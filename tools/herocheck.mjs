@@ -279,8 +279,9 @@ const main = async () => {
     // 滚轮/持续引导是杯杯菇特有的，别的英雄不做这两条断言
     if (slot === 's1' && heroId === 'mushroom') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
 
-    if (slot === 's1') {
+    if (slot === 's1' && heroId === 'mushroom') {
       // 滚轮要能被移动指令改向：发一个垂直方向的移动指令，看冲刺方向是否跟着转
+      // （u.rt.dash 只有杯杯菇的滚轮才有，别的英雄不要断言这条）
       const before = await ev(`(()=>{const u=${U}; const d=u.rt.dash; return d?JSON.stringify({x:+d.dirX.toFixed(2),y:+d.dirY.toFixed(2)}):null;})()`);
       await ev(`(()=>{const w=window.__moba.world,u=${U};
         w.command(u.id,{type:"moveTo",pos:{x:u.pos.x - 9, y:u.pos.y - 9}}); return 1;})()`);
