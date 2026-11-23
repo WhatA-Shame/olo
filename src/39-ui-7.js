@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 73220–74450 行
 // 关键内容：
 //   mG                    小地图：按住拖动可观察战场
+//   Rk                    金币不足
+//   vG                    竖屏：装备换到第二行，其余列收窄 */
+//   bG                    关闭战况
+//   K4                    商店按钮 + 快捷购买气泡 / 自动出装提示条（小地图
 //   Dm                    boots
-//   $f                    boots
-//   Gf                    boots
-//   zm                    boots
-//   Yd                    boots
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { rn } from './01-audio.js';

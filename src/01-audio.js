@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 1–1373 行
 // 关键内容：
 //   Y6                    近战兵
+//   PS                    己方
 //   Qi                    lowpass
 //   zl                    lowpass
 //   Q6                    lowpass
 //   Nl                    lowpass
-//   A0                    lowpass
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 const Y6 = {

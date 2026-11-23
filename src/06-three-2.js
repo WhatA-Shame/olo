@@ -4,7 +4,7 @@
 //   fv                    added
 //   Ws                    Object3D
 //   oo                    in l && (l.z = 0),
-//   Ut                    number
+//   Ut                    THREE.Color: Alpha component of
 //   Uh                    Material
 //   yM                    MeshBasicMaterial
 //

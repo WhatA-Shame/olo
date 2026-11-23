@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 68807–70021 行
 // 关键内容：
 //   jH                    进度条不走缓动：加载的每一步都是同步的重活，两步之间主
-//   qH                    span
 //   XH                    蓝色方
 //   ZH                    标题横幅 ── */
-//   D4                    span
-//   ll                    span
+//   QH                    胜利
+//   t$                    阵亡：去色层 + 面板 ── */
+//   e$                    你已阵亡
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { rn } from './01-audio.js';

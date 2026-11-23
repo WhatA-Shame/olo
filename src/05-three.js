@@ -6,7 +6,7 @@
 //   b7                    canvas
 //   w7                    standard
 //   M7                    image/png
-//   Q3                    string
+//   Vs                    THREE.Texture.setValues(): parameter
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Af, C0, D1, Ee, Fo, Gs, Ki, Ns, Ul, aM, co, jn, mh, mi, ri, ti, vn, w5 } from './04-audio-2.js';

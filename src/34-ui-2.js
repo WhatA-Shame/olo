@@ -1,12 +1,12 @@
 // 34-ui-2.js — ui｜39 个顶层语句｜52KB
 // 对应 game.pretty.js 第 66542–67534 行
 // 关键内容：
-//   tH                    #e9c873
-//   Ye                    fill=
-//   eH                    ${t ?
-//   M3                    <path d=
-//   iH                    <defs>${fn(
-//   Vt                    gold
+//   S3                    上路
+//   Ml                    生存
+//   T4                    难度 ${n} / ${t}
+//   mH                    技能类型标签：胶囊形，文字用标签色，底色为标签色 14
+//   ty                    大招</span>
+//   ck                    大招
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Se, kr, z0 } from './02-data.js';

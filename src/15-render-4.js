@@ -1,12 +1,12 @@
 // 15-render-4.js — render｜45 个顶层语句｜67KB
 // 对应 game.pretty.js 第 27462–29691 行
 // 关键内容：
-//   hL                    rock
 //   Vl                    立面补光：法线越接近水平，多吃一份地面反光(被太阳晒亮
 //   uL                    顶面：按世界 xz 平铺的草贴图 + 大块色斑(与地表
-//   dx                    ) : t.map && (o.TOON_MAP =
 //   bm                    环境染色在顶点采一次就够(贴图 1 米一个 texel
-//   SL                    hero:
+//   XL                    计时不可用：这台设备/浏览器没有 EXT_disjoi
+//   hL                    rock
+//   dx                    ) : t.map && (o.TOON_MAP =
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Dr, Ee, Gs, Ki, Ns, Pi, Rr, Sr, co, fo, mi, ph, pi, ti } from './04-audio-2.js';

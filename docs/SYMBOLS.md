@@ -30,7 +30,7 @@
 - `It, Ur, ES, Ud, Nc, ru` — L475
 - `Km` — L481 — white
 - `AS` — L490 — lowpass
-- `RS` — L501 — function
+- `RS` — L501 — white
 - `L1` — L636 — sine
 - `At` — L842
 - `i1, CS, Tl, ga, pl, LS` — L859
@@ -43,7 +43,7 @@
 - `Hc` — L1233 — triangle
 - `Ti` — L1240 — white
 - `Si` — L1249 — lowpass
-- `Zm` — L1269 — string
+- `Zm` — L1269 — bandpass
 - `NS` — L1273 — bandpass
 - `W0` — L1278 — lowpass
 - `Od` — L1290 — lowpass
@@ -55,12 +55,12 @@
 ## 02-data.js
 
 - `Ey, Qm, Ay, FS, Ry, kr, Se` — L1374 — 英雄普攻
-- `z0` — L2577 — string
+- `z0` — L2577
 - `Br, eh` — L2581 — 位移
 - `lm` — L2592
-- `Nh` — L2601 — skill ${n.name} has no value
-- `Cy` — L2608 — ${Math.round(n * 100)}%
-- `US` — L2611 — {${s}}
+- `Nh` — L2601
+- `Cy` — L2608
+- `US` — L2611
 - `ea` — L2618 — 回城
 - `f5` — L2643
 - `Ly, ml, OS, o1, BS, Bd, Xf, Iy, lu, p0, Uc, gl, d5, HS, $S` — L2665
@@ -134,7 +134,7 @@
 - `nc` — L8218
 - `M7` — L8219 — image/png
 - `k7` — L8261
-- `Q3` — L8262 — string
+- `Q3` — L8262
 - `dg` — L8304
 - `S7` — L8313
 - `hg` — L8314
@@ -165,7 +165,7 @@
 - `oo` — L10804 — in l && (l.z = 0),
 - `xM, qr, wu` — L10938
 - `Tg` — L11090
-- `Ut` — L11097 — number
+- `Ut` — L11097 — THREE.Color: Alpha component of
 - `ni` — L11355
 - `z7` — L11357
 - `Uh` — L11358 — Material
@@ -290,7 +290,7 @@
 - `wE` — L15291
 - `rx` — L15321
 - `Lv` — L15337
-- `ME` — L15414 — Unknown texture type ${n}.
+- `ME` — L15414
 - `zM` — L15442
 - `kE` — L15465
 
@@ -384,11 +384,11 @@
 - `jv` — L21555
 - `dC` — L21559
 - `hC` — L21560
-- `uC` — L21561 — ${r === t ?
+- `uC` — L21561
 - `qv` — L21574
 - `pC` — L21575 — LinearTransferOETF
 - `Xv` — L21587 — ) return
-- `mC` — L21607 — vec4 ${n}( vec4 value ) {
+- `mC` — L21607 — ].join(
 - `gC` — L21612 — Linear
 - `Ou` — L21641
 - `xC` — L21642 — float luminance( const in vec3 rgb ) {
@@ -527,7 +527,7 @@
 - `kh` — L30159
 - `mx` — L30160
 - `SI` — L30167 — high-performance
-- `TI` — L30176 — function
+- `TI` — L30176
 - `EI` — L30198
 - `AI` — L30207
 - `RI` — L30210 — absolute
@@ -651,7 +651,7 @@
 - `bo` — L36969
 - `t8` — L36972 — self
 - `_x` — L36975 — direction
-- `Nr` — L36978 — number
+- `Nr` — L36978
 - `cs, zb, $P, ba, e8, n8` — L36982
 - `wx` — L36988
 - `s8` — L36991
@@ -711,9 +711,9 @@
 - `cz` — L40648 — hit_
 - `jb, c3` — L40839 — PingFang SC
 - `Eh` — L40841 — 不可用
-- `fz` — L40848 — ${a} ${e}px ${o}
+- `fz` — L40848 — center
 - `t0` — L40891
-- `dz` — L40892 — ${t.italic ?
+- `dz` — L40892 — center
 - `qb` — L40961
 - `Xb` — L40962
 - `hz` — L40973 — #ffd84a
@@ -760,7 +760,7 @@
 - `gs` — L42569
 - `Zz` — L42575
 - `Be` — L42585 — position
-- `c_` — L42781 — ${i}:${r}
+- `c_` — L42781
 - `Qz` — L42825
 - `xf` — L42830
 - `Jz` — L42836
@@ -843,7 +843,7 @@
 - `iF` — L45653
 - `aF` — L45677
 - `rh, oF, vl, rF` — L45696
-- `lF` — L45700 — border:${g}
+- `lF` — L45700
 - `cF` — L45894
 - `fF, dF` — L46049 — 横向 0..1；vUv.y：沿水流方向的米数。vFal
 - `hF` — L46090 — position
@@ -1086,10 +1086,10 @@
 - `Gx, Kw` — L62385 — hero:panyue
 - `Zw` — L62404
 - `qc` — L62407 — 未知模型：${n}
-- `Vx, DO, zO, NO, FO, UO` — L62416 — hero:${n}
+- `Vx, DO, zO, NO, FO, UO` — L62416
 - `Qw` — L62422
 - `Jw` — L62425
-- `Md` — L62426 — fallback:${n.toFixed(2)}:${t.toFixed(2)}
+- `Md` — L62426 — root
 - `t4, e4, OO, BO, HO, $O` — L62484 — 四边形比标称半径大 1.5 倍，留给外发光
 - `GO` — L62573 — position
 - `zp, VO, WO` — L62640 — 绕一圈的 0..1，position.y = 自下而上
@@ -1120,7 +1120,7 @@
 - `dh, c4, k2` — L63874
 - `z8` — L63877
 - `N8` — L63881 — canvas
-- `F8` — L63938 — function
+- `F8` — L63938
 - `xB` — L63954
 - `U8` — L63960
 - `yB` — L63961
@@ -1130,20 +1130,20 @@
 - `H8` — L63975
 - `Wx` — L63984
 - `$8` — L63990
-- `Jn` — L63999 — ${e}calc(var(--sf-u) * ${s})
+- `Jn` — L63999
 - `bB` — L64005 — color-mix(
-- `_B` — L64032 — ${e}${s}${i}${bB(a)}; ${s}${i}${a}
-- `G8` — L64038 — calc(var(--sf-u) * ${n})
+- `_B` — L64032
+- `G8` — L64038
 - `Zn` — L64039 — style
 - `jx` — L64044 — url(
 - `S2, wB, MB, kB, Qe, SB, TB` — L64047 — 根容器 ───────────── */
 - `z` — L64633
-- `b3` — L64637 — string
+- `b3` — L64637
 - `_e` — L64643 — span
 - `ro` — L64647 — button
 - `po` — L64658 — secondary
 - `T0` — L64674 — button
-- `V8` — L64689 — sf-seg${n.block ?
+- `V8` — L64689 — role
 - `W8` — L64715 — sf-tabs
 - `EB` — L64741 — input
 - `j8` — L64770 — button
@@ -1178,27 +1178,27 @@
 - `zB` — L65722 — 全队
 - `NB, FB` — L65735 — 拿到蓝buff：冷却缩减 +${Ps(yn.frost
 - `UB` — L65775
-- `OB` — L65778 — ${X1(n)} · ${t}
+- `OB` — L65778
 - `X1` — L65782 — 朝一个方向
 - `Y1` — L65796 — 半径 ${n.radius} 米
 - `J8, tk` — L65799 — 物攻
 - `ek` — L65823
-- `BB` — L65831 — ${i}${a(o).replace(/\(.*\)$/,
+- `BB` — L65831
 - `w3, u4, p4, E2` — L65839 — 位移
 - `m4` — L65881
-- `B0` — L65893 — #${c(s, o)}${c(i, r)}${c(a, l)}
+- `B0` — L65893
 - `Hn, Ln, nk, fn, Vo` — L65902 — #ffffff
 - `HB` — L65914
 - `Kh` — L65915 — sf-ico
-- `dn` — L65919 — <defs>${Vo(
+- `dn` — L65919 — #fff
 - `Is` — L65935
 - `hn` — L65936
-- `Mr` — L65940 — ${r === 0 ?
+- `Mr` — L65940
 - `Wo` — L65949
-- `wl` — L65953 — M${a} ${o}A${e} ${e} 0 ${c} 1 ${r} ${l}
+- `wl` — L65953
 - `je, We, xe` — L65959 — <radialGradient id=
 - `Rs` — L65963 — yeque
-- `b1` — L65968 — M${r} ${t}L${r + 2.2} ${t - 8.5}
+- `b1` — L65968 — <path d=
 - `g4, on, A2, Up` — L65977 — <path d=
 - `Op` — L66007 — <g transform=
 - `x4` — L66010 — <g transform=
@@ -1207,7 +1207,7 @@
 - `Hp` — L66098 — <path d=
 - `GB, an` — L66109 — chijin
 - `R2` — L66182 — <g transform=
-- `v4` — L66185 — ${l === 0 ?
+- `v4` — L66185
 - `VB, Ge, WB` — L66194 — xingli
 - `b4` — L66282 — <path d=
 - `jB, Cn, $p` — L66292 — <path d=
@@ -1224,13 +1224,13 @@
 - `tH` — L66542 — #e9c873
 - `Po` — L66822
 - `Ye, Ne` — L66825 — fill=
-- `eH` — L66828 — ${t ?
+- `eH` — L66828
 - `M3, Vp, Zx, M4, nH, sH` — L66845 — <path d=
-- `iH` — L66903 — <defs>${fn(
+- `iH` — L66903 — #fff6d8
 - `Vt` — L66917 — gold
 - `aH` — L66921 — <path fill-rule=
 - `Ar` — L66928
-- `oH` — L66931 — ${Vp}<path d=
+- `oH` — L66931 — fill=
 - `k3` — L66937
 - `S3, T3, Ys, Eo` — L66940 — 上路
 - `Hs` — L66974 — <g transform=
@@ -1239,10 +1239,10 @@
 - `cH` — L67075 — || t ===
 - `Ml, Tf, fH, Ad, dH, hH, hh, uH, Z1` — L67078 — 生存
 - `Zh` — L67103 — span
-- `pH` — L67132 — function
+- `pH` — L67132 — load
 - `T4` — L67161 — 难度 ${n} / ${t}
-- `rk` — L67167 — )}:${String(t % 60).padStart(2,
-- `kl` — L67171 — ${(t / 1e3).toFixed(1)}k
+- `rk` — L67167
+- `kl` — L67171
 - `ks` — L67175 — &amp;
 - `Qx` — L67178 — small
 - `mH` — L67185 — 技能类型标签：胶囊形，文字用标签色，底色为标签色 14
@@ -1254,7 +1254,7 @@
 - `fk` — L67232 — 被动 · ${ks(n.passive.name)}<
 - `ey` — L67244 — ) return
 - `dk, hk, L2, xH` — L67255 — high
-- `yH` — L67269 — object
+- `yH` — L67269
 - `vH` — L67287
 - `bH, E4, _H` — L67290 — 关闭阴影与后期特效，帧率最高，适合低端设备或省电。
 - `wH` — L67323 — 画质
@@ -1268,7 +1268,7 @@
 - `EH` — L67775 — boots
 - `AH` — L67779 — 能力雷达图
 - `RH` — L67815 — 返回标题
-- `Xc` — L68197 — boolean
+- `Xc` — L68197
 - `E3` — L68201
 - `CH` — L68205 — 键盘示意 */
 - `Yn` — L68260 — span
@@ -1285,7 +1285,7 @@
 - `NH, FH, UH, OH` — L68499 — 坠星划痕：自右上斜贯到左下，星头落在「星」字旁 */
 - `BH` — L68602 — 星陨战纪
 - `pk, P2` — L68686 — starfall.lastChoice.v1
-- `HH` — L68688 — object
+- `HH` — L68688 — easy
 - `I4` — L68696
 - `$H` — L68699 — sf-root sf-menu-root
 - `GH, VH` — L68773 — 摧毁敌方水晶才算胜利——别只顾着击杀，记得带兵线推塔。
@@ -1309,10 +1309,10 @@
 - `br` — L69430
 - `is` — L69437
 - `uo` — L69443
-- `gk` — L69446 — ${e < 10 ?
+- `gk` — L69446
 - `JH` — L69452 — async
 - `Dl` — L69469 — is-me
-- `Na` — L69472 — ${s}
+- `Na` — L69472
 - `Rl` — L69475 — span
 - `t$` — L69478 — 阵亡：去色层 + 面板 ── */
 - `e$` — L69598 — 你已阵亡
@@ -1323,7 +1323,7 @@
 - `xk` — L69775 — starfall.hud.tips.v1
 - `r$` — L69776
 - `l$` — L69779 — 关闭操作提示
-- `z2` — L69836 — sf-hud__ripple${s ?
+- `z2` — L69836
 - `c$` — L69844 — sf-hud-overlays
 - `A3, N2, z4, R3, xr, F2, U2, N4, O2, F4, f$` — L69847 — 空格
 - `d$` — L70002
@@ -1363,7 +1363,7 @@
 - `V$` — L71562
 - `W$` — L71563 — tower
 - `Q1` — L71584
-- `G4` — L71590 — push_lane:${n.lane}:${n.tier}
+- `G4` — L71590
 - `j$` — L71591
 - `q$` — L71595 — monster
 - `Rc` — L71609
@@ -1525,15 +1525,15 @@
 - `Qh, Jh, Fm, ry, N3, h6` — L78840
 - `G0` — L78846
 - `F3, Ok, CV, Bk, LV, Vi, ha, ss, IV, PV, u6, Hk, p6, DV, n5, m6` — L78850
-- `zV` — L78866 — ${n.bound}|${JSON.stringify(n.walls)}
+- `zV` — L78866
 - `NV` — L78902
 - `FV` — L79213
 - `$k` — L79222
 - `UV` — L79236
 - `OV, tm, Gk, Vk, U3` — L79243
-- `Oi` — L79248 — ${n}:${t}
-- `ly` — L79251 — *:${n}
-- `Wk` — L79254 — ${n}:${t}
+- `Oi` — L79248
+- `ly` — L79251
+- `Wk` — L79254
 - `tu` — L79257
 - `BV` — L79260
 - `ql` — L79263
@@ -1759,8 +1759,8 @@
 - `_y` — L83716 — style
 - `s1` — L83721 — boot
 - `Rq` — L83728 — canvas
-- `R1` — L83736 — app-layer${t.page ?
-- `o5` — L83827 — ${n.name}: ${n.message}
+- `R1` — L83736 — role
+- `o5` — L83827
 - `Cq, Lq, Iq, Pq, _S, Dq, zq` — L83837 — attack
 - `Nq` — L83854
 - `dl, q6, r5, Fq, to` — L83862

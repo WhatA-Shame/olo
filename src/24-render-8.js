@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 47148–49121 行
 // 关键内容：
 //   wF                    角星的有符号距离(iq)：m 越小角越尖
+//   vf                    被单位拨开：向外推并压低，离得越近越明显
+//   OF                    一层落叶图章：cell 米见方的格子里至多一片两头尖的
+//   VF                    相位, 速度, 尺寸, 模式；aMotion: 水平幅
 //   SF                    abyss_drake
 //   TF                    position
-//   vf                    被单位拨开：向外推并压低，离得越近越明显
-//   PF                    bushes
-//   k8                    canvas
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Ee, Fo, Gs, Ki, Ns, fi, h5, mh, mi } from './04-audio-2.js';

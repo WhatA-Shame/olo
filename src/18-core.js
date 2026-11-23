@@ -2,8 +2,8 @@
 // 对应 game.pretty.js 第 33802–36609 行
 // 关键内容：
 //   oP                    弹道：线性阻尼 + 重力(有阻尼时趋向终端速度)
-//   rP                    position
 //   cP                    噪声顺着带子向尾部流动，把边缘侵蚀成火舌/烟缕
+//   rP                    position
 //   dP                    position
 //   MP                    direction
 //   o3                    vent

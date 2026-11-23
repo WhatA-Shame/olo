@@ -1,12 +1,12 @@
 // 44-data-4.js — data｜61 个顶层语句｜56KB
 // 对应 game.pretty.js 第 82716–84668 行
 // 关键内容：
+//   kq                    必须为正数
+//   Uq                    集结双方英雄…
+//   Xq                    重新开始
 //   e1                    chijin
 //   Ic                    xingli
 //   G6                    damage
-//   u0                    fengling
-//   n1                    yeque
-//   wq                    announce
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { v0 } from './01-audio.js';

@@ -1,9 +1,8 @@
 // 23-render-7.js — render｜28 个顶层语句｜60KB
 // 对应 game.pretty.js 第 45216–47147 行
 // 关键内容：
-//   JN                    ridge
-//   lF                    border:${g}
 //   fF                    横向 0..1；vUv.y：沿水流方向的米数。vFal
+//   JN                    ridge
 //   hF                    position
 //   pF                    pillar
 //   _F                    beam

@@ -3,10 +3,10 @@
 // 关键内容：
 //   uI                    钳位：个别极亮的像素(高光/特效核心)不至于在降采样后
 //   yI                    对比：幂函数式，围绕支点(线性值)拉开；纯黑不动，暗部
+//   DI                    不可用
+//   gx                    遮挡部分(权重 1 - fxAdd)与叠加部分(权重
 //   bI                    moba.scene
 //   _I                    EXT_color_buffer_float
-//   xb                    pcfsoft
-//   wI                    canvas
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Cr, Dr, Ee, Fh, Fo, Gs, Ki, Ns, P1, V3, b0, co, mi, mo, ri } from './04-audio-2.js';

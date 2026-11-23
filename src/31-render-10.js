@@ -1,12 +1,12 @@
 // 31-render-10.js — render｜34 个顶层语句｜66KB
 // 对应 game.pretty.js 第 61621–63707 行
 // 关键内容：
+//   qc                    未知模型：${n}
+//   t4                    四边形比标称半径大 1.5 倍，留给外发光
+//   zp                    绕一圈的 0..1，position.y = 自下而上
 //   Ec                    root
 //   Xw                    root
 //   Yw                    root
-//   IO                    tower:1:0
-//   PO                    idle
-//   Gx                    hero:panyue
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Se } from './02-data.js';

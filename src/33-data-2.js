@@ -5,8 +5,8 @@
 //   _3                    左上河道
 //   zB                    全队
 //   NB                    拿到蓝buff：冷却缩减 +${Ps(yn.frost
-//   OB                    ${X1(n)} · ${t}
 //   X1                    朝一个方向
+//   Y1                    半径 ${n.radius} 米
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { yn, yr } from './01-audio.js';

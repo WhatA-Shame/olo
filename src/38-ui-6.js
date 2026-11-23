@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 71632–73219 行
 // 关键内容：
 //   X$                    血量危险：先后撤，按 B 回城
-//   sy                    push_lane
-//   Y$                    group
 //   I3                    移动
-//   kk                    text
 //   q4                    小贴士
+//   Sk                    提示卡 ── */
+//   J$                    跳过引导
+//   nG                    窄屏放不下「当前目标」四个字：只留图标 */
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { rn } from './01-audio.js';

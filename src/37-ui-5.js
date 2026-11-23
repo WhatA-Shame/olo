@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 70022–71631 行
 // 关键内容：
 //   p$                    普通攻击
-//   Cd                    || t ===
-//   m$                    self
-//   U4                    self
-//   C3                    untargetable
-//   bk                    direction
+//   y$                    虚拟摇杆：空闲时半透明停在左下角提示位置；按下后跳到手
+//   A$                    技能尚未学会
+//   R$                    底带：中间实、两端渐隐；上沿一道亮的星轨线，下沿一道淡
+//   D$                    我方
+//   z$                    不设 z-index：与宿主里别的界面(加载/结算)按
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { rn } from './01-audio.js';

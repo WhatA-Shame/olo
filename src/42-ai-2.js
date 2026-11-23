@@ -2,11 +2,11 @@
 // 对应 game.pretty.js 第 77942–80420 行
 // 关键内容：
 //   TV                    init
-//   zV                    ${n.bound}|${JSON.stringify(n.walls)}
-//   Oi                    ${n}:${t}
-//   ly                    *:${n}
-//   Wk                    ${n}:${t}
 //   jk                    self
+//   em                    recall
+//   x6                    hero
+//   jV                    hero
+//   qV                    airborne
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { K6, Qd, Y6, Z6, eo, rn, ui, va } from './01-audio.js';

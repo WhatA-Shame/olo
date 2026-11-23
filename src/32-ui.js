@@ -1,11 +1,11 @@
 // 32-ui.js — ui｜57 个顶层语句｜66KB
 // 对应 game.pretty.js 第 63708–65486 行
 // 关键内容：
+//   S2                    根容器 ───────────── */
+//   X8                    关闭
 //   gB                    high-performance
 //   l4                    canvas
 //   N8                    canvas
-//   F8                    function
-//   Jn                    ${e}calc(var(--sf-u) * ${s})
 //   bB                    color-mix(
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。

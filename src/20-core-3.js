@@ -1,10 +1,10 @@
 // 20-core-3.js — core｜26 个顶层语句｜65KB
 // 对应 game.pretty.js 第 38374–40647 行
 // 关键内容：
+//   Fb                    稍微朝相机拉近一点：贴在模型表面的图标不被模型吃掉
 //   AD                    dashSpeed
 //   VD                    hero
 //   WD                    units
-//   Fb                    稍微朝相机拉近一点：贴在模型表面的图标不被模型吃掉
 //   YD                    position
 //   QD                    tower
 //

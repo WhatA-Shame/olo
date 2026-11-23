@@ -2,9 +2,9 @@
 // 对应 game.pretty.js 第 2683–4843 行
 // 关键内容：
 //   tg                    技能施放
+//   XS                    状态与系统
 //   zy                    lowpass
 //   fu                    pink
-//   XS                    状态与系统
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { At, El, Fc, Hc, It, Jd, NS, Od, Or, Qi, Si, Ti, Tl, Ty, W0, Zm, c5, en, ga, i1, ja, pl, th, yn, zS, zl } from './01-audio.js';

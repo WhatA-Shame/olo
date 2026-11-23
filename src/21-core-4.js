@@ -1,12 +1,12 @@
 // 21-core-4.js — core｜58 个顶层语句｜67KB
 // 对应 game.pretty.js 第 40648–42948 行
 // 关键内容：
+//   Eh                    不可用
+//   Ez                    升级 Lv.${o.level}
+//   Nz                    不可用
 //   cz                    hit_
 //   jb                    PingFang SC
-//   Eh                    不可用
-//   fz                    ${a} ${e}px ${o}
-//   dz                    ${t.italic ?
-//   hz                    #ffd84a
+//   fz                    center
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { rn } from './01-audio.js';

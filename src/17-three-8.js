@@ -2,9 +2,9 @@
 // 对应 game.pretty.js 第 31758–33801 行
 // 关键内容：
 //   Ea                    角星的有符号距离(Inigo Quilez)：m ∈
+//   qe                    非均匀缩放下的法线：按各轴缩放平方修正
 //   OI                    position
 //   BI                    attribute.
-//   qe                    非均匀缩放下的法线：按各轴缩放平方修正
 //   Ll                    position
 //   jI                    position
 //

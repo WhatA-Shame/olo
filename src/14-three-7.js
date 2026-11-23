@@ -1,12 +1,12 @@
 // 14-three-7.js — three｜17 个顶层语句｜68KB
 // 对应 game.pretty.js 第 25616–27461 行
 // 关键内容：
-//   iL                    dispose
-//   cx                    default
-//   Yt                    moba.lightTint.neutral
 //   rL                    只有直出屏幕的材质定义了 TONE_MAPPING：把
 //   $M                    未找到 CustomToneMapping 的默认实现
 //   fx                    不可用
+//   iL                    dispose
+//   cx                    default
+//   Yt                    moba.lightTint.neutral
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Dr, Ee, Fl, Fo, G3, Gs, K3, Ki, Ns, R0, Rr, Ul, Uo, Y3, Z3, co, fi, gh, iM, j3, mh, mi, pi, q3, ri, ti, xh } from './04-audio-2.js';

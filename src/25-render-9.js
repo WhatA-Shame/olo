@@ -1,12 +1,12 @@
 // 25-render-9.js — render｜73 个顶层语句｜63KB
 // 对应 game.pretty.js 第 49122–51324 行
 // 关键内容：
-//   nU                    sky-dome
 //   sU                    云团：亮顶、蓝灰的谷；朝向太阳的一侧镶暖亮边，背光一侧
-//   aU                    mountains
 //   cU                    波纹法线(世界空间 → 视图空间)
+//   Wa                    没有关节 ${t}
+//   nU                    sky-dome
+//   aU                    mountains
 //   dU                    position
-//   nw                    splat
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Ee, Ul, fi, pi, ri } from './04-audio-2.js';

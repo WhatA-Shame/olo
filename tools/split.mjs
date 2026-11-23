@@ -280,28 +280,29 @@ for (const f of fs.readdirSync(OUT)) {
 }
 
 // 线索提取：优先中文文案，其次首个有意义的字符串字面量
+const NOISE = new Set(['string', 'number', 'object', 'function', 'boolean', 'undefined', 'symbol', 'bigint']);
 function hintOf(code) {
   const zh = code.match(/[\u4e00-\u9fa5][^"'`\n]{1,26}/);
-  if (zh) return zh[0].replace(/\s+/g, ' ').trim();
+  if (zh) return { text: zh[0].replace(/\s+/g, ' ').trim(), zh: true };
   const str = [...code.matchAll(/["'`]([^"'`\n]{4,40})["'`]/g)]
     .map((m) => m[1])
-    .find((s) => /[a-zA-Z]/.test(s) && !/^[0-9.]+$/.test(s));
-  return str ? str.replace(/\s+/g, ' ').trim() : '';
+    .find((s) => /[a-zA-Z]/.test(s) && !/^[0-9.]+$/.test(s) && !NOISE.has(s) && !s.includes('${'));
+  return str ? { text: str.replace(/\s+/g, ' ').trim(), zh: false } : null;
 }
 
 for (const m of modules) {
-  // 头部注释：模块用途 + 原始行号范围 + 关键绑定，便于定位
+  // 头部注释：模块用途 + 原始行号范围 + 关键绑定（中文线索优先），便于定位
   const lineFrom = Math.min(...m.idxs.map((i) => stmts[i].line));
   const lineTo = Math.max(...m.idxs.map((i) => stmts[i].endLine));
-  const hints = [];
+  const all = [];
   for (const i of m.idxs) {
     const s = stmts[i];
     if (!s.names.length) continue;
     const h = hintOf(src.slice(s.start, s.end));
-    if (!h) continue;
-    hints.push([s.names[0], h]);
-    if (hints.length >= 6) break;
+    if (h) all.push([s.names[0], h.text, h.zh]);
   }
+  all.sort((a, b) => Number(b[2]) - Number(a[2]));
+  const hints = all.slice(0, 6).map(([n, t]) => [n, t]);
   const header = [
     `// ${m.file} — ${m.label}｜${m.idxs.length} 个顶层语句｜${Math.round(m.size / 1024)}KB`,
     `// 对应 game.pretty.js 第 ${lineFrom}–${lineTo} 行`,
@@ -342,7 +343,7 @@ for (const m of modules) {
     const s = stmts[i];
     if (!s.names.length) continue;
     const h = hintOf(src.slice(s.start, s.end));
-    symbolLines.push(`- \`${s.names.join(', ')}\` — L${s.line}${h ? ` — ${h}` : ''}`);
+    symbolLines.push(`- \`${s.names.join(', ')}\` — L${s.line}${h ? ` — ${h.text}` : ''}`);
   }
   symbolLines.push('');
 }

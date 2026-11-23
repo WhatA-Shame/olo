@@ -3,10 +3,10 @@
 // 关键内容：
 //   I2                    被动
 //   R4                    物攻
-//   EH                    boots
 //   AH                    能力雷达图
 //   RH                    返回标题
-//   Xc                    boolean
+//   CH                    键盘示意 */
+//   LH                    空格
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { rn, va, yn } from './01-audio.js';

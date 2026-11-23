@@ -2,11 +2,8 @@
 // 对应 game.pretty.js 第 1374–2682 行
 // 关键内容：
 //   Ey                    英雄普攻
-//   z0                    string
 //   Br                    位移
-//   Nh                    skill ${n.name} has no value
-//   Cy                    ${Math.round(n * 100)}%
-//   US                    {${s}}
+//   ea                    回城
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { At, CS, El, Fc, Hc, It, Od, Si, Ti, Tl, c5, ga, i1, th } from './01-audio.js';
