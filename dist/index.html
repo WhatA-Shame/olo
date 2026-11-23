@@ -2417,7 +2417,7 @@ var Se = {
         slot: "s2",
         name: "\u5B62\u5B50\u55B7\u5410",
         brief: "\u957F\u6309\u6301\u7EED\u55B7\u5410\u5B62\u5B50\u7C89\u96FE\uFF0C\u6301\u7EED\u8017\u84DD",
-        tags: ["slow", "waveclear"],
+        tags: ["slow", "dot"],
         desc: "\u6309\u4F4F\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u55B7\u51FA\u5B62\u5B50\u7C89\u96FE\uFF0C\u6BCF {tickInterval} \u79D2\u5BF9\u9525\u5F62\u5185\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF08{slowDur} \u79D2\uFF09\u3002\u55B7\u5C04\u671F\u95F4\u6BCF\u79D2\u6D88\u8017 {manaPerSec} \u70B9\u6CD5\u529B\uFF1B\u6CD5\u529B\u8017\u5C3D\u3001\u88AB\u63A7\u6216\u518D\u6B21\u6309\u952E\u5373\u4E2D\u65AD\uFF0C\u4E2D\u65AD\u540E\u53EA\u9700\u5F88\u77ED\u51B7\u5374\u3002",
         maxLevel: 6,
         cooldown: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
@@ -50957,6 +50957,7 @@ function ty(n, t) {
   let e = n === "ult" ? '<span class="sf-stag is-ult">\u5927\u62DB</span>' : n === "passive" ? '<span class="sf-stag is-passive">\u88AB\u52A8</span>' : "";
   for (const s of t ?? []) {
     const i = w3[s];
+    if (!i) continue;
     e += `<span class="sf-stag" style="--tag:${lk(i.color)}">${i.name}</span>`;
   }
   return e ? `<span class="sf-stags">${e}</span>` : "";

@@ -716,7 +716,9 @@ function ty(n, t) {
         ? '<span class="sf-stag is-passive">被动</span>'
         : "";
   for (const s of t ?? []) {
+    // 表里没有的标签直接跳过：以前这里取到 undefined 会让整个提示框崩掉
     const i = w3[s];
+    if (!i) continue;
     e += `<span class="sf-stag" style="--tag:${lk(i.color)}">${i.name}</span>`;
   }
   return e ? `<span class="sf-stags">${e}</span>` : "";
