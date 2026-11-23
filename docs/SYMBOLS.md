@@ -1,0 +1,1779 @@
+# 符号索引
+
+由 `tools/split.mjs` 生成。名字是压缩器产物，右侧「线索」是所在语句里最靠前的中文文案，可用于辨认用途。
+
+## 01-audio.js
+
+- `Y6, v0, K6, yr, eo, Xm, yn, rn, va` — L1 — 近战兵
+- `Z6` — L277
+- `wS` — L280
+- `Qd, ui` — L283
+- `Qi` — L285 — lowpass
+- `zl` — L299 — lowpass
+- `en` — L324
+- `Q6` — L340 — lowpass
+- `Nl` — L351 — lowpass
+- `A0` — L370 — lowpass
+- `J6` — L381 — glass
+- `wy` — L398 — lowpass
+- `$3` — L404 — bandpass
+- `My` — L432 — highpass
+- `Ym` — L436 — triangle
+- `Sl` — L441 — bandpass
+- `MS` — L445 — bandpass
+- `kS` — L450 — highpass
+- `SS` — L453 — bandpass
+- `TS` — L456 — triangle
+- `rm` — L461 — highpass
+- `tM` — L466 — highpass
+- `Lo` — L469 — pink
+- `It, Ur, ES, Ud, Nc, ru` — L475
+- `Km` — L481 — white
+- `AS` — L490 — lowpass
+- `RS` — L501 — function
+- `L1` — L636 — sine
+- `At` — L842
+- `i1, CS, Tl, ga, pl, LS` — L859
+- `ky` — L865
+- `IS` — L869 — horn
+- `PS, a1, DS, yi, zS, Sy, Jd` — L910 — 己方
+- `Or` — L1183 — triangle
+- `ja` — L1188 — triangle
+- `Ty` — L1210 — bandpass
+- `Hc` — L1233 — triangle
+- `Ti` — L1240 — white
+- `Si` — L1249 — lowpass
+- `Zm` — L1269 — string
+- `NS` — L1273 — bandpass
+- `W0` — L1278 — lowpass
+- `Od` — L1290 — lowpass
+- `c5` — L1300 — bandpass
+- `th` — L1311 — triangle
+- `El` — L1317 — bandpass
+- `Fc` — L1322 — lowpass
+
+## 02-data.js
+
+- `Ey, Qm, Ay, FS, Ry, kr, Se` — L1374 — 英雄普攻
+- `z0` — L2577 — string
+- `Br, eh` — L2581 — 位移
+- `lm` — L2592
+- `Nh` — L2601 — skill ${n.name} has no value
+- `Cy` — L2608 — ${Math.round(n * 100)}%
+- `US` — L2611 — {${s}}
+- `ea` — L2618 — 回城
+- `f5` — L2643
+- `Ly, ml, OS, o1, BS, Bd, Xf, Iy, lu, p0, Uc, gl, d5, HS, $S` — L2665
+- `Jm` — L2680
+
+## 03-vfx.js
+
+- `tg, eg, Py, Os, ns, Hr, Hi, GS, VS, WS, Kl, jS, Zl, Dy, $r, ng, ko, Yf, er, Ql, cu, sg, qS, xn` — L2683 — 技能施放
+- `zy` — L3598 — lowpass
+- `fu` — L3667 — pink
+- `XS, nr, YS, r1` — L3683 — 状态与系统
+- `KS` — L4611
+- `ZS, QS, JS, Kf` — L4614
+- `Jl` — L4832
+- `tT` — L4833
+
+## 04-audio-2.js
+
+- `Ny` — L4618 — lowpass
+- `eT, nT, sT` — L4844
+- `cm` — L4847
+- `iT` — L4853
+- `fm` — L4861 — lowpass
+- `aT, oT, rT, I1` — L4972
+- `lT` — L5046 — cPad
+- `Fy, Uy, Oy, du, By, Hy, cT, fT, dT, tc, hT, uT, $y, Gy, Vy, Wy, ig, jy, qy, pT, mT` — L5097
+- `gT` — L5182 — cPad
+- `xT, yT, Xy` — L5315
+- `vT` — L5340 — cPad
+- `bT, _T, Yy` — L5399
+- `wT` — L5419 — cPad
+- `Ky` — L5457 — none
+- `MT, kT` — L5511 — First blood!
+- `ST` — L5538
+- `TT` — L5547 — voiceschanged
+- `ET, AT, RT, CT, LT, hu, ag, Zy, eM, IT` — L5627 — atk_panyue_swing
+- `PT` — L5703
+- `DT` — L5713 — none
+- `Qy` — L6374 — pointerdown
+- `uu` — L6375
+- `zT` — L6376
+- `G3, NT, Jy, FT, V3, P1, pr, Rr, pi, fi, Sr, Kc, h5, tv, ev, Fh, b0, UT, OT, BT, HT, $T, Cr, GT, VT, u5, mo, WT, jT, qT, XT, YT, KT, ZT, QT, JT, p5, m5, g5, cf, x5, y5, ph, v5, nM, t7, e7, R0, n7, s7, i7, sM, iM, a7, o7, aM, ff, df, b5, _5, dm, mh, co, w5, ti, r7, pu, Ns, og, Fo, mi, oM, rM, gh, W3, Fl, fo, Dr, j3, q3, xh, lM, cM, fM, dM, Gs, yh, vh, X3, Y3, hM, K3, Z3, l1, c1, f1, d1, M5, k5, S5, T5, E5, A5, R5, C5, L5, I5, P5, D5, z5, N5, F5, U5, O5, B5, H5, $5, G5, V5, W5, j5, q5, X5, Y5, K5, l7, c7, f7, d7, Ki, ri, Ul, D1, jn, ec, nv, h7, u7, p7, uM, m7, g7, x7, y7, Z5, Pi, sv, Uo, z1` — L6379 — srgb
+- `Af` — L6528
+- `ei, rg, Q5` — L6559
+- `C0` — L6819
+- `vn` — L6847
+- `v7` — L6850
+- `lg` — L6853
+- `zo` — L6856 — Invalid component type.
+- `qn` — L6876 — Invalid component type.
+- `Ee` — L6896 — index is out of range:
+
+## 05-three.js
+
+- `Ri` — L7096
+- `dt` — L7454 — index is out of range:
+- `cg, iv` — L7810
+- `Je` — L7812
+- `fg` — L8067
+- `pM` — L8068
+- `N1` — L8072 — http://www.w3.org/1999/xhtml
+- `b7` — L8075 — canvas
+- `av` — L8079
+- `bh` — L8080
+- `_7` — L8083
+- `ov, rv` — L8100
+- `w7` — L8122 — standard
+- `In` — L8211
+- `Tr` — L8212
+- `Zc` — L8215
+- `nc` — L8218
+- `M7` — L8219 — image/png
+- `k7` — L8261
+- `Q3` — L8262 — string
+- `dg` — L8304
+- `S7` — L8313
+- `hg` — L8314
+- `Vs` — L8315 — THREE.Texture.setValues(): parameter
+- `kn` — L8527 — index is out of range:
+- `T7` — L8854 — dispose
+- `go` — L8974
+- `mM` — L8979
+- `E7` — L8999
+- `$l` — L9012 — position
+- `sr, qa, mu, sc, ic, ac, Gr, Vr, j0, Zf, gu, xu, q0` — L9238
+- `ug` — L9251
+- `A7, Qf, pg` — L9262
+- `Rf` — L9265
+- `ir, mg, yu, Wr, gg, vu, xg` — L9360
+- `J3` — L9367
+
+## 06-three-2.js
+
+- `Ke` — L9518
+- `oc, Xa, R7, C7, jr, bu, fa, lv, cv` — L10181
+- `sa` — L10190
+- `gM` — L10321
+- `L7` — L10350
+- `fv, rc, ar, _u, Jf, I7, P7, dv, hv, uv, pv, D7, lc, yg` — L10351 — added
+- `Ws` — L10365 — Object3D
+- `Ya, or, vg, rr, cc, fc, mv, bg, _g, wg, Mg, kg, Sg` — L10791
+- `oo` — L10804 — in l && (l.z = 0),
+- `xM, qr, wu` — L10938
+- `Tg` — L11090
+- `Ut` — L11097 — number
+- `ni` — L11355
+- `z7` — L11357
+- `Uh` — L11358 — Material
+- `yM` — L11672 — MeshBasicMaterial
+- `Es, Mu` — L11722
+
+## 07-three-3.js
+
+- `N7` — L11724
+- `On` — L11725
+- `hm` — L11882
+- `um` — L11887
+- `Ae` — L11892
+- `F7` — L11897
+- `Ta, Eg, dc, da, td, Bs` — L11898
+- `Bn` — L11904 — BufferGeometry
+- `gv, X0, ku, xv, Su, Tu, Eu, Ag, Au, yv, Ru` — L12362
+- `Sn` — L12373 — Mesh
+- `U7` — L12510
+- `Cu` — L12523
+- `Oh` — L12539 — BoxGeometry
+- `hf` — L12615
+- `ki` — L12643
+- `O7` — L12651
+- `vM` — L12656
+- `N0` — L12664
+- `B7, H7` — L12665
+- `An` — L12671 — ShaderMaterial
+- `bM` — L12744 — Camera
+- `Xr, vv, bv` — L12781
+- `Yi` — L12784 — PerspectiveCamera
+- `hc, uc` — L12907
+- `$7` — L12909 — CubeCamera
+- `_M` — L12994
+- `G7` — L13005 — CubemapFromEquirect
+- `Ji` — L13085 — Group
+- `V7` — L13090 — move
+- `Rg` — L13091 — connected
+- `tx` — L13232
+- `wM` — L13243 — Scene
+- `MM` — L13289
+- `vi` — L13357
+- `No` — L13358
+- `zr` — L13527
+- `Qs` — L13537
+- `pc, _v, Lu, wv, W7, ed, nd` — L13549
+- `kM` — L13556 — dispose
+- `Cg, j7, q7` — L13658
+- `g0` — L13661
+- `Y0, X7, Iu` — L13734
+- `pm` — L13737
+- `Y7` — L13830 — PointsMaterial
+- `Mv, J5, Pu, Du` — L13856
+- `K7` — L13860 — Points
+- `kv` — L13925
+- `Z7` — L13944
+
+## 08-three-4.js
+
+- `SM` — L13949
+- `TM` — L13973
+- `ex` — L13981 — CircleGeometry
+- `uf` — L14017 — CylinderGeometry
+- `mm` — L14130 — ConeGeometry
+- `gm` — L14156 — PolyhedronGeometry
+- `Q7` — L14272
+- `EM` — L14292
+- `Ol` — L14298
+- `_h` — L14311
+- `J7` — L14332
+- `tE` — L14362
+- `eE` — L14434
+- `nE` — L14448
+- `sE` — L14463
+- `iE` — L14475
+- `aE` — L14484
+- `oE` — L14490
+- `rE` — L14520
+- `lE` — L14523
+- `cE` — L14529
+- `t3` — L14556
+- `fE` — L14571
+- `AM` — L14578
+- `Hd` — L14585
+- `dE` — L14588
+- `ys` — L14597
+- `pf` — L14600
+- `RM` — L14603
+- `zu` — L14616
+- `Nu` — L14624
+- `hE` — L14627
+- `wh` — L14635
+- `uE` — L14640
+- `CM` — L14654
+- `Sv` — L14671
+- `Mh` — L14678
+- `e3` — L14684
+- `pE` — L14687
+- `mE` — L14692
+- `nx` — L14697
+- `Tv` — L14720
+- `Ev` — L14724
+- `sx` — L14727 — IcosahedronGeometry
+- `ix` — L14778 — OctahedronGeometry
+- `Gl` — L14788 — PlaneGeometry
+- `xm` — L14832 — SphereGeometry
+- `gE` — L14902 — RawShaderMaterial
+- `xE` — L14907 — MeshDepthMaterial
+- `yE` — L14937 — MeshDistanceMaterial
+- `ax` — L14961 — Light
+- `LM` — L14985 — HemisphereLight
+- `Lg, Av, Rv` — L14998
+- `IM` — L15001
+- `Cv, sd, Ig` — L15082
+- `vE` — L15085
+- `PM` — L15133 — PointLight
+- `ox` — L15161 — OrthographicCamera
+- `bE` — L15249
+- `DM` — L15254 — DirectionalLight
+- `Cf` — L15271 — InstancedBufferGeometry
+- `_E` — L15286
+- `wE` — L15291
+- `rx` — L15321
+- `Lv` — L15337
+- `ME` — L15414 — Unknown texture type ${n}.
+- `zM` — L15442
+- `kE` — L15465
+
+## 09-render.js
+
+- `SE, TE, EE, AE, RE, CE, LE, IE, PE, DE, zE, NE, FE, UE, OE, BE, HE, $E, GE, VE, WE, jE, qE, XE, YE, KE, ZE, QE, JE, tA, eA, nA, sA, iA, aA, oA, rA, lA, cA, fA, dA, hA, uA, pA, mA, gA, xA, yA, vA, bA, _A, wA, MA, kA, SA, TA, EA, AA, RA, CA, LA, IA, PA, DA, zA, NA, FA, UA, OA, BA, HA, $A, GA, VA, WA, jA, qA, XA, YA, KA, ZA, QA, JA, t9, e9, n9, s9, i9, a9, o9, r9, l9, c9, f9, d9, h9, u9, p9, m9, g9, x9, y9, v9, b9, _9, w9, M9` — L15537
+
+## 10-render-2.js
+
+- `k9, S9, T9, E9, A9, R9, C9, L9, I9, P9, D9, z9, N9, F9, U9, O9, B9, H9, $9, G9, V9, W9, j9, q9, X9, Y9, K9, Z9, Q9, J9, tR, eR, nR, sR, tn, ee, Io` — L18127
+- `Fu, K0, iR` — L19709
+- `aR` — L19712 — additive
+- `oR` — L19841 — instanceMatrix
+- `rR` — L20076 — WEBGL_multi_draw
+- `lR` — L20111 — EXT_texture_filter_anisotropic
+- `cR` — L20179
+- `fR` — L20238 — dispose
+- `$c, Iv, bl, Pg, Pv` — L20276
+- `xl, mc, Dv, dR` — L20285
+- `hR` — L20502 — position
+- `Nv` — L20542 — PMREM.cubeUv
+- `Uu` — L20546
+- `lx` — L20688
+
+## 11-render-3.js
+
+- `Dg, zg, Ng, Fg` — L20281
+- `zv` — L20300 — PMREM.Background
+- `uR` — L20549 — SphericalGaussianBlur
+- `Fv` — L20631 — EquirectangularToCubeUV
+- `Uv` — L20661 — CubemapToCubeUV
+- `pR` — L20746 — dispose
+- `mR` — L20798 — WEBGL_depth_texture
+- `gR` — L20850 — dispose
+- `xR` — L20910 — WEBGL_multi_draw
+- `yR` — L20950 — THREE.WebGLInfo: Unknown draw mode:
+- `vR` — L20980 — dispose
+- `bR` — L21052 — dispose
+- `NM, Ov, FM, UM, OM, Bv, Hv, $v, Gv, Vv` — L21084
+- `Lf` — L21094
+- `Fs` — L21105
+- `Us` — L21110
+- `ym` — L21113
+- `_R` — L21119
+- `wR` — L21123
+- `MR` — L21132
+- `kR` — L21145
+- `SR` — L21155
+- `TR` — L21166
+- `ER` — L21177
+- `AR` — L21188
+- `RR` — L21192
+- `CR` — L21201
+- `LR` — L21211
+- `IR` — L21221
+- `PR` — L21225
+- `DR` — L21234
+- `zR` — L21244
+- `NR` — L21254
+- `FR` — L21262
+- `UR` — L21267
+- `OR` — L21272
+- `BR` — L21277
+- `HR` — L21335
+- `$R` — L21338
+- `GR` — L21342
+- `VR` — L21346
+- `WR` — L21350
+- `jR` — L21354
+- `qR` — L21358
+- `XR` — L21362
+- `YR` — L21365
+- `KR` — L21368
+- `ZR` — L21371
+- `QR` — L21374
+- `JR` — L21377
+- `tC` — L21380
+- `eC` — L21383
+- `nC` — L21386
+- `sC` — L21393
+- `iC` — L21400
+- `aC` — L21407
+- `oC` — L21414
+- `rC` — L21472
+- `lC` — L21477
+- `cC` — L21487
+- `Ug` — L21499
+- `Wv` — L21500
+- `fC` — L21503
+- `h1` — L21521
+- `jv` — L21555
+- `dC` — L21559
+- `hC` — L21560
+- `uC` — L21561 — ${r === t ?
+- `qv` — L21574
+- `pC` — L21575 — LinearTransferOETF
+- `Xv` — L21587 — ) return
+- `mC` — L21607 — vec4 ${n}( vec4 value ) {
+- `gC` — L21612 — Linear
+- `Ou` — L21641
+- `xC` — L21642 — float luminance( const in vec3 rgb ) {
+- `yC` — L21655 — #extension GL_ANGLE_multi_draw : require
+- `vC` — L21662 — #define
+- `bC` — L21671
+- `$d` — L21685
+- `Yv` — L21688
+- `Kv` — L21703
+- `_C` — L21708
+- `n3` — L21709
+- `wC` — L21712
+- `MC` — L21713 — THREE.WebGLRenderer: Shader chunk
+- `kC` — L21724
+- `Zv` — L21726
+- `SC` — L21729 — + a +
+- `Qv` — L21735 — highp
+- `TC` — L21767 — SHADOWMAP_TYPE_BASIC
+- `EC` — L21778 — ENVMAP_TYPE_CUBE
+- `AC` — L21792 — ENVMAP_MODE_REFLECTION
+- `RC` — L21796 — ENVMAP_BLENDING_NONE
+- `CC` — L21812
+- `LC` — L21819 — #version
+- `IC` — L22196
+- `PC` — L22197
+- `DC` — L22234
+- `zC` — L22239 — depth
+
+## 12-three-5.js
+
+- `NC` — L22639
+- `FC` — L22659
+- `Jv` — L22670
+- `tb` — L22679
+- `UC` — L22735
+- `OC` — L22754 — DirectionalLight
+- `BC` — L22789 — DirectionalLight
+- `HC` — L22830
+- `$C` — L22831
+- `GC` — L22834 — OES_texture_float_linear
+- `eb` — L23080
+- `VC` — L23102
+- `WC, jC` — L23121
+- `qC` — L23151 — position
+- `XC` — L23336
+- `YC` — L23337 — EXT_clip_control
+
+## 13-three-6.js
+
+- `KC` — L23902 — WEBGL_multisampled_render_to_texture
+- `ZC` — L25060 — WEBGL_compressed_texture_s3tc_srgb
+- `QC, JC` — L25176
+- `tL` — L25202
+- `eL` — L25237 — local-floor
+- `Z0, nL` — L25614
+
+## 14-three-7.js
+
+- `sL` — L25616
+- `iL` — L25812 — dispose
+- `cx` — L25963 — default
+- `Yt, aL, yl, BM, HM, fs` — L27213 — moba.lightTint.neutral
+- `nb` — L27335
+- `oL` — L27338
+- `rL, k0, lL` — L27341 — 只有直出屏幕的材质定义了 TONE_MAPPING：把
+- `$M` — L27366 — 未找到 CustomToneMapping 的默认实现
+- `ke` — L27375
+- `nn` — L27405
+- `sb` — L27409
+- `u1` — L27410
+- `un` — L27423
+- `GM` — L27435
+- `fx` — L27445 — 不可用
+- `nh` — L27454
+
+## 15-render-4.js
+
+- `cL` — L27462
+- `F1` — L27495
+- `fL` — L27496
+- `dL` — L27500
+- `Og` — L27504
+- `hL` — L27505 — rock
+- `Vl, VM, vm, If, Pf, Df, zf, aa, WM, Nf` — L27550 — 立面补光：法线越接近水平，多吃一份地面反光(被太阳晒亮
+- `Ff` — L27697
+- `uL, pL` — L27708 — 顶面：按世界 xz 平铺的草贴图 + 大块色斑(与地表
+- `dx` — L27924 — ) : t.map && (o.TOON_MAP =
+- `Qc` — L28075
+- `bm, _m, mL, gL, xL, yL, vL, bL, _L, wL, ML` — L28078 — 环境染色在顶点采一次就够(贴图 1 米一个 texel
+- `s3` — L28521
+- `hx` — L28522
+- `kL` — L28523
+- `SL` — L28530 — hero:
+- `TL` — L28539
+- `EL` — L28562
+- `ib` — L28565
+- `AL` — L28566
+- `RL` — L28588
+- `sh` — L28597
+- `ux` — L28611 — unit-batch
+- `ua, p1, Bu, ab, CL, LL, IL, PL, ob, DL, rb, zL, lb, NL, FL, UL, cb, OL, BL, fb, HL, db, hb, $L, GL, VL` — L28802
+- `WL` — L28828
+- `jM` — L29022
+- `Bg, jL, qL, Hu, ub` — L29044
+- `XL` — L29049 — 计时不可用：这台设备/浏览器没有 EXT_disjoi
+- `YL` — L29139 — gpuTimings
+- `as, mf, KL, ZL, QL, JL, tI, eI, nI, id, $u, Gu, i3, pb` — L29146
+- `sI` — L29165
+- `Yr, Vu` — L29283
+- `Wu` — L29285
+- `iI` — L29304 — moba.lightTint
+- `aI` — L29418 — CopyShader
+- `Uf` — L29447
+- `oI` — L29461
+- `rI` — L29462 — position
+- `lI` — L29469
+- `px` — L29470
+- `cI` — L29487 — tDiffuse
+- `mb` — L29519
+- `fI` — L29558
+- `dI` — L29566 — EffectComposer.rt1
+- `hI` — L29660
+
+## 16-render-5.js
+
+- `uI, pI, mI, gI, Hg, gb` — L29692 — 钳位：个别极亮的像素(高光/特效核心)不至于在降采样后
+- `xI` — L29756
+- `yI` — L29853 — 对比：幂函数式，围绕支点(线性值)拉开；纯黑不动，暗部
+- `vI` — L29908
+- `bI` — L29983 — moba.scene
+- `_I` — L30043 — EXT_color_buffer_float
+- `xb` — L30049 — pcfsoft
+- `wI` — L30126 — canvas
+- `MI` — L30138 — || typeof document >
+- `ju, Kr, kI` — L30156
+- `kh` — L30159
+- `mx` — L30160
+- `SI` — L30167 — high-performance
+- `TI` — L30176 — function
+- `EI` — L30198
+- `AI` — L30207
+- `RI` — L30210 — absolute
+- `CI` — L30593
+- `LI` — L30594 — hero
+- `Jc` — L30608
+- `II` — L30625
+- `PI` — L30630
+- `qM` — L30661 — static
+- `ji, ih, Xs, Ft, Ve, Le, Ro` — L30985
+- `yb` — L31036
+- `qu` — L31047
+- `Oc` — L31056 — round
+- `$g` — L31068 — #fff
+- `vb` — L31089 — #fff
+- `DI` — L31653 — 不可用
+- `gx` — L31727 — 遮挡部分(权重 1 - fxAdd)与叠加部分(权重
+- `Bh` — L31747
+
+## 17-three-8.js
+
+- `Ea, mr, zI, Xt, bb, NI, FI` — L31758 — 角星的有符号距离(Inigo Quilez)：m ∈
+- `UI` — L32391
+- `OI` — L32459 — position
+- `BI` — L32656 — attribute.
+- `_b` — L32782
+- `oe, HI, $I, wb` — L32837
+- `XM` — L32847
+- `Lt, ws, W, Mb` — L32880
+- `Fa` — L32980
+- `qe, Gg, sn, kb, GI, VI, WI` — L32983 — 非均匀缩放下的法线：按各轴缩放平方修正
+- `Sb` — L33171
+- `Ll` — L33251 — position
+- `Il` — L33257
+- `jI` — L33260 — position
+- `qI` — L33288 — position
+- `XI` — L33314 — position
+- `YI` — L33339 — position
+- `KI` — L33368 — position
+- `ZI` — L33399 — position
+- `QI` — L33415
+- `JI, tP` — L33459
+- `Tb` — L33461
+- `eP` — L33466 — position
+- `YM` — L33496 — position
+- `nP` — L33504 — position
+- `sP` — L33528 — position
+- `iP` — L33552
+- `Eb, Ab, gc, Rb, Cb, Lb` — L33564
+- `aP` — L33570 — fx.meshes
+- `So, Xu, pa` — L33774
+- `$e` — L33777
+
+## 18-core.js
+
+- `oP, KM` — L33802 — 弹道：线性阻尼 + 重力(有阻尼时趋向终端速度)
+- `rP` — L33910 — position
+- `Yu, os, Ka` — L34079
+- `wi` — L34082
+- `lP` — L34100
+- `cP, fP` — L34121 — 噪声顺着带子向尾部流动，把边缘侵蚀成火舌/烟缕
+- `dP` — L34176 — position
+- `Mt, $n, hP, uP, pP, mP, ZM` — L34435
+- `H0` — L35199
+- `jo` — L35221
+- `L0` — L35244
+- `Ha` — L35255
+- `Ni` — L35278
+- `F0` — L35298
+- `U0` — L35320
+- `gf` — L35331
+- `le, _r` — L35352
+- `vs` — L35369
+- `bn` — L35396
+- `xx` — L35404
+- `Hh` — L35407
+- `gP` — L35416
+- `Lr` — L35425
+- `wm` — L35434
+- `U1` — L35444
+- `qo` — L35445
+- `yx` — L35456
+- `vx` — L35476
+- `QM` — L35486
+- `bx` — L35493
+- `Of` — L35501
+- `O1` — L35504
+- `Mm` — L35507
+- `B1` — L35528
+- `km` — L35532
+- `Sh` — L35552
+- `Th` — L35576
+- `JM` — L35594
+- `xP, yP, vP, Ib, bP, _P, wP` — L35605
+- `MP` — L35618 — direction
+- `kP, xo, SP` — L35736
+- `Gd` — L35739
+- `ad` — L35743
+- `od` — L35755
+- `xc` — L35762
+- `yc, rd, Zr, Ku, TP, EP, Pb` — L35767
+- `AP` — L36054
+- `a3` — L36133
+- `RP` — L36134
+- `CP` — L36140
+- `Nn, Db, Q0` — L36149
+- `o3` — L36152 — vent
+- `LP, r3, IP` — L36164
+- `PP` — L36368
+- `tf` — L36590
+
+## 19-core-2.js
+
+- `DP` — L36390 — monster
+- `zP` — L36610 — frost_golem
+- `NP` — L36737
+- `FP` — L36765 — abyss_drake
+- `UP, OP, BP` — L36866
+- `HP` — L36869 — hero
+- `$0` — L36966
+- `bo` — L36969
+- `t8` — L36972 — self
+- `_x` — L36975 — direction
+- `Nr` — L36978 — number
+- `cs, zb, $P, ba, e8, n8` — L36982
+- `wx` — L36988
+- `s8` — L36991
+- `GP` — L36997
+- `VP, WP, jP, qP, XP, YP, di, KP` — L37042 — dashSpeed
+- `i8` — L37254
+- `ZP, QP, JP, tD, eD` — L37275 — dashSpeed
+- `Mx` — L37419
+- `Ei` — L37426
+- `kx` — L37427 — hero
+- `nD, sD, iD, aD, oD, rD` — L37437 — hero
+- `Sx` — L37557
+- `lD, cD, fD, dD, hD, uD` — L37576
+- `a8` — L37756
+- `o8` — L37762
+- `pD, mD, gD, xD` — L37767 — frost_insight
+- `yD` — L37992
+- `vD` — L38021
+- `bD` — L38028
+- `He, m1, r8` — L38052
+- `Tx` — L38055
+- `l3` — L38058
+- `_D, wD, MD, kD, SD, TD, ED, Pn, ld` — L38086 — dashSpeed
+- `Ex` — L38351
+
+## 20-core-3.js
+
+- `AD, RD, CD, LD, ID, PD, Ci, Nb, DD, zD, Vg, ND, FD, UD, OD, BD, HD, $D` — L38374 — dashSpeed
+- `GD` — L38758
+- `VD` — L38761 — hero
+- `WD` — L38775 — units
+- `Fb, jD, qD, Zu, XD` — L38849 — 稍微朝相机拉近一点：贴在模型表面的图标不被模型吃掉
+- `YD` — L38877 — position
+- `Qu, Wg` — L38949
+- `l8` — L38955
+- `jg, KD` — L39121
+- `To` — L39123
+- `Ub, ZD, Ob` — L39146
+- `Ju` — L39149
+- `Bb` — L39155
+- `QD` — L39499 — tower
+- `Qr, Vd, qg, Xg, JD, tz, Yg, Hb, ez, nz, Kg, Zg, tp, Qg, sz, iz, J0, Jg, t2, $b, e2, Gb` — L39694
+- `Vb` — L39716
+- `oi` — L39720
+- `Ks` — L39725
+- `n2` — L39729
+- `c8` — L39730
+- `f8` — L39733
+- `Wb` — L39736
+- `d8, az, oz` — L39807 — hero
+- `rz` — L40550 — minion
+- `lz` — L40641
+- `Jr` — L40647
+
+## 21-core-4.js
+
+- `cz` — L40648 — hit_
+- `jb, c3` — L40839 — PingFang SC
+- `Eh` — L40841 — 不可用
+- `fz` — L40848 — ${a} ${e}px ${o}
+- `t0` — L40891
+- `dz` — L40892 — ${t.italic ?
+- `qb` — L40961
+- `Xb` — L40962
+- `hz` — L40973 — #ffd84a
+- `uz` — L41158
+- `lr, s2, Yb, pz, mz, Kb, gz, Zb` — L41177 — #58d83e
+- `xz` — L41190
+- `yz` — L41194 — minion
+- `vz, Al, bz, Qb, Jb, _z, wz, Mz, kz, Sz, Tz` — L41547 — #fff6e0
+- `Ez` — L41577 — 升级 Lv.${o.level}
+- `Az` — L41821 — magic
+- `Rz, Cz, Lz, Iz, i2, t_, a2, Pz` — L41824
+- `Dz` — L41832 — pointer
+- `zz` — L41959
+- `Nz` — L41960 — 不可用
+- `Fz, Uz, $t, $h, I0, Ax, h8` — L42048
+- `e_` — L42055
+- `Oz, Bz, n_, Hz` — L42058 — frost_golem
+- `$z` — L42085 — frost_golem
+- `s_, Gz` — L42129
+- `i_` — L42131
+- `a_` — L42145
+- `Vz` — L42156
+- `u8` — L42162
+- `yo` — L42177
+- `Ah` — L42186
+- `p8` — L42193
+- `Fn, Wz, mn, H1` — L42198
+- `Bf` — L42202 — abyss_drake
+- `Rx, Sm, Cx, f3, jz, $1` — L42214
+- `o2` — L42223
+- `Er` — L42232
+- `qz` — L42236
+- `o_` — L42357
+- `r2` — L42374
+- `l2` — L42391
+- `m8` — L42407
+- `Xz` — L42411
+- `Yz` — L42458
+- `Kz` — L42486
+- `yt` — L42544
+- `Pt` — L42548
+- `Ht` — L42551
+- `g8, Mn, ci, ep, cd, r_, Lx, Ir, li, x8, Ix, l_` — L42554
+- `gs` — L42569
+- `Zz` — L42575
+- `Be` — L42585 — position
+- `c_` — L42781 — ${i}:${r}
+- `Qz` — L42825
+- `xf` — L42830
+- `Jz` — L42836
+- `Px` — L42882
+- `y8` — L42913
+
+## 22-render-6.js
+
+- `tN, eN, nN` — L42949 — 光束：横向软边 + 沿束方向的条纹(几道粗细不一的光缕
+- `sN` — L43008 — ridge
+- `tl, np, sp, f_, d_, iN, aN, oN, rN, h_` — L43119
+- `yf` — L43129
+- `u_, p_, m_, lN, g_` — L43162
+- `cN` — L43167
+- `Dn, x_` — L43225
+- `v8` — L43227
+- `Ts` — L43298
+- `gn` — L43382
+- `Xo` — L43432
+- `bs` — L43472
+- `Ho` — L43475
+- `Dx` — L43585
+- `na, Rh, Ch` — L43606
+- `c2` — L43609
+- `fN` — L43693
+- `dN` — L43767
+- `hN` — L43812
+- `uN` — L43847
+- `pN` — L43874
+- `y_` — L43900
+- `v_` — L43926
+- `b_` — L43966
+- `mN` — L44020
+- `gN` — L44086
+- `__` — L44122
+- `xN` — L44165
+- `yN` — L44192
+- `vN` — L44224
+- `bN` — L44252
+- `_N` — L44317
+- `wN` — L44368
+- `MN` — L44391
+- `kN` — L44444
+- `SN` — L44471
+- `TN` — L44479
+- `EN` — L44492
+- `AN` — L44522
+- `RN, b8, _8` — L44556
+- `CN` — L44559
+- `ah, d3, ip` — L44599
+- `LN` — L44623
+- `IN` — L44672
+- `PN` — L44693
+- `DN` — L44703
+- `zN` — L44758
+- `NN` — L44837
+- `w_` — L44861
+- `h3, Gc, M_, FN` — L44873
+- `k_` — L44884
+- `UN` — L44891
+- `Wl, S_, fd, el, T_, f2, d2, ON, BN, HN, E_, A_, ap` — L44904
+- `$N` — L44917 — ridge
+- `GN, R_, C_, L_, I_` — L45107
+- `ae` — L45112
+- `vr, O0, zx, oh, P_, VN, WN, D_, jN, qN` — L45121
+- `u3` — L45131 — frost_golem
+- `XN` — L45150
+- `op` — L45156
+- `h2, YN, z_` — L45163
+- `KN` — L45166
+- `ZN` — L45183
+- `QN` — L45186
+- `p3` — L45215
+
+## 23-render-7.js
+
+- `JN` — L45216 — ridge
+- `tF` — L45428
+- `nl, cr, e0, rp, sl, eF, N_, F_, nF, sF, wr, g1, _0, w8, m3, M8` — L45637
+- `iF` — L45653
+- `aF` — L45677
+- `rh, oF, vl, rF` — L45696
+- `lF` — L45700 — border:${g}
+- `cF` — L45894
+- `fF, dF` — L46049 — 横向 0..1；vUv.y：沿水流方向的米数。vFal
+- `hF` — L46090 — position
+- `U_` — L46209
+- `uF` — L46225
+- `pF` — L46272 — pillar
+- `Zs, x1` — L46426
+- `O_` — L46428
+- `B_` — L46476
+- `mF` — L46526
+- `gF` — L46561
+- `xF` — L46607
+- `H_` — L46632
+- `$_` — L46689
+- `G_` — L46726
+- `V_` — L46769
+- `yF` — L46790
+- `vF` — L46816
+- `dd` — L46827
+- `bF` — L46835
+- `_F` — L46843 — beam
+
+## 24-render-8.js
+
+- `wF, MF, kF` — L47148 — 角星的有符号距离(iq)：m 越小角越尖
+- `SF` — L47432 — abyss_drake
+- `TF` — L47508 — position
+- `vf, EF, AF, RF, lp, CF, cp` — L47571 — 被单位拨开：向外推并压低，离得越近越明显
+- `LF` — L47636
+- `IF` — L47669
+- `PF` — L47716 — bushes
+- `so` — L47767
+- `k8` — L47768 — canvas
+- `DF` — L47793 — round
+- `zF` — L47881 — rgba(40,34,30,0.32)
+- `lh, Vc` — L47923
+- `g3` — L47928
+- `NF` — L47941
+- `FF` — L47942
+- `UF` — L48064
+- `OF, il, n0, BF` — L48107 — 一层落叶图章：cell 米见方的格子里至多一片两头尖的
+- `HF` — L48612 — position
+- `$F` — L48651
+- `S8` — L48674
+- `W_` — L48680
+- `T8` — L48681
+- `GF` — L48694 — ground
+- `VF, WF` — L48790 — 相位, 速度, 尺寸, 模式；aMotion: 水平幅
+- `jF` — L48840 — position
+- `bf, qF, xs, Oo, ef, x3, _f, Wc` — L48902
+- `j_` — L48910
+- `XF` — L48913
+- `E8` — L48966
+- `q_` — L49005
+- `X_` — L49061
+- `YF` — L49074
+- `Y_` — L49102
+
+## 25-render-9.js
+
+- `KF` — L49122
+- `K_` — L49188
+- `ZF` — L49223
+- `QF` — L49237
+- `JF` — L49238
+- `tU` — L49289
+- `eU` — L49306
+- `Nx` — L49432
+- `nU` — L49433 — sky-dome
+- `sU` — L49469 — 云团：亮顶、蓝灰的谷；朝向太阳的一侧镶暖亮边，背光一侧
+- `iU` — L49533
+- `aU` — L49556 — mountains
+- `oU` — L49635
+- `rU, Z_` — L49639
+- `lU` — L49641
+- `cU, fU` — L49686 — 波纹法线(世界空间 → 视图空间)
+- `dU` — L49815 — position
+- `hU, Q_, J_, uU, tw, ew, pU, hd, ud` — L49888
+- `nw` — L49897 — splat
+- `mU, ch` — L50213
+- `Wa` — L50224 — 没有关节 ${t}
+- `fp` — L50273
+- `y1` — L50274
+- `Ua` — L50289
+- `Da` — L50303
+- `gU` — L50315
+- `xU` — L50331
+- `sw` — L50349
+- `Aa, dp, no, _l, iw, yU, vU` — L50405
+- `bU` — L50412
+- `hp, Za, up` — L50634
+- `Tm` — L50637
+- `pp, pd, si, Qa, ii, mp, s0, vc, fr` — L50662
+- `u2` — L50671
+- `Fx` — L50677
+- `Em` — L50756
+- `_U, Ct, Xe, Gn, Kn, wf` — L50764
+- `Qo` — L50773
+- `Di` — L50777
+- `Am` — L50812
+- `Gh` — L50829 — root
+- `he, hi, ma, Fi, ho` — L50884
+- `Vh` — L50898
+- `jl` — L50902
+- `nf` — L50912
+- `ge` — L50922 — hipsPos
+- `md` — L50939
+- `A8` — L50942
+- `zs` — L50952
+- `ta` — L50955
+- `aw, gp, gd` — L50966
+- `G1` — L50969
+- `P0` — L50977
+- `S0` — L51005
+- `Un` — L51015
+- `Rm, xp` — L51030
+- `ow` — L51044
+- `i0` — L51061
+- `Mf` — L51062
+- `Wh` — L51086
+- `jh` — L51151 — stunned
+- `Yo` — L51177
+- `sf, yp` — L51190
+- `Lh` — L51192
+- `fh` — L51195
+- `Ux` — L51200
+- `Xi, bt, Qn` — L51204
+- `pt` — L51210
+- `K, En, rw` — L51215
+- `wU` — L51218
+- `lw, cw` — L51296
+- `vp` — L51304
+- `p2` — L51313
+
+## 26-core-5.js
+
+- `Ls` — L51325 — position
+- `Bl` — L51925
+- `Zi` — L51943
+- `Li` — L51975
+- `Js` — L51982 — flat
+- `MU` — L52011
+- `qh` — L52022
+- `Cm` — L52059
+- `bp` — L52079
+- `Xh` — L52088
+- `Ox` — L52221
+- `Wd` — L52250
+- `af` — L52253
+- `Bx` — L52276
+- `R8` — L52354
+- `_p` — L52392
+- `Ko` — L52402
+- `ne, kU, fw, wp, Co` — L52435
+- `SU` — L52459 — gripR
+- `dw, al` — L53061
+- `TU` — L53075
+- `EU, hw, Mp` — L53293
+- `AU` — L53296 — leap
+- `jt, RU, uw, pw, Ra` — L53430
+
+## 27-core-6.js
+
+- `CU` — L53467 — bowUp
+- `mw` — L54063
+- `LU` — L54075
+- `kp, IU, gw, m2` — L54155
+- `PU` — L54159 — leap
+- `de, DU, xw, m0, xd` — L54285
+- `bc` — L54328
+- `zU` — L54351 — shield
+- `y3, NU` — L54917
+- `FU` — L54931
+- `UU` — L55181 — dead
+- `ie, OU, yw, vw` — L55275
+
+## 28-core-7.js
+
+- `BU` — L55301 — pipa
+- `bw` — L55893
+- `HU` — L55906
+- `a0` — L56039
+- `$U` — L56040 — leap
+- `me, GU, _w, io, Sp` — L56188
+- `VU` — L56217 — scarf
+- `ww` — L56649
+- `WU` — L56661
+- `jU` — L56837 — leap
+- `qU` — L56931
+- `Lm` — L56932 — root
+- `Mw` — L56968
+- `Ds` — L56969
+- `_a` — L56974
+- `XU` — L56981
+- `YU` — L56985
+- `Im` — L56990 — bound
+- `V1` — L57027
+- `Jo` — L57030
+- `Qt, kf, As, wa, ya, $o, Ai` — L57035
+- `Hx` — L57050
+- `C8` — L57059
+- `Pm` — L57079
+- `Go` — L57082
+- `KU` — L57086 — root
+- `ZU` — L57389 — root
+
+## 29-core-8.js
+
+- `QU` — L57609 — root
+- `JU` — L57857 — root
+- `tO, eO, kw, yd, Sw, Tw, nO, sO, Ew, Aw, iO, Rw, aO, oO, rO` — L58223
+- `lO` — L58241 — shell
+- `Cw, Ca, Lw, o0, Iw, Pw, g2, _c, Dw, Tp, wc, vd, bd, Ep, cO, zw, Nw` — L58613
+- `x2` — L58630
+- `fO` — L58668 — crest
+- `Fw, Uw, y2, dO, hO, v2, Ow, uO, Bw` — L59622
+
+## 30-core-9.js
+
+- `pO` — L59631 — root
+- `Ap, dr, b2, r0, Hw, Rp, Cp, Mc, _d, mO, $w, Gw, gO, xO, Lp` — L59919
+- `yO` — L59937 — crater
+- `Ip, Vw, l0, kc, c0, vO, $i, Ja, bO, _O, wO, Sc` — L60493
+- `MO` — L60508 — root
+- `wd, Tc, kO, SO, _2, w2, Ww, TO, Pp, Dp, EO, jw, AO, RO, M2` — L60989
+- `CO` — L61007 — earL
+- `$x, LO, jc, rs, qi, xa, ao` — L61531
+- `L8` — L61564
+- `qw` — L61586
+- `W1` — L61610
+
+## 31-render-10.js
+
+- `Ec` — L61621 — root
+- `Xw` — L61965 — root
+- `Yw` — L62085 — root
+- `IO` — L62305 — tower:1:0
+- `PO` — L62317 — idle
+- `of` — L62336
+- `Gx, Kw` — L62385 — hero:panyue
+- `Zw` — L62404
+- `qc` — L62407 — 未知模型：${n}
+- `Vx, DO, zO, NO, FO, UO` — L62416 — hero:${n}
+- `Qw` — L62422
+- `Jw` — L62425
+- `Md` — L62426 — fallback:${n.toFixed(2)}:${t.toFixed(2)}
+- `t4, e4, OO, BO, HO, $O` — L62484 — 四边形比标称半径大 1.5 倍，留给外发光
+- `GO` — L62573 — position
+- `zp, VO, WO` — L62640 — 绕一圈的 0..1，position.y = 自下而上
+- `jO` — L62710 — position
+- `f0, qO, Np, XO, n4, s4, YO, KO, ZO, QO, JO, tB, eB` — L62782
+- `nB` — L62799 — hero
+- `sB` — L62813 — hero
+- `iB` — L62827 — core
+- `aB` — L62840 — minion:
+- `oB` — L62843 — hero:
+- `kd, Sd, Td, Ed, i4, rB` — L62856
+- `lB` — L62867 — unit-views
+- `cB, Ac, a4, fB, o4, r4` — L63501 — dash
+- `dB` — L63519
+- `v3, hB` — L63561
+- `uB` — L63569 — idle
+- `I8` — L63602
+- `P8` — L63620
+- `pB` — L63623
+- `D8` — L63662 — #0b1020
+- `mB` — L63687
+
+## 32-ui.js
+
+- `gB` — L63708 — high-performance
+- `jd, j1` — L63837
+- `l4` — L63839 — canvas
+- `dh, c4, k2` — L63874
+- `z8` — L63877
+- `N8` — L63881 — canvas
+- `F8` — L63938 — function
+- `xB` — L63954
+- `U8` — L63960
+- `yB` — L63961
+- `vB` — L63964
+- `O8` — L63967
+- `B8` — L63968
+- `H8` — L63975
+- `Wx` — L63984
+- `$8` — L63990
+- `Jn` — L63999 — ${e}calc(var(--sf-u) * ${s})
+- `bB` — L64005 — color-mix(
+- `_B` — L64032 — ${e}${s}${i}${bB(a)}; ${s}${i}${a}
+- `G8` — L64038 — calc(var(--sf-u) * ${n})
+- `Zn` — L64039 — style
+- `jx` — L64044 — url(
+- `S2, wB, MB, kB, Qe, SB, TB` — L64047 — 根容器 ───────────── */
+- `z` — L64633
+- `b3` — L64637 — string
+- `_e` — L64643 — span
+- `ro` — L64647 — button
+- `po` — L64658 — secondary
+- `T0` — L64674 — button
+- `V8` — L64689 — sf-seg${n.block ?
+- `W8` — L64715 — sf-tabs
+- `EB` — L64741 — input
+- `j8` — L64770 — button
+- `AB` — L64791 — sf-progress
+- `za` — L64807 — gold
+- `RB` — L64810 — click
+- `qx` — L64811 — [data-sf-snd]
+- `CB, q1` — L64839 — <svg viewBox=
+- `Sf` — L64842
+- `q8` — L64846
+- `Xx` — L64850
+- `Yx` — L64854 — :focus-visible
+- `X8` — L64861 — 关闭
+- `ms, lo, Ih, f4, Y8, K8` — L64928
+- `Z8` — L64941 — pointerdown
+- `w0` — L64952 — is-open
+- `Q8` — L64955 — .sf-root
+- `M0` — L64983 — mouse
+- `zi` — L65055
+- `T2` — L65058
+- `Fp` — L65067 — is-open
+- `Hf` — L65070 — sf-theme-tokens
+- `d4` — L65073 — #02040d
+- `h4` — L65132
+- `LB` — L65144
+- `Kx` — L65167 — menu
+
+## 33-data-2.js
+
+- `ln, IB, Yh, PB, Ps, v1, DB, Pl` — L65487 — 移速草鞋
+- `_3` — L65719 — 左上河道
+- `zB` — L65722 — 全队
+- `NB, FB` — L65735 — 拿到蓝buff：冷却缩减 +${Ps(yn.frost
+- `UB` — L65775
+- `OB` — L65778 — ${X1(n)} · ${t}
+- `X1` — L65782 — 朝一个方向
+- `Y1` — L65796 — 半径 ${n.radius} 米
+- `J8, tk` — L65799 — 物攻
+- `ek` — L65823
+- `BB` — L65831 — ${i}${a(o).replace(/\(.*\)$/,
+- `w3, u4, p4, E2` — L65839 — 位移
+- `m4` — L65881
+- `B0` — L65893 — #${c(s, o)}${c(i, r)}${c(a, l)}
+- `Hn, Ln, nk, fn, Vo` — L65902 — #ffffff
+- `HB` — L65914
+- `Kh` — L65915 — sf-ico
+- `dn` — L65919 — <defs>${Vo(
+- `Is` — L65935
+- `hn` — L65936
+- `Mr` — L65940 — ${r === 0 ?
+- `Wo` — L65949
+- `wl` — L65953 — M${a} ${o}A${e} ${e} 0 ${c} 1 ${r} ${l}
+- `je, We, xe` — L65959 — <radialGradient id=
+- `Rs` — L65963 — yeque
+- `b1` — L65968 — M${r} ${t}L${r + 2.2} ${t - 8.5}
+- `g4, on, A2, Up` — L65977 — <path d=
+- `Op` — L66007 — <g transform=
+- `x4` — L66010 — <g transform=
+- `y4` — L66013 — <g transform=
+- `$B, pn, Bp` — L66016 — panyue
+- `Hp` — L66098 — <path d=
+- `GB, an` — L66109 — chijin
+- `R2` — L66182 — <g transform=
+- `v4` — L66185 — ${l === 0 ?
+- `VB, Ge, WB` — L66194 — xingli
+- `b4` — L66282 — <path d=
+- `jB, Cn, $p` — L66292 — <path d=
+- `Gp` — L66383 — <path d=
+- `qB, XB` — L66393 — yeque
+- `Ia` — L66467
+- `YB` — L66470 — #3c86e6
+- `K1` — L66507
+- `Mi, sk, ik, ak, _4, KB, w4, ok, Pe, ZB, QB, JB` — L66510 — #0b1128
+- `C2` — L66532 — , n, 14, 6, 46, 54) + je(
+
+## 34-ui-2.js
+
+- `tH` — L66542 — #e9c873
+- `Po` — L66822
+- `Ye, Ne` — L66825 — fill=
+- `eH` — L66828 — ${t ?
+- `M3, Vp, Zx, M4, nH, sH` — L66845 — <path d=
+- `iH` — L66903 — <defs>${fn(
+- `Vt` — L66917 — gold
+- `aH` — L66921 — <path fill-rule=
+- `Ar` — L66928
+- `oH` — L66931 — ${Vp}<path d=
+- `k3` — L66937
+- `S3, T3, Ys, Eo` — L66940 — 上路
+- `Hs` — L66974 — <g transform=
+- `k4, S4, rH` — L66982 — #c9a227
+- `lH` — L67072
+- `cH` — L67075 — || t ===
+- `Ml, Tf, fH, Ad, dH, hH, hh, uH, Z1` — L67078 — 生存
+- `Zh` — L67103 — span
+- `pH` — L67132 — function
+- `T4` — L67161 — 难度 ${n} / ${t}
+- `rk` — L67167 — )}:${String(t % 60).padStart(2,
+- `kl` — L67171 — ${(t / 1e3).toFixed(1)}k
+- `ks` — L67175 — &amp;
+- `Qx` — L67178 — small
+- `mH` — L67185 — 技能类型标签：胶囊形，文字用标签色，底色为标签色 14
+- `Jx` — L67199 — sf-skill-tags
+- `lk` — L67202
+- `ty` — L67206 — 大招</span>
+- `ck` — L67219 — 大招
+- `gH` — L67225
+- `fk` — L67232 — 被动 · ${ks(n.passive.name)}<
+- `ey` — L67244 — ) return
+- `dk, hk, L2, xH` — L67255 — high
+- `yH` — L67269 — object
+- `vH` — L67287
+- `bH, E4, _H` — L67290 — 关闭阴影与后期特效，帧率最高，适合低端设备或省电。
+- `wH` — L67323 — 画质
+- `ny` — L67512 — 游戏暂停
+
+## 35-ui-3.js
+
+- `I2, MH, kH, SH, TH, A4` — L67535 — 被动
+- `R4` — L67765 — 物攻
+- `uk` — L67772
+- `EH` — L67775 — boots
+- `AH` — L67779 — 能力雷达图
+- `RH` — L67815 — 返回标题
+- `Xc` — L68197 — boolean
+- `E3` — L68201
+- `CH` — L68205 — 键盘示意 */
+- `Yn` — L68260 — span
+- `Pa` — L68264 — span
+- `LH` — L68270 — 空格
+- `IH` — L68321 — 取消</text><circle cx=
+- `PH, _1, w1, ls` — L68368 — #e2cf7a
+- `Rd` — L68379 — <circle cx=
+- `C4, L4` — L68391 — <rect x=
+- `ol` — L68395 — span
+- `rl` — L68402 — span
+- `DH` — L68406 — 战场示意图：蓝方在左下，红方在右上，三条路，河道从左上
+- `zH` — L68481 — 键盘鼠标
+- `NH, FH, UH, OH` — L68499 — 坠星划痕：自右上斜贯到左下，星头落在「星」字旁 */
+- `BH` — L68602 — 星陨战纪
+- `pk, P2` — L68686 — starfall.lastChoice.v1
+- `HH` — L68688 — object
+- `I4` — L68696
+- `$H` — L68699 — sf-root sf-menu-root
+- `GH, VH` — L68773 — 摧毁敌方水晶才算胜利——别只顾着击杀，记得带兵线推塔。
+- `WH` — L68801
+
+## 36-ui-4.js
+
+- `jH` — L68807 — 进度条不走缓动：加载的每一步都是同步的重活，两步之间主
+- `qH` — L68907 — span
+- `XH` — L68932 — 蓝色方
+- `P4, mk` — L69012
+- `YH` — L69014
+- `KH` — L69018
+- `ZH` — L69049 — 标题横幅 ── */
+- `D4` — L69185 — span
+- `ll` — L69189 — span
+- `QH` — L69199 — 胜利
+- `D2, Ef` — L69416
+- `vo` — L69418
+- `Vn` — L69424
+- `br` — L69430
+- `is` — L69437
+- `uo` — L69443
+- `gk` — L69446 — ${e < 10 ?
+- `JH` — L69452 — async
+- `Dl` — L69469 — is-me
+- `Na` — L69472 — ${s}
+- `Rl` — L69475 — span
+- `t$` — L69478 — 阵亡：去色层 + 面板 ── */
+- `e$` — L69598 — 你已阵亡
+- `n$, s$` — L69689 — cancel
+- `i$` — L69691 — sf-hud__toasts
+- `a$` — L69734 — 回城中
+- `o$` — L69757 — sf-hud__fps
+- `xk` — L69775 — starfall.hud.tips.v1
+- `r$` — L69776
+- `l$` — L69779 — 关闭操作提示
+- `z2` — L69836 — sf-hud__ripple${s ?
+- `c$` — L69844 — sf-hud-overlays
+- `A3, N2, z4, R3, xr, F2, U2, N4, O2, F4, f$` — L69847 — 空格
+- `d$` — L70002
+- `h$` — L70006 — <span class=
+- `u$` — L70014 — 被动</span></div><div class=
+
+## 37-ui-5.js
+
+- `p$` — L70022 — 普通攻击
+- `Cd` — L70198 — || t ===
+- `m$` — L70201 — self
+- `U4` — L70204 — self
+- `yk` — L70213
+- `C3` — L70214 — untargetable
+- `vk` — L70242
+- `bk` — L70243 — direction
+- `g$` — L70266 — position
+- `_k` — L70297
+- `x$` — L70298
+- `y$, v$, b$, _$, O4, B4, w$, M$, Wp, k$, S$, B2` — L70302 — 虚拟摇杆：空闲时半透明停在左下角提示位置；按下后跳到手
+- `T$` — L70354 — direction
+- `E$` — L70370
+- `A$` — L70373 — 技能尚未学会
+- `R$, C$, L$, I$, H2, H4, P$` — L70897 — 底带：中间实、两端渐隐；上沿一道亮的星轨线，下沿一道淡
+- `D$` — L71007 — 我方
+- `z$` — L71240 — 不设 z-index：与宿主里别的界面(加载/结算)按
+- `N$` — L71286 — sf-hud-base
+- `F$, jp, Ld, U$, qp, Xp, $2, O$` — L71289 — 目标脚下的椭圆光圈(只在目标进了屏幕时显示) */
+- `B$` — L71333 — sf-hud-garrow
+- `H$` — L71482
+- `G2, $$, wk, Wi, Id` — L71498
+- `Pd` — L71527
+- `qd` — L71531
+- `Xd` — L71548
+- `G$` — L71549
+- `$4` — L71558 — 小野怪
+- `V$` — L71562
+- `W$` — L71563 — tower
+- `Q1` — L71584
+- `G4` — L71590 — push_lane:${n.lane}:${n.tier}
+- `j$` — L71591
+- `q$` — L71595 — monster
+- `Rc` — L71609
+- `Mk` — L71614 — frost_golem
+- `L3` — L71624
+- `Yp` — L71628
+
+## 38-ui-6.js
+
+- `X$` — L71632 — 血量危险：先后撤，按 B 回城
+- `sy, V4, W4` — L72017 — push_lane
+- `Y$` — L72020 — group
+- `K$` — L72024
+- `I3, V2, j4, ai` — L72062 — 移动
+- `kk` — L72095 — text
+- `Z$` — L72105
+- `hr` — L72110
+- `Q$` — L72115
+- `q4` — L72119 — 小贴士
+- `Sk` — L72687 — 提示卡 ── */
+- `J$` — L72754 — 跳过引导
+- `tG` — L72838 — .sf-hud__joy-base
+- `eG` — L72845 — sf-hud-guide
+- `nG` — L72873 — 窄屏放不下「当前目标」四个字：只留图标 */
+- `sG` — L72895 — 当前目标
+- `iG, X4, aG` — L72925 — 横幅出现：让位 */
+- `oG` — L72945 — 已关闭新手引导，可在设置里重新打开
+- `rG, lG, cG` — L73076 — 竖屏：顶部指引位(引导卡 / 当前目标)横贯整屏，就在
+- `fG` — L73107 — 我方摧毁
+- `dG, hG, W2, Y4, uG, j2, pG` — L73178 — 金色星轨描边：与面板同一手法，左上/右下两角最亮 */
+
+## 39-ui-7.js
+
+- `mG` — L73220 — 小地图：按住拖动可观察战场
+- `Dm` — L73791 — boots
+- `$f` — L73796 — boots
+- `Gf` — L73822 — boots
+- `zm` — L73830 — boots
+- `Tk` — L73838
+- `Yd` — L73841 — boots
+- `gG` — L73894 — done
+- `q2` — L73897 — done
+- `xG, Ek` — L73901
+- `Ak` — L73903 — boots
+- `M1` — L73907 — boots
+- `Rk` — L73925 — 金币不足
+- `X2` — L73926
+- `yG` — L73929
+- `vG` — L73935 — 竖屏：装备换到第二行，其余列收窄 */
+- `bG` — L74004 — 关闭战况
+- `K4, _G, wG, MG, kG, Y2, SG, TG, EG, Z4, K2` — L74175 — 商店按钮 + 快捷购买气泡 / 自动出装提示条（小地图
+
+## 40-ui-8.js
+
+- `AG` — L74451 — 商店
+- `RG, CG, LG, Q4, J4` — L75102 — 上沿的金色星轨线：中间亮，向两侧渐隐 */
+- `IG` — L75225 — 被动：${s.passive.name}
+- `PG` — L75447 — 比分牌：贴着屏幕上沿的倒梯形，左蓝右红，中间垂下一块计
+- `DG` — L75534 — 我方已推掉的塔
+- `zG, NG` — L75623 — 对局结束：收起操作类部件，把画面留给终局演出与结算页
+- `Z2` — L75633
+- `FG` — L75637 — 卖了推荐装，本局已关闭。点一下重新打开。
+- `UG` — L75941
+- `E0` — L75942
+- `$a` — L75945
+- `Ck` — L75948 — range
+- `bi` — L75952 — direction
+- `ze, k1, d0, Gi, Oa` — L76000 — dash
+- `OG, BG` — L76202 — incoming
+- `Lk` — L76219 — dmg_reduction
+- `Ik` — L76224 — true
+- `Pk` — L76229 — hero
+- `Dk` — L76241 — yeque
+- `Nm` — L76251
+- `S1` — L76257 — hero
+- `t6` — L76264
+- `HG, $G, GG` — L76273
+
+## 41-ai.js
+
+- `VG` — L76276 — moveTo
+- `zk` — L76366
+- `WG` — L76460 — easy
+- `jG, se, J1` — L76463
+- `Nk` — L76522
+- `Kp` — L76525
+- `T1` — L76528
+- `e6` — L76532
+- `qG` — L76545
+- `XG` — L76548
+- `YG` — L76551
+- `n6` — L76561
+- `KG` — L76564
+- `iy` — L76569
+- `Fk` — L76577
+- `rf` — L76583
+- `gr` — L76629
+- `ye` — L76630
+- `ZG` — L76633
+- `QG` — L76636
+- `JG` — L76648
+- `Q2` — L76670
+- `tV` — L76671
+- `s6` — L76703
+- `eV` — L76704
+- `Bt, lf` — L76708
+- `P3` — L76710
+- `uh` — L76714 — stun
+- `D3` — L76722 — slow
+- `wn` — L76725
+- `x0` — L76734
+- `_s` — L76737
+- `$s` — L76751
+- `Bc` — L76756
+- `i6` — L76763
+- `Zp` — L76769
+- `ay` — L76787
+- `Dd` — L76803
+- `J2` — L76813
+- `Cl` — L76827
+- `Ii` — L76835
+- `nV` — L76838 — panyue
+- `sV` — L76955 — panyue
+- `Uk` — L76991 — panyue
+- `oy` — L77020 — panyue
+- `Kd` — L77071
+- `a6` — L77086 — panyue
+- `cl, Ao` — L77119
+- `iV` — L77121 — marksman
+- `aV` — L77129 — siege
+- `oV` — L77177 — poke
+- `rV` — L77205 — siege
+- `lV` — L77217
+- `E1` — L77223 — lane
+- `o6, Qp, ur` — L77309
+- `r6` — L77312
+- `z3` — L77316
+- `cV` — L77321 — frost_golem
+- `fV` — L77347
+- `Cc` — L77374
+- `l6` — L77377 — hero
+- `dV` — L77407 — lane
+- `hV` — L77454 — epic:none
+- `uV` — L77483
+- `pV, mV, gV, xV` — L77489 — , dash:
+- `yV` — L77499 — lane
+- `c6` — L77915
+- `vV` — L77916
+- `Ms, t5, bV, _V, wV, MV, kV, SV` — L77922
+- `e5` — L77930
+- `f6, d6` — L77934
+
+## 42-ai-2.js
+
+- `TV` — L77942 — init
+- `EV` — L78835
+- `AV` — L78836
+- `RV` — L78837
+- `Qh, Jh, Fm, ry, N3, h6` — L78840
+- `G0` — L78846
+- `F3, Ok, CV, Bk, LV, Vi, ha, ss, IV, PV, u6, Hk, p6, DV, n5, m6` — L78850
+- `zV` — L78866 — ${n.bound}|${JSON.stringify(n.walls)}
+- `NV` — L78902
+- `FV` — L79213
+- `$k` — L79222
+- `UV` — L79236
+- `OV, tm, Gk, Vk, U3` — L79243
+- `Oi` — L79248 — ${n}:${t}
+- `ly` — L79251 — *:${n}
+- `Wk` — L79254 — ${n}:${t}
+- `tu` — L79257
+- `BV` — L79260
+- `ql` — L79263
+- `HV` — L79266
+- `jk` — L79276 — self
+- `em` — L79281 — recall
+- `g6` — L79284
+- `$V` — L79285
+- `qk` — L79302
+- `Jp` — L79310
+- `x6` — L79311 — hero
+- `GV, VV, WV` — L79355
+- `jV` — L79358 — hero
+- `eu` — L79608
+- `zd` — L79617
+- `qV` — L79620 — airborne
+- `Zo` — L79646 — onTick
+- `O3` — L79679 — areaEnd
+- `Xk` — L79685
+- `XV` — L79688
+- `YV` — L79722
+- `Um` — L79723
+- `nu` — L79745
+- `su` — L79790 — idle
+- `Om` — L79814
+- `KV` — L79815 — hero
+- `ZV` — L79892 — physical
+- `QV` — L79927 — physical
+- `JV` — L79956 — physical
+- `tW` — L79982 — physical
+- `Ss` — L80018 — tower
+- `cy` — L80021
+- `Ui` — L80024
+- `y6, v6, eW, nW, sW, iW, s5, fy` — L80033
+- `Bm` — L80041
+- `Hl` — L80046
+- `aW` — L80050
+- `Ph` — L80054
+- `oW` — L80071
+- `Yk` — L80074
+- `b6, t1, rW` — L80102
+- `lW` — L80105
+- `cW` — L80117
+- `dy` — L80132
+- `Kk` — L80148
+- `hy` — L80161
+- `uy` — L80173
+- `Zk` — L80263
+- `iu` — L80272 — interrupted
+- `i5` — L80276
+- `py` — L80277 — leap
+- `_6` — L80319
+- `w6` — L80320 — tower
+- `hW` — L80323
+- `uW, pW, mW, M6, pe` — L80369
+- `gW` — L80397
+
+## 43-data-3.js
+
+- `Hm` — L80196 — interrupted
+- `fW` — L80223 — interrupted
+- `dW` — L80245 — airborne
+- `_o` — L80421 — slow
+- `k6, xW, yW` — L80512
+- `D0` — L80515 — gold
+- `vW` — L80523
+- `bW` — L80534 — levelUp
+- `nm` — L80543
+- `Qk` — L80549
+- `_W` — L80550 — hero
+- `wW` — L80561 — hero
+- `MW` — L80657 — hero
+- `kW, SW, TW, EW` — L80681
+- `AW` — L80685
+- `RW` — L80688 — monsterSpawn
+- `CW` — L80702
+- `S6` — L80712
+- `LW` — L80713 — cast_s1
+- `Jk` — L80751 — cast_s1
+- `IW` — L80758 — tower
+- `PW` — L80778 — drake_breath
+- `DW` — L80805
+- `zW` — L80809 — abyss_drake
+- `NW` — L80876 — monster_slain
+- `tS` — L80941 — physical
+- `FW` — L80975
+- `my` — L80988
+- `sm` — L81006 — projectileEnd
+- `eS` — L81012 — projectileHit
+- `UW` — L81024 — hero
+- `T6, h0, fl` — L81027
+- `OW` — L81030
+- `BW` — L81050
+- `HW` — L81092
+- `$W, GW, E6, VW, im` — L81106
+- `nS` — L81111
+- `WW` — L81125 — minion
+- `jW` — L81158 — core
+- `qW` — L81170 — towerDestroyed
+- `XW` — L81185 — core_destroyed
+- `YW` — L81196 — fountain
+- `KW, ZW, QW, JW, tj, ej` — L81224
+- `Bo` — L81230 — skill
+- `gy` — L81319 — heal
+- `nj` — L81329 — interrupted
+- `xy` — L81375
+- `yy` — L81378
+- `Ga` — L81384 — attack
+- `sj` — L81389
+- `ij` — L81402 — attack
+- `$m` — L81424
+- `aj` — L81444
+- `oj` — L81448 — true
+- `_i` — L81451
+- `rj` — L81452 — hit_crit
+- `sS` — L81499 — hero
+- `Gm` — L81525
+- `lj, Vm, cj` — L81539 — stun
+- `iS` — L81542 — tower
+- `Dh` — L81553
+- `Ba` — L81561
+- `am` — L81566
+- `Vf` — L81572 — stun
+- `A6` — L81626 — forced
+- `Wn` — L81634 — slow
+- `au` — L81690 — recall
+- `fj` — L81693 — hero
+- `Va` — L81703 — hero
+- `dj` — L81715
+- `Nd, Fd` — L81722
+- `hj` — L81724 — hero
+- `uj` — L81760 — shield
+- `R6, pj, aS, oS, C6, mj, gj, xj, yj, vj` — L81778 — recall
+- `Do` — L81788 — reject
+- `vy` — L81791 — recall
+- `rS` — L81794
+- `lS` — L81808
+- `cS` — L81811 — boots
+- `bj` — L81840
+- `_j` — L81851
+- `L6, wj` — L81855
+- `fS` — L81857
+- `B3` — L81860 — hero
+- `dS` — L81872 — hero
+- `Mj` — L81902 — no_target
+- `kj` — L81928
+- `I6` — L81942
+- `Sj` — L81943
+- `H3` — L81946
+- `a5` — L81953 — tower
+- `Zd` — L81971
+- `Tj` — L81977
+- `P6` — L81981
+- `Yc` — L81987
+- `Ej` — L81990 — facing
+- `hS` — L82045 — disabled
+- `D6` — L82115
+- `Aj` — L82118 — sell
+- `Rj` — L82159 — idle
+- `Cj` — L82191 — star_blessing
+- `Lj` — L82244
+- `Ij, uS, Pj, Dj, z6, N6, A1, F6` — L82248
+- `zj` — L82256
+- `Nj` — L82273 — melee
+- `Fj` — L82292 — waveSpawn
+- `pS` — L82306 — hero
+- `Uj` — L82357
+- `om` — L82378
+- `Oj` — L82407
+- `mS` — L82432
+- `Bj` — L82433 — hero
+- `Hj` — L82451
+- `ia` — L82480 — hero
+- `U6` — L82494
+- `Pr` — L82495
+- `$j` — L82510
+- `zh` — L82530 — skill
+- `gS` — L82533 — proc
+- `xS` — L82536 — heal
+- `oa` — L82540
+- `Gj` — L82550 — stun
+- `yS` — L82553 — airborne
+- `tr` — L82556 — slow
+- `Vj` — L82559 — haste
+- `Wj` — L82562 — attack_speed
+- `jj` — L82571 — shield
+- `qj` — L82574
+- `Xj` — L82579
+- `Yj` — L82582
+- `Kj` — L82588
+- `Wm` — L82591
+- `ds` — L82597
+- `vS` — L82600
+- `Zj` — L82603
+- `Qj` — L82607
+- `Jj` — L82610
+- `tq` — L82613
+- `O6` — L82617
+- `eq` — L82620
+- `Cs` — L82625
+- `nq` — L82628 — magic
+- `wo` — L82631
+- `by` — L82634
+- `Lc, sq, iq, aq, oq` — L82638
+
+## 44-data-4.js
+
+- `e1, B6` — L82755 — chijin
+- `Ic, H6, $6, bS, rq` — L82873 — xingli
+- `lq` — L82938
+- `G6` — L82943 — damage
+- `u0, V6, cq` — L82988 — fengling
+- `n1, W6, fq, dq` — L83102 — yeque
+- `hq, uq, pq, mq, Xl, jm` — L83209
+- `Pc, Dc, La, gq, xq` — L83255
+- `yq` — L83260
+- `vq, bq, _q` — L83306
+- `wq` — L83309 — announce
+- `Mq` — L83532
+- `kq` — L83535 — 必须为正数
+- `Sq` — L83567
+- `j6, Tq, Eq, Aq` — L83663 — starfall-app-style
+- `_y` — L83716 — style
+- `s1` — L83721 — boot
+- `Rq` — L83728 — canvas
+- `R1` — L83736 — app-layer${t.page ?
+- `o5` — L83827 — ${n.name}: ${n.message}
+- `Cq, Lq, Iq, Pq, _S, Dq, zq` — L83837 — attack
+- `Nq` — L83854
+- `dl, q6, r5, Fq, to` — L83862
+- `zc` — L83867
+- `X6` — L83876
+- `Uq` — L83877 — 集结双方英雄…
+- `Oq, C1, l5` — L84214 — && n !==
+- `Bq` — L84217 — ) || t.includes(
+- `Hq` — L84224 — hero
+- `hl` — L84257
+- `ul` — L84297
+- `y0` — L84298
+- `$q` — L84358
+- `Gq, Vq, Wq, jq` — L84378
+- `qq` — L84382
+- `Xq` — L84385 — 重新开始
