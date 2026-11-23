@@ -57,7 +57,7 @@ function gB(n, t) {
         (o = qc(Vx(b))),
         (r = new of(o, 0.37)),
         l && (l.removeFrom(s.scene), l.dispose()),
-        (l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6 }, `preview:${b}`)),
+        (l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map }, `preview:${b}`)),
         l.addTo(s.scene));
       const w = new Ut(Se[b].palette.glow);
       (s.rim.color.copy(w).lerp(new Ut(1, 1, 1), 0.35),
@@ -218,7 +218,7 @@ function N8(n) {
       const { renderer: e, stage: s } = dh,
         i = qc(Vx(n)),
         a = new of(i, 0.37),
-        o = new ux(i.geometry, i.rig.count, 1, { outline: 1.7 }, `portrait:${n}`);
+        o = new ux(i.geometry, i.rig.count, 1, { outline: 1.7, map: i.map }, `portrait:${n}`);
       (o.setShadows(!1), o.addTo(s.scene));
       try {
         const r = new Ut(Se[n].palette.glow);

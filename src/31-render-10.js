@@ -1381,7 +1381,7 @@ function lB(n) {
       let Q = a.get(D.key);
       if (!Q) {
         const $ = D.key.startsWith("hero:") || D.key.startsWith("minion:") || D.key.startsWith("monster:");
-        ((Q = new ux(D.geometry, D.rig.count, oB(D.key), { outline: aB(D), xray: $ }, D.key)),
+        ((Q = new ux(D.geometry, D.rig.count, oB(D.key), { outline: aB(D), xray: $, map: D.map }, D.key)),
           Q.setShadows(p),
           Q.setOutlineVisible(x),
           B(Q, D),

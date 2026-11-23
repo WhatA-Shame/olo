@@ -691,9 +691,11 @@ varying vec3 vViewPosition;
 varying vec4 vLt;
 varying vec4 vObj;
 varying vec3 vObjN;
+varying vec2 vUv;
 flat varying vec4 vMat;
 void main() {
   #include <color_vertex>
+  vUv = uv;
   vFx = aFx;
   vMat = aMat;
   vInstA = aInstA;
@@ -803,6 +805,8 @@ uniform float uKick;
 uniform vec2 uKickDir;
 uniform vec3 uKickColor;
 uniform float uTime;
+uniform sampler2D uMap;
+uniform float uMapOn;
 varying vec4 vFx;
 varying vec4 vInstA;
 varying vec3 vTeam;
@@ -813,6 +817,7 @@ varying vec3 vViewPosition;
 varying vec4 vLt;
 varying vec4 vObj;
 varying vec3 vObjN;
+varying vec2 vUv;
 flat varying vec4 vMat;
 
 // 各材质类别的参数：x = 高光强度，y = 高光锐度，z = 明暗交界的柔和倍率，w = 假环境反射强度
@@ -841,6 +846,8 @@ void main() {
 
   // 本体乘色只作用在非队伍色区域；队伍色只染蒙版区域；整体染色(石化/冰冻/阵亡变灰)按 vTint.a 的强度向灰度化后的染色过渡
   vec3 base = mix(vColor.rgb * vBody, vTeam, vFx.z);
+  // 外部网格(glTF)的 basecolor：uMapOn=0 时是纯白，乘上去不影响原生英雄
+  base *= mix(vec3(1.0), texture2D(uMap, vUv).rgb, uMapOn);
   float lum = dot(base, vec3(0.3, 0.55, 0.15));
   base = mix(base, vTint.rgb * mix(lum, 1.0, 0.25) * 1.6, vTint.a);
 
@@ -1123,6 +1130,8 @@ function TL(n, t, e) {
       uKick: { value: t.kicker ?? SL(e) },
       uSpec: { value: new Ee(t.specular ?? 0.9, t.gloss ?? 36) },
       uGlowBoost: { value: t.glowBoost ?? 3 },
+      uMap: { value: t.map ?? null },
+      uMapOn: { value: t.map ? 1 : 0 },
     }),
     defines: s3 ? { UNIT_PATTERNS: "" } : {},
     vertexShader: mL,
@@ -1276,6 +1285,8 @@ class ux {
     e.setIndex(s.index);
     for (const a of ["position", "normal", "color", "aFx", "aMat", "aSkin", "aOutline"])
       e.setAttribute(a, s.attributes[a]);
+    // 外部网格才有 uv；原生英雄的几何没有这个属性，材质里 uMapOn=0 也不会采样
+    s.attributes.uv && e.setAttribute("uv", s.attributes.uv);
     ((this.instA = new Qs(new Float32Array(t * 4), 4)),
       (this.instTeam = new Qs(new Float32Array(t * 3), 3)),
       (this.instTint = new Qs(new Float32Array(t * 4), 4)),

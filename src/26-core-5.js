@@ -10,12 +10,17 @@
 import { Ee } from './04-audio-2.js';
 import { Ke } from './06-three-2.js';
 import { Ae, Bn, On, hm, um } from './07-three-3.js';
+import { heroMesh, heroMap } from './45-mushroom-mesh.js';
 import { nx } from './08-three-4.js';
 import { Am, Em, En, Fi, Gh, K, Lh, Mf, P0, Qn, S0, Tm, Un, Vh, Wh, Xi, Yo, bt, cw, ge, he, ho, jh, jl, lw, nf, pt, sf, ta, vp, wU, zs } from './25-render-9.js';
 
 class Ls {
   pos = [];
   nor = [];
+  uv = [];
+  uvX = 0;
+  uvY = 0;
+  mapOn = 0;
   col = [];
   fx = [];
   skin = [];
@@ -232,6 +237,7 @@ class Ls {
         this.ao2 >= 0 ? bt(this.ao, this.ao2, f) : this.ao,
       ),
       this.line.push(this.lineW),
+      this.uv.push(this.uvX, this.uvY),
       this.mat.push(this.matX, this.matY, this.matZ, this.matW),
       this.soft)
     ) {
@@ -556,11 +562,43 @@ class Ls {
       ((this.col[a * 3] *= c), (this.col[a * 3 + 1] *= c), (this.col[a * 3 + 2] *= c));
     }
   }
+  // 外部网格（glTF/GLB）直灌：位置/法线/UV 原样进缓冲，顶点色留白让贴图决定颜色
+  rawMesh(m, o = {}) {
+    const base = this.pos.length / 3,
+      n = m.pos.length / 3,
+      start = this.idx.length,
+      keep = [this.c, this.c2, this.by, this.gloss, this.glow, this.ao, this.ao2, this.lineW, this.matX, this.matY, this.matZ, this.matW];
+    ((this.c = o.color ?? [1, 1, 1]),
+      (this.c2 = null),
+      (this.by = null),
+      (this.gloss = o.gloss ?? 0.32),
+      (this.glow = 0),
+      (this.ao = o.ao ?? 1),
+      (this.ao2 = -1),
+      (this.lineW = o.line ?? 1),
+      (this.matX = (o.mat ?? K.cloth) / 8),
+      (this.matY = 0),
+      (this.matZ = 0),
+      (this.matW = 0));
+    for (let i = 0; i < n; i++) {
+      ((this.uvX = m.uv[i * 2]), (this.uvY = m.uv[i * 2 + 1]));
+      this.writeVertex(
+        m.pos[i * 3], m.pos[i * 3 + 1], m.pos[i * 3 + 2],
+        m.nor[i * 3], m.nor[i * 3 + 1], m.nor[i * 3 + 2], 1,
+      );
+    }
+    for (let i = 0; i < m.idx.length; i++) this.idx.push(m.idx[i] + base);
+    (this.prims.push({ start, count: this.idx.length - start, size: o.size ?? 2.2, outlined: this.lineW > 0 }),
+      ([this.c, this.c2, this.by, this.gloss, this.glow, this.ao, this.ao2, this.lineW, this.matX, this.matY, this.matZ, this.matW] = keep));
+    return this;
+  }
   build() {
     const t = new Bn();
     (t.setAttribute("position", new Ae(this.pos, 3)),
       t.setAttribute("normal", new Ae(this.nor, 3)),
-      t.setAttribute("color", new Ae(this.col, 3)));
+      t.setAttribute("color", new Ae(this.col, 3)),
+      this.uv.length === this.pos.length / 3 * 2 &&
+        t.setAttribute("uv", new Ae(this.uv, 2)));
     const e = new Uint8Array(this.fx.length);
     for (let h = 0; h < e.length; h++) e[h] = Math.round(Xi(this.fx[h]) * 255);
     (t.setAttribute("aFx", new On(e, 4, !0)), t.setAttribute("aSkin", new Ae(this.skin, 3)));
@@ -2062,97 +2100,17 @@ function bBg() {
   (n.rig.add("gripR", i.chest, 0, d.chestY, 0),
     n.rig.add("aim", i.chest, 0, d.chestY, 0),
     n.rig.add("gripL", i.chest, 0, d.chestY, 0));
-  const s = TU(n);
-  // 通用站姿带 -10° 扭转 + 前倾，是为持武器人形准备的；蘑菇是圆胖身子，用中性站姿才站得直
-  const MgN = ge(n, s.stance, {
-    hips: [0, 0, 0],
-    spine: [0, 0, 0],
-    chest: [0, 0, 0],
-    neck: [0, 0, 0],
-    head: [0, 0, 0],
-  });
-  t.crease = 44;
-  // ── 一体菇体：平底 → 肥肚(r0.97) → 收腰 → 菌褶外翻 → 紫红伞盖(r1.21)
-  //    轮廓照抄 ququfeiche 的杯杯菇，就是"能当轮子滚"的那个胖桶
-  (t.bind(Bl(n)).paint(MgC.stalk, {
-    c2: MgC.cap,
-    ao: 0.88,
-    ao2: 1,
-    mat: K.skin,
-    by: (R, I) => Xi((I - 1.3) / 0.12),
-  }),
-    t.lathe(
-      [
-        [0.22, 0.0],
-        [0.22, 0.47],
-        [0.125, 0.792],
-        [0.458, 0.969],
-        [0.834, 0.917],
-        [1.062, 0.76],
-        [1.22, 0.636],
-        [1.325, 0.698],
-        [1.377, 0.933],
-        [1.346, 1.094],
-        [1.398, 1.209],
-        [1.533, 1.173],
-        [1.731, 0.967],
-        [1.909, 0.556],
-        [2.004, 0.0],
-      ],
-      { seg: 40, cap0: !1, cap1: !1 },
-    ));
-  // 盖面奶白圆斑（贴着伞盖表面）
-  t.paint(MgC.spot, { ao: 0.95, mat: K.fur, line: 0 });
-  for (const [R, I, P, F] of [
-    [0.42, 1.45, 1.12, 0.16],
-    [-0.35, 1.6, 1.1, 0.14],
-    [0.15, 1.75, 0.94, 0.12],
-    [-0.75, 1.5, 0.92, 0.12],
-    [0.3, 1.85, 0.69, 0.1],
-    [0.55, 1.68, 0.89, 0.1],
-  ])
-    t.ball(R, I, P, F, F * 0.34, F, 0, 180);
-  // 脸（长在桶身正面）
-  (t.bone(i.neck).paint(16777215, { ao: 0.96, mat: K.skin, line: 0 }),
-    t.ball(0.26, 0.95, 0.85, 0.115, 0.135, 0.075, 0, 180),
-    t.ball(-0.26, 0.95, 0.85, 0.115, 0.135, 0.075, 0, 180),
-    t.paint(MgC.eye, { ao: 0.98, mat: K.skin, line: 0 }),
-    t.ball(0.255, 0.945, 0.905, 0.055, 0.068, 0.034, 0, 180),
-    t.ball(-0.255, 0.945, 0.905, 0.055, 0.068, 0.034, 0, 180),
-    t.paint(MgC.blush, { ao: 0.95, mat: K.skin, line: 0 }),
-    t.ball(0.42, 0.86, 0.79, 0.08, 0.048, 0.03, 0, 180),
-    t.ball(-0.42, 0.86, 0.79, 0.08, 0.048, 0.03, 0, 180),
-    t.paint(MgC.mouth, { ao: 0.97, mat: K.skin, line: 0 }),
-    t.ball(0, 0.82, 0.9, 0.08, 0.038, 0.027, 0, 180));
-  // 短小胖胳膊：横着伸出来一小截，只比桶身多出一点点
-  t.sym((R) => {
-    const _ = [
-        [0.92, 0.58, 0.2],
-        [1.04, 0.58, 0.2],
-        [1.15, 0.58, 0.2],
-        [1.2, 0.58, 0.2],
-      ],
-      k = [R > 0 ? i.armL : i.armR, R > 0 ? i.foreL : i.foreR, R > 0 ? i.handL : i.handR];
-    (t.bind(Zi(k, _, i.chest)).paint(MgC.stalk, { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin }),
-      t.ball(0.97, 0.58, 0.2, 0.13, 0.13, 0.13, 0, 180),
-      t.ball(1.09, 0.58, 0.2, 0.125, 0.125, 0.125, 0, 180),
-      t.bone(R > 0 ? i.handL : i.handR).paint(MgC.stalk, { c2: MgC.stalk, ao: 0.92, mat: K.skin }),
-      t.ball(1.2, 0.58, 0.2, 0.14, 0.135, 0.14, 0, 180));
-  });
-  // 短小胖腿：藏在桶底下面，只露一小截和胖脚
-  t.sym((R) => {
-    const _ = [
-        [0.72, 0.34, 0.02],
-        [0.72, 0.22, 0.16],
-        [0.72, 0.1, 0.3],
-        [0.72, 0.06, 0.42],
-      ],
-      k = [R > 0 ? i.thighL : i.thighR, R > 0 ? i.shinL : i.shinR, R > 0 ? i.footL : i.footR];
-    (t.bind(Zi(k, _, i.hips)).paint(MgC.stalk, { c2: MgC.stalk, ao: 0.84, ao2: 1, mat: K.skin }),
-      t.limb(_[0], _[2], 0.13, 0.11, { seg: 8, bulge: 0.08 }),
-      t.bone(R > 0 ? i.footL : i.footR).paint(MgC.stalk, { c2: MgC.stalk, ao: 0.9, mat: K.skin }),
-      t.ball(0.72, 0.085, 0.42, 0.195, 0.115, 0.26, 0, 180));
-  });
+  const s = TU(n),
+    MgN = ge(n, s.stance, {
+      hips: [0, 0, 0],
+      spine: [0, 0, 0],
+      chest: [0, 0, 0],
+      neck: [0, 0, 0],
+      head: [0, 0, 0],
+    });
+  // 外部网格（glTF）：整只绑到根关节，滚动/摇摆都是整体刚性变换
+  (t.bone(i.root),
+    t.rawMesh(heroMesh(), { mat: K.skin, gloss: 0.34, line: 1, ao: 1 }));
   const a = s.tmp,
     h = (R, I, P) => {
       const F = s.common;
@@ -2203,12 +2161,15 @@ function bBg() {
           break;
         }
         case "roll": {
-          // 侧倒成菌轮：整体绕左右轴转 90° 躺平，再按时间继续翻滚
+          // 侧倒平滚：R = Rx(滚角) · Rz(90°)
+          //   Rz 先把身体放倒、长轴转到左右方向，Rx 再绕这条长轴自转 —— 轮子
+          //   支点补偿把旋转中心从脚底挪到肚子中心，否则会绕着脚插进地里
           (nf(a, s.spin),
             Un(n, R, a, () => {
-              const L = 90 + ((I.time * 620) % 360),
-                B = Math.min(1, I.time * 3.2);
-              (R.rot(i.root, L * B, 0, 0), R.add(i.root, 0, -0.18 * B, 0.12 * B));
+              const B = Math.min(1, I.time * 3.2),
+                L = (I.time * 620) % 360;
+              (R.rot(i.root, L * B, 0, 90 * B),
+                R.move(i.root, 0.98 * B, 0.95 * B, 0));
             }),
             (P.glow = 2.2));
           break;
@@ -2230,11 +2191,12 @@ function bBg() {
     {
       key: "hero:mushroom",
       geometry: t.build(),
+      map: heroMap(),
       rig: n.rig,
-      height: 2.15,
-      radius: 0.82,
-      scale: 1.06,
-      stride: MgW.stride * 1.06,
+      height: 2.0,
+      radius: 0.95,
+      scale: 1.0,
+      stride: MgW.stride,
       triangles: t.triangleCount,
       attach: {
         head: { joint: i.head, x: 0, y: 0.3, z: 0 },

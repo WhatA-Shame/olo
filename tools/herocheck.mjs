@@ -270,7 +270,8 @@ const main = async () => {
       (typeof cd === 'number' && cd > 0) || channeling,
       channeling ? '引导中（cd 由引导结束设置）' : cd === 0 ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）' : `cd ${cd}`,
     );
-    if (slot === 's1') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
+    // 滚轮/持续引导是杯杯菇特有的，别的英雄不做这两条断言
+    if (slot === 's1' && heroId === 'mushroom') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
 
     if (slot === 's1') {
       // 滚轮要能被移动指令改向：发一个垂直方向的移动指令，看冲刺方向是否跟着转
@@ -288,7 +289,7 @@ const main = async () => {
         await shot('roll', { x: 0, y: 0, width: 1088, height: 615 });
       }
     }
-    if (slot === 's2') ok('E 进入持续喷吐', st.s2 === true, `channel=${st.s2} anim=${st.anim}`);
+    if (slot === 's2' && heroId === 'mushroom') ok('E 进入持续喷吐', st.s2 === true, `channel=${st.s2} anim=${st.anim}`);
     await shot(slot);
     // 收尾：结束冲刺/引导，避免影响下一个技能
     await ev(`(()=>{const u=${U}; u.rt.dash && (u.rt.dash.left=0); u.rt.mushS2=null; return 1;})()`);

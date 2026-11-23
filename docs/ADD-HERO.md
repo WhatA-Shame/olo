@@ -19,6 +19,28 @@ grep -rn "\b<heroId>\b" src/            # 例：grep -rn "\bchijin\b" src/
 - `src/22-render-6.js` / `src/23-render-7.js` 里的 `mushrooms` 是**场景装饰蘑菇**，跟英雄无关；
 - `grep -c` 出来的 `mushroom` 也可能命中注释或文案，以带引号的形式再确认一次。
 
+## 1.5 有现成模型时：GLB 直灌
+
+手写 `lathe/ball/limb` 只适合程序化角色。有 glTF/GLB 时走这条路：
+
+```bash
+node tools/glb2hero.mjs "模型.glb" src/45-<name>-mesh.js --scale 2.0 --rotY 270
+```
+
+然后在模型构建器里把几何段换成：
+
+```js
+(t.bone(i.root), t.rawMesh(heroMesh(), { mat: K.skin, gloss: 0.34, line: 1 }));
+```
+
+并在返回对象里加 `map: heroMap()`，`31-render-10.js` / `32-ui.js` 建 `ux` 时传 `map: D.map`。
+
+**三个必查项**：
+
+- `--rotY`：glTF 朝向不统一。用 `tools/probe.mjs` 按 UV 反查眼睛顶点在三维空间的位置，能直接算出该转多少度，比逐个试快。
+- `flipY = false`：glTF 的 UV 原点在左上，three 默认会翻转，症状是贴图碎成色块。
+- 无骨骼模型整只绑 `i.root`：滚动/摇摆都是整体刚性变换，别再去绑 hips。
+
 ## 2. 接入点清单（以杯杯菇为例，共 11 个文件）
 
 | 文件 | 位置 | 要做什么 |

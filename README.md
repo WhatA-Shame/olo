@@ -106,7 +106,32 @@ node split.mjs ../_recover/game.pretty.js ../src 70000
 > `node tools/herocheck.mjs <heroId> --shots` 一条命令验证：自动起服务器和无头浏览器、断言选中的英雄、
 > 放三个技能、检查特效事件与运行时异常，跑完自动关。
 
-紫伞盖蘑菇，坦克 / 上路。模型、技能、音效、AI 全部按原工程的约定接入，未改动任何既有英雄。
+紫伞盖蘑菇，坦克 / 上路。**模型是外部 glTF（GLB）直接导入的**，不是手写几何；技能、音效、AI 按原工程约定接入。
+
+### 外部模型（GLB）导入管线
+
+原工程的渲染管线是「批量 InstancedMesh + 顶点色卡通着色」，几何由 `Ls` 构建器用 `lathe/ball/limb` 现场车削出来，
+**没有 UV，也没有贴图采样**。所以 ququfeiche 那套 three.js `Mesh + MeshPhysicalMaterial`（贴图 + sheen + bump）
+不能直接搬过来，需要补通道。已经补好的部分：
+
+| 层 | 改动 |
+| --- | --- |
+| `tools/glb2hero.mjs` | 解析 GLB（POSITION/NORMAL/TEXCOORD_0/索引 + basecolor JPEG），缩放/转向后内联成 `src/45-*.js`（base64，约 878KB） |
+| `Ls`（`src/26-core-5.js`） | 新增 `uv` 缓冲与 `rawMesh()`：外部网格整只灌进来，顶点色留白交给贴图 |
+| shader（`src/15-render-4.js`） | 顶点加 `vUv`，片元加 `uMap/uMapOn`，`base *= mix(1, texture, uMapOn)`；`uMapOn=0` 时对原生英雄零影响 |
+| 材质 | `TL()` 接受 `map`，每个英雄本来就是一个独立 `ShaderMaterial`，不需要拆 drawcall |
+
+用法：
+
+```bash
+node tools/glb2hero.mjs "模型.glb" src/45-<name>-mesh.js --scale 2.0 --rotY 270
+```
+
+`--rotY` 是模型朝向；glTF 的 UV 原点在左上，贴图必须 `flipY = false`（否则会上下翻转，表现为色块错乱）。
+模型没有骨骼时，整只网格绑到根关节，翻滚/摇摆都是整体刚性变换——这反而让「侧滚」变得简单。
+
+> 还没做的：法线贴图（`normalMap`）与 PBR 粗糙度通道。当前只接了 basecolor，光照仍走引擎原有的卡通分段着色。
+
 
 | 技能 | 效果 | 实现 |
 | --- | --- | --- |
@@ -120,7 +145,7 @@ node split.mjs ../_recover/game.pretty.js ../src 70000
 | 位置 | 内容 |
 | --- | --- |
 | `src/02-data.js` | `Se.mushroom`（属性/技能/配色/文案）、`kr` 花名册、音效表 `FS` 里的 `atk_*` / `cast_*` / `fx_*` |
-| `src/26-core-5.js` | 程序化模型构建器 `bBg()`（骨架、蒙皮、配色、步态、各技能姿势） |
+| `src/26-core-5.js` | 模型构建器 `bBg()`（骨架、蒙皮、步态、各技能姿势）＋ `rawMesh()` 外部网格入口 |
 | `src/31-render-10.js` | `hero:mushroom` 模型注册、镜头高度 `XO`、技能动作映射 `cB`、选将台站位 `fB`、展示框 `v3` |
 | `src/17-three-8.js` | 配色表 `ws.mushroom`（glow/hot/deep/accent/dark） |
 | `src/20-core-3.js` | 特效函数（冲刺、拖尾、撞击、孢子锥、蓄力、落地）并合入 `$D` |
