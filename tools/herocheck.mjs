@@ -310,7 +310,8 @@ const main = async () => {
 
   const errs = await ev(`JSON.stringify({ game: (window.__moba.errors||[]).slice(-4), win: (window.__hcErr||[]).slice(0,3) })`);
   const e = JSON.parse(errs && !errs.__err ? errs : '{}');
-  const allErr = [...(e.game || []), ...(e.win || [])];
+  const last = await ev(`window.__lastErr ? window.__lastErr.msg + ' @ ' + window.__lastErr.where + '\\n' + (window.__lastErr.stack||'').split('\\n').slice(0,4).join('\\n') : ''`);
+  const allErr = [...(e.game || []), ...(e.win || []), ...(typeof last === 'string' && last ? [last] : [])];
   ok('无运行时异常', allErr.length === 0, allErr.slice(0, 2).join(' | '));
   ok('对局未中断', (await ev(`!window.__moba.state.over`)) === true);
 

@@ -64630,6 +64630,23 @@ function Xq() {
   F();
 }
 Xq();
+
+// src/entry.js
+if (typeof window !== "undefined") {
+  window.__lastErr = null;
+  window.addEventListener("error", (e) => {
+    window.__lastErr = {
+      msg: e.message,
+      stack: e.error && e.error.stack || "",
+      where: `${e.filename || ""}:${e.lineno || 0}:${e.colno || 0}`,
+      at: Date.now()
+    };
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    const r = e.reason;
+    window.__lastErr = { msg: String(r && r.message || r), stack: r && r.stack || "", where: "promise", at: Date.now() };
+  });
+}
 </script>
   <link rel="canonical" href="https://sanwan.ai/" /></head>
   <body>

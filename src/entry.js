@@ -45,3 +45,20 @@ import './41-ai.js';
 import './42-ai-2.js';
 import './43-data-3.js';
 import './44-data-4.js';
+
+// 未捕获异常留一份完整栈，出问题时可在控制台执行 __lastErr 直接取到
+if (typeof window !== 'undefined') {
+  window.__lastErr = null;
+  window.addEventListener('error', (e) => {
+    window.__lastErr = {
+      msg: e.message,
+      stack: (e.error && e.error.stack) || '',
+      where: `${e.filename || ''}:${e.lineno || 0}:${e.colno || 0}`,
+      at: Date.now(),
+    };
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    const r = e.reason;
+    window.__lastErr = { msg: String((r && r.message) || r), stack: (r && r.stack) || '', where: 'promise', at: Date.now() };
+  });
+}
