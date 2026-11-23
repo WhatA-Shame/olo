@@ -10,7 +10,7 @@
 import { Ee } from './04-audio-2.js';
 import { Ke } from './06-three-2.js';
 import { Ae, Bn, On, hm, um } from './07-three-3.js';
-import { heroMesh, heroMap } from './45-mushroom-mesh.js';
+import { heroMesh, heroMap, heroRig, heroAnim } from './45-mushroom-mesh.js';
 import { nx } from './08-three-4.js';
 import { Am, Em, En, Fi, Gh, K, Lh, Mf, P0, Qn, S0, Tm, Un, Vh, Wh, Xi, Yo, bt, cw, ge, he, ho, jh, jl, lw, nf, pt, sf, ta, vp, wU, zs } from './25-render-9.js';
 
@@ -20,6 +20,7 @@ class Ls {
   uv = [];
   uvX = 0;
   uvY = 0;
+  skinTriple = null;
   mapOn = 0;
   col = [];
   fx = [];
@@ -243,7 +244,8 @@ class Ls {
     ) {
       const h = this.soft(t, e, s, f);
       this.skin.push(h[0], h[1], h[2]);
-    } else this.skin.push(this.boneId, this.boneId, 1);
+    } else if (this.skinTriple) this.skin.push(this.skinTriple[0], this.skinTriple[1], this.skinTriple[2]);
+    else this.skin.push(this.boneId, this.boneId, 1);
   }
   skinRings(t, e, s, i, a, o, r, l, c = 0, f = 1) {
     const d = [],
@@ -582,11 +584,14 @@ class Ls {
       (this.matW = 0));
     for (let i = 0; i < n; i++) {
       ((this.uvX = m.uv[i * 2]), (this.uvY = m.uv[i * 2 + 1]));
+      // 外部网格自带 2 骨骼权重；没有的话退回单骨骼
+      this.skinTriple = m.skin ? [m.skin[i * 3], m.skin[i * 3 + 1], m.skin[i * 3 + 2]] : null;
       this.writeVertex(
         m.pos[i * 3], m.pos[i * 3 + 1], m.pos[i * 3 + 2],
         m.nor[i * 3], m.nor[i * 3 + 1], m.nor[i * 3 + 2], 1,
       );
     }
+    this.skinTriple = null;
     for (let i = 0; i < m.idx.length; i++) this.idx.push(m.idx[i] + base);
     (this.prims.push({ start, count: this.idx.length - start, size: o.size ?? 2.2, outlined: this.lineW > 0 }),
       ([this.c, this.c2, this.by, this.gloss, this.glow, this.ao, this.ao2, this.lineW, this.matX, this.matY, this.matZ, this.matW] = keep));
@@ -2092,122 +2097,143 @@ const MgU = {
 
 // 杯杯菇：粗胖菌柄 + 紫红大伞盖 + 短粗四肢，沿用通用骨架与姿势组
 function bBg() {
-  const n = Gh(MgU),
-    t = new Ls(),
-    i = n.J,
-    d = n.d;
-  // 与通用姿势组配套的手部辅助关节（无武器，仅用于姿势驱动）
-  (n.rig.add("gripR", i.chest, 0, d.chestY, 0),
-    n.rig.add("aim", i.chest, 0, d.chestY, 0),
-    n.rig.add("gripL", i.chest, 0, d.chestY, 0));
-  const s = TU(n),
-    MgN = ge(n, s.stance, {
-      hips: [0, 0, 0],
-      spine: [0, 0, 0],
-      chest: [0, 0, 0],
-      neck: [0, 0, 0],
-      head: [0, 0, 0],
-    });
-  // 外部网格（glTF）：整只绑到根关节，滚动/摇摆都是整体刚性变换
-  (t.bone(i.root),
-    t.rawMesh(heroMesh(), { mat: K.skin, gloss: 0.34, line: 1, ao: 1 }));
-  const a = s.tmp,
-    h = (R, I, P) => {
-      const F = s.common;
-      if (jh(n, R, I.anim === "leap" ? "airborne" : I.anim, I.t, I.p, I.time, F)) {
-        I.anim === "dead" && (P.glow = Math.max(0.15, 1 - I.t * 1.2));
-        return;
-      }
-      switch (I.anim) {
-        case "move": {
-          (Mf(n, R, I.stride, MgW, () => {
-            const L = Math.cos(I.stride * Math.PI * 2);
-            (R.add(i.chest, 0, 0, L * 3), R.add(i.head, 0, 0, -L * 2));
-          }),
-            (P.glow = 1));
-          break;
-        }
-        case "attack": {
-          const L = Vh(I.p, I.windup);
-          (ta(I.variant % 2 === 0 ? s.atkA : s.atkB, L, a), Un(n, R, a), (P.glow = 1 + 1.4 * ho(L, 0.36, 0.2)));
-          break;
-        }
-        case "cast_s1":
-        case "dash": {
-          // 侧倒平滚：R = Rx(滚动角) * Rz(90°) —— 先躺倒，再绕身体长轴滚
-          const L = ((I.t || 0) * 620) % 360;
-          (Un(n, R, MgN),
-            R.rot(i.hips, L, 0, 90),
-            R.move(i.hips, 0, 0.8 + Math.abs(Math.sin((L * Math.PI) / 180)) * 0.035, 0),
-            (P.glow = 2.4));
-          break;
-        }
-        case "cast_s2": {
-          (ta(s.s1, I.p, a), Un(n, R, a), (P.glow = 1 + 2 * ho(I.p, 0.45, 0.3)));
-          break;
-        }
-        case "cast_ult": {
-          (ta(s.ult, I.p, a), Un(n, R, a), (P.glow = 1 + 1.6 * I.p));
-          break;
-        }
-        case "spin": {
-          (nf(a, s.spin),
-            Un(n, R, a, () => {
-              const L = I.t,
-                B = L < 0.15 ? ((L * L) / 0.3) * 2.4 : (L - 0.075) * 2.4;
-              (R.rot(i.root, 0, -B * 360, 0), R.add(i.spine, 0, 0, 4 * Math.sin(L * 9)));
-            }),
-            (P.glow = 2.6));
-          break;
-        }
-        case "roll": {
-          // 侧倒平滚：R = Rx(滚角) · Rz(90°)
-          //   Rz 先把身体放倒、长轴转到左右方向，Rx 再绕这条长轴自转 —— 轮子
-          //   支点补偿把旋转中心从脚底挪到肚子中心，否则会绕着脚插进地里
-          (nf(a, s.spin),
-            Un(n, R, a, () => {
-              const B = Math.min(1, I.time * 3.2),
-                L = (I.time * 620) % 360;
-              (R.rot(i.root, L * B, 0, 90 * B),
-                R.move(i.root, 0.98 * B, 0.95 * B, 0));
-            }),
-            (P.glow = 2.2));
-          break;
-        }
-        case "channel": {
-          (Un(n, R, s.channel, () => Yo(n, R, I.time, I.seed, 0.8)),
-            (P.glow = 1 + 0.5 * (0.5 + 0.5 * Math.sin(I.time * 5))));
-          break;
-        }
-        default: {
-          (nf(a, MgN),
-            Un(n, R, a, () => Yo(n, R, I.time, I.seed, 1.2)),
-            (P.glow = 1 + 0.12 * Math.sin(I.time * 3)));
-        }
-      }
-    };
+  const HR = heroRig(),
+    mesh = heroMesh(),
+    t = new Ls();
+  // 外部骨架：bind 存世界位置（蒙皮用），local 存父坐标系下的位移（solve 用）
+  // 不能直接用 Wa.add：它把 local 当"世界差"算，而 glTF 的父骨骼是带旋转的
+  // bind 全零：顶点已经被预变换到各自主骨骼的 bind 局部空间，
+  // 蒙皮就成了 wp + rotate(worldQ, v')，不需要再减 bind 世界位置
+  const rig = {
+    names: HR.names,
+    parent: HR.parent,
+    bind: new Float32Array(HR.names.length * 3),
+    local: HR.localPos,
+    chains: [],
+    get count() {
+      return HR.names.length;
+    },
+  };
+  const N = HR.names.length,
+    jid = (k) => {
+      const i = HR.names.indexOf(k);
+      return i < 0 ? 0 : i;
+    },
+    rootJ = HR.parent.indexOf(-1),
+    chestJ = jid("Spine02"),
+    headJ = jid("Head");
+  (t.bone(rootJ), t.rawMesh(mesh, { mat: K.skin, gloss: 0.34, line: 1, ao: 1 }));
+
+  // 把重采样好的关键帧写进 pose（值已经是"相对绑定姿态的偏移"）
+  const play = (R, name, time, loop) => {
+    const a = heroAnim(name);
+    if (!a) return;
+    const span = a.dur,
+      fpos = loop
+        ? ((time % span) / span) * (a.frames - 1)
+        : Math.min(a.frames - 1, (time / span) * (a.frames - 1)),
+      f0 = Math.floor(fpos),
+      f1 = Math.min(a.frames - 1, f0 + 1),
+      w = fpos - f0,
+      d = a.data;
+    for (let j = 0; j < N; j++) {
+      const o0 = (f0 * N + j) * 7,
+        o1 = (f1 * N + j) * 7,
+        p3 = j * 3,
+        p4 = j * 4;
+      ((R.t[p3] = d[o0] + (d[o1] - d[o0]) * w),
+        (R.t[p3 + 1] = d[o0 + 1] + (d[o1 + 1] - d[o0 + 1]) * w),
+        (R.t[p3 + 2] = d[o0 + 2] + (d[o1 + 2] - d[o0 + 2]) * w));
+      const x = d[o0 + 3] + (d[o1 + 3] - d[o0 + 3]) * w,
+        y = d[o0 + 4] + (d[o1 + 4] - d[o0 + 4]) * w,
+        z = d[o0 + 5] + (d[o1 + 5] - d[o0 + 5]) * w,
+        ww = d[o0 + 6] + (d[o1 + 6] - d[o0 + 6]) * w,
+        l = Math.hypot(x, y, z, ww) || 1;
+      ((R.q[p4] = x / l), (R.q[p4 + 1] = y / l), (R.q[p4 + 2] = z / l), (R.q[p4 + 3] = ww / l));
+    }
+  };
+  // pose.q 存的是"绝对局部四元数"，所以静息态要填绑定值，不是单位四元数
+  const rest = (R) => {
+    R.t.fill(0);
+    for (let j = 0; j < N; j++) {
+      ((R.q[j * 4] = HR.bindQ[j * 4]),
+        (R.q[j * 4 + 1] = HR.bindQ[j * 4 + 1]),
+        (R.q[j * 4 + 2] = HR.bindQ[j * 4 + 2]),
+        (R.q[j * 4 + 3] = HR.bindQ[j * 4 + 3]));
+    }
+  };
+
+  const h = (R, I, P) => {
+    const st = I.anim;
+    if (st === "dead") {
+      (play(R, "fall", Math.min(2.9, I.t * 3), false), (P.glow = Math.max(0.15, 1 - I.t * 1.2)));
+      return;
+    }
+    if (st === "cast_s1" || st === "dash" || st === "roll") {
+      // 侧躺平滚：Rx(90°) 先把身体放倒（头朝侧向），再绕自身头脚轴 Ry 转 —— 像轮胎那样滚，
+      // 不是绕前进轴自转（那样是烤串）。放倒后身体有一半沉到地下，抬 0.95；再沿侧向 -1 把它摆回单位中心
+      (rest(R),
+        R.add(rootJ, 90, ((I.t || 0) * 620) % 360, 0),
+        R.move(rootJ, 0, 1.05, -1.0),
+        (P.glow = 2.4));
+      return;
+    }
+    if (st === "attack" || st === "attack2") {
+      (play(R, "box_01", I.t * 2.2, false), (P.glow = 1 + 1.4 * ho(I.p, 0.36, 0.2)));
+      return;
+    }
+    if (st === "cast_s2" || st === "channel") {
+      // fire 片段几乎是静止的持势，持续喷吐时叠一层高频抖动，避免看起来僵住
+      const s = Math.sin(I.time * 13.5),
+        c = Math.sin(I.time * 7.3);
+      (play(R, "fire", I.t * 1.5, false),
+        R.add(chestJ, -3.5 + s * 1.8, 0, c * 1.4),
+        R.add(headJ, 2.5 + s * 2.6, c * 1.2, 0),
+        R.move(rootJ, 0, s * 0.012, 0),
+        (P.glow = 1 + 2 * ho(I.p, 0.45, 0.3)));
+      return;
+    }
+    if (st === "cast_ult" || st === "spin") {
+      (play(R, "front_kick_02", I.t * 1.38, false), (P.glow = 1 + 1.6 * I.p));
+      return;
+    }
+    if (st === "hit" || st === "hurt") {
+      (play(R, "hit_to_head", I.t * 1.83, false), (P.glow = 1));
+      return;
+    }
+    if (st === "move" || st === "run") {
+      (play(R, "run", I.time * 1.6, true), (P.glow = 1));
+      return;
+    }
+    // 待机：这套模型没有 idle 片段，回绑定姿态 + 轻微呼吸
+    const b = Math.sin(I.time * 2.2);
+    (rest(R),
+      R.add(chestJ, b * 1.6, 0, 0),
+      R.add(headJ, -b * 1.2, 0, 0),
+      R.move(rootJ, 0, b * 0.012, 0),
+      (P.glow = 1 + 0.12 * Math.sin(I.time * 3)));
+  };
+
   return (
-    t.bakeGrounding(2.01),
     {
       key: "hero:mushroom",
       geometry: t.build(),
       map: heroMap(),
-      rig: n.rig,
+      rig,
       height: 2.0,
       radius: 0.95,
       scale: 1.0,
       stride: MgW.stride,
       triangles: t.triangleCount,
       attach: {
-        head: { joint: i.head, x: 0, y: 0.3, z: 0 },
-        chest: { joint: i.chest, x: 0, y: 0.08, z: 0 },
-        handR: { joint: i.handR, x: 0, y: -0.07, z: 0 },
-        handL: { joint: i.handL, x: 0, y: -0.07, z: 0 },
-        weapon: { joint: i.handR, x: 0, y: -0.05, z: 0 },
-        muzzle: { joint: i.handR, x: 0, y: -0.05, z: 0 },
+        head: { joint: headJ, x: 0, y: 0.3, z: 0 },
+        chest: { joint: chestJ, x: 0, y: 0.08, z: 0 },
+        handR: { joint: jid("R_Hand"), x: 0, y: -0.07, z: 0 },
+        handL: { joint: jid("L_Hand"), x: 0, y: -0.07, z: 0 },
+        weapon: { joint: jid("R_Hand"), x: 0, y: -0.05, z: 0 },
+        muzzle: { joint: jid("R_Hand"), x: 0, y: -0.05, z: 0 },
       },
-      blend: (R, I) =>
-        I === "attack" || I === "dash" ? 0.07 : I === "dead" ? 0.05 : R === "dash" || R === "spin" ? 0.16 : 0.13,
+      blend: () => 0.12,
       animate: h,
     }
   );

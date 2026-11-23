@@ -61,7 +61,7 @@ node tools/glb2hero.mjs "模型.glb" src/45-<name>-mesh.js --scale 2.0 --rotY 27
 
 > 漏一个不会报错，只会表现为"这个英雄 AI 不放技能"或"图标空白"。所以清单要对着表勾。
 
-## 3. 五个必踩的坑
+## 3. 六个必踩的坑
 
 **① 模型 DSL：三个顺序问题**
 
@@ -97,11 +97,35 @@ Zi(limbs, pts, rootJoint);   // pts.length === limbs.length + 1
 `--disable-gpu` 下只有 3~5 fps，**0.3~0.5 秒的特效经常一帧都没渲染就过期**。
 截图验证短特效时，先把 duration 临时改成 2 秒确认形状，再改回去。
 
+**⑥ 姿态合成的两个坑：`add` 是四元数相乘，不是位移**
+
+```js
+R.add(关节, x, y, z)   // q = q * (Rx·Ry·Rz)，是"再叠一层旋转"
+R.move(关节, x, y, z)  // 才是位移，而且是加在绑定局部位移上的增量
+R.rot(关节, x, y, z)   // 直接覆盖成 Rx·Ry·Rz
+```
+
+因为 `y1(x,y,z)` 展开是 `Rx·Ry·Rz`（最右边的先作用），所以**"先放倒再自转"要写成
+`add(关节, 90, 角度, 0)`，不是 `add(关节, 角度, 0, 90)`**。
+
+侧滚（像轮胎一样躺在地上滚）的正确写法：
+
+```js
+// Rx(90°) 把身体放倒 → 头朝侧向、身体沿 Z 轴躺平、蘑菇伞盖变成一个竖立的圆盘（=轮子）
+// 再绕自身头脚轴 Ry(角度) 转 → 轮子滚动。写成 add(角度,0,90) 就成了绕前进轴自转（烤串）
+R.add(root, 90, (t * 620) % 360, 0);
+R.move(root, 0, 1.05, -1.0);   // 放倒后有一半沉到地下，抬 1.05；再沿侧向 -1 摆回单位中心
+```
+
+抬升量的算法：绑定姿态世界包围盒 `y∈[0,2]、z∈[-0.81,1.09]`，`Rx(90)` 后 `y' = -z`，
+所以要抬 `1.09`；`z' = y`，所以要沿 Z 平移 `-1` 把身体挪回原点。
+
 ## 4. 验证：一条命令
 
 ```bash
 node tools/herocheck.mjs mushroom            # 自动起服务器 + 无头 Chrome，跑完自动关
 node tools/herocheck.mjs mushroom --shots    # 同时存截图到 .herocheck/
+node tools/herocheck.mjs mushroom --shots --zoom   # 战场截图裁到英雄附近放大
 ```
 
 它会做这些事，任何一步不对就红字报出来：
@@ -114,6 +138,19 @@ node tools/herocheck.mjs mushroom --shots    # 同时存截图到 .herocheck/
 6. 钩住 `world.emit` 记录所有 `fx` 键，断言每个技能都真的发出了特效；
 7. 最后检查 `window.__moba.errors`——**这是游戏自己的错误数组，被循环吞掉的异常都在里面**，
    比 `window.onerror` 靠谱；只有需要调用栈时才上 `Debugger.setPauseOnExceptions`。
+
+**骨骼动画单独校验**：渲染用的 puppet 挂在渲染器内部视图对象上，`window.__moba` 拿不到，
+所以不要试图从页面里读 skeleton。用离线解算代替：
+
+```bash
+node tools/animcheck.mjs mushroom
+```
+
+它直接解析 `src/45-<name>-mesh.js` 里的动画数据，按引擎同一套层级解算
+（`worldPos = parentWorld + rot(parentQ, 绑定局部 + pose.t)`，每骨 7 个浮点：pos3+quat4）
+算出骨骼世界坐标，比较各帧位移。引擎状态用到的片段（run / box_01 / fall / front_kick_02 /
+hit_to_head）位移必须 > 0.3，否则说明动画没导进去。`fire` 原片段几乎是静止持势，
+引擎里另外叠了程序化抖动，不算失败。
 
 ## 5. 提交前
 

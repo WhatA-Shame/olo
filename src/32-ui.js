@@ -42,8 +42,16 @@ function gB(n, t) {
     l = null;
   const c = sh();
   c.team.set(Yt.blue.main);
+  // ?anim=move 之类的调试参数：在选将台直接预览指定动作，默认仍是 idle
+  const qAnim = (() => {
+      try {
+        return new URLSearchParams(location.search).get("anim") || "idle";
+      } catch {
+        return "idle";
+      }
+    })();
   let f = t,
-    d = "idle",
+    d = qAnim,
     h = 0,
     u = 0,
     m = 0,
@@ -65,7 +73,7 @@ function gB(n, t) {
         (a = new Sn(pB(w, b === "panyue" ? 1.5 : 1.12), i)),
         (a.receiveShadow = !0),
         s.scene.add(a),
-        (d = "idle"),
+        (d = qAnim),
         (h = 0),
         r.snap(),
         k());
@@ -104,11 +112,13 @@ function gB(n, t) {
       if (((v = b), !n.isConnected || document.hidden || !l)) return;
       ((x += w), (p = v3[f][0] + Math.sin(x * 0.5) * v3[f][1]));
       const T = r.input;
-      (d !== "idle" && ((h += w), h >= u && ((d = "idle"), (h = 0))),
+      // move 是循环动作（?anim=move 调试时用），不能按一次性动作那样播完就回 idle
+      const cyc = d === "idle" || d === "move";
+      (d !== "idle" && d !== "move" && ((h += w), h >= u && ((d = "idle"), (h = 0))),
         (T.anim = d),
         (T.time = x),
-        (T.t = d === "idle" ? x : h),
-        (T.p = d === "idle" ? 0 : Math.min(1, h / u)),
+        (T.t = cyc ? x : h),
+        (T.p = cyc ? 0 : Math.min(1, h / u)),
         (T.variant = m),
         (T.windup = 0.35),
         (T.stride = 0),

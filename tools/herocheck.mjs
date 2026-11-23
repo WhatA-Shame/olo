@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { animReport } from './animcheck.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -15,7 +16,10 @@ if (!heroId) {
   process.exit(2);
 }
 const shots = argv.includes('--shots');
+// --anim=move：选将台直接预览指定动作（引擎侧读 ?anim=）
+const ANIM = (argv.find((a) => a.startsWith('--anim=')) || '').split('=')[1] || '';
 const debug = argv.includes('--debug');
+const ZOOM = argv.includes('--zoom');
 const modular = argv.includes('--modular');
 const argOf = (k, d) => {
   const i = argv.indexOf(k);
@@ -159,6 +163,8 @@ const main = async () => {
     const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale: 2.4 } } : {}) });
     fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-${name}.jpg`), Buffer.from(r.result.data, 'base64'));
   };
+  // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节
+  const shotHero = (name) => shot(name, ZOOM ? { x: 190, y: 110, width: 420, height: 240 } : undefined);
   const clickAt = async (x, y) => {
     for (const type of ['mousePressed', 'mouseReleased'])
       await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
@@ -191,7 +197,7 @@ const main = async () => {
   // 复用 profile 时浏览器会缓存 dist/index.html，必须关掉缓存，否则截到的是旧版本
   await send('Network.enable');
   await send('Network.setCacheDisabled', { cacheDisabled: true });
-  await send('Page.navigate', { url: URL_ });
+  await send('Page.navigate', { url: URL_ + (ANIM ? (URL_.includes('?') ? '&' : '?') + 'anim=' + ANIM : '') });
   await sleep(6000);
   if (!(await waitFor(`[...document.querySelectorAll('button,div,a,span')].some(e=>(e.textContent||'').trim()==='开始对战')`, '标题页', 45000)))
     fail('标题页没出来，页面可能报错了');
@@ -225,7 +231,7 @@ const main = async () => {
     await cleanup(1);
   }
   await sleep(2000);
-  await shot('battle');
+  await shotHero('battle');
 
   // 技能等级 / 蓝量 / 冷却 + 钩子
   const prep = await ev(`(() => { const w=window.__moba.world,u=${U};
@@ -285,17 +291,41 @@ const main = async () => {
       const turned = !!(b && a && (Math.abs(a.x - b.x) > 0.15 || Math.abs(a.y - b.y) > 0.15));
       ok('Q 可以控制方向', turned, `dir ${b ? `${b.x},${b.y}` : '?'} → ${a ? `${a.x},${a.y}` : '?'}`);
       if (shots) {
-        await sleep(500);
+        await sleep(380);
         await shot('roll', { x: 0, y: 0, width: 1088, height: 615 });
+        // 连拍三帧看清滚动姿态（侧滚应该是躺平了绕前进轴转，不是头朝前翻跟头）
+        await shotHero('rollA');
+        await sleep(110);
+        await shotHero('rollB');
+        await sleep(110);
+        await shotHero('rollC');
       }
     }
     if (slot === 's2' && heroId === 'mushroom') ok('E 进入持续喷吐', st.s2 === true, `channel=${st.s2} anim=${st.anim}`);
-    await shot(slot);
+    await shotHero(slot);
     // 收尾：结束冲刺/引导，避免影响下一个技能
     await ev(`(()=>{const u=${U}; u.rt.dash && (u.rt.dash.left=0); u.rt.mushS2=null; return 1;})()`);
     await sleep(900);
     return cd;
   };
+
+  // 骨骼动画：puppet 挂在渲染器内部视图上，window 拿不到，改成离线解算校验
+  {
+    const r = animReport(heroId);
+    if (r.detail.startsWith('找不到')) console.log(`· 跳过骨骼校验（${r.detail}）`);
+    else ok('骨骼动画在动', r.ok, r.detail);
+  }
+
+  if (shots) {
+    const kd = (type) => send('Input.dispatchKeyEvent', { type, key: 'w', code: 'KeyW', windowsVirtualKeyCode: 87, nativeVirtualKeyCode: 87 });
+    await kd('keyDown');
+    await sleep(650);
+    await shotHero('run');
+    await sleep(420);
+    await shotHero('run2');
+    await kd('keyUp');
+    await sleep(260);
+  }
 
   const before = await ev(`JSON.stringify(window.__hcFx)`);
   const mana0 = await ev(`${U}.mana`);
@@ -323,7 +353,7 @@ const main = async () => {
   ok('无运行时异常', allErr.length === 0, allErr.slice(0, 2).join(' | '));
   ok('对局未中断', (await ev(`!window.__moba.state.over`)) === true);
 
-  await shot('after');
+  await shotHero('after');
   ws.close();
   await cleanup();
 };
