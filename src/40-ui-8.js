@@ -1780,6 +1780,48 @@ const ze = $a,
         immunity: "untargetable",
       }),
     },
+    mushroom: {
+      s1: bi("mushroom", "s1", {
+        roles: ["engage", "chase"],
+        damage: Gi("physical", { ad: "adRatio" }),
+        cc: [{ kind: "knockup", duration: ze("mushroom", "s1", "knockup"), value: 0 }],
+        mobility: {
+          kind: "dash",
+          distance: 22,
+          duration: ze("mushroom", "s1", "chargeTime"),
+          wallBlocked: !0,
+          stopsAtHero: !0,
+          destination: "aim",
+        },
+        lock: ze("mushroom", "s1", "chargeTime"),
+        reach: 9 + ze("mushroom", "s1", "impactRadius"),
+        aoeRadius: ze("mushroom", "s1", "impactRadius"),
+        dodgeable: !0,
+      }),
+      s2: bi("mushroom", "s2", {
+        roles: ["poke", "waveclear", "slow"],
+        damage: Gi("magic", { ap: "apRatio" }),
+        cc: [{ kind: "slow", duration: ze("mushroom", "s2", "slowDur"), value: ze("mushroom", "s2", "slow") }],
+        delay: E0("mushroom", "s2"),
+      }),
+      ult: bi("mushroom", "ult", {
+        roles: ["engage", "zone"],
+        damage: Gi("magic", { hp: "hpRatio" }),
+        cc: [{ kind: "knockup", duration: ze("mushroom", "ult", "knockup"), value: 0 }],
+        mobility: {
+          kind: "leap",
+          distance: k1("mushroom", "ult"),
+          duration: ze("mushroom", "ult", "leapTime"),
+          wallBlocked: !1,
+          stopsAtHero: !1,
+          destination: "aim",
+        },
+        delay: ze("mushroom", "ult", "warnTime") + ze("mushroom", "ult", "leapTime"),
+        lock: ze("mushroom", "ult", "warnTime") + ze("mushroom", "ult", "leapTime"),
+        immunity: "unstoppable",
+        dodgeable: !0,
+      }),
+    },
   };
 
 kr.flatMap((n) => [Oa[n].s1, Oa[n].s2, Oa[n].ult]);
@@ -1790,6 +1832,7 @@ const OG = {
     xingli: ["s2", "ult", "s1"],
     fengling: ["s1", "ult", "s2"],
     yeque: ["s2", "s1", "ult"],
+    mushroom: ["ult", "s1", "s2"],
   },
   BG = {
     telegraph: "incoming",

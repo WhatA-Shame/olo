@@ -211,6 +211,7 @@ const jG = {
     xingli: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: !1, diveBackline: 0, support: !1 },
     fengling: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: !1, diveBackline: 0, support: !1 },
     yeque: { fleeHp: 0.28, recallHp: 0.38, engage: 0.94, initiator: !1, diveBackline: 1.2, support: !1 },
+    mushroom: { fleeHp: 0.2, recallHp: 0.3, engage: 0.85, initiator: !0, diveBackline: 0.1, support: !0 },
   },
   se = {
     senseRadius: 15,
@@ -715,6 +716,31 @@ function nV(n, t) {
       }
       return !1;
     }
+    case "mushroom": {
+      if (wn(n, "ult") && s <= 15.5 && s > 4.5) {
+        const a = Oa.mushroom.ult,
+          o = Zp(n, t, a.aoeRadius, 16, a.delay, Bt);
+        if (
+          (o >= 2 || (o >= 1 && (i < 0.65 || n.fightAdv >= 1.5 || n.friendsNear >= 1))) &&
+          (n.diving || n.v.enemyStructureCovering(Bt, 0) === null)
+        )
+          return (Bc(n, "ult", Bt), !0);
+      }
+      if (wn(n, "s1") && s <= 12 && s > 2) {
+        _s(n, t, 0, Ii(n, "s1", "dashSpeed"), Bt);
+        const a = Bt.x - e.pos.x,
+          o = Bt.y - e.pos.y,
+          r = Math.hypot(a, o) || 1;
+        if (Cl(n, a / r, o / r, Math.min(7, r))) return ($s(n, "s1", Bt), !0);
+      }
+      if (wn(n, "s2") && s <= 5.8) {
+        const a = t.pos.x - e.pos.x,
+          o = t.pos.y - e.pos.y,
+          r = Math.hypot(a, o) || 1;
+        return (n.act.castDir("s2", a / r, o / r), !0);
+      }
+      return !1;
+    }
     case "yeque": {
       if (wn(n, "ult") && s <= 8.4 && t.alive) {
         const a = Nm(e, "ult", t),
@@ -761,6 +787,13 @@ function sV(n, t) {
       return s <= 12.2 && a("s1") ? (_s(n, t, 0.08, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), !0) : !1;
     case "fengling":
       return s <= 13.6 && a("s1") ? (_s(n, t, 0.12, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), !0) : !1;
+    case "mushroom":
+      if (s <= 9.6 && a("s1")) {
+        _s(n, t, 0, Ii(n, "s1", "dashSpeed"), Bt);
+        const o = Math.hypot(Bt.x - e.pos.x, Bt.y - e.pos.y) || 1;
+        if (Cl(n, (Bt.x - e.pos.x) / o, (Bt.y - e.pos.y) / o, Math.min(7, o))) return ($s(n, "s1", Bt), !0);
+      }
+      return !1;
     case "yeque":
       return s <= 8.4 && a("s2", 1) && (_s(n, t, 0.06, Ii(n, "s2", "speed"), Bt), !ay(n, Bt, 0.5))
         ? ($s(n, "s2", Bt), !0)
@@ -792,6 +825,10 @@ function Uk(n, t) {
     case "fengling":
       return wn(n, "s1") && s <= 12.8 && x0(n, "s1") >= se.pokeMana
         ? (_s(n, t, 0.12, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), !0)
+        : !1;
+    case "mushroom":
+      return wn(n, "s2") && s <= 6 && x0(n, "s2") >= se.pokeMana
+        ? (n.act.castDir("s2", t.pos.x - e.pos.x, t.pos.y - e.pos.y), !0)
         : !1;
     case "yeque":
       return wn(n, "s2") &&
@@ -838,6 +875,16 @@ function oy(n, t, e) {
       const l = Bt.x - s.pos.x,
         c = Bt.y - s.pos.y;
       return Math.hypot(l, c) <= 12 && J2(n, t, l, c, 14, 0.65) >= a ? (n.act.castDir("s1", l, c), !0) : !1;
+    }
+    case "mushroom": {
+      if (!o("s2")) return !1;
+      Dd(t, 4, Bt);
+      const l = Bt.x - s.pos.x,
+        c = Bt.y - s.pos.y,
+        f = Math.hypot(l, c);
+      return f <= 6 && J2(n, t, l, c, 6.2, 0.85) >= a + (e ? 0 : 1)
+        ? (n.act.castDir("s2", l, c), !0)
+        : !1;
     }
     case "yeque": {
       if (o("s2") && ye(s.pos, r.pos) <= 3.6 + r.radius)
@@ -900,6 +947,11 @@ function a6(n, t, e) {
         : i && s && wn(n, "s1", !0) && n.hpR > 0.2
           ? (_s(n, s, 0.12, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), !0)
           : !1;
+    case "mushroom":
+      if (wn(n, "s1", !0) && Kd(n, "s1", t, e, 8)) return !0;
+      return i && s && wn(n, "s2", !0) && n.nearFoeD < 6
+        ? (n.act.castDir("s2", s.pos.x - n.me.pos.x, s.pos.y - n.me.pos.y), !0)
+        : !1;
     case "yeque":
       return wn(n, "s1", !0) && Kd(n, "s1", t, e, 6.5);
   }
@@ -1298,6 +1350,7 @@ const pV = {
     xingli: { cast_s1: "s1", cast_s2: "s2", cast_ult: "ult" },
     fengling: { cast_s1: "s1", dash: "s2", cast_ult: "ult" },
     yeque: { dash: "s1", cast_s2: "s2", cast_ult: "ult" },
+    mushroom: { cast_s1: "s1", spin: "s1", dash: "s1", cast_s2: "s2", leap: "ult" },
   },
   mV = 20,
   gV = 10,

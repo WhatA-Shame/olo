@@ -1728,6 +1728,107 @@ var FS = {
     },
     { loud: -18, len: 0.4, gap: 0.06, rev: 0.14 }
   ),
+  atk_mushroom_swing: At(
+    "\u82F1\u96C4\u666E\u653B",
+    "\u676F\u676F\u83C7\xB7\u62A1\u62F3",
+    (n) => {
+      Ti(n, 0, 0.2, 0.34, 240, 980, 420, 1.1, "pink"), n.osc({ w: "sine", f: 190, f1: 95, a: 0.01, d: 0.12, g: 0.18 });
+    },
+    { loud: -28, len: 0.34, gap: 0.12, rev: 0.06 }
+  ),
+  atk_mushroom_hit: At(
+    "\u82F1\u96C4\u666E\u653B",
+    "\u676F\u676F\u83C7\xB7\u8F6F\u62F3\u547D\u4E2D",
+    (n) => {
+      const t = n.drive(2);
+      n.osc({ w: "sine", f: 140, f1: 52, a: 2e-3, d: 0.22, g: 0.55, to: t }), n.noise({ flt: "bandpass", fc: 900, q: 1.1, a: 1e-3, d: 0.09, g: 0.5, to: t }), n.noise({ k: "pink", flt: "lowpass", fc: 600, a: 2e-3, d: 0.12, g: 0.3 });
+    },
+    { loud: -18, len: 0.45, gap: 0.08, rev: 0.12 }
+  ),
+  cast_mushroom_s1: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u6EDA\u83CC\u51B2\u950B",
+    (n) => {
+      Ti(n, 0, 0.45, 0.5, 220, 1500, 520, 1.5, "brown"), n.osc({ w: "sawtooth", f: 70, f1: 130, ft: 0.4, a: 0.05, d: 0.4, g: 0.14 });
+    },
+    { loud: -22, len: 0.6, gap: 0.1, poly: 2, rev: 0.1 }
+  ),
+  fx_mushroom_s1_dash: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u6EDA\u83CC\u8D77\u8F6C",
+    (n) => {
+      Ti(n, 0, 0.4, 0.45, 260, 1300, 620, 1.4, "brown"), n.osc({ w: "sawtooth", f: 78, f1: 150, ft: 0.35, a: 0.04, d: 0.34, g: 0.14 }), n.noise({ k: "pink", flt: "bandpass", fc: 1400, fc1: 700, q: 0.8, a: 0.03, d: 0.3, g: 0.28 });
+    },
+    { loud: -22, len: 0.5, gap: 0.12, poly: 2, rev: 0.1 }
+  ),
+  fx_mushroom_s1_trail: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u83CC\u76D6\u6EDA\u52A8",
+    (n) => {
+      n.osc({ w: "triangle", f: 96, f1: 128, a: 0.02, d: 0.16, g: 0.16 }), n.noise({ k: "pink", flt: "lowpass", fc: 780, a: 0.01, d: 0.18, g: 0.3 });
+    },
+    { loud: -26, len: 0.3, gap: 0.22, poly: 2, rev: 0.06 }
+  ),
+  fx_mushroom_s1_impact: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u649E\u98DE",
+    (n) => {
+      const t = n.drive(2.4);
+      n.osc({ f: 110, f1: 38, ft: 0.12, a: 2e-3, d: 0.32, g: 0.6, to: t }), n.noise({ flt: "bandpass", fc: 1500, q: 0.9, a: 1e-3, d: 0.14, g: 0.55, to: t }), n.noise({ k: "pink", flt: "lowpass", fc: 900, a: 2e-3, d: 0.25, g: 0.35 });
+    },
+    { loud: -15, len: 0.6, gap: 0.08, rev: 0.18 }
+  ),
+  cast_mushroom_s2: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u5B62\u5B50\u55B7\u5410",
+    (n) => {
+      Ti(n, 0, 0.5, 0.42, 1800, 700, 320, 0.8, "pink"), n.noise({ k: "brown", flt: "lowpass", fc: 700, a: 0.06, d: 0.4, g: 0.32 });
+    },
+    { loud: -23, len: 0.6, gap: 0.1, poly: 2, rev: 0.12 }
+  ),
+  fx_mushroom_s2_spray: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u5B62\u5B50\u7C89\u96FE",
+    (n) => {
+      Ti(n, 0, 0.42, 0.34, 2200, 620, 900, 1.3, "pink"), n.noise({ k: "brown", flt: "bandpass", fc: 900, fc1: 380, q: 0.7, a: 0.05, d: 0.42, g: 0.4 }), n.scatter(
+        7,
+        0.04,
+        0.3,
+        (t) => n.noise({ k: "pink", flt: "lowpass", fc: n.rr(500, 1100), t, a: 0.01, d: 0.09, g: n.rr(0.08, 0.18) })
+      );
+    },
+    { loud: -20, len: 0.7, gap: 0.1, poly: 2, rev: 0.14 }
+  ),
+  cast_mushroom_ult: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u84C4\u529B",
+    (n) => {
+      n.osc({ w: "sine", f: 60, f1: 110, ft: 1.6, a: 0.4, d: 1.6, g: 0.28 }), Ti(n, 0, 1.4, 0.3, 300, 900, 400, 0.7, "brown");
+    },
+    { loud: -24, len: 1.8, gap: 0.2, prio: 2, rev: 0.1 }
+  ),
+  fx_mushroom_ult_charge: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u83CC\u76D6\u84C4\u529B",
+    (n) => {
+      n.osc({ w: "sine", f: 58, f1: 132, ft: 1.5, a: 0.35, d: 1.5, g: 0.3 }), Ti(n, 0, 1.3, 0.26, 320, 1100, 480, 0.7, "brown"), n.scatter(
+        6,
+        0.1,
+        1.2,
+        (t) => n.osc({ w: "triangle", f: n.rr(240, 420), f1: n.rr(520, 900), t, a: 0.02, d: 0.18, g: 0.06 })
+      );
+    },
+    { loud: -24, len: 1.7, gap: 0.2, prio: 2, rev: 0.12 }
+  ),
+  fx_mushroom_ult_land: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u7838\u5730",
+    (n) => {
+      const t = n.drive(3);
+      n.osc({ f: 95, f1: 30, ft: 0.2, a: 2e-3, d: 0.5, g: 0.7, to: t }), n.noise({ flt: "lowpass", fc: 800, a: 1e-3, d: 0.4, g: 0.6, to: t }), n.ring(420, [1, 1.5, 2.2], { a: 2e-3, d: 0.5, g: 0.3 });
+    },
+    { loud: -12, len: 0.9, gap: 0.1, prio: 2, rev: 0.2 }
+  ),
   proj_fizzle: At(
     "\u6280\u80FD\u5F39\u9053",
     "\u5F39\u9053\u843D\u7A7A",
@@ -1753,7 +1854,7 @@ var FS = {
   )
 };
 var Ry = Math.PI / 180;
-var kr = ["panyue", "chijin", "xingli", "fengling", "yeque"];
+var kr = ["panyue", "chijin", "xingli", "fengling", "yeque", "mushroom"];
 var Se = {
   panyue: {
     id: "panyue",
@@ -2254,6 +2355,112 @@ var Se = {
     ],
     palette: { primary: "#3a3156", secondary: "#ece8de", accent: "#b48cff", glow: "#a886ff" },
     look: "\u7CBE\u7626\u51B7\u5CFB\u7684\u6218\u56FD\u6E38\u4FA0\uFF1A\u675F\u53D1\u9732\u9762\uFF0C\u4E00\u8EAB\u8FD1\u9ED1\u7684\u58A8\u7D2B\u52B2\u88C5\uFF0C\u675F\u8155\u7ED1\u817F\uFF1B\u9888\u540E\u4E00\u6761\u957F\u957F\u7684\u7D20\u767D\u5DFE\u62D6\u5728\u8EAB\u540E\uFF0C\u672B\u7AEF\u50CF\u8638\u4E86\u58A8\uFF1B\u80CC\u4E0A\u659C\u630E\u4E00\u652F\u56FE\u5377\u7B52\uFF1B\u53F3\u624B\u53CD\u63E1\u4E00\u67C4\u6DEC\u8FC7\u836F\u7684\u9752\u94A2\u5315\u9996\uFF0C\u5DE6\u624B\u4E00\u628A\u66F4\u5C0F\u7684\u526F\u5315\u3002\u8DD1\u52A8\u65F6\u8EAB\u4F53\u538B\u4F4E\u3002"
+  },
+  mushroom: {
+    id: "mushroom",
+    name: "\u676F\u676F\u83C7",
+    title: "\u83CC\u76D6\u5982\u5C71",
+    role: "tank",
+    roleName: "\u5766\u514B",
+    lane: "top",
+    difficulty: 2,
+    lore: "\u5C71\u91CC\u957F\u51FA\u6765\u7684\u4E00\u6735\u6210\u4E86\u7CBE\u7684\u8611\u83C7\u3002\u83CC\u67C4\u53C8\u7C97\u53C8\u8F6F\uFF0C\u7D2B\u7EA2\u7684\u4F1E\u76D6\u50CF\u5012\u6263\u7684\u4E00\u53EA\u5927\u676F\u5B50\uFF0C\u5B62\u5B50\u4E00\u55B7\u5C31\u662F\u4E00\u56E2\u545B\u4EBA\u7684\u7C89\u96FE\u3002\u5B83\u81EA\u5DF1\u4E5F\u4E0D\u592A\u6E05\u695A\u4E3A\u4EC0\u4E48\u8981\u4E0A\u6218\u573A\uFF0C\u53EA\u662F\u89C9\u5F97\u7AD9\u5728\u6700\u524D\u9762\u3001\u628A\u540C\u4F34\u6321\u5728\u8EAB\u540E\uFF0C\u662F\u4EF6\u5F88\u81EA\u7136\u7684\u4E8B\u3002",
+    tips: "\u4F60\u662F\u961F\u4F0D\u6700\u524D\u9762\u90A3\u5835\u8F6F\u5899\uFF1A\u4E00\u6280\u80FD\u300C\u6EDA\u83CC\u51B2\u950B\u300D\u7F29\u6210\u83CC\u7403\u8D8A\u6EDA\u8D8A\u5FEB\uFF0C\u649E\u5230\u4EBA\u5C31\u628A\u4EBA\u9876\u98DE\uFF1B\u4E8C\u6280\u80FD\u300C\u5B62\u5B50\u55B7\u5410\u300D\u671D\u524D\u55B7\u4E00\u56E2\u9525\u5F62\u5B62\u5B50\uFF0C\u53C8\u75BC\u53C8\u9ECF\u4EBA\uFF1B\u5927\u62DB\u300C\u5929\u964D\u83CC\u76D6\u300D\u84C4\u529B\u540E\u8DF3\u5230\u5F88\u8FDC\u7684\u843D\u70B9\u7838\u4E0B\u6765\uFF0C\u843D\u70B9\u4F1A\u5148\u4EAE\u51FA\u6765\uFF0C\u8BB0\u5F97\u63D0\u524D\u91CF\u3002\u88AB\u52A8\u6BCF\u7B2C\u56DB\u4E0B\u666E\u653B\u4F1A\u7F20\u4F4F\u5BF9\u624B\u3002",
+    attackType: "melee",
+    radius: 0.82,
+    base: {
+      hp: 3920,
+      mana: 430,
+      ad: 152,
+      armor: 126,
+      mr: 72,
+      attackSpeed: 0.72,
+      moveSpeed: 5.5,
+      attackRange: 2.4,
+      hpRegen: 12,
+      manaRegen: 3
+    },
+    growth: { hp: 350, mana: 95, ad: 9, armor: 25, mr: 9.5, attackSpeedPct: 0.012 },
+    basicAttack: { windup: 0.42, damageType: "physical" },
+    passive: {
+      name: "\u83CC\u4E1D\u7F20\u7F1A",
+      brief: "\u6BCF\u7B2C\u56DB\u4E0B\u666E\u653B\u7F20\u4F4F\u5BF9\u624B\uFF0C\u989D\u5916\u4F24\u5BB3\u5E76\u51CF\u901F",
+      tags: ["slow"],
+      desc: "\u6BCF\u7B2C\u56DB\u6B21\u666E\u653B\u4F1A\u7529\u51FA\u4E00\u675F\u83CC\u4E1D\uFF0C\u5BF9\u76EE\u6807\u989D\u5916\u9020\u6210\u81EA\u8EAB {hpRatio%} \u6700\u5927\u751F\u547D\u7684\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
+      values: { hits: 4, hpRatio: 0.035, slow: 0.25, slowDur: 1 }
+    },
+    skills: {
+      s1: {
+        slot: "s1",
+        name: "\u6EDA\u83CC\u51B2\u950B",
+        brief: "\u7F29\u6210\u83CC\u7403\u65CB\u8F6C\u51B2\u523A\uFF0C\u8D8A\u6EDA\u8D8A\u5FEB\uFF0C\u649E\u4EBA\u51FB\u98DE",
+        tags: ["dash", "control"],
+        desc: "\u7F29\u6210\u4E00\u56E2\u83CC\u7403\u539F\u5730\u65CB\u8F6C\u52A0\u901F\uFF0C\u5411\u6307\u5B9A\u65B9\u5411\u6EDA\u53BB\uFF1A\u901F\u5EA6\u5728 {chargeTime} \u79D2\u5185\u4ECE {dashSpeed} \u4E00\u8DEF\u63D0\u5230 {maxSpeed}\u3002\u649E\u5230\u7B2C\u4E00\u4E2A\u654C\u65B9\u82F1\u96C4\u5373\u505C\u4E0B\uFF0C\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002\u6EDA\u52A8\u671F\u95F4\u53EF\u4EE5\u78BE\u8FC7\u5C0F\u5175\u3002",
+        maxLevel: 6,
+        cooldown: [12, 11.5, 11, 10.5, 10, 9.5],
+        manaCost: [55, 60, 65, 70, 75, 80],
+        cast: { type: "direction", range: 9, width: 2.4 },
+        values: {
+          damage: [180, 240, 300, 360, 420, 480],
+          adRatio: 0.55,
+          knockup: 0.9,
+          dashSpeed: 10,
+          maxSpeed: 22,
+          accel: 9,
+          chargeTime: 1.6,
+          impactRadius: 2.4
+        },
+        castTime: 0.12
+      },
+      s2: {
+        slot: "s2",
+        name: "\u5B62\u5B50\u55B7\u5410",
+        brief: "\u55B7\u51FA\u9525\u5F62\u5B62\u5B50\u7C89\u96FE\uFF0C\u9020\u6210\u4F24\u5BB3\u5E76\u51CF\u901F",
+        tags: ["slow", "waveclear"],
+        desc: "\u9F13\u8D77\u83CC\u76D6\u671D\u6307\u5B9A\u65B9\u5411\u55B7\u51FA\u4E00\u5927\u7247\u9525\u5F62\u8611\u83C7\u5B62\u5B50\u7C89\u96FE\uFF0C\u5BF9\u5176\u4E2D\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\uFF0C\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
+        maxLevel: 6,
+        cooldown: [10, 9.5, 9, 8.5, 8, 7.5],
+        manaCost: [60, 65, 70, 75, 80, 85],
+        cast: { type: "cone", range: 6.2, angle: 100 * (Math.PI / 180) },
+        values: {
+          damage: [140, 190, 240, 290, 340, 390],
+          apRatio: 0.5,
+          slow: 0.4,
+          slowDur: 2
+        },
+        castTime: 0.22
+      },
+      ult: {
+        slot: "ult",
+        name: "\u5929\u964D\u83CC\u76D6",
+        brief: "\u84C4\u529B\u6570\u79D2\u540E\u8DC3\u5411\u8FDC\u5904\uFF0C\u7838\u5730\u51FB\u98DE",
+        tags: ["control", "dash"],
+        desc: "\u8E72\u4E0B\u628A\u83CC\u76D6\u538B\u5F97\u5431\u5431\u54CD\uFF0C\u84C4\u529B {warnTime} \u79D2\uFF08\u843D\u70B9\u4F1A\u63D0\u524D\u4EAE\u51FA\u8B66\u793A\uFF09\uFF1B\u968F\u540E\u9AD8\u9AD8\u8DC3\u8D77\u7838\u5411\u76EE\u6807\u533A\u57DF\uFF0C\u9020\u6210 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002\u84C4\u529B\u4E0E\u8DC3\u8D77\u671F\u95F4\u514D\u75AB\u63A7\u5236\u3002",
+        maxLevel: 3,
+        cooldown: [70, 62, 54],
+        manaCost: [110, 120, 130],
+        cast: { type: "position", range: 16, radius: 4.6 },
+        values: {
+          damage: [300, 450, 600],
+          hpRatio: 0.06,
+          knockup: 0.9,
+          warnTime: 1.8,
+          leapTime: 0.6
+        },
+        castTime: 0.2
+      }
+    },
+    build: [
+      "boots",
+      "guardian_plate",
+      "boots_guard",
+      "starweave_cloak",
+      "undying_heart",
+      "thorn_mail",
+      "winter_scepter"
+    ],
+    palette: { primary: "#7c3aed", secondary: "#f3e7d0", accent: "#a78bfa", glow: "#c4a2ff" },
+    look: "\u4E00\u6735\u6210\u4E86\u7CBE\u7684\u7D2B\u8272\u5927\u8611\u83C7\uFF1A\u7C97\u58EE\u5706\u80D6\u7684\u5976\u767D\u83CC\u67C4\u5C31\u662F\u8EAB\u5B50\uFF0C\u83CC\u9888\u5904\u900F\u51FA\u6DE1\u6DE1\u7D2B\u8272\uFF1B\u5934\u9876\u5012\u6263\u7740\u4E00\u53EA\u5DE8\u5927\u7684\u7D2B\u7EA2\u4F1E\u76D6\uFF0C\u76D6\u9762\u662F\u5E26\u7ED2\u5149\u7684\u7D2B\uFF0C\u70B9\u7F00\u7740\u51E0\u5757\u5976\u767D\u8272\u5706\u6591\uFF0C\u76D6\u5E95\u662F\u653E\u5C04\u72B6\u7684\u6D45\u8272\u83CC\u8936\u3002\u83CC\u67C4\u4E2D\u6BB5\u6709\u4E00\u5F20\u61A8\u539A\u7684\u8138\uFF1A\u4E24\u53EA\u5706\u773C\u775B\u3001\u7C89\u816E\u7EA2\u3001\u5C0F\u5C0F\u7684\u5634\u3002\u56DB\u80A2\u77ED\u7C97\uFF0C\u62F3\u5934\u5706\u6EDA\u6EDA\u3002"
   }
 };
 function z0(n) {
@@ -4066,7 +4273,9 @@ var Ny = class {
     a.normalize = false, a.buffer = this.kit.impulse(2.4, 2), this.sfxRev = s(1), this.musicRev = s(1), this.sfxRev.connect(a), this.musicRev.connect(a), a.connect(i), this.graph.push(a);
   }
   play(t, e = {}) {
-    const s = r1[t], i = this.now() + (e.when ?? 0) + 4e-3, a = s.group ?? t, o = this.lastAt.get(a);
+    const s = r1[t];
+    if (!s) return null;
+    const i = this.now() + (e.when ?? 0) + 4e-3, a = s.group ?? t, o = this.lastAt.get(a);
     if (o !== void 0 && i - o < s.gap && i >= o) return this.stats.throttled++, null;
     const r = e.prio ?? s.prio;
     let l = 0, c = 0;
@@ -4814,9 +5023,10 @@ var ET = {
   chijin: "atk_chijin_swing",
   xingli: "atk_xingli_charge",
   fengling: "atk_fengling_draw",
-  yeque: "atk_yeque_swing"
+  yeque: "atk_yeque_swing",
+  mushroom: "atk_mushroom_swing"
 };
-var AT = { panyue: "atk_panyue_hit", chijin: "atk_chijin_hit", yeque: "atk_yeque_hit" };
+var AT = { panyue: "atk_panyue_hit", chijin: "atk_chijin_hit", yeque: "atk_yeque_hit", mushroom: "atk_mushroom_hit" };
 var RT = {
   xingli_basic: "atk_xingli_launch",
   fengling_basic: "atk_fengling_launch",
@@ -5059,8 +5269,8 @@ var DT = class {
     return this.spGain = Math.max(s, Math.pow(l, 1.6)), this.spPan = Math.max(-1, Math.min(1, i / 13)) * 0.85, this.spLp = o > 8 ? 17e3 * Math.pow(0.13, Math.min(1, (o - 8) / 18)) : 0, this.spGain > 4e-3;
   }
   at(t, e, s, i) {
-    const a = this.mixer;
-    return !a || !this.locate(e, r1[t].range, i?.floor ?? 0) ? null : a.play(t, {
+    const a = this.mixer, g12 = r1[t];
+    return !a || !g12 || !this.locate(e, g12.range, i?.floor ?? 0) ? null : a.play(t, {
       gain: s * this.spGain,
       pan: this.spPan,
       lp: this.spLp,
@@ -24903,6 +25113,13 @@ var ws = {
     deep: Lt(3811960),
     accent: Lt(12577250),
     dark: Lt(920086)
+  },
+  mushroom: {
+    glow: Lt(12885247),
+    hot: Lt(15720703),
+    deep: Lt(5972410),
+    accent: Lt(10967295),
+    dark: Lt(2031134)
   }
 };
 var W = {
@@ -29026,6 +29243,151 @@ var PD = {
   xingli_ult_cast: LD,
   xingli_meteor: ID
 };
+var Mu2 = ws.mushroom;
+var mSD = (n, t) => {
+  const e = t.pos.x, s = t.pos.y, i = t.dir?.x ?? 1, a = t.dir?.y ?? 0, o = Math.atan2(a, i), r = n.rnd;
+  n.decals.add(Xt.ring, e, s, 1.7, 0.4).params(1, 0.1).color(Mu2.glow, 1.8).under(W.shadow, 0.32), n.decals.add(Xt.zone, e, s, 2.3, 0.45).params(14, 0).color(Mu2.accent, 1.3, 0.7).under(W.shadow, 0.26);
+  const l = n.particles.use(Mt.dust);
+  for (let c = 0; c < 14; c++) {
+    const f = o + Math.PI + (r.next() - 0.5) * 1.5, d = r.range(0.3, 1.5);
+    l.spawn(
+      e + Math.cos(f) * d,
+      r.range(0.2, 1),
+      s + Math.sin(f) * d,
+      Math.cos(f) * r.range(2, 5),
+      r.range(0.6, 2.2),
+      Math.sin(f) * r.range(2, 5),
+      0.45,
+      0.6,
+      1.5
+    );
+  }
+  n.light(e, s, 1.2, Mu2.glow, 4, 5, 0.3);
+};
+var mTD = (n, t) => {
+  const e = t.pos.x, s = t.pos.y, i = n.rnd;
+  n.decals.add(Xt.ring, e, s, 1.3, 0.34).params(1, 0.12).color(Mu2.accent, 1.2).under(W.shadow, 0.24);
+  const a = n.particles.use(Mt.dust);
+  for (let o = 0; o < 5; o++) {
+    const r = i.next() * Math.PI * 2, l = i.range(0.2, 1.1);
+    a.spawn(
+      e + Math.cos(r) * l,
+      i.range(0.15, 0.7),
+      s + Math.sin(r) * l,
+      Math.cos(r) * i.range(0.8, 2.4),
+      i.range(0.4, 1.4),
+      Math.sin(r) * i.range(0.8, 2.4),
+      0.35,
+      0.45,
+      1.3
+    );
+  }
+  n.light(e, s, 0.8, Mu2.glow, 3, 3.5, 0.2);
+};
+var mQD = (n, t) => {
+  const e = t.pos.x, s = t.pos.y, i = t.radius ?? 2.4;
+  n.decals.add(Xt.ring, e, s, i, 0.32).params(1, 0.1).color(Mu2.hot, 1.8).under(W.shadow, 0.35), n.decals.add(Xt.zone, e, s, i * 0.8, 0.4).params(14, 0).color(Mu2.glow, 1.5, 0.75).under(W.shadow, 0.3);
+  const a = n.particles.use(Mt.dust), o = n.rnd;
+  for (let r = 0; r < 16; r++) {
+    const l = o.next() * Math.PI * 2, c = o.range(0.4, i);
+    a.spawn(
+      e + Math.cos(l) * c,
+      o.range(0.2, 0.9),
+      s + Math.sin(l) * c,
+      Math.cos(l) * o.range(1, 3.2),
+      o.range(0.6, 2.4),
+      Math.sin(l) * o.range(1, 3.2),
+      0.5,
+      0.7,
+      1.5
+    );
+  }
+  n.light(e, s, 1, Mu2.glow, 6, i * 2.4, 0.35), n.shake(0.16, e, s);
+};
+var mJD = (n, t) => {
+  const e = t.pos.x, s = t.pos.y, i = t.dir?.x ?? 1, a = t.dir?.y ?? 0, o = Math.atan2(a, i), r = t.radius ?? 6.2, l = t.angle ?? 1.6, h = l / 2, f = n.rnd;
+  n.decals.add(Xt.cone, e, s, r, 0.85).rot(o).params(h, 0.12).color(Mu2.glow, 2.1).under(W.shadow, 0.36), n.decals.add(Xt.cone, e, s, r * 0.6, 0.7).rot(o).params(h * 0.92, 0.04).color(Mu2.hot, 1.3).under(W.shadow, 0.24);
+  const c = n.particles.use(Mt.streak).tint(W.white, Mu2.accent), u = n.n(12);
+  for (let d = 0; d < u; d++) {
+    const m = f.next(), x = o + h - l * m, p = r * f.range(0.3, 0.95);
+    c.spawn(
+      e + Math.cos(x) * p,
+      f.range(0.4, 1.2),
+      s + Math.sin(x) * p,
+      Math.cos(x) * f.range(4, 9),
+      f.range(0.2, 0.9),
+      Math.sin(x) * f.range(4, 9),
+      0.3,
+      0.09,
+      0.05,
+      m * 0.1
+    );
+  }
+  const g = n.particles.use(Mt.dust), y = n.n(9);
+  for (let d = 0; d < y; d++) {
+    const m = f.next(), x = o + h - l * m, p = r * f.range(0.25, 0.8);
+    g.spawn(
+      e + Math.cos(x) * p,
+      f.range(0.5, 1.4),
+      s + Math.sin(x) * p,
+      Math.cos(x) * f.range(0.8, 2),
+      f.range(0.2, 0.8),
+      Math.sin(x) * f.range(0.8, 2),
+      0.8,
+      0.55,
+      1.6
+    );
+  }
+  n.light(e + i * r * 0.45, s + a * r * 0.45, 1.4, Mu2.glow, 5, r * 1.5, 0.34);
+};
+var mZD = (n, t, e) => {
+  const s = t.pos.x, i = t.pos.y, a = t.radius ?? 4.6, o = n.rnd;
+  n.decals.add(Xt.ring, s, i, a, 0.42).params(1, 0.12).color(Mu2.hot, 2).under(W.shadow, 0.45), n.decals.add(Xt.zone, s, i, a, 0.5).params(16, 0).color(Mu2.glow, 1.6, 0.8).under(W.shadow, 0.4), n.decals.add(Xt.ring, s, i, a * 0.55, 0.5).params(1, 0.1).color(Mu2.accent, 1.6).under(W.shadow, 0.3);
+  const r = n.particles.use(Mt.dust);
+  for (let l = 0; l < 24; l++) {
+    const c = o.next() * Math.PI * 2, f = o.range(0.5, a);
+    r.spawn(
+      s + Math.cos(c) * f,
+      o.range(0.2, 1.2),
+      i + Math.sin(c) * f,
+      Math.cos(c) * o.range(1.5, 4.5),
+      o.range(0.8, 3),
+      Math.sin(c) * o.range(1.5, 4.5),
+      0.6,
+      0.8,
+      1.8
+    );
+  }
+  n.light(s, i, 1, Mu2.glow, le.lightMax, a * 2.6, 0.45), n.shake(bo(t, e) ? 0.5 : 0.3, s, i);
+};
+var mXD = (n, t) => {
+  const e = t.pos.x, s = t.pos.y, i = n.rnd;
+  n.decals.add(Xt.ring, e, s, 1.5, 1.6).params(1, 0.06).color(Mu2.accent, 1.4, 0.7).under(W.shadow, 0.3), n.decals.add(Xt.zone, e, s, 1.1, 1.6).params(12, 0.2).color(Mu2.glow, 1.2, 0.6).under(W.shadow, 0.25);
+  const a = n.particles.use(Mt.dust);
+  for (let o = 0; o < 14; o++) {
+    const r = i.next() * Math.PI * 2, l = i.range(0.5, 1.5);
+    a.spawn(
+      e + Math.cos(r) * l,
+      i.range(0.1, 0.4),
+      s + Math.sin(r) * l,
+      -Math.cos(r) * i.range(0.4, 1.2),
+      i.range(1.6, 3.2),
+      -Math.sin(r) * i.range(0.4, 1.2),
+      1.3,
+      0.5,
+      1.4
+    );
+  }
+  n.light(e, s, 1, Mu2.accent, 5, 5, 1.5);
+};
+var mMD = {
+  mushroom_s1_dash: mSD,
+  mushroom_s1_trail: mTD,
+  mushroom_s1_impact: mQD,
+  mushroom_s2_spray: mJD,
+  mushroom_ult_land: mZD,
+  mushroom_ult_charge: mXD
+};
 var Ci = ws.yeque;
 var Nb = Se.yeque.skills.s1;
 var DD = Se.yeque.skills.s2;
@@ -29161,7 +29523,7 @@ var BD = (n, t, e) => {
   n.decals.add(Xt.scorch, s, i, 1.25, 2.2).color(W.black, 0).under(W.ink, 0.9), n.light(s, i, r, Ci.hot, le.lightMax, 8, 0.3), n.shake(bo(t, e) ? 0.4 : 0.25, s, i);
 };
 var HD = { yeque_s1_dash: FD, yeque_s2_cast: UD, yeque_ult_vanish: OD, yeque_ult_strike: BD };
-var $D = { ...xD, ...UP, ...ED, ...YP, ...PD, ...eD, ...HD };
+var $D = { ...xD, ...UP, ...ED, ...YP, ...PD, ...mMD, ...eD, ...HD };
 function GD() {
   return { x: 0, y: 0, z: 0, height: 2, radius: 0.6, visible: false, opacity: 1, unit: null };
 }
@@ -39856,6 +40218,218 @@ function TU(n) {
 var EU = [0, 0, 0];
 var hw = [0, 0, 0, 1];
 var Mp = new Float32Array(8);
+var MgU = {
+  ...Am,
+  hipX: 0.175,
+  shoulderX: 0.33,
+  clavX: 0.12,
+  pelvisY: 0.8,
+  spineY: 0.95,
+  chestY: 1.12,
+  neckY: 1.38,
+  headY: 1.44,
+  shoulderY: 1.3,
+  elbowY: 1.02,
+  wristY: 0.78,
+  handY: 0.7,
+  hipY: 0.78,
+  kneeY: 0.44,
+  ankleY: 0.1
+};
+var MgC = {
+  stalk: 15984592,
+  stalkShade: 14271907,
+  neck: 15127407,
+  cap: 8138477,
+  capDeep: 5972410,
+  capLight: 10316543,
+  gill: 15720648,
+  spot: 16248805,
+  blush: 15695854,
+  mouth: 7019818,
+  eye: 2825023
+};
+var MgW = {
+  stride: 2.1,
+  sway: 0.03,
+  stance: 0.34,
+  lift: 0.2,
+  bob: 0.05,
+  drop: 0.06,
+  lean: 8,
+  twist: 6,
+  width: 0.19,
+  arm: 26,
+  elbow: 16
+};
+function bBg() {
+  const n = Gh(MgU), t = new Ls(), i = n.J, d = n.d;
+  n.rig.add("gripR", i.chest, 0, d.chestY, 0), n.rig.add("aim", i.chest, 0, d.chestY, 0), n.rig.add("gripL", i.chest, 0, d.chestY, 0);
+  const s = TU(n);
+  t.crease = 44;
+  t.sym((R) => {
+    const _ = [
+      [R * d.hipX, d.hipY + 0.05, 0],
+      [R * d.hipX, d.kneeY, 0.02],
+      [R * d.hipX, d.ankleY + 0.07, 0.03],
+      [R * d.hipX, d.ankleY + 0.02, 0.26]
+    ], k = [R > 0 ? i.thighL : i.thighR, R > 0 ? i.shinL : i.shinR, R > 0 ? i.footL : i.footR];
+    t.bind(Zi(k, _, i.hips)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }), t.limb(_[0], _[2], 0.21, 0.155, { seg: 10, bulge: 0.1 }), t.bone(R > 0 ? i.footL : i.footR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }), t.ball(R * d.hipX, d.ankleY + 0.02, 0.075, 0.23, 0.115, 0.28, 0, 180);
+  });
+  t.bind(Bl(n)).paint(MgC.stalk, {
+    c2: MgC.stalkShade,
+    ao: 0.84,
+    ao2: 1,
+    mat: K.skin,
+    by: (R, I) => 1 - Xi((I - 0.62) / 0.82)
+  }), t.lathe(
+    [
+      [0.56, 0.02],
+      [0.6, 0.3],
+      [0.68, 0.42],
+      [0.78, 0.5],
+      [0.9, 0.535],
+      [1.02, 0.525],
+      [1.14, 0.475],
+      [1.24, 0.405],
+      [1.32, 0.345],
+      [1.4, 0.315],
+      [1.46, 0.3]
+    ],
+    { seg: 18, cap0: true, cap1: false }
+  );
+  t.bind(Zi([i.chest, i.neck, i.head], [[0, 1.18, 0], [0, 1.28, 0], [0, 1.36, 0], [0, 1.45, 0]], i.chest)).paint(
+    MgC.neck,
+    { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin, by: (R, I) => Xi((I - 1.2) / 0.26) }
+  ), t.lathe(
+    [
+      [1.22, 0.4],
+      [1.3, 0.35],
+      [1.38, 0.315],
+      [1.45, 0.305]
+    ],
+    { seg: 18, cap0: false, cap1: false }
+  );
+  t.bone(i.head).paint(MgC.gill, {
+    c2: MgC.stalkShade,
+    ao: 0.78,
+    ao2: 1,
+    mat: K.skin,
+    by: (R, I) => Xi((I - 1.36) / 0.1)
+  }), t.lathe(
+    [
+      [1.345, 0.02],
+      [1.35, 0.3],
+      [1.365, 0.58],
+      [1.39, 0.79],
+      [1.43, 0.9]
+    ],
+    { seg: 30, cap0: false, cap1: false, shape: (R) => 1 + 9e-3 * Math.cos(R * 26) }
+  );
+  t.paint(MgC.capDeep, { c2: MgC.capLight, ao: 0.86, ao2: 1, mat: K.fur, by: (R, I) => Xi((I - 1.45) / 0.52) }), t.lathe(
+    [
+      [1.41, 0.88],
+      [1.47, 0.93],
+      [1.56, 0.945],
+      [1.66, 0.93],
+      [1.77, 0.88],
+      [1.88, 0.79],
+      [1.98, 0.65],
+      [2.06, 0.46],
+      [2.11, 0.24],
+      [2.13, 0.02]
+    ],
+    { seg: 30, cap0: false, cap1: true, shape: (R) => 1 + 0.012 * Math.cos(R * 7) }
+  );
+  t.paint(MgC.spot, { ao: 0.95, mat: K.fur, line: 0 });
+  for (const [R, I, P, F] of [
+    [0.36, 1.72, 0.52, 0.15],
+    [-0.3, 1.86, 0.44, 0.12],
+    [0.08, 1.98, -0.34, 0.13],
+    [-0.56, 1.66, -0.2, 0.11],
+    [0.62, 1.6, -0.28, 0.1],
+    [-0.12, 1.6, 0.62, 0.09]
+  ])
+    t.ball(R, I, P, F, F * 0.34, F, 0, 180);
+  t.bone(i.neck).paint(16777215, { ao: 0.96, mat: K.skin, line: 0 }), t.ball(0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180), t.ball(-0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180), t.paint(MgC.eye, { ao: 0.98, mat: K.skin, line: 0 }), t.ball(0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180), t.ball(-0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180), t.paint(MgC.blush, { ao: 0.95, mat: K.skin, line: 0 }), t.ball(0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180), t.ball(-0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180), t.paint(MgC.mouth, { ao: 0.97, mat: K.skin, line: 0 }), t.ball(0, 1.105, 0.44, 0.075, 0.036, 0.026, 0, 180);
+  t.sym((R) => {
+    const _ = [
+      [R * 0.3, 1.27, 0.02],
+      [R * 0.4, 1.08, 0.05],
+      [R * 0.46, 0.9, 0.07],
+      [R * 0.47, 0.83, 0.08]
+    ], k = [R > 0 ? i.armL : i.armR, R > 0 ? i.foreL : i.foreR, R > 0 ? i.handL : i.handR];
+    t.bind(Zi(k, _, i.chest)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }), t.limb(_[0], _[2], 0.15, 0.125, { seg: 9, bulge: 0.09 }), t.bone(R > 0 ? i.handL : i.handR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }), t.ball(R * 0.47, 0.87, 0.075, 0.15, 0.135, 0.15, 0, 180);
+  });
+  const a = s.tmp, h = (R, I, P) => {
+    const F = s.common;
+    if (jh(n, R, I.anim === "leap" ? "airborne" : I.anim, I.t, I.p, I.time, F)) {
+      I.anim === "dead" && (P.glow = Math.max(0.15, 1 - I.t * 1.2));
+      return;
+    }
+    switch (I.anim) {
+      case "move": {
+        Mf(n, R, I.stride, MgW, () => {
+          const L = Math.cos(I.stride * Math.PI * 2);
+          R.add(i.chest, 0, 0, L * 3), R.add(i.head, 0, 0, -L * 2);
+        }), P.glow = 1;
+        break;
+      }
+      case "attack": {
+        const L = Vh(I.p, I.windup);
+        ta(I.variant % 2 === 0 ? s.atkA : s.atkB, L, a), Un(n, R, a), P.glow = 1 + 1.4 * ho(L, 0.36, 0.2);
+        break;
+      }
+      case "cast_s1":
+      case "dash": {
+        Un(n, R, s.dash), P.glow = 2.4;
+        break;
+      }
+      case "cast_s2": {
+        ta(s.s1, I.p, a), Un(n, R, a), P.glow = 1 + 2 * ho(I.p, 0.45, 0.3);
+        break;
+      }
+      case "cast_ult": {
+        ta(s.ult, I.p, a), Un(n, R, a), P.glow = 1 + 1.6 * I.p;
+        break;
+      }
+      case "spin": {
+        nf(a, s.spin), Un(n, R, a, () => {
+          const L = I.t, B = L < 0.15 ? L * L / 0.3 * 2.4 : (L - 0.075) * 2.4;
+          R.rot(i.root, 0, -B * 360, 0), R.add(i.spine, 0, 0, 4 * Math.sin(L * 9));
+        }), P.glow = 2.6;
+        break;
+      }
+      case "channel": {
+        Un(n, R, s.channel, () => Yo(n, R, I.time, I.seed, 0.8)), P.glow = 1 + 0.5 * (0.5 + 0.5 * Math.sin(I.time * 5));
+        break;
+      }
+      default: {
+        nf(a, s.stance), Un(n, R, a, () => Yo(n, R, I.time, I.seed, 1.2)), P.glow = 1 + 0.12 * Math.sin(I.time * 3);
+      }
+    }
+  };
+  return t.bakeGrounding(2.13), {
+    key: "hero:mushroom",
+    geometry: t.build(),
+    rig: n.rig,
+    height: 2.15,
+    radius: 0.82,
+    scale: 1.06,
+    stride: MgW.stride * 1.06,
+    triangles: t.triangleCount,
+    attach: {
+      head: { joint: i.head, x: 0, y: 0.3, z: 0 },
+      chest: { joint: i.chest, x: 0, y: 0.08, z: 0 },
+      handR: { joint: i.handR, x: 0, y: -0.07, z: 0 },
+      handL: { joint: i.handL, x: 0, y: -0.07, z: 0 },
+      weapon: { joint: i.handR, x: 0, y: -0.05, z: 0 },
+      muzzle: { joint: i.handR, x: 0, y: -0.05, z: 0 }
+    },
+    blend: (R, I) => I === "attack" || I === "dash" ? 0.07 : I === "dead" ? 0.05 : R === "dash" || R === "spin" ? 0.16 : 0.13,
+    animate: h
+  };
+}
 function AU() {
   const { h: n, b: t, extra: e } = SU(), s = TU(n), i = n.J, a = n.rig, o = s.tmp, r = t.build(), l = e.gripR * 3, c = e.aim * 3, f = e.gripL * 3, d = (u, m, x = 0) => {
     if (P0(n, u, -1, i.chest, m[l], m[l + 1], m[l + 2], -0.7, -0.55, -0.45), Tm(a, u, i.handR, EU, hw), Em(u, i.propR, hw, m[c], m[c + 1], m[c + 2]), x !== 0) {
@@ -46691,6 +47265,7 @@ var Gx = {
   "hero:xingli": $U,
   "hero:fengling": PU,
   "hero:yeque": jU,
+  "hero:mushroom": bBg,
   "minion:melee": KU,
   "minion:ranged": ZU,
   "minion:siege": QU,
@@ -47028,7 +47603,7 @@ var jO = class {
 var f0 = { hero: false, minion: false, monster: false, tower: true, core: true };
 var qO = { hero: 1.32, minion: 1.28, monster: 1.17, tower: 1, core: 1 };
 var Np = [3.05, 3.55];
-var XO = { panyue: 1.07, chijin: 0.97 };
+var XO = { panyue: 1.07, chijin: 0.97, mushroom: 1.02 };
 var n4 = 20;
 var s4 = 0.16;
 var YO = 0.25;
@@ -47510,7 +48085,8 @@ var cB = {
   chijin: { cast_s1: ["cast_s1", 0.9], cast_s2: ["dash", 0.55], cast_ult: ["spin", 1.7] },
   xingli: { cast_s1: ["cast_s1", 0.9], cast_s2: ["cast_s2", 1], cast_ult: ["cast_ult", 1.5] },
   fengling: { cast_s1: ["cast_s1", 1], cast_s2: ["dash", 0.5], cast_ult: ["cast_ult", 1.2] },
-  yeque: { cast_s1: ["dash", 0.45], cast_s2: ["cast_s2", 0.8], cast_ult: ["cast_ult", 1] }
+  yeque: { cast_s1: ["dash", 0.45], cast_s2: ["cast_s2", 0.8], cast_ult: ["cast_ult", 1] },
+  mushroom: { cast_s1: ["spin", 1.6], cast_s2: ["cast_s2", 0.9], cast_ult: ["cast_ult", 1.2] }
 };
 var Ac = { side: 0.07, top: 0.06, bottom: 0.12 };
 var a4 = { top: 3.2, halfW: 1.2 };
@@ -47519,7 +48095,8 @@ var fB = {
   chijin: { drop: 0.26, dist: 3, yaw: -12, x: -0.08 },
   xingli: { drop: 0.26, dist: 2.75, yaw: -18, x: 0.04 },
   fengling: { drop: 0.24, dist: 2.75, yaw: 26, x: 0.06, anim: "channel" },
-  yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 }
+  yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 },
+  mushroom: { drop: 0.2, dist: 3.4, yaw: -16, x: 0.02 }
 };
 var o4 = /* @__PURE__ */ new Map();
 var r4 = new Float32Array(512);
@@ -47542,7 +48119,8 @@ var v3 = {
   chijin: [-0.38, 0.44],
   xingli: [0.25, 0.8],
   fengling: [0.25, 0.8],
-  yeque: [0.25, 0.8]
+  yeque: [0.25, 0.8],
+  mushroom: [-0.26, 0.26]
 };
 var hB = 48;
 function uB(n, t) {
@@ -49223,6 +49801,7 @@ var FB = {
   star_blessing: () => `\u5DE8\u7075buff(\u661F\u9668\u795D\u798F)\uFF1A\u4F24\u5BB3 +${Ps(yn.blessingDamage)}\uFF0C\u6301\u7EED\u56DE\u8840\uFF0C\u6211\u65B9\u5C0F\u5175\u66F4\u5F3A\u3002\u6253\u6389\u661F\u9668\u5DE8\u7075\u540E\u5168\u961F\u83B7\u5F97\uFF0C\u6301\u7EED ${yn.blessingDuration} \u79D2\u3002`,
   panyue_passive: (n) => `\u76FE\u51FB\u84C4\u52BF ${n.stacks}/3\uFF1A\u7B2C\u4E09\u6B21\u666E\u653B\u6539\u7528\u5927\u76FE\u7838\u5730\uFF0C\u9644\u5E26\u989D\u5916\u4F24\u5BB3\u4E0E\u51CF\u901F\u3002`,
   panyue_bulwark: () => "\u62E5\u76FE\u800C\u7ACB\uFF1A\u62A4\u76FE\u751F\u6548\u4E2D\uFF0C\u76FE\u7834\u6216\u5230\u671F\u5373\u7ED3\u675F\u3002",
+  mushroom_passive: (n) => `\u83CC\u4E1D\u84C4\u52BF ${n.stacks}/3\uFF1A\u7B2C\u56DB\u4E0B\u666E\u653B\u7F20\u4F4F\u5BF9\u624B\uFF0C\u9644\u5E26\u989D\u5916\u4F24\u5BB3\u4E0E\u51CF\u901F\u3002`,
   chijin_ember: () => "\u4E0B\u4E00\u6B21\u666E\u653B\u53D8\u4E3A\u91CD\u65A7\uFF0C\u5E76\u56DE\u590D\u81EA\u8EAB\u751F\u547D\u3002",
   chijin_blaze: (n) => n.value > 0 ? `\u653B\u901F\u63D0\u9AD8 ${Ps(n.value)}\u3002` : "\u653B\u901F\u5927\u5E45\u63D0\u9AD8\u3002",
   chijin_spin: () => "\u65A7\u5F71\u6301\u7EED\u5288\u780D\u5468\u56F4\u654C\u4EBA\uFF1B\u671F\u95F4\u514D\u75AB\u51CF\u901F\u5E76\u83B7\u5F97\u51CF\u4F24\u3002",
@@ -49753,7 +50332,29 @@ var qB = {
     `<g transform="rotate(-13 32 36)"><path d="M10 25H47V48H10Z" fill="url(#@pp)" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/><path d="M15 39L20 31.500L24 36.500L29.500 29.500L34.500 37.500" fill="none" stroke="${Cn.map}" stroke-width="1.400" stroke-linejoin="round" stroke-linecap="round"/><path d="M14.500 43.500Q21 40 27 43.500T39.500 42.500" fill="none" stroke="#3f6f96" stroke-width="1.300" stroke-linecap="round"/><rect x="37.500" y="28.500" width="5" height="5" rx=".8" fill="#b8323a"/><rect x="4" y="21" width="9" height="31" rx="4.500" fill="url(#@rl)" stroke="${xe}" stroke-width="1.400"/><path d="M8.500 17.500V21M8.500 52V55.500" stroke="${Cn.dark}" stroke-width="4.200" stroke-linecap="round"/><path d="M8.500 17.500V21M8.500 52V55.500" stroke="${Cn.accent}" stroke-width="1.600" stroke-linecap="round"/></g>` + We("g", 50, 24, 17) + Gp("translate(39.500 35) rotate(-40) scale(1.060)") + `<g transform="rotate(-13 32 36)"><path d="M41 24.500Q52 22 51.500 34Q51 46 41 48.500Q45.500 42 45.500 36.500Q45.500 30.500 41 24.500Z" fill="url(#@rl)" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/></g><path d="${hn(56.5, 20.5, 5, 0.14)}" fill="#ffffff"/>`
   )
 };
-var XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB };
+var mB2 = {
+  passive: () => dn(
+    Rs("mushroom"),
+    je("g", "#c4a2ff"),
+    `<ellipse cx="32" cy="55" rx="17" ry="4.5" fill="none" stroke="#c4b5fd" stroke-width="1.4" opacity=".55"/><path d="M23 53V38Q23 31 32 31Q41 31 41 38V53Q32 57 23 53Z" fill="#f3e7d0" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 35Q13 15 32 15Q51 15 53 35Q42 30 32 30Q22 30 11 35Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><circle cx="24" cy="24" r="2.7" fill="#f7efdd"/><circle cx="38" cy="22" r="2.1" fill="#f7efdd"/><circle cx="27" cy="43" r="1.7" fill="#2b1b3f"/><circle cx="37" cy="43" r="1.7" fill="#2b1b3f"/><path d="M28.5 48Q32 50 35.5 48" fill="none" stroke="#6b1d2a" stroke-width="1.5" stroke-linecap="round"/><path d="M47 44q4.5 2 5.5 6M17 44q-4.5 2-5.5 6" fill="none" stroke="#c4b5fd" stroke-width="1.4" stroke-linecap="round"/>`
+  ),
+  s1: () => dn(
+    Rs("mushroom", true),
+    je("g", "#c4a2ff", 1),
+    `<circle cx="32" cy="32" r="19" fill="#7c3aed" stroke="#070b16" stroke-width="1.8"/><path d="M13 30Q22 21 32 21Q42 21 51 30Q42 26 32 26Q22 26 13 30Z" fill="#a78bfa" opacity=".92"/><circle cx="26" cy="30" r="2.1" fill="#f3e7d0"/><circle cx="38" cy="37" r="1.7" fill="#f3e7d0"/><path d="M52 17q8 7 4 15M56 40q-2 8-9 11M12 47q-6-7-4-15" fill="none" stroke="#c4a2ff" stroke-width="2.2" stroke-linecap="round" opacity=".85"/>`
+  ),
+  s2: () => dn(
+    Rs("mushroom"),
+    je("g", "#c4a2ff"),
+    `<path d="M8 41Q10 24 26 24Q42 24 44 41Q34 36 26 36Q18 36 8 41Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 41V51Q17 56 26 56Q35 56 35 51V41" fill="#f3e7d0" stroke="#070b16" stroke-width="1.5" stroke-linejoin="round"/><g fill="#c4b5fd"><circle cx="44" cy="30" r="2.3"/><circle cx="50" cy="25" r="1.6"/><circle cx="50" cy="36" r="1.9"/><circle cx="56" cy="31" r="2.5"/><circle cx="45" cy="43" r="1.5"/><circle cx="52" cy="45" r="2"/></g>`
+  ),
+  ult: () => dn(
+    Rs("mushroom", true),
+    je("g", "#c4a2ff", 1),
+    `<ellipse cx="32" cy="55" rx="19" ry="4.5" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M26 21v10M32 21v15M38 21v10" stroke="#c4a2ff" stroke-width="2.1" stroke-linecap="round" opacity=".8"/><path d="M18 20Q19 7 32 7Q45 7 46 20Q39 16 32 16Q25 16 18 20Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><circle cx="27" cy="14" r="2.2" fill="#f7efdd"/><circle cx="38" cy="13" r="1.6" fill="#f7efdd"/><path d="M32 40l-7 8h4v6h6v-6h4z" fill="#f3e7d0" stroke="#070b16" stroke-width="1.4" stroke-linejoin="round"/>`
+  )
+};
+var XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB, mushroom: mB2 };
 function Ia(n, t) {
   return XB[n][t]();
 }
@@ -50149,6 +50750,7 @@ var T3 = {
   star_blessing: { name: "\u5DE8\u7075buff", kind: "buff" },
   panyue_passive: { name: "\u8986\u76FE\u9707\u5730", kind: "buff" },
   panyue_bulwark: { name: "\u62E5\u76FE\u6012\u76EE", kind: "buff" },
+  mushroom_passive: { name: "\u83CC\u4E1D\u7F20\u7F1A", kind: "buff" },
   chijin_ember: { name: "\u8D8A\u780D\u8D8A\u52C7", kind: "buff" },
   chijin_blaze: { name: "\u534A\u8DEF\u6740\u51FA \xB7 \u653B\u901F", kind: "buff" },
   chijin_spin: { name: "\u62A1\u5706\u4E86\u780D", kind: "buff" },
@@ -50233,6 +50835,7 @@ var rH = {
   ),
   panyue_passive: () => Ia("panyue", "passive"),
   panyue_bulwark: () => Ia("panyue", "s2"),
+  mushroom_passive: () => Ia("mushroom", "passive"),
   chijin_ember: () => Ia("chijin", "passive"),
   chijin_blaze: () => Ia("chijin", "s2"),
   chijin_spin: () => Ia("chijin", "ult"),
@@ -50264,7 +50867,8 @@ var hH = {
   chijin: { survive: 7.2, damage: 7.6, control: 4.4, mobility: 7.4, ease: 7 },
   xingli: { survive: 4.2, damage: 9, control: 8, mobility: 2.6, ease: 6.2 },
   fengling: { survive: 3.8, damage: 9.6, control: 5, mobility: 6.8, ease: 6.6 },
-  yeque: { survive: 5.4, damage: 9.2, control: 3.4, mobility: 9.6, ease: 3.6 }
+  yeque: { survive: 5.4, damage: 9.2, control: 3.4, mobility: 9.6, ease: 3.6 },
+  mushroom: { survive: 9.4, damage: 4.2, control: 9.2, mobility: 7.2, ease: 8.6 }
 };
 var hh = {
   easy: { label: "\u7B80\u5355", desc: "\u654C\u4EBA\u53CD\u5E94\u6162\u3001\u6280\u80FD\u4E0D\u51C6\u3001\u5F88\u5C11\u8D8A\u7EBF\uFF1B\u961F\u53CB\u4E5F\u4E0D\u5F3A\uFF0C\u8F93\u8D62\u770B\u4F60\u3002\u9002\u5408\u7B2C\u4E00\u6B21\u73A9\u3002" },
@@ -57399,6 +58003,48 @@ var Oa = {
       hitsNonHeroes: false,
       immunity: "untargetable"
     })
+  },
+  mushroom: {
+    s1: bi("mushroom", "s1", {
+      roles: ["engage", "chase"],
+      damage: Gi("physical", { ad: "adRatio" }),
+      cc: [{ kind: "knockup", duration: ze("mushroom", "s1", "knockup"), value: 0 }],
+      mobility: {
+        kind: "dash",
+        distance: 22,
+        duration: ze("mushroom", "s1", "chargeTime"),
+        wallBlocked: true,
+        stopsAtHero: true,
+        destination: "aim"
+      },
+      lock: ze("mushroom", "s1", "chargeTime"),
+      reach: 9 + ze("mushroom", "s1", "impactRadius"),
+      aoeRadius: ze("mushroom", "s1", "impactRadius"),
+      dodgeable: true
+    }),
+    s2: bi("mushroom", "s2", {
+      roles: ["poke", "waveclear", "slow"],
+      damage: Gi("magic", { ap: "apRatio" }),
+      cc: [{ kind: "slow", duration: ze("mushroom", "s2", "slowDur"), value: ze("mushroom", "s2", "slow") }],
+      delay: E0("mushroom", "s2")
+    }),
+    ult: bi("mushroom", "ult", {
+      roles: ["engage", "zone"],
+      damage: Gi("magic", { hp: "hpRatio" }),
+      cc: [{ kind: "knockup", duration: ze("mushroom", "ult", "knockup"), value: 0 }],
+      mobility: {
+        kind: "leap",
+        distance: k1("mushroom", "ult"),
+        duration: ze("mushroom", "ult", "leapTime"),
+        wallBlocked: false,
+        stopsAtHero: false,
+        destination: "aim"
+      },
+      delay: ze("mushroom", "ult", "warnTime") + ze("mushroom", "ult", "leapTime"),
+      lock: ze("mushroom", "ult", "warnTime") + ze("mushroom", "ult", "leapTime"),
+      immunity: "unstoppable",
+      dodgeable: true
+    })
   }
 };
 kr.flatMap((n) => [Oa[n].s1, Oa[n].s2, Oa[n].ult]);
@@ -57407,7 +58053,8 @@ var OG = {
   chijin: ["s2", "ult", "s1"],
   xingli: ["s2", "ult", "s1"],
   fengling: ["s1", "ult", "s2"],
-  yeque: ["s2", "s1", "ult"]
+  yeque: ["s2", "s1", "ult"],
+  mushroom: ["ult", "s1", "s2"]
 };
 var BG = {
   telegraph: "incoming",
@@ -57649,7 +58296,8 @@ var jG = {
   chijin: { fleeHp: 0.23, recallHp: 0.34, engage: 0.82, initiator: true, diveBackline: 0.5, support: false },
   xingli: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: false, diveBackline: 0, support: false },
   fengling: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: false, diveBackline: 0, support: false },
-  yeque: { fleeHp: 0.28, recallHp: 0.38, engage: 0.94, initiator: false, diveBackline: 1.2, support: false }
+  yeque: { fleeHp: 0.28, recallHp: 0.38, engage: 0.94, initiator: false, diveBackline: 1.2, support: false },
+  mushroom: { fleeHp: 0.2, recallHp: 0.3, engage: 0.85, initiator: true, diveBackline: 0.1, support: true }
 };
 var se = {
   senseRadius: 15,
@@ -58001,6 +58649,23 @@ function nV(n, t) {
       }
       return false;
     }
+    case "mushroom": {
+      if (wn(n, "ult") && s <= 15.5 && s > 4.5) {
+        const a = Oa.mushroom.ult, o = Zp(n, t, a.aoeRadius, 16, a.delay, Bt);
+        if ((o >= 2 || o >= 1 && (i < 0.65 || n.fightAdv >= 1.5 || n.friendsNear >= 1)) && (n.diving || n.v.enemyStructureCovering(Bt, 0) === null))
+          return Bc(n, "ult", Bt), true;
+      }
+      if (wn(n, "s1") && s <= 12 && s > 2) {
+        _s(n, t, 0, Ii(n, "s1", "dashSpeed"), Bt);
+        const a = Bt.x - e.pos.x, o = Bt.y - e.pos.y, r = Math.hypot(a, o) || 1;
+        if (Cl(n, a / r, o / r, Math.min(7, r))) return $s(n, "s1", Bt), true;
+      }
+      if (wn(n, "s2") && s <= 5.8) {
+        const a = t.pos.x - e.pos.x, o = t.pos.y - e.pos.y, r = Math.hypot(a, o) || 1;
+        return n.act.castDir("s2", a / r, o / r), true;
+      }
+      return false;
+    }
     case "yeque": {
       if (wn(n, "ult") && s <= 8.4 && t.alive) {
         const a = Nm(e, "ult", t), o = t.hp + t.shield;
@@ -58040,6 +58705,13 @@ function sV(n, t) {
       return s <= 12.2 && a("s1") ? (_s(n, t, 0.08, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), true) : false;
     case "fengling":
       return s <= 13.6 && a("s1") ? (_s(n, t, 0.12, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), true) : false;
+    case "mushroom":
+      if (s <= 9.6 && a("s1")) {
+        _s(n, t, 0, Ii(n, "s1", "dashSpeed"), Bt);
+        const o = Math.hypot(Bt.x - e.pos.x, Bt.y - e.pos.y) || 1;
+        if (Cl(n, (Bt.x - e.pos.x) / o, (Bt.y - e.pos.y) / o, Math.min(7, o))) return $s(n, "s1", Bt), true;
+      }
+      return false;
     case "yeque":
       return s <= 8.4 && a("s2", 1) && (_s(n, t, 0.06, Ii(n, "s2", "speed"), Bt), !ay(n, Bt, 0.5)) ? ($s(n, "s2", Bt), true) : s <= 8.3 && a("ult") && (n.diving || n.v.enemyStructureCovering(t.pos, 0.5) === null) && n.advantageAt(t.pos.x, t.pos.y) >= 0.8 ? (n.act.castTarget("ult", t.id), true) : false;
   }
@@ -58055,6 +58727,8 @@ function Uk(n, t) {
       return wn(n, "s1") && s <= 11.6 && x0(n, "s1") >= se.pokeMana ? (_s(n, t, 0.08, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), true) : wn(n, "s2") && s <= 9 && x0(n, "s2") >= 0.5 && (D3(t) || uh(t) > 0.2) ? (_s(n, t, Oa.xingli.s2.delay, 0, Bt), Bc(n, "s2", Bt), true) : false;
     case "fengling":
       return wn(n, "s1") && s <= 12.8 && x0(n, "s1") >= se.pokeMana ? (_s(n, t, 0.12, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), true) : false;
+    case "mushroom":
+      return wn(n, "s2") && s <= 6 && x0(n, "s2") >= se.pokeMana ? (n.act.castDir("s2", t.pos.x - e.pos.x, t.pos.y - e.pos.y), true) : false;
     case "yeque":
       return wn(n, "s2") && s <= 8 && x0(n, "s2") >= se.pokeMana && (_s(n, t, 0.06, Ii(n, "s2", "speed"), Bt), !ay(n, Bt, 0.5)) ? ($s(n, "s2", Bt), true) : false;
   }
@@ -58084,6 +58758,12 @@ function oy(n, t, e) {
       Dd(t, 4, Bt);
       const l = Bt.x - s.pos.x, c = Bt.y - s.pos.y;
       return Math.hypot(l, c) <= 12 && J2(n, t, l, c, 14, 0.65) >= a ? (n.act.castDir("s1", l, c), true) : false;
+    }
+    case "mushroom": {
+      if (!o("s2")) return false;
+      Dd(t, 4, Bt);
+      const l = Bt.x - s.pos.x, c = Bt.y - s.pos.y, f = Math.hypot(l, c);
+      return f <= 6 && J2(n, t, l, c, 6.2, 0.85) >= a + (e ? 0 : 1) ? (n.act.castDir("s2", l, c), true) : false;
     }
     case "yeque": {
       if (o("s2") && ye(s.pos, r.pos) <= 3.6 + r.radius)
@@ -58126,6 +58806,9 @@ function a6(n, t, e) {
       return i && s && wn(n, "s2", true) ? (Bt.x = s.pos.x + (n.me.pos.x - s.pos.x) * 0.3, Bt.y = s.pos.y + (n.me.pos.y - s.pos.y) * 0.3, n.act.castAt("s2", Bt), true) : false;
     case "fengling":
       return wn(n, "s2", true) && Kd(n, "s2", t, e, 5) ? true : i && s && wn(n, "s1", true) && n.hpR > 0.2 ? (_s(n, s, 0.12, Ii(n, "s1", "speed"), Bt), $s(n, "s1", Bt), true) : false;
+    case "mushroom":
+      if (wn(n, "s1", true) && Kd(n, "s1", t, e, 8)) return true;
+      return i && s && wn(n, "s2", true) && n.nearFoeD < 6 ? (n.act.castDir("s2", s.pos.x - n.me.pos.x, s.pos.y - n.me.pos.y), true) : false;
     case "yeque":
       return wn(n, "s1", true) && Kd(n, "s1", t, e, 6.5);
   }
@@ -58371,7 +59054,8 @@ var pV = {
   chijin: { cast_s1: "s1", dash: "s2", spin: "ult" },
   xingli: { cast_s1: "s1", cast_s2: "s2", cast_ult: "ult" },
   fengling: { cast_s1: "s1", dash: "s2", cast_ult: "ult" },
-  yeque: { dash: "s1", cast_s2: "s2", cast_ult: "ult" }
+  yeque: { dash: "s1", cast_s2: "s2", cast_ult: "ult" },
+  mushroom: { cast_s1: "s1", spin: "s1", dash: "s1", cast_s2: "s2", leap: "ult" }
 };
 var mV = 20;
 var gV = 10;
@@ -62214,6 +62898,89 @@ Oi("panyue", "ult", {
     Wn(t, e, "unstoppable", { duration: s + aq, sourceId: e.id, key: "panyue_ult", merge: "replace" }), ds(t, "panyue_ult_leap", i, e.team, { unitId: e.id, from: i, to: Cs(l) }), o = Zo(t, { visual: "telegraph", owner: e, pos: l, radius: n.radius, duration: s });
   }
 });
+var mP2 = Se.mushroom.passive.values;
+tu("mushroom", {
+  modifyBasicAttack(n, t, e, s) {
+    Ss(e) || am(t, "mushroom_passive") >= mP2.hits - 1 && (s.bonusMagic += t.stats.maxHp * mP2.hpRatio);
+  },
+  onBasicAttackHit(n, t, e) {
+    if (Ss(e)) return;
+    if (am(t, "mushroom_passive") >= mP2.hits - 1) {
+      Va(n, t, "mushroom_passive"), ds(n, "hit_magic", e.pos, t.team, { unitId: t.id, targetId: e.id }), e.alive && tr(n, e, mP2.slow, mP2.slowDur, t, "mushroom_passive");
+      return;
+    }
+    Wn(n, t, "mushroom_passive", { duration: 1 / 0, maxStacks: mP2.hits - 1, sourceId: t.id });
+  }
+});
+Oi("mushroom", "s1", {
+  movement: true,
+  noAnim: true,
+  lockTime: 0,
+  aimSpeed: $a("mushroom", "s1", "dashSpeed"),
+  aimRange: 9,
+  cast(n) {
+    const { sim: t, caster: e } = n, s = n.val("chargeTime"), i = n.val("dashSpeed"), a = n.val("maxSpeed"), o = n.val("accel"), r = oa(n, "damage", { ad: "adRatio" }), l = n.val("impactRadius");
+    ds(t, "mushroom_s1_dash", n.origin, e.team, { unitId: e.id, dir: Cs(n.dir) }), Hm(t, e, {
+      dir: n.dir,
+      distance: 999,
+      speed: i,
+      hitRadius: e.radius + 0.55,
+      filter: ia(e.team, { heroesOnly: true }),
+      anim: "spin",
+      onHit(c10) {
+        const f10 = Cs(c10.pos);
+        ds(t, "mushroom_s1_impact", f10, e.team, { unitId: e.id, radius: l });
+        for (const d of Pr(t, c10.pos, l, ia(e.team))) wo(n, d, r, "physical"), yS(t, d, n.val("knockup"), e);
+        return true;
+      }
+    }), vS(t, e, "spin", s, false);
+    const c = t.state.time;
+    let v = 0;
+    const f = () => {
+      const d = e.rt.dash;
+      if (!e.alive || !d || d.anim !== "spin") return;
+      const h = t.state.time - c;
+      if (h >= s) return void iu(t, e, "arrived");
+      d.speed = Math.min(a, i + h * o), v++ % 3 === 0 && ds(t, "mushroom_s1_trail", e.pos, e.team, { unitId: e.id }), t.schedule(0.08, f);
+    };
+    t.schedule(0.08, f);
+  }
+});
+Oi("mushroom", "s2", {
+  cast(n) {
+    const { sim: t, caster: e } = n, s = oa(n, "damage", { ap: "apRatio" });
+    ds(t, "mushroom_s2_spray", e.pos, e.team, {
+      unitId: e.id,
+      dir: Cs(n.dir),
+      radius: n.range,
+      angle: n.angle
+    }), t.schedule(0.06, () => {
+      for (const i of $j(t, e.pos, n.dir, n.range, n.angle, ia(e.team)))
+        wo(n, i, s, "magic"), tr(t, i, n.val("slow"), n.val("slowDur"), e, "mushroom_s2");
+    });
+  }
+});
+Oi("mushroom", "ult", {
+  movement: true,
+  noAnim: true,
+  aimLead: $a("mushroom", "ult", "warnTime"),
+  cast(n) {
+    const { sim: t, caster: e } = n, s = n.val("warnTime"), i = n.val("leapTime"), a = Cs(n.origin), o = { x: n.targetPos.x, y: n.targetPos.y };
+    Wn(t, e, "unstoppable", {
+      duration: s + i + 0.1,
+      sourceId: e.id,
+      key: "mushroom_ult",
+      merge: "replace"
+    }), ds(t, "mushroom_ult_charge", a, e.team, { unitId: e.id }), vS(t, e, "channel", s, false), Zo(t, { visual: "telegraph", owner: e, pos: o, radius: n.radius, duration: s + i }), t.schedule(s, () => {
+      e.alive && fW(t, e, o.x, o.y, i, (r) => {
+        if (r !== "arrived" || !e.alive) return;
+        const l = Cs(e.pos), c = oa(n, "damage", { hp: "hpRatio" });
+        ds(t, "mushroom_ult_land", l, e.team, { unitId: e.id, radius: n.radius });
+        for (const f of Pr(t, l, n.radius, ia(e.team))) wo(n, f, c, "magic"), yS(t, f, n.val("knockup"), e);
+      });
+    });
+  }
+});
 var e1 = Se.chijin.passive.values;
 var B6 = E0("chijin", "s1");
 tu("chijin", {
@@ -62747,7 +63514,7 @@ var wq = class {
     ];
     const a = () => Array.from({ length: 10 }, () => ({ x: 0, y: 0, time: -999 }));
     this.lastSeen = [a(), a()];
-    const o = [s, ...kr.filter((c) => c !== s)];
+    const o = [s, ...kr.filter((c) => c !== s).slice(0, 4)];
     for (const c of [0, 1])
       o.forEach((f, d) => {
         const h = KV(this, c * 5 + d, c, f, c === 0 && d === 0);

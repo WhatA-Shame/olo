@@ -21,7 +21,7 @@ import { $H } from './35-ui-3.js';
 import { QH, XH } from './36-ui-4.js';
 import { $a, E0, FG } from './40-ui-8.js';
 import { WG, rf } from './41-ai.js';
-import { JV, KV, NV, Oi, QV, RV, Ss, XV, Xk, Zo, hW, jV, qV, ql, tu, x6 } from './42-ai-2.js';
+import { JV, KV, NV, Oi, QV, RV, Ss, XV, Xk, Zo, hW, iu, jV, qV, ql, tu, x6 } from './42-ai-2.js';
 import { $j, AW, Aj, Ba, CW, Cj, Cs, Dh, Fj, Gj, HW, Hm, Jj, Kj, Lj, O6, Oj, Pr, Qj, Uj, Va, Vj, Wj, Wm, Wn, Xj, YW, Yj, Zj, _o, am, aq, by, ds, eq, fW, fj, gS, hj, ia, iq, jW, jj, my, nS, oa, om, qj, sq, tq, tr, vS, wo, xS, yS, zW, zh } from './43-data-3.js';
 
 Oi("panyue", "ult", {
@@ -61,6 +61,118 @@ Oi("panyue", "ult", {
     (Wn(t, e, "unstoppable", { duration: s + aq, sourceId: e.id, key: "panyue_ult", merge: "replace" }),
       ds(t, "panyue_ult_leap", i, e.team, { unitId: e.id, from: i, to: Cs(l) }),
       (o = Zo(t, { visual: "telegraph", owner: e, pos: l, radius: n.radius, duration: s })));
+  },
+});
+
+const mP = Se.mushroom.passive.values;
+
+tu("mushroom", {
+  modifyBasicAttack(n, t, e, s) {
+    Ss(e) || (am(t, "mushroom_passive") >= mP.hits - 1 && (s.bonusMagic += t.stats.maxHp * mP.hpRatio));
+  },
+  onBasicAttackHit(n, t, e) {
+    if (Ss(e)) return;
+    if (am(t, "mushroom_passive") >= mP.hits - 1) {
+      (Va(n, t, "mushroom_passive"),
+        ds(n, "hit_magic", e.pos, t.team, { unitId: t.id, targetId: e.id }),
+        e.alive && tr(n, e, mP.slow, mP.slowDur, t, "mushroom_passive"));
+      return;
+    }
+    Wn(n, t, "mushroom_passive", { duration: 1 / 0, maxStacks: mP.hits - 1, sourceId: t.id });
+  },
+});
+
+Oi("mushroom", "s1", {
+  movement: !0,
+  noAnim: !0,
+  lockTime: 0,
+  aimSpeed: $a("mushroom", "s1", "dashSpeed"),
+  aimRange: 9,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      s = n.val("chargeTime"),
+      i = n.val("dashSpeed"),
+      a = n.val("maxSpeed"),
+      o = n.val("accel"),
+      r = oa(n, "damage", { ad: "adRatio" }),
+      l = n.val("impactRadius");
+    (ds(t, "mushroom_s1_dash", n.origin, e.team, { unitId: e.id, dir: Cs(n.dir) }),
+      Hm(t, e, {
+        dir: n.dir,
+        distance: 999,
+        speed: i,
+        hitRadius: e.radius + 0.55,
+        filter: ia(e.team, { heroesOnly: !0 }),
+        anim: "spin",
+        onHit(c) {
+          const f = Cs(c.pos);
+          ds(t, "mushroom_s1_impact", f, e.team, { unitId: e.id, radius: l });
+          for (const d of Pr(t, c.pos, l, ia(e.team))) (wo(n, d, r, "physical"), yS(t, d, n.val("knockup"), e));
+          return !0;
+        },
+      }),
+      vS(t, e, "spin", s, !1));
+    const c = t.state.time;
+    let v = 0;
+    const f = () => {
+      const d = e.rt.dash;
+      if (!e.alive || !d || d.anim !== "spin") return;
+      const h = t.state.time - c;
+      if (h >= s) return void iu(t, e, "arrived");
+      ((d.speed = Math.min(a, i + h * o)),
+        v++ % 3 === 0 && ds(t, "mushroom_s1_trail", e.pos, e.team, { unitId: e.id }),
+        t.schedule(0.08, f));
+    };
+    t.schedule(0.08, f);
+  },
+});
+
+Oi("mushroom", "s2", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      s = oa(n, "damage", { ap: "apRatio" });
+    (ds(t, "mushroom_s2_spray", e.pos, e.team, {
+      unitId: e.id,
+      dir: Cs(n.dir),
+      radius: n.range,
+      angle: n.angle,
+    }),
+      t.schedule(0.06, () => {
+        for (const i of $j(t, e.pos, n.dir, n.range, n.angle, ia(e.team)))
+          (wo(n, i, s, "magic"), tr(t, i, n.val("slow"), n.val("slowDur"), e, "mushroom_s2"));
+      }));
+  },
+});
+
+Oi("mushroom", "ult", {
+  movement: !0,
+  noAnim: !0,
+  aimLead: $a("mushroom", "ult", "warnTime"),
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      s = n.val("warnTime"),
+      i = n.val("leapTime"),
+      a = Cs(n.origin),
+      o = { x: n.targetPos.x, y: n.targetPos.y };
+    (Wn(t, e, "unstoppable", {
+      duration: s + i + 0.1,
+      sourceId: e.id,
+      key: "mushroom_ult",
+      merge: "replace",
+    }),
+      ds(t, "mushroom_ult_charge", a, e.team, { unitId: e.id }),
+      vS(t, e, "channel", s, !1),
+      Zo(t, { visual: "telegraph", owner: e, pos: o, radius: n.radius, duration: s + i }),
+      t.schedule(s, () => {
+        e.alive &&
+          fW(t, e, o.x, o.y, i, (r) => {
+            if (r !== "arrived" || !e.alive) return;
+            const l = Cs(e.pos),
+              c = oa(n, "damage", { hp: "hpRatio" });
+            ds(t, "mushroom_ult_land", l, e.team, { unitId: e.id, radius: n.radius });
+            for (const f of Pr(t, l, n.radius, ia(e.team))) (wo(n, f, c, "magic"), yS(t, f, n.val("knockup"), e));
+          });
+      }));
   },
 });
 
@@ -719,7 +831,7 @@ class wq {
       ]));
     const a = () => Array.from({ length: 10 }, () => ({ x: 0, y: 0, time: -999 }));
     this.lastSeen = [a(), a()];
-    const o = [s, ...kr.filter((c) => c !== s)];
+    const o = [s, ...kr.filter((c) => c !== s).slice(0, 4)];
     for (const c of [0, 1])
       o.forEach((f, d) => {
         const h = KV(this, c * 5 + d, c, f, c === 0 && d === 0);

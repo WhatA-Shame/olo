@@ -202,6 +202,191 @@ const AD = (n, t, e) => {
     xingli_ult_cast: LD,
     xingli_meteor: ID,
   },
+  Mu = ws.mushroom,
+  mSD = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = t.dir?.x ?? 1,
+      a = t.dir?.y ?? 0,
+      o = Math.atan2(a, i),
+      r = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 1.7, 0.4).params(1, 0.1).color(Mu.glow, 1.8).under(W.shadow, 0.32),
+      n.decals.add(Xt.zone, e, s, 2.3, 0.45).params(14, 0).color(Mu.accent, 1.3, 0.7).under(W.shadow, 0.26));
+    const l = n.particles.use(Mt.dust);
+    for (let c = 0; c < 14; c++) {
+      const f = o + Math.PI + (r.next() - 0.5) * 1.5,
+        d = r.range(0.3, 1.5);
+      l.spawn(
+        e + Math.cos(f) * d,
+        r.range(0.2, 1),
+        s + Math.sin(f) * d,
+        Math.cos(f) * r.range(2, 5),
+        r.range(0.6, 2.2),
+        Math.sin(f) * r.range(2, 5),
+        0.45,
+        0.6,
+        1.5,
+      );
+    }
+    n.light(e, s, 1.2, Mu.glow, 4, 5, 0.3);
+  },
+  mTD = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    n.decals.add(Xt.ring, e, s, 1.3, 0.34).params(1, 0.12).color(Mu.accent, 1.2).under(W.shadow, 0.24);
+    const a = n.particles.use(Mt.dust);
+    for (let o = 0; o < 5; o++) {
+      const r = i.next() * Math.PI * 2,
+        l = i.range(0.2, 1.1);
+      a.spawn(
+        e + Math.cos(r) * l,
+        i.range(0.15, 0.7),
+        s + Math.sin(r) * l,
+        Math.cos(r) * i.range(0.8, 2.4),
+        i.range(0.4, 1.4),
+        Math.sin(r) * i.range(0.8, 2.4),
+        0.35,
+        0.45,
+        1.3,
+      );
+    }
+    n.light(e, s, 0.8, Mu.glow, 3, 3.5, 0.2);
+  },
+  mQD = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = t.radius ?? 2.4;
+    (n.decals.add(Xt.ring, e, s, i, 0.32).params(1, 0.1).color(Mu.hot, 1.8).under(W.shadow, 0.35),
+      n.decals.add(Xt.zone, e, s, i * 0.8, 0.4).params(14, 0).color(Mu.glow, 1.5, 0.75).under(W.shadow, 0.3));
+    const a = n.particles.use(Mt.dust),
+      o = n.rnd;
+    for (let r = 0; r < 16; r++) {
+      const l = o.next() * Math.PI * 2,
+        c = o.range(0.4, i);
+      a.spawn(
+        e + Math.cos(l) * c,
+        o.range(0.2, 0.9),
+        s + Math.sin(l) * c,
+        Math.cos(l) * o.range(1, 3.2),
+        o.range(0.6, 2.4),
+        Math.sin(l) * o.range(1, 3.2),
+        0.5,
+        0.7,
+        1.5,
+      );
+    }
+    (n.light(e, s, 1, Mu.glow, 6, i * 2.4, 0.35), n.shake(0.16, e, s));
+  },
+  mJD = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = t.dir?.x ?? 1,
+      a = t.dir?.y ?? 0,
+      o = Math.atan2(a, i),
+      r = t.radius ?? 6.2,
+      l = t.angle ?? 1.6,
+      h = l / 2,
+      f = n.rnd;
+    (n.decals.add(Xt.cone, e, s, r, 0.85).rot(o).params(h, 0.12).color(Mu.glow, 2.1).under(W.shadow, 0.36),
+      n.decals.add(Xt.cone, e, s, r * 0.6, 0.7).rot(o).params(h * 0.92, 0.04).color(Mu.hot, 1.3).under(W.shadow, 0.24));
+    const c = n.particles.use(Mt.streak).tint(W.white, Mu.accent),
+      u = n.n(12);
+    for (let d = 0; d < u; d++) {
+      const m = f.next(),
+        x = o + h - l * m,
+        p = r * f.range(0.3, 0.95);
+      c.spawn(
+        e + Math.cos(x) * p,
+        f.range(0.4, 1.2),
+        s + Math.sin(x) * p,
+        Math.cos(x) * f.range(4, 9),
+        f.range(0.2, 0.9),
+        Math.sin(x) * f.range(4, 9),
+        0.3,
+        0.09,
+        0.05,
+        m * 0.1,
+      );
+    }
+    const g = n.particles.use(Mt.dust),
+      y = n.n(9);
+    for (let d = 0; d < y; d++) {
+      const m = f.next(),
+        x = o + h - l * m,
+        p = r * f.range(0.25, 0.8);
+      g.spawn(
+        e + Math.cos(x) * p,
+        f.range(0.5, 1.4),
+        s + Math.sin(x) * p,
+        Math.cos(x) * f.range(0.8, 2),
+        f.range(0.2, 0.8),
+        Math.sin(x) * f.range(0.8, 2),
+        0.8,
+        0.55,
+        1.6,
+      );
+    }
+    n.light(e + i * r * 0.45, s + a * r * 0.45, 1.4, Mu.glow, 5, r * 1.5, 0.34);
+  },
+  mZD = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      a = t.radius ?? 4.6,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, a, 0.42).params(1, 0.12).color(Mu.hot, 2).under(W.shadow, 0.45),
+      n.decals.add(Xt.zone, s, i, a, 0.5).params(16, 0).color(Mu.glow, 1.6, 0.8).under(W.shadow, 0.4),
+      n.decals.add(Xt.ring, s, i, a * 0.55, 0.5).params(1, 0.1).color(Mu.accent, 1.6).under(W.shadow, 0.3));
+    const r = n.particles.use(Mt.dust);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2,
+        f = o.range(0.5, a);
+      r.spawn(
+        s + Math.cos(c) * f,
+        o.range(0.2, 1.2),
+        i + Math.sin(c) * f,
+        Math.cos(c) * o.range(1.5, 4.5),
+        o.range(0.8, 3),
+        Math.sin(c) * o.range(1.5, 4.5),
+        0.6,
+        0.8,
+        1.8,
+      );
+    }
+    (n.light(s, i, 1, Mu.glow, le.lightMax, a * 2.6, 0.45), n.shake(bo(t, e) ? 0.5 : 0.3, s, i));
+  },
+  mXD = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 1.5, 1.6).params(1, 0.06).color(Mu.accent, 1.4, 0.7).under(W.shadow, 0.3),
+      n.decals.add(Xt.zone, e, s, 1.1, 1.6).params(12, 0.2).color(Mu.glow, 1.2, 0.6).under(W.shadow, 0.25));
+    const a = n.particles.use(Mt.dust);
+    for (let o = 0; o < 14; o++) {
+      const r = i.next() * Math.PI * 2,
+        l = i.range(0.5, 1.5);
+      a.spawn(
+        e + Math.cos(r) * l,
+        i.range(0.1, 0.4),
+        s + Math.sin(r) * l,
+        -Math.cos(r) * i.range(0.4, 1.2),
+        i.range(1.6, 3.2),
+        -Math.sin(r) * i.range(0.4, 1.2),
+        1.3,
+        0.5,
+        1.4,
+      );
+    }
+    n.light(e, s, 1, Mu.accent, 5, 5, 1.5);
+  },
+  mMD = {
+    mushroom_s1_dash: mSD,
+    mushroom_s1_trail: mTD,
+    mushroom_s1_impact: mQD,
+    mushroom_s2_spray: mJD,
+    mushroom_ult_land: mZD,
+    mushroom_ult_charge: mXD,
+  },
   Ci = ws.yeque,
   Nb = Se.yeque.skills.s1,
   DD = Se.yeque.skills.s2,
@@ -404,7 +589,7 @@ const AD = (n, t, e) => {
       n.shake(bo(t, e) ? 0.4 : 0.25, s, i));
   },
   HD = { yeque_s1_dash: FD, yeque_s2_cast: UD, yeque_ult_vanish: OD, yeque_ult_strike: BD },
-  $D = { ...xD, ...UP, ...ED, ...YP, ...PD, ...eD, ...HD };
+  $D = { ...xD, ...UP, ...ED, ...YP, ...PD, ...mMD, ...eD, ...HD };
 
 function GD() {
   return { x: 0, y: 0, z: 0, height: 2, radius: 0.6, visible: !1, opacity: 1, unit: null };

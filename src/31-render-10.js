@@ -20,7 +20,7 @@ import { Yt, fs } from './14-three-7.js';
 import { aa, as, sh, ux, zf } from './15-render-4.js';
 import { xo } from './18-core.js';
 import { Ct, En, K, Kn, Ux, Wa, Xe, bU, bt, p2, pt, sw } from './25-render-9.js';
-import { AU, Ls } from './26-core-5.js';
+import { AU, Ls, bBg } from './26-core-5.js';
 import { PU, UU } from './27-core-6.js';
 import { $U, KU, ZU, jU } from './28-core-7.js';
 import { JU, QU, fO, lO } from './29-core-8.js';
@@ -802,6 +802,7 @@ const Gx = {
     "hero:xingli": $U,
     "hero:fengling": PU,
     "hero:yeque": jU,
+    "hero:mushroom": bBg,
     "minion:melee": KU,
     "minion:ranged": ZU,
     "minion:siege": QU,
@@ -1207,7 +1208,7 @@ class jO {
 const f0 = { hero: !1, minion: !1, monster: !1, tower: !0, core: !0 },
   qO = { hero: 1.32, minion: 1.28, monster: 1.17, tower: 1, core: 1 },
   Np = [3.05, 3.55],
-  XO = { panyue: 1.07, chijin: 0.97 },
+  XO = { panyue: 1.07, chijin: 0.97, mushroom: 1.02 },
   n4 = 20,
   s4 = 0.16,
   YO = 0.25,
@@ -1937,6 +1938,7 @@ const cB = {
     xingli: { cast_s1: ["cast_s1", 0.9], cast_s2: ["cast_s2", 1], cast_ult: ["cast_ult", 1.5] },
     fengling: { cast_s1: ["cast_s1", 1], cast_s2: ["dash", 0.5], cast_ult: ["cast_ult", 1.2] },
     yeque: { cast_s1: ["dash", 0.45], cast_s2: ["cast_s2", 0.8], cast_ult: ["cast_ult", 1] },
+    mushroom: { cast_s1: ["spin", 1.6], cast_s2: ["cast_s2", 0.9], cast_ult: ["cast_ult", 1.2] },
   },
   Ac = { side: 0.07, top: 0.06, bottom: 0.12 },
   a4 = { top: 3.2, halfW: 1.2 },
@@ -1946,6 +1948,7 @@ const cB = {
     xingli: { drop: 0.26, dist: 2.75, yaw: -18, x: 0.04 },
     fengling: { drop: 0.24, dist: 2.75, yaw: 26, x: 0.06, anim: "channel" },
     yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 },
+    mushroom: { drop: 0.2, dist: 3.4, yaw: -16, x: 0.02 },
   },
   o4 = new Map(),
   r4 = new Float32Array(512);
@@ -1999,6 +2002,7 @@ const v3 = {
     xingli: [0.25, 0.8],
     fengling: [0.25, 0.8],
     yeque: [0.25, 0.8],
+    mushroom: [-0.26, 0.26],
   },
   hB = 48;
 

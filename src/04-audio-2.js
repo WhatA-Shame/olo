@@ -85,8 +85,9 @@ class Ny {
       this.graph.push(a));
   }
   play(t, e = {}) {
-    const s = r1[t],
-      i = this.now() + (e.when ?? 0) + 0.004,
+    const s = r1[t];
+    if (!s) return null;
+    const i = this.now() + (e.when ?? 0) + 0.004,
       a = s.group ?? t,
       o = this.lastAt.get(a);
     if (o !== void 0 && i - o < s.gap && i >= o) return (this.stats.throttled++, null);
@@ -1032,8 +1033,9 @@ const ET = {
     xingli: "atk_xingli_charge",
     fengling: "atk_fengling_draw",
     yeque: "atk_yeque_swing",
+    mushroom: "atk_mushroom_swing",
   },
-  AT = { panyue: "atk_panyue_hit", chijin: "atk_chijin_hit", yeque: "atk_yeque_hit" },
+  AT = { panyue: "atk_panyue_hit", chijin: "atk_chijin_hit", yeque: "atk_yeque_hit", mushroom: "atk_mushroom_hit" },
   RT = {
     xingli_basic: "atk_xingli_launch",
     fengling_basic: "atk_fengling_launch",
@@ -1363,8 +1365,9 @@ class DT {
     );
   }
   at(t, e, s, i) {
-    const a = this.mixer;
-    return !a || !this.locate(e, r1[t].range, i?.floor ?? 0)
+    const a = this.mixer,
+      g1 = r1[t];
+    return !a || !g1 || !this.locate(e, g1.range, i?.floor ?? 0)
       ? null
       : a.play(t, {
           gain: s * this.spGain,

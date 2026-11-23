@@ -2006,6 +2006,269 @@ const EU = [0, 0, 0],
   hw = [0, 0, 0, 1],
   Mp = new Float32Array(8);
 
+const MgU = {
+    ...Am,
+    hipX: 0.175,
+    shoulderX: 0.33,
+    clavX: 0.12,
+    pelvisY: 0.8,
+    spineY: 0.95,
+    chestY: 1.12,
+    neckY: 1.38,
+    headY: 1.44,
+    shoulderY: 1.3,
+    elbowY: 1.02,
+    wristY: 0.78,
+    handY: 0.7,
+    hipY: 0.78,
+    kneeY: 0.44,
+    ankleY: 0.1,
+  },
+  MgC = {
+    stalk: 15984592,
+    stalkShade: 14271907,
+    neck: 15127407,
+    cap: 8138477,
+    capDeep: 5972410,
+    capLight: 10316543,
+    gill: 15720648,
+    spot: 16248805,
+    blush: 15695854,
+    mouth: 7019818,
+    eye: 2825023,
+  },
+  MgW = {
+    stride: 2.1,
+    sway: 0.03,
+    stance: 0.34,
+    lift: 0.2,
+    bob: 0.05,
+    drop: 0.06,
+    lean: 8,
+    twist: 6,
+    width: 0.19,
+    arm: 26,
+    elbow: 16,
+  };
+
+// 杯杯菇：粗胖菌柄 + 紫红大伞盖 + 短粗四肢，沿用通用骨架与姿势组
+function bBg() {
+  const n = Gh(MgU),
+    t = new Ls(),
+    i = n.J,
+    d = n.d;
+  // 与通用姿势组配套的手部辅助关节（无武器，仅用于姿势驱动）
+  (n.rig.add("gripR", i.chest, 0, d.chestY, 0),
+    n.rig.add("aim", i.chest, 0, d.chestY, 0),
+    n.rig.add("gripL", i.chest, 0, d.chestY, 0));
+  const s = TU(n);
+  t.crease = 44;
+  // 短粗腿 + 圆脚
+  t.sym((R) => {
+    const _ = [
+        [R * d.hipX, d.hipY + 0.05, 0],
+        [R * d.hipX, d.kneeY, 0.02],
+        [R * d.hipX, d.ankleY + 0.07, 0.03],
+        [R * d.hipX, d.ankleY + 0.02, 0.26],
+      ],
+      k = [R > 0 ? i.thighL : i.thighR, R > 0 ? i.shinL : i.shinR, R > 0 ? i.footL : i.footR];
+    (t.bind(Zi(k, _, i.hips)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }),
+      t.limb(_[0], _[2], 0.21, 0.155, { seg: 10, bulge: 0.1 }),
+      t.bone(R > 0 ? i.footL : i.footR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }),
+      t.ball(R * d.hipX, d.ankleY + 0.02, 0.075, 0.23, 0.115, 0.28, 0, 180));
+  });
+  // 菌柄身子
+  (t.bind(Bl(n)).paint(MgC.stalk, {
+    c2: MgC.stalkShade,
+    ao: 0.84,
+    ao2: 1,
+    mat: K.skin,
+    by: (R, I) => 1 - Xi((I - 0.62) / 0.82),
+  }),
+    t.lathe(
+      [
+        [0.56, 0.02],
+        [0.6, 0.3],
+        [0.68, 0.42],
+        [0.78, 0.5],
+        [0.9, 0.535],
+        [1.02, 0.525],
+        [1.14, 0.475],
+        [1.24, 0.405],
+        [1.32, 0.345],
+        [1.4, 0.315],
+        [1.46, 0.3],
+      ],
+      { seg: 18, cap0: !0, cap1: !1 },
+    ));
+  // 菌颈淡紫
+  (t.bind(Zi([i.chest, i.neck, i.head], [[0, 1.18, 0], [0, 1.28, 0], [0, 1.36, 0], [0, 1.45, 0]], i.chest)).paint(
+    MgC.neck,
+    { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin, by: (R, I) => Xi((I - 1.2) / 0.26) },
+  ),
+    t.lathe(
+      [
+        [1.22, 0.4],
+        [1.3, 0.35],
+        [1.38, 0.315],
+        [1.45, 0.305],
+      ],
+      { seg: 18, cap0: !1, cap1: !1 },
+    ));
+  // 伞盖底面（菌褶）
+  (t.bone(i.head).paint(MgC.gill, {
+    c2: MgC.stalkShade,
+    ao: 0.78,
+    ao2: 1,
+    mat: K.skin,
+    by: (R, I) => Xi((I - 1.36) / 0.1),
+  }),
+    t.lathe(
+      [
+        [1.345, 0.02],
+        [1.35, 0.3],
+        [1.365, 0.58],
+        [1.39, 0.79],
+        [1.43, 0.9],
+      ],
+      { seg: 30, cap0: !1, cap1: !1, shape: (R) => 1 + 0.009 * Math.cos(R * 26) },
+    ));
+  // 紫红伞盖
+  (t.paint(MgC.capDeep, { c2: MgC.capLight, ao: 0.86, ao2: 1, mat: K.fur, by: (R, I) => Xi((I - 1.45) / 0.52) }),
+    t.lathe(
+      [
+        [1.41, 0.88],
+        [1.47, 0.93],
+        [1.56, 0.945],
+        [1.66, 0.93],
+        [1.77, 0.88],
+        [1.88, 0.79],
+        [1.98, 0.65],
+        [2.06, 0.46],
+        [2.11, 0.24],
+        [2.13, 0.02],
+      ],
+      { seg: 30, cap0: !1, cap1: !0, shape: (R) => 1 + 0.012 * Math.cos(R * 7) },
+    ));
+  // 盖面奶白圆斑
+  t.paint(MgC.spot, { ao: 0.95, mat: K.fur, line: 0 });
+  for (const [R, I, P, F] of [
+    [0.36, 1.72, 0.52, 0.15],
+    [-0.3, 1.86, 0.44, 0.12],
+    [0.08, 1.98, -0.34, 0.13],
+    [-0.56, 1.66, -0.2, 0.11],
+    [0.62, 1.6, -0.28, 0.1],
+    [-0.12, 1.6, 0.62, 0.09],
+  ])
+    t.ball(R, I, P, F, F * 0.34, F, 0, 180);
+  // 脸（长在菌柄中段）
+  (t.bone(i.neck).paint(16777215, { ao: 0.96, mat: K.skin, line: 0 }),
+    t.ball(0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180),
+    t.ball(-0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180),
+    t.paint(MgC.eye, { ao: 0.98, mat: K.skin, line: 0 }),
+    t.ball(0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180),
+    t.ball(-0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180),
+    t.paint(MgC.blush, { ao: 0.95, mat: K.skin, line: 0 }),
+    t.ball(0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180),
+    t.ball(-0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180),
+    t.paint(MgC.mouth, { ao: 0.97, mat: K.skin, line: 0 }),
+    t.ball(0, 1.105, 0.44, 0.075, 0.036, 0.026, 0, 180));
+  // 短粗手臂
+  t.sym((R) => {
+    const _ = [
+        [R * 0.3, 1.27, 0.02],
+        [R * 0.4, 1.08, 0.05],
+        [R * 0.46, 0.9, 0.07],
+        [R * 0.47, 0.83, 0.08],
+      ],
+      k = [R > 0 ? i.armL : i.armR, R > 0 ? i.foreL : i.foreR, R > 0 ? i.handL : i.handR];
+    (t.bind(Zi(k, _, i.chest)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }),
+      t.limb(_[0], _[2], 0.15, 0.125, { seg: 9, bulge: 0.09 }),
+      t.bone(R > 0 ? i.handL : i.handR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }),
+      t.ball(R * 0.47, 0.87, 0.075, 0.15, 0.135, 0.15, 0, 180));
+  });
+  const a = s.tmp,
+    h = (R, I, P) => {
+      const F = s.common;
+      if (jh(n, R, I.anim === "leap" ? "airborne" : I.anim, I.t, I.p, I.time, F)) {
+        I.anim === "dead" && (P.glow = Math.max(0.15, 1 - I.t * 1.2));
+        return;
+      }
+      switch (I.anim) {
+        case "move": {
+          (Mf(n, R, I.stride, MgW, () => {
+            const L = Math.cos(I.stride * Math.PI * 2);
+            (R.add(i.chest, 0, 0, L * 3), R.add(i.head, 0, 0, -L * 2));
+          }),
+            (P.glow = 1));
+          break;
+        }
+        case "attack": {
+          const L = Vh(I.p, I.windup);
+          (ta(I.variant % 2 === 0 ? s.atkA : s.atkB, L, a), Un(n, R, a), (P.glow = 1 + 1.4 * ho(L, 0.36, 0.2)));
+          break;
+        }
+        case "cast_s1":
+        case "dash": {
+          (Un(n, R, s.dash), (P.glow = 2.4));
+          break;
+        }
+        case "cast_s2": {
+          (ta(s.s1, I.p, a), Un(n, R, a), (P.glow = 1 + 2 * ho(I.p, 0.45, 0.3)));
+          break;
+        }
+        case "cast_ult": {
+          (ta(s.ult, I.p, a), Un(n, R, a), (P.glow = 1 + 1.6 * I.p));
+          break;
+        }
+        case "spin": {
+          (nf(a, s.spin),
+            Un(n, R, a, () => {
+              const L = I.t,
+                B = L < 0.15 ? ((L * L) / 0.3) * 2.4 : (L - 0.075) * 2.4;
+              (R.rot(i.root, 0, -B * 360, 0), R.add(i.spine, 0, 0, 4 * Math.sin(L * 9)));
+            }),
+            (P.glow = 2.6));
+          break;
+        }
+        case "channel": {
+          (Un(n, R, s.channel, () => Yo(n, R, I.time, I.seed, 0.8)),
+            (P.glow = 1 + 0.5 * (0.5 + 0.5 * Math.sin(I.time * 5))));
+          break;
+        }
+        default: {
+          (nf(a, s.stance),
+            Un(n, R, a, () => Yo(n, R, I.time, I.seed, 1.2)),
+            (P.glow = 1 + 0.12 * Math.sin(I.time * 3)));
+        }
+      }
+    };
+  return (
+    t.bakeGrounding(2.13),
+    {
+      key: "hero:mushroom",
+      geometry: t.build(),
+      rig: n.rig,
+      height: 2.15,
+      radius: 0.82,
+      scale: 1.06,
+      stride: MgW.stride * 1.06,
+      triangles: t.triangleCount,
+      attach: {
+        head: { joint: i.head, x: 0, y: 0.3, z: 0 },
+        chest: { joint: i.chest, x: 0, y: 0.08, z: 0 },
+        handR: { joint: i.handR, x: 0, y: -0.07, z: 0 },
+        handL: { joint: i.handL, x: 0, y: -0.07, z: 0 },
+        weapon: { joint: i.handR, x: 0, y: -0.05, z: 0 },
+        muzzle: { joint: i.handR, x: 0, y: -0.05, z: 0 },
+      },
+      blend: (R, I) =>
+        I === "attack" || I === "dash" ? 0.07 : I === "dead" ? 0.05 : R === "dash" || R === "spin" ? 0.16 : 0.13,
+      animate: h,
+    }
+  );
+}
+
 function AU() {
   const { h: n, b: t, extra: e } = SU(),
     s = TU(n),
@@ -2178,4 +2441,4 @@ const jt = {
   uw = 1.2,
   pw = Math.PI / 180,
   Ra = { tip: 0.86, string: 0.2 };
-export { Ls, Bl, Zi, Li, Js, qh, Cm, Xh, Ox, Wd, af, Bx, R8, _p, Ko, AU, jt, RU, uw, pw, Ra };
+export { Ls, Bl, Zi, Li, Js, qh, Cm, Xh, Ox, Wd, af, Bx, R8, _p, Ko, AU, bBg, jt, RU, uw, pw, Ra };

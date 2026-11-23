@@ -680,6 +680,118 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
       },
       { loud: -18, len: 0.4, gap: 0.06, rev: 0.14 },
     ),
+    atk_mushroom_swing: At(
+      "英雄普攻",
+      "杯杯菇·抡拳",
+      (n) => {
+        (Ti(n, 0, 0.2, 0.34, 240, 980, 420, 1.1, "pink"),
+          n.osc({ w: "sine", f: 190, f1: 95, a: 0.01, d: 0.12, g: 0.18 }));
+      },
+      { loud: -28, len: 0.34, gap: 0.12, rev: 0.06 },
+    ),
+    atk_mushroom_hit: At(
+      "英雄普攻",
+      "杯杯菇·软拳命中",
+      (n) => {
+        const t = n.drive(2);
+        (n.osc({ w: "sine", f: 140, f1: 52, a: 0.002, d: 0.22, g: 0.55, to: t }),
+          n.noise({ flt: "bandpass", fc: 900, q: 1.1, a: 0.001, d: 0.09, g: 0.5, to: t }),
+          n.noise({ k: "pink", flt: "lowpass", fc: 600, a: 0.002, d: 0.12, g: 0.3 }));
+      },
+      { loud: -18, len: 0.45, gap: 0.08, rev: 0.12 },
+    ),
+    cast_mushroom_s1: At(
+      "技能施放",
+      "杯杯菇·滚菌冲锋",
+      (n) => {
+        (Ti(n, 0, 0.45, 0.5, 220, 1500, 520, 1.5, "brown"),
+          n.osc({ w: "sawtooth", f: 70, f1: 130, ft: 0.4, a: 0.05, d: 0.4, g: 0.14 }));
+      },
+      { loud: -22, len: 0.6, gap: 0.1, poly: 2, rev: 0.1 },
+    ),
+    fx_mushroom_s1_dash: At(
+      "技能施放",
+      "杯杯菇·滚菌起转",
+      (n) => {
+        (Ti(n, 0, 0.4, 0.45, 260, 1300, 620, 1.4, "brown"),
+          n.osc({ w: "sawtooth", f: 78, f1: 150, ft: 0.35, a: 0.04, d: 0.34, g: 0.14 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1400, fc1: 700, q: 0.8, a: 0.03, d: 0.3, g: 0.28 }));
+      },
+      { loud: -22, len: 0.5, gap: 0.12, poly: 2, rev: 0.1 },
+    ),
+    fx_mushroom_s1_trail: At(
+      "技能施放",
+      "杯杯菇·菌盖滚动",
+      (n) => {
+        (n.osc({ w: "triangle", f: 96, f1: 128, a: 0.02, d: 0.16, g: 0.16 }),
+          n.noise({ k: "pink", flt: "lowpass", fc: 780, a: 0.01, d: 0.18, g: 0.3 }));
+      },
+      { loud: -26, len: 0.3, gap: 0.22, poly: 2, rev: 0.06 },
+    ),
+    fx_mushroom_s1_impact: At(
+      "技能施放",
+      "杯杯菇·撞飞",
+      (n) => {
+        const t = n.drive(2.4);
+        (n.osc({ f: 110, f1: 38, ft: 0.12, a: 0.002, d: 0.32, g: 0.6, to: t }),
+          n.noise({ flt: "bandpass", fc: 1500, q: 0.9, a: 0.001, d: 0.14, g: 0.55, to: t }),
+          n.noise({ k: "pink", flt: "lowpass", fc: 900, a: 0.002, d: 0.25, g: 0.35 }));
+      },
+      { loud: -15, len: 0.6, gap: 0.08, rev: 0.18 },
+    ),
+    cast_mushroom_s2: At(
+      "技能施放",
+      "杯杯菇·孢子喷吐",
+      (n) => {
+        (Ti(n, 0, 0.5, 0.42, 1800, 700, 320, 0.8, "pink"),
+          n.noise({ k: "brown", flt: "lowpass", fc: 700, a: 0.06, d: 0.4, g: 0.32 }));
+      },
+      { loud: -23, len: 0.6, gap: 0.1, poly: 2, rev: 0.12 },
+    ),
+    fx_mushroom_s2_spray: At(
+      "技能施放",
+      "杯杯菇·孢子粉雾",
+      (n) => {
+        (Ti(n, 0, 0.42, 0.34, 2200, 620, 900, 1.3, "pink"),
+          n.noise({ k: "brown", flt: "bandpass", fc: 900, fc1: 380, q: 0.7, a: 0.05, d: 0.42, g: 0.4 }),
+          n.scatter(7, 0.04, 0.3, (t) =>
+            n.noise({ k: "pink", flt: "lowpass", fc: n.rr(500, 1100), t, a: 0.01, d: 0.09, g: n.rr(0.08, 0.18) }),
+          ));
+      },
+      { loud: -20, len: 0.7, gap: 0.1, poly: 2, rev: 0.14 },
+    ),
+    cast_mushroom_ult: At(
+      "技能施放",
+      "杯杯菇·蓄力",
+      (n) => {
+        (n.osc({ w: "sine", f: 60, f1: 110, ft: 1.6, a: 0.4, d: 1.6, g: 0.28 }),
+          Ti(n, 0, 1.4, 0.3, 300, 900, 400, 0.7, "brown"));
+      },
+      { loud: -24, len: 1.8, gap: 0.2, prio: 2, rev: 0.1 },
+    ),
+    fx_mushroom_ult_charge: At(
+      "技能施放",
+      "杯杯菇·菌盖蓄力",
+      (n) => {
+        (n.osc({ w: "sine", f: 58, f1: 132, ft: 1.5, a: 0.35, d: 1.5, g: 0.3 }),
+          Ti(n, 0, 1.3, 0.26, 320, 1100, 480, 0.7, "brown"),
+          n.scatter(6, 0.1, 1.2, (t) =>
+            n.osc({ w: "triangle", f: n.rr(240, 420), f1: n.rr(520, 900), t, a: 0.02, d: 0.18, g: 0.06 }),
+          ));
+      },
+      { loud: -24, len: 1.7, gap: 0.2, prio: 2, rev: 0.12 },
+    ),
+    fx_mushroom_ult_land: At(
+      "技能施放",
+      "杯杯菇·砸地",
+      (n) => {
+        const t = n.drive(3);
+        (n.osc({ f: 95, f1: 30, ft: 0.2, a: 0.002, d: 0.5, g: 0.7, to: t }),
+          n.noise({ flt: "lowpass", fc: 800, a: 0.001, d: 0.4, g: 0.6, to: t }),
+          n.ring(420, [1, 1.5, 2.2], { a: 0.002, d: 0.5, g: 0.3 }));
+      },
+      { loud: -12, len: 0.9, gap: 0.1, prio: 2, rev: 0.2 },
+    ),
     proj_fizzle: At(
       "技能弹道",
       "弹道落空",
@@ -708,7 +820,7 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
     ),
   },
   Ry = Math.PI / 180,
-  kr = ["panyue", "chijin", "xingli", "fengling", "yeque"],
+  kr = ["panyue", "chijin", "xingli", "fengling", "yeque", "mushroom"],
   Se = {
     panyue: {
       id: "panyue",
@@ -1209,6 +1321,112 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
       ],
       palette: { primary: "#3a3156", secondary: "#ece8de", accent: "#b48cff", glow: "#a886ff" },
       look: "精瘦冷峻的战国游侠：束发露面，一身近黑的墨紫劲装，束腕绑腿；颈后一条长长的素白巾拖在身后，末端像蘸了墨；背上斜挎一支图卷筒；右手反握一柄淬过药的青钢匕首，左手一把更小的副匕。跑动时身体压低。",
+    },
+    mushroom: {
+      id: "mushroom",
+      name: "杯杯菇",
+      title: "菌盖如山",
+      role: "tank",
+      roleName: "坦克",
+      lane: "top",
+      difficulty: 2,
+      lore: "山里长出来的一朵成了精的蘑菇。菌柄又粗又软，紫红的伞盖像倒扣的一只大杯子，孢子一喷就是一团呛人的粉雾。它自己也不太清楚为什么要上战场，只是觉得站在最前面、把同伴挡在身后，是件很自然的事。",
+      tips: "你是队伍最前面那堵软墙：一技能「滚菌冲锋」缩成菌球越滚越快，撞到人就把人顶飞；二技能「孢子喷吐」朝前喷一团锥形孢子，又疼又黏人；大招「天降菌盖」蓄力后跳到很远的落点砸下来，落点会先亮出来，记得提前量。被动每第四下普攻会缠住对手。",
+      attackType: "melee",
+      radius: 0.82,
+      base: {
+        hp: 3920,
+        mana: 430,
+        ad: 152,
+        armor: 126,
+        mr: 72,
+        attackSpeed: 0.72,
+        moveSpeed: 5.5,
+        attackRange: 2.4,
+        hpRegen: 12,
+        manaRegen: 3,
+      },
+      growth: { hp: 350, mana: 95, ad: 9, armor: 25, mr: 9.5, attackSpeedPct: 0.012 },
+      basicAttack: { windup: 0.42, damageType: "physical" },
+      passive: {
+        name: "菌丝缠缚",
+        brief: "每第四下普攻缠住对手，额外伤害并减速",
+        tags: ["slow"],
+        desc: "每第四次普攻会甩出一束菌丝，对目标额外造成自身 {hpRatio%} 最大生命的法术伤害并减速 {slow%}，持续 {slowDur} 秒。",
+        values: { hits: 4, hpRatio: 0.035, slow: 0.25, slowDur: 1 },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "滚菌冲锋",
+          brief: "缩成菌球旋转冲刺，越滚越快，撞人击飞",
+          tags: ["dash", "control"],
+          desc: "缩成一团菌球原地旋转加速，向指定方向滚去：速度在 {chargeTime} 秒内从 {dashSpeed} 一路提到 {maxSpeed}。撞到第一个敌方英雄即停下，造成 {damage}(+{adRatio%}物攻) 点物理伤害并击飞 {knockup} 秒。滚动期间可以碾过小兵。",
+          maxLevel: 6,
+          cooldown: [12, 11.5, 11, 10.5, 10, 9.5],
+          manaCost: [55, 60, 65, 70, 75, 80],
+          cast: { type: "direction", range: 9, width: 2.4 },
+          values: {
+            damage: [180, 240, 300, 360, 420, 480],
+            adRatio: 0.55,
+            knockup: 0.9,
+            dashSpeed: 10,
+            maxSpeed: 22,
+            accel: 9,
+            chargeTime: 1.6,
+            impactRadius: 2.4,
+          },
+          castTime: 0.12,
+        },
+        s2: {
+          slot: "s2",
+          name: "孢子喷吐",
+          brief: "喷出锥形孢子粉雾，造成伤害并减速",
+          tags: ["slow", "waveclear"],
+          desc: "鼓起菌盖朝指定方向喷出一大片锥形蘑菇孢子粉雾，对其中敌人造成 {damage}(+{apRatio%}法强) 点法术伤害，并减速 {slow%}，持续 {slowDur} 秒。",
+          maxLevel: 6,
+          cooldown: [10, 9.5, 9, 8.5, 8, 7.5],
+          manaCost: [60, 65, 70, 75, 80, 85],
+          cast: { type: "cone", range: 6.2, angle: 100 * (Math.PI / 180) },
+          values: {
+            damage: [140, 190, 240, 290, 340, 390],
+            apRatio: 0.5,
+            slow: 0.4,
+            slowDur: 2,
+          },
+          castTime: 0.22,
+        },
+        ult: {
+          slot: "ult",
+          name: "天降菌盖",
+          brief: "蓄力数秒后跃向远处，砸地击飞",
+          tags: ["control", "dash"],
+          desc: "蹲下把菌盖压得吱吱响，蓄力 {warnTime} 秒（落点会提前亮出警示）；随后高高跃起砸向目标区域，造成 {damage}(+{hpRatio%}最大生命) 点法术伤害并击飞 {knockup} 秒。蓄力与跃起期间免疫控制。",
+          maxLevel: 3,
+          cooldown: [70, 62, 54],
+          manaCost: [110, 120, 130],
+          cast: { type: "position", range: 16, radius: 4.6 },
+          values: {
+            damage: [300, 450, 600],
+            hpRatio: 0.06,
+            knockup: 0.9,
+            warnTime: 1.8,
+            leapTime: 0.6,
+          },
+          castTime: 0.2,
+        },
+      },
+      build: [
+        "boots",
+        "guardian_plate",
+        "boots_guard",
+        "starweave_cloak",
+        "undying_heart",
+        "thorn_mail",
+        "winter_scepter",
+      ],
+      palette: { primary: "#7c3aed", secondary: "#f3e7d0", accent: "#a78bfa", glow: "#c4a2ff" },
+      look: "一朵成了精的紫色大蘑菇：粗壮圆胖的奶白菌柄就是身子，菌颈处透出淡淡紫色；头顶倒扣着一只巨大的紫红伞盖，盖面是带绒光的紫，点缀着几块奶白色圆斑，盖底是放射状的浅色菌褶。菌柄中段有一张憨厚的脸：两只圆眼睛、粉腮红、小小的嘴。四肢短粗，拳头圆滚滚。",
     },
   };
 

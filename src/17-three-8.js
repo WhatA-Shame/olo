@@ -1184,6 +1184,13 @@ const Lt = (n) => new Ut(n),
       accent: Lt(12577250),
       dark: Lt(920086),
     },
+    mushroom: {
+      glow: Lt(12885247),
+      hot: Lt(15720703),
+      deep: Lt(5972410),
+      accent: Lt(10967295),
+      dark: Lt(2031134),
+    },
   },
   W = {
     white: Lt(16777215),

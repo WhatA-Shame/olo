@@ -293,6 +293,7 @@ const NB = {
       `巨灵buff(星陨祝福)：伤害 +${Ps(yn.blessingDamage)}，持续回血，我方小兵更强。打掉星陨巨灵后全队获得，持续 ${yn.blessingDuration} 秒。`,
     panyue_passive: (n) => `盾击蓄势 ${n.stacks}/3：第三次普攻改用大盾砸地，附带额外伤害与减速。`,
     panyue_bulwark: () => "拥盾而立：护盾生效中，盾破或到期即结束。",
+    mushroom_passive: (n) => `菌丝蓄势 ${n.stacks}/3：第四下普攻缠住对手，附带额外伤害与减速。`,
     chijin_ember: () => "下一次普攻变为重斧，并回复自身生命。",
     chijin_blaze: (n) => (n.value > 0 ? `攻速提高 ${Ps(n.value)}。` : "攻速大幅提高。"),
     chijin_spin: () => "斧影持续劈砍周围敌人；期间免疫减速并获得减伤。",
@@ -1030,7 +1031,33 @@ const qB = {
           `<g transform="rotate(-13 32 36)"><path d="M41 24.500Q52 22 51.500 34Q51 46 41 48.500Q45.500 42 45.500 36.500Q45.500 30.500 41 24.500Z" fill="url(#@rl)" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/></g><path d="${hn(56.5, 20.5, 5, 0.14)}" fill="#ffffff"/>`,
       ),
   },
-  XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB };
+  mB = {
+    passive: () =>
+      dn(
+        Rs("mushroom"),
+        je("g", "#c4a2ff"),
+        `<ellipse cx="32" cy="55" rx="17" ry="4.5" fill="none" stroke="#c4b5fd" stroke-width="1.4" opacity=".55"/><path d="M23 53V38Q23 31 32 31Q41 31 41 38V53Q32 57 23 53Z" fill="#f3e7d0" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 35Q13 15 32 15Q51 15 53 35Q42 30 32 30Q22 30 11 35Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><circle cx="24" cy="24" r="2.7" fill="#f7efdd"/><circle cx="38" cy="22" r="2.1" fill="#f7efdd"/><circle cx="27" cy="43" r="1.7" fill="#2b1b3f"/><circle cx="37" cy="43" r="1.7" fill="#2b1b3f"/><path d="M28.5 48Q32 50 35.5 48" fill="none" stroke="#6b1d2a" stroke-width="1.5" stroke-linecap="round"/><path d="M47 44q4.5 2 5.5 6M17 44q-4.5 2-5.5 6" fill="none" stroke="#c4b5fd" stroke-width="1.4" stroke-linecap="round"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("mushroom", !0),
+        je("g", "#c4a2ff", 1),
+        `<circle cx="32" cy="32" r="19" fill="#7c3aed" stroke="#070b16" stroke-width="1.8"/><path d="M13 30Q22 21 32 21Q42 21 51 30Q42 26 32 26Q22 26 13 30Z" fill="#a78bfa" opacity=".92"/><circle cx="26" cy="30" r="2.1" fill="#f3e7d0"/><circle cx="38" cy="37" r="1.7" fill="#f3e7d0"/><path d="M52 17q8 7 4 15M56 40q-2 8-9 11M12 47q-6-7-4-15" fill="none" stroke="#c4a2ff" stroke-width="2.2" stroke-linecap="round" opacity=".85"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("mushroom"),
+        je("g", "#c4a2ff"),
+        `<path d="M8 41Q10 24 26 24Q42 24 44 41Q34 36 26 36Q18 36 8 41Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 41V51Q17 56 26 56Q35 56 35 51V41" fill="#f3e7d0" stroke="#070b16" stroke-width="1.5" stroke-linejoin="round"/><g fill="#c4b5fd"><circle cx="44" cy="30" r="2.3"/><circle cx="50" cy="25" r="1.6"/><circle cx="50" cy="36" r="1.9"/><circle cx="56" cy="31" r="2.5"/><circle cx="45" cy="43" r="1.5"/><circle cx="52" cy="45" r="2"/></g>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("mushroom", !0),
+        je("g", "#c4a2ff", 1),
+        `<ellipse cx="32" cy="55" rx="19" ry="4.5" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M26 21v10M32 21v15M38 21v10" stroke="#c4a2ff" stroke-width="2.1" stroke-linecap="round" opacity=".8"/><path d="M18 20Q19 7 32 7Q45 7 46 20Q39 16 32 16Q25 16 18 20Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><circle cx="27" cy="14" r="2.2" fill="#f7efdd"/><circle cx="38" cy="13" r="1.6" fill="#f7efdd"/><path d="M32 40l-7 8h4v6h6v-6h4z" fill="#f3e7d0" stroke="#070b16" stroke-width="1.4" stroke-linejoin="round"/>`,
+      ),
+  },
+  XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB, mushroom: mB };
 
 function Ia(n, t) {
   return XB[n][t]();
