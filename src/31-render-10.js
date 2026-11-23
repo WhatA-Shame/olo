@@ -1948,7 +1948,7 @@ const cB = {
     xingli: { drop: 0.26, dist: 2.75, yaw: -18, x: 0.04 },
     fengling: { drop: 0.24, dist: 2.75, yaw: 26, x: 0.06, anim: "channel" },
     yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 },
-    mushroom: { drop: 0.2, dist: 3.4, yaw: -16, x: 0.02 },
+    mushroom: { drop: 0.12, dist: 3.2, yaw: 0, x: 0 },
   },
   o4 = new Map(),
   r4 = new Float32Array(512);
@@ -2002,7 +2002,7 @@ const v3 = {
     xingli: [0.25, 0.8],
     fengling: [0.25, 0.8],
     yeque: [0.25, 0.8],
-    mushroom: [-0.26, 0.26],
+    mushroom: [0, 0],
   },
   hB = 48;
 

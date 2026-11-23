@@ -2393,42 +2393,46 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u6EDA\u83CC\u51B2\u950B",
-        brief: "\u7F29\u6210\u83CC\u7403\u65CB\u8F6C\u51B2\u523A\uFF0C\u8D8A\u6EDA\u8D8A\u5FEB\uFF0C\u649E\u4EBA\u51FB\u98DE",
+        brief: "\u4FA7\u5012\u6210\u83CC\u8F6E\u6301\u7EED\u6EDA\u52A8\uFF0C\u53EF\u8F6C\u5411\uFF0C\u78BE\u5230\u5C31\u75BC",
         tags: ["dash", "control"],
-        desc: "\u7F29\u6210\u4E00\u56E2\u83CC\u7403\u539F\u5730\u65CB\u8F6C\u52A0\u901F\uFF0C\u5411\u6307\u5B9A\u65B9\u5411\u6EDA\u53BB\uFF1A\u901F\u5EA6\u5728 {chargeTime} \u79D2\u5185\u4ECE {dashSpeed} \u4E00\u8DEF\u63D0\u5230 {maxSpeed}\u3002\u649E\u5230\u7B2C\u4E00\u4E2A\u654C\u65B9\u82F1\u96C4\u5373\u505C\u4E0B\uFF0C\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002\u6EDA\u52A8\u671F\u95F4\u53EF\u4EE5\u78BE\u8FC7\u5C0F\u5175\u3002",
+        desc: "\u628A\u8EAB\u5B50\u4FA7\u8FC7\u6765\u7F29\u6210\u4E00\u53EA\u83CC\u8F6E\uFF0C\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u6EDA\u52A8 {rollTime} \u79D2\uFF0C\u671F\u95F4\u7528\u79FB\u52A8\u6307\u4EE4\u53EF\u4EE5\u4E0D\u65AD\u6539\u53D8\u65B9\u5411\uFF1A\u901F\u5EA6\u4ECE {dashSpeed} \u4E00\u8DEF\u63D0\u5230 {maxSpeed}\u3002\u88AB\u78BE\u8FC7\u7684\u654C\u4EBA\u6BCF {tickInterval} \u79D2\u53D7\u5230 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\uFF0C\u7B2C\u4E00\u6B21\u88AB\u78BE\u5230\u4F1A\u88AB\u9876\u98DE {knockup} \u79D2\u3002\u649E\u5899\u5373\u505C\u3002",
         maxLevel: 6,
-        cooldown: [12, 11.5, 11, 10.5, 10, 9.5],
-        manaCost: [55, 60, 65, 70, 75, 80],
+        cooldown: [16, 15, 14, 13, 12, 11],
+        manaCost: [60, 65, 70, 75, 80, 85],
         cast: { type: "direction", range: 9, width: 2.4 },
         values: {
-          damage: [180, 240, 300, 360, 420, 480],
-          adRatio: 0.55,
-          knockup: 0.9,
-          dashSpeed: 10,
-          maxSpeed: 22,
-          accel: 9,
-          chargeTime: 1.6,
-          impactRadius: 2.4
+          damage: [70, 105, 140, 175, 210, 245],
+          adRatio: 0.25,
+          knockup: 0.85,
+          dashSpeed: 11,
+          maxSpeed: 18,
+          accel: 7,
+          rollTime: 10,
+          tickInterval: 0.5,
+          impactRadius: 2.2
         },
         castTime: 0.12
       },
       s2: {
         slot: "s2",
         name: "\u5B62\u5B50\u55B7\u5410",
-        brief: "\u55B7\u51FA\u9525\u5F62\u5B62\u5B50\u7C89\u96FE\uFF0C\u9020\u6210\u4F24\u5BB3\u5E76\u51CF\u901F",
+        brief: "\u957F\u6309\u6301\u7EED\u55B7\u5410\u5B62\u5B50\u7C89\u96FE\uFF0C\u6301\u7EED\u8017\u84DD",
         tags: ["slow", "waveclear"],
-        desc: "\u9F13\u8D77\u83CC\u76D6\u671D\u6307\u5B9A\u65B9\u5411\u55B7\u51FA\u4E00\u5927\u7247\u9525\u5F62\u8611\u83C7\u5B62\u5B50\u7C89\u96FE\uFF0C\u5BF9\u5176\u4E2D\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\uFF0C\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
+        desc: "\u6309\u4F4F\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u55B7\u51FA\u5B62\u5B50\u7C89\u96FE\uFF0C\u6BCF {tickInterval} \u79D2\u5BF9\u9525\u5F62\u5185\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF08{slowDur} \u79D2\uFF09\u3002\u55B7\u5C04\u671F\u95F4\u6BCF\u79D2\u6D88\u8017 {manaPerSec} \u70B9\u6CD5\u529B\uFF1B\u6CD5\u529B\u8017\u5C3D\u3001\u88AB\u63A7\u6216\u518D\u6B21\u6309\u952E\u5373\u4E2D\u65AD\uFF0C\u4E2D\u65AD\u540E\u53EA\u9700\u5F88\u77ED\u51B7\u5374\u3002",
         maxLevel: 6,
-        cooldown: [10, 9.5, 9, 8.5, 8, 7.5],
-        manaCost: [60, 65, 70, 75, 80, 85],
+        cooldown: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+        manaCost: [25, 28, 31, 34, 37, 40],
         cast: { type: "cone", range: 6.2, angle: 100 * (Math.PI / 180) },
         values: {
-          damage: [140, 190, 240, 290, 340, 390],
-          apRatio: 0.5,
+          damage: [22, 30, 38, 46, 54, 62],
+          apRatio: 0.06,
           slow: 0.4,
-          slowDur: 2
+          slowDur: 1.2,
+          manaPerSec: [30, 33, 36, 39, 42, 45],
+          channelTime: 8,
+          tickInterval: 0.25
         },
-        castTime: 0.22
+        castTime: 0.1
       },
       ult: {
         slot: "ult",
@@ -40220,20 +40224,20 @@ var hw = [0, 0, 0, 1];
 var Mp = new Float32Array(8);
 var MgU = {
   ...Am,
-  hipX: 0.175,
-  shoulderX: 0.33,
+  hipX: 0.19,
+  shoulderX: 0.34,
   clavX: 0.12,
-  pelvisY: 0.8,
-  spineY: 0.95,
-  chestY: 1.12,
-  neckY: 1.38,
-  headY: 1.44,
-  shoulderY: 1.3,
-  elbowY: 1.02,
-  wristY: 0.78,
-  handY: 0.7,
-  hipY: 0.78,
-  kneeY: 0.44,
+  pelvisY: 0.7,
+  spineY: 0.86,
+  chestY: 1.06,
+  neckY: 1.28,
+  headY: 1.36,
+  shoulderY: 1.2,
+  elbowY: 0.96,
+  wristY: 0.8,
+  handY: 0.74,
+  hipY: 0.66,
+  kneeY: 0.38,
   ankleY: 0.1
 };
 var MgC = {
@@ -40266,100 +40270,103 @@ function bBg() {
   const n = Gh(MgU), t = new Ls(), i = n.J, d = n.d;
   n.rig.add("gripR", i.chest, 0, d.chestY, 0), n.rig.add("aim", i.chest, 0, d.chestY, 0), n.rig.add("gripL", i.chest, 0, d.chestY, 0);
   const s = TU(n);
+  const MgN = ge(n, s.stance, {
+    hips: [0, 0, 0],
+    spine: [0, 0, 0],
+    chest: [0, 0, 0],
+    neck: [0, 0, 0],
+    head: [0, 0, 0]
+  });
   t.crease = 44;
   t.sym((R) => {
     const _ = [
-      [R * d.hipX, d.hipY + 0.05, 0],
+      [R * d.hipX, d.hipY + 0.03, 0],
       [R * d.hipX, d.kneeY, 0.02],
       [R * d.hipX, d.ankleY + 0.07, 0.03],
-      [R * d.hipX, d.ankleY + 0.02, 0.26]
+      [R * d.hipX, d.ankleY + 0.02, 0.2]
     ], k = [R > 0 ? i.thighL : i.thighR, R > 0 ? i.shinL : i.shinR, R > 0 ? i.footL : i.footR];
-    t.bind(Zi(k, _, i.hips)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }), t.limb(_[0], _[2], 0.21, 0.155, { seg: 10, bulge: 0.1 }), t.bone(R > 0 ? i.footL : i.footR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }), t.ball(R * d.hipX, d.ankleY + 0.02, 0.075, 0.23, 0.115, 0.28, 0, 180);
+    t.bind(Zi(k, _, i.hips)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }), t.limb(_[0], _[2], 0.165, 0.135, { seg: 10, bulge: 0.09 }), t.bone(R > 0 ? i.footL : i.footR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }), t.ball(R * d.hipX, d.ankleY + 0.02, 0.06, 0.18, 0.1, 0.22, 0, 180);
   });
   t.bind(Bl(n)).paint(MgC.stalk, {
     c2: MgC.stalkShade,
     ao: 0.84,
     ao2: 1,
     mat: K.skin,
-    by: (R, I) => 1 - Xi((I - 0.62) / 0.82)
+    by: (R, I) => 1 - Xi((I - 0.62) / 0.68)
   }), t.lathe(
     [
-      [0.56, 0.02],
-      [0.6, 0.3],
-      [0.68, 0.42],
-      [0.78, 0.5],
-      [0.9, 0.535],
-      [1.02, 0.525],
-      [1.14, 0.475],
-      [1.24, 0.405],
-      [1.32, 0.345],
-      [1.4, 0.315],
-      [1.46, 0.3]
+      [0.62, 0.24],
+      [0.7, 0.38],
+      [0.82, 0.44],
+      [0.95, 0.45],
+      [1.08, 0.42],
+      [1.2, 0.375],
+      [1.3, 0.33]
     ],
     { seg: 18, cap0: true, cap1: false }
   );
-  t.bind(Zi([i.chest, i.neck, i.head], [[0, 1.18, 0], [0, 1.28, 0], [0, 1.36, 0], [0, 1.45, 0]], i.chest)).paint(
+  t.bind(Zi([i.chest, i.neck, i.head], [[0, 1.04, 0], [0, 1.16, 0], [0, 1.26, 0], [0, 1.32, 0]], i.chest)).paint(
     MgC.neck,
-    { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin, by: (R, I) => Xi((I - 1.2) / 0.26) }
+    { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin, by: (R, I) => Xi((I - 1.04) / 0.28) }
   ), t.lathe(
     [
-      [1.22, 0.4],
-      [1.3, 0.35],
-      [1.38, 0.315],
-      [1.45, 0.305]
+      [1.06, 0.43],
+      [1.16, 0.39],
+      [1.26, 0.35],
+      [1.32, 0.33]
     ],
     { seg: 18, cap0: false, cap1: false }
   );
-  t.bone(i.head).paint(MgC.gill, {
+  t.bone(i.chest).paint(MgC.gill, {
     c2: MgC.stalkShade,
     ao: 0.78,
     ao2: 1,
     mat: K.skin,
-    by: (R, I) => Xi((I - 1.36) / 0.1)
+    by: (R, I) => Xi((I - 1.28) / 0.14)
   }), t.lathe(
     [
-      [1.345, 0.02],
-      [1.35, 0.3],
-      [1.365, 0.58],
-      [1.39, 0.79],
-      [1.43, 0.9]
+      [1.28, 0.34],
+      [1.3, 0.5],
+      [1.34, 0.64],
+      [1.38, 0.73],
+      [1.42, 0.78]
     ],
     { seg: 30, cap0: false, cap1: false, shape: (R) => 1 + 9e-3 * Math.cos(R * 26) }
   );
-  t.paint(MgC.capDeep, { c2: MgC.capLight, ao: 0.86, ao2: 1, mat: K.fur, by: (R, I) => Xi((I - 1.45) / 0.52) }), t.lathe(
+  t.paint(MgC.capDeep, { c2: MgC.capLight, ao: 0.86, ao2: 1, mat: K.fur, by: (R, I) => Xi((I - 1.4) / 0.62) }), t.lathe(
     [
-      [1.41, 0.88],
-      [1.47, 0.93],
-      [1.56, 0.945],
-      [1.66, 0.93],
-      [1.77, 0.88],
-      [1.88, 0.79],
-      [1.98, 0.65],
-      [2.06, 0.46],
-      [2.11, 0.24],
-      [2.13, 0.02]
+      [1.4, 0.72],
+      [1.43, 0.78],
+      [1.5, 0.82],
+      [1.6, 0.815],
+      [1.72, 0.76],
+      [1.82, 0.67],
+      [1.9, 0.53],
+      [1.96, 0.34],
+      [1.99, 0.12],
+      [2, 0.02]
     ],
     { seg: 30, cap0: false, cap1: true, shape: (R) => 1 + 0.012 * Math.cos(R * 7) }
   );
   t.paint(MgC.spot, { ao: 0.95, mat: K.fur, line: 0 });
   for (const [R, I, P, F] of [
-    [0.36, 1.72, 0.52, 0.15],
-    [-0.3, 1.86, 0.44, 0.12],
-    [0.08, 1.98, -0.34, 0.13],
-    [-0.56, 1.66, -0.2, 0.11],
-    [0.62, 1.6, -0.28, 0.1],
-    [-0.12, 1.6, 0.62, 0.09]
+    [0.28, 1.62, 0.44, 0.14],
+    [-0.24, 1.74, 0.36, 0.115],
+    [0.04, 1.86, -0.26, 0.12],
+    [-0.42, 1.56, -0.16, 0.1],
+    [0.44, 1.5, -0.24, 0.095],
+    [-0.08, 1.52, 0.5, 0.09]
   ])
     t.ball(R, I, P, F, F * 0.34, F, 0, 180);
-  t.bone(i.neck).paint(16777215, { ao: 0.96, mat: K.skin, line: 0 }), t.ball(0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180), t.ball(-0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180), t.paint(MgC.eye, { ao: 0.98, mat: K.skin, line: 0 }), t.ball(0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180), t.ball(-0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180), t.paint(MgC.blush, { ao: 0.95, mat: K.skin, line: 0 }), t.ball(0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180), t.ball(-0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180), t.paint(MgC.mouth, { ao: 0.97, mat: K.skin, line: 0 }), t.ball(0, 1.105, 0.44, 0.075, 0.036, 0.026, 0, 180);
+  t.bone(i.neck).paint(16777215, { ao: 0.96, mat: K.skin, line: 0 }), t.ball(0.155, 1.06, 0.34, 0.1, 0.12, 0.068, 0, 180), t.ball(-0.155, 1.06, 0.34, 0.1, 0.12, 0.068, 0, 180), t.paint(MgC.eye, { ao: 0.98, mat: K.skin, line: 0 }), t.ball(0.15, 1.055, 0.395, 0.048, 0.06, 0.031, 0, 180), t.ball(-0.15, 1.055, 0.395, 0.048, 0.06, 0.031, 0, 180), t.paint(MgC.blush, { ao: 0.95, mat: K.skin, line: 0 }), t.ball(0.275, 0.97, 0.27, 0.072, 0.043, 0.027, 0, 180), t.ball(-0.275, 0.97, 0.27, 0.072, 0.043, 0.027, 0, 180), t.paint(MgC.mouth, { ao: 0.97, mat: K.skin, line: 0 }), t.ball(0, 0.94, 0.38, 0.072, 0.035, 0.025, 0, 180);
   t.sym((R) => {
     const _ = [
-      [R * 0.3, 1.27, 0.02],
-      [R * 0.4, 1.08, 0.05],
-      [R * 0.46, 0.9, 0.07],
-      [R * 0.47, 0.83, 0.08]
+      [R * 0.34, 1.18, 0.02],
+      [R * 0.44, 1, 0.05],
+      [R * 0.47, 0.86, 0.07],
+      [R * 0.47, 0.8, 0.08]
     ], k = [R > 0 ? i.armL : i.armR, R > 0 ? i.foreL : i.foreR, R > 0 ? i.handL : i.handR];
-    t.bind(Zi(k, _, i.chest)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }), t.limb(_[0], _[2], 0.15, 0.125, { seg: 9, bulge: 0.09 }), t.bone(R > 0 ? i.handL : i.handR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }), t.ball(R * 0.47, 0.87, 0.075, 0.15, 0.135, 0.15, 0, 180);
+    t.bind(Zi(k, _, i.chest)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }), t.limb(_[0], _[2], 0.145, 0.12, { seg: 9, bulge: 0.09 }), t.bone(R > 0 ? i.handL : i.handR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }), t.ball(R * 0.47, 0.83, 0.075, 0.145, 0.13, 0.145, 0, 180);
   });
   const a = s.tmp, h = (R, I, P) => {
     const F = s.common;
@@ -40400,16 +40407,23 @@ function bBg() {
         }), P.glow = 2.6;
         break;
       }
+      case "roll": {
+        nf(a, s.spin), Un(n, R, a, () => {
+          const L = 90 + I.time * 620 % 360, B = Math.min(1, I.time * 3.2);
+          R.rot(i.root, L * B, 0, 0), R.add(i.root, 0, -0.18 * B, 0.12 * B);
+        }), P.glow = 2.2;
+        break;
+      }
       case "channel": {
         Un(n, R, s.channel, () => Yo(n, R, I.time, I.seed, 0.8)), P.glow = 1 + 0.5 * (0.5 + 0.5 * Math.sin(I.time * 5));
         break;
       }
       default: {
-        nf(a, s.stance), Un(n, R, a, () => Yo(n, R, I.time, I.seed, 1.2)), P.glow = 1 + 0.12 * Math.sin(I.time * 3);
+        nf(a, MgN), Un(n, R, a, () => Yo(n, R, I.time, I.seed, 1.2)), P.glow = 1 + 0.12 * Math.sin(I.time * 3);
       }
     }
   };
-  return t.bakeGrounding(2.13), {
+  return t.bakeGrounding(2.01), {
     key: "hero:mushroom",
     geometry: t.build(),
     rig: n.rig,
@@ -48096,7 +48110,7 @@ var fB = {
   xingli: { drop: 0.26, dist: 2.75, yaw: -18, x: 0.04 },
   fengling: { drop: 0.24, dist: 2.75, yaw: 26, x: 0.06, anim: "channel" },
   yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 },
-  mushroom: { drop: 0.2, dist: 3.4, yaw: -16, x: 0.02 }
+  mushroom: { drop: 0.12, dist: 3.2, yaw: 0, x: 0 }
 };
 var o4 = /* @__PURE__ */ new Map();
 var r4 = new Float32Array(512);
@@ -48120,7 +48134,7 @@ var v3 = {
   xingli: [0.25, 0.8],
   fengling: [0.25, 0.8],
   yeque: [0.25, 0.8],
-  mushroom: [-0.26, 0.26]
+  mushroom: [0, 0]
 };
 var hB = 48;
 function uB(n, t) {
@@ -58011,13 +58025,13 @@ var Oa = {
       cc: [{ kind: "knockup", duration: ze("mushroom", "s1", "knockup"), value: 0 }],
       mobility: {
         kind: "dash",
-        distance: 22,
-        duration: ze("mushroom", "s1", "chargeTime"),
+        distance: 24,
+        duration: ze("mushroom", "s1", "rollTime"),
         wallBlocked: true,
-        stopsAtHero: true,
+        stopsAtHero: false,
         destination: "aim"
       },
-      lock: ze("mushroom", "s1", "chargeTime"),
+      lock: 0,
       reach: 9 + ze("mushroom", "s1", "impactRadius"),
       aoeRadius: ze("mushroom", "s1", "impactRadius"),
       dodgeable: true
@@ -62919,45 +62933,81 @@ Oi("mushroom", "s1", {
   aimSpeed: $a("mushroom", "s1", "dashSpeed"),
   aimRange: 9,
   cast(n) {
-    const { sim: t, caster: e } = n, s = n.val("chargeTime"), i = n.val("dashSpeed"), a = n.val("maxSpeed"), o = n.val("accel"), r = oa(n, "damage", { ad: "adRatio" }), l = n.val("impactRadius");
+    const { sim: t, caster: e } = n, s = n.val("rollTime"), i = n.val("dashSpeed"), a = n.val("maxSpeed"), o = n.val("accel"), r = oa(n, "damage", { ad: "adRatio" }), l = n.val("impactRadius"), c = n.val("tickInterval"), knocked = /* @__PURE__ */ new Set(), foe = ia(e.team), hitOk = (u) => u.kind !== "tower" && u.kind !== "core" && foe(u);
     ds(t, "mushroom_s1_dash", n.origin, e.team, { unitId: e.id, dir: Cs(n.dir) }), Hm(t, e, {
       dir: n.dir,
-      distance: 999,
+      distance: 9999,
       speed: i,
-      hitRadius: e.radius + 0.55,
-      filter: ia(e.team, { heroesOnly: true }),
-      anim: "spin",
-      onHit(c10) {
-        const f10 = Cs(c10.pos);
-        ds(t, "mushroom_s1_impact", f10, e.team, { unitId: e.id, radius: l });
-        for (const d of Pr(t, c10.pos, l, ia(e.team))) wo(n, d, r, "physical"), yS(t, d, n.val("knockup"), e);
-        return true;
+      hitRadius: e.radius + 0.7,
+      filter: hitOk,
+      anim: "roll",
+      onHit(d) {
+        const h = Cs(d.pos);
+        ds(t, "mushroom_s1_impact", h, e.team, { unitId: e.id, radius: l });
+        for (const u of Pr(t, d.pos, l, hitOk)) {
+          wo(n, u, r, "physical"), u.id === d.id && !knocked.has(u.id) && (knocked.add(u.id), yS(t, u, n.val("knockup"), e));
+        }
+        return false;
       }
-    }), vS(t, e, "spin", s, false);
-    const c = t.state.time;
-    let v = 0;
+    }), vS(t, e, "roll", s, false);
+    const f02 = t.state.time;
+    let resetAt = 0, tick = 0;
     const f = () => {
       const d = e.rt.dash;
-      if (!e.alive || !d || d.anim !== "spin") return;
-      const h = t.state.time - c;
+      if (!e.alive || !d || d.anim !== "roll") return;
+      const h = t.state.time - f02;
       if (h >= s) return void iu(t, e, "arrived");
-      d.speed = Math.min(a, i + h * o), v++ % 3 === 0 && ds(t, "mushroom_s1_trail", e.pos, e.team, { unitId: e.id }), t.schedule(0.08, f);
+      d.speed = Math.min(a, i + h * o);
+      const p = e.rt.path;
+      if (p && e.rt.pathIdx < p.length) {
+        const g = p[e.rt.pathIdx], y = g.x - e.pos.x, k = g.y - e.pos.y, v = Math.hypot(y, k);
+        v > 0.5 && (d.dirX = y / v, d.dirY = k / v, e.facing = Math.atan2(k, y));
+      }
+      if (h >= resetAt) {
+        d.hitIds.length = 0, resetAt = h + c;
+      }
+      tick++ % 2 === 0 && ds(t, "mushroom_s1_trail", e.pos, e.team, { unitId: e.id }), t.schedule(0.08, f);
     };
     t.schedule(0.08, f);
   }
 });
+function stopMushS2(n, t, e) {
+  t.rt.mushS2 = null;
+  t.skills.s2.cd = e;
+}
 Oi("mushroom", "s2", {
+  lockTime: 0,
   cast(n) {
-    const { sim: t, caster: e } = n, s = oa(n, "damage", { ap: "apRatio" });
-    ds(t, "mushroom_s2_spray", e.pos, e.team, {
+    const { sim: t, caster: e } = n, s = e.rt;
+    if (s.mushS2) {
+      return void (n.def && (e.mana = Math.min(e.stats.maxMana, e.mana + n.def.manaCost[n.level - 1])), stopMushS2(t, e, 1.2));
+    }
+    const i = n.val("manaPerSec"), a = oa(n, "damage", { ap: "apRatio" }), o = n.val("slow"), r = n.val("slowDur"), l = n.val("channelTime"), c = n.val("tickInterval"), f = Cs(n.dir);
+    e.skills.s2.cd = 0, s.mushS2 = { until: t.state.time + l, nextTick: 0, nextFx: 0, dir: f };
+    e.facing = Math.atan2(f.y, f.x), vS(t, e, "cast_s2", l, false);
+    const d = () => ds(t, "mushroom_s2_spray", e.pos, e.team, {
       unitId: e.id,
-      dir: Cs(n.dir),
+      dir: Cs(s.mushS2 ? s.mushS2.dir : f),
       radius: n.range,
       angle: n.angle
-    }), t.schedule(0.06, () => {
-      for (const i of $j(t, e.pos, n.dir, n.range, n.angle, ia(e.team)))
-        wo(n, i, s, "magic"), tr(t, i, n.val("slow"), n.val("slowDur"), e, "mushroom_s2");
     });
+    d();
+    const h = () => {
+      const u = s.mushS2;
+      if (!u) return;
+      if (!e.alive || s.stunned || t.state.time >= u.until) return void stopMushS2(t, e, 1.5);
+      const m = i * 0.1;
+      if (e.mana < m) return void stopMushS2(t, e, 1.5);
+      if (e.mana -= m, t.state.time >= u.nextTick && (u.nextTick = t.state.time + c, (() => {
+        for (const x of $j(t, e.pos, u.dir, n.range, n.angle, ia(e.team)))
+          wo(n, x, a, "magic"), tr(t, x, o, r, e, "mushroom_s2");
+      })()), t.state.time >= u.nextFx) {
+        u.nextFx = t.state.time + 0.3;
+        d();
+      }
+      t.schedule(0.1, h);
+    };
+    t.schedule(0.1, h);
   }
 });
 Oi("mushroom", "ult", {

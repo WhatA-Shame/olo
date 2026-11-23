@@ -2008,20 +2008,20 @@ const EU = [0, 0, 0],
 
 const MgU = {
     ...Am,
-    hipX: 0.175,
-    shoulderX: 0.33,
+    hipX: 0.19,
+    shoulderX: 0.34,
     clavX: 0.12,
-    pelvisY: 0.8,
-    spineY: 0.95,
-    chestY: 1.12,
-    neckY: 1.38,
-    headY: 1.44,
-    shoulderY: 1.3,
-    elbowY: 1.02,
-    wristY: 0.78,
-    handY: 0.7,
-    hipY: 0.78,
-    kneeY: 0.44,
+    pelvisY: 0.7,
+    spineY: 0.86,
+    chestY: 1.06,
+    neckY: 1.28,
+    headY: 1.36,
+    shoulderY: 1.2,
+    elbowY: 0.96,
+    wristY: 0.8,
+    handY: 0.74,
+    hipY: 0.66,
+    kneeY: 0.38,
     ankleY: 0.1,
   },
   MgC = {
@@ -2062,130 +2062,134 @@ function bBg() {
     n.rig.add("aim", i.chest, 0, d.chestY, 0),
     n.rig.add("gripL", i.chest, 0, d.chestY, 0));
   const s = TU(n);
+  // 通用站姿带 -10° 扭转 + 前倾，是为持武器人形准备的；蘑菇是圆胖身子，用中性站姿才站得直
+  const MgN = ge(n, s.stance, {
+    hips: [0, 0, 0],
+    spine: [0, 0, 0],
+    chest: [0, 0, 0],
+    neck: [0, 0, 0],
+    head: [0, 0, 0],
+  });
   t.crease = 44;
-  // 短粗腿 + 圆脚
+  // 短粗腿 + 圆脚（菌柄从髋部上方起，腿要露在外面）
   t.sym((R) => {
     const _ = [
-        [R * d.hipX, d.hipY + 0.05, 0],
+        [R * d.hipX, d.hipY + 0.03, 0],
         [R * d.hipX, d.kneeY, 0.02],
         [R * d.hipX, d.ankleY + 0.07, 0.03],
-        [R * d.hipX, d.ankleY + 0.02, 0.26],
+        [R * d.hipX, d.ankleY + 0.02, 0.2],
       ],
       k = [R > 0 ? i.thighL : i.thighR, R > 0 ? i.shinL : i.shinR, R > 0 ? i.footL : i.footR];
     (t.bind(Zi(k, _, i.hips)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }),
-      t.limb(_[0], _[2], 0.21, 0.155, { seg: 10, bulge: 0.1 }),
+      t.limb(_[0], _[2], 0.165, 0.135, { seg: 10, bulge: 0.09 }),
       t.bone(R > 0 ? i.footL : i.footR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }),
-      t.ball(R * d.hipX, d.ankleY + 0.02, 0.075, 0.23, 0.115, 0.28, 0, 180));
+      t.ball(R * d.hipX, d.ankleY + 0.02, 0.06, 0.18, 0.1, 0.22, 0, 180));
   });
-  // 菌柄身子
+  // 菌柄身子：从髋部上方起，桶形，比伞盖窄一圈
   (t.bind(Bl(n)).paint(MgC.stalk, {
     c2: MgC.stalkShade,
     ao: 0.84,
     ao2: 1,
     mat: K.skin,
-    by: (R, I) => 1 - Xi((I - 0.62) / 0.82),
+    by: (R, I) => 1 - Xi((I - 0.62) / 0.68),
   }),
     t.lathe(
       [
-        [0.56, 0.02],
-        [0.6, 0.3],
-        [0.68, 0.42],
-        [0.78, 0.5],
-        [0.9, 0.535],
-        [1.02, 0.525],
-        [1.14, 0.475],
-        [1.24, 0.405],
-        [1.32, 0.345],
-        [1.4, 0.315],
-        [1.46, 0.3],
+        [0.62, 0.24],
+        [0.7, 0.38],
+        [0.82, 0.44],
+        [0.95, 0.45],
+        [1.08, 0.42],
+        [1.2, 0.375],
+        [1.3, 0.33],
       ],
       { seg: 18, cap0: !0, cap1: !1 },
     ));
   // 菌颈淡紫
-  (t.bind(Zi([i.chest, i.neck, i.head], [[0, 1.18, 0], [0, 1.28, 0], [0, 1.36, 0], [0, 1.45, 0]], i.chest)).paint(
+  (t.bind(Zi([i.chest, i.neck, i.head], [[0, 1.04, 0], [0, 1.16, 0], [0, 1.26, 0], [0, 1.32, 0]], i.chest)).paint(
     MgC.neck,
-    { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin, by: (R, I) => Xi((I - 1.2) / 0.26) },
+    { c2: MgC.stalk, ao: 0.9, ao2: 1, mat: K.skin, by: (R, I) => Xi((I - 1.04) / 0.28) },
   ),
     t.lathe(
       [
-        [1.22, 0.4],
-        [1.3, 0.35],
-        [1.38, 0.315],
-        [1.45, 0.305],
+        [1.06, 0.43],
+        [1.16, 0.39],
+        [1.26, 0.35],
+        [1.32, 0.33],
       ],
       { seg: 18, cap0: !1, cap1: !1 },
     ));
   // 伞盖底面（菌褶）
-  (t.bone(i.head).paint(MgC.gill, {
+  (t.bone(i.chest).paint(MgC.gill, {
     c2: MgC.stalkShade,
     ao: 0.78,
     ao2: 1,
     mat: K.skin,
-    by: (R, I) => Xi((I - 1.36) / 0.1),
+    by: (R, I) => Xi((I - 1.28) / 0.14),
   }),
     t.lathe(
       [
-        [1.345, 0.02],
-        [1.35, 0.3],
-        [1.365, 0.58],
-        [1.39, 0.79],
-        [1.43, 0.9],
+        [1.28, 0.34],
+        [1.3, 0.5],
+        [1.34, 0.64],
+        [1.38, 0.73],
+        [1.42, 0.78],
       ],
       { seg: 30, cap0: !1, cap1: !1, shape: (R) => 1 + 0.009 * Math.cos(R * 26) },
     ));
   // 紫红伞盖
-  (t.paint(MgC.capDeep, { c2: MgC.capLight, ao: 0.86, ao2: 1, mat: K.fur, by: (R, I) => Xi((I - 1.45) / 0.52) }),
+  (t.paint(MgC.capDeep, { c2: MgC.capLight, ao: 0.86, ao2: 1, mat: K.fur, by: (R, I) => Xi((I - 1.4) / 0.62) }),
     t.lathe(
       [
-        [1.41, 0.88],
-        [1.47, 0.93],
-        [1.56, 0.945],
-        [1.66, 0.93],
-        [1.77, 0.88],
-        [1.88, 0.79],
-        [1.98, 0.65],
-        [2.06, 0.46],
-        [2.11, 0.24],
-        [2.13, 0.02],
+        [1.4, 0.72],
+        [1.43, 0.78],
+        [1.5, 0.82],
+        [1.6, 0.815],
+        [1.72, 0.76],
+        [1.82, 0.67],
+        [1.9, 0.53],
+        [1.96, 0.34],
+        [1.99, 0.12],
+        [2.0, 0.02],
       ],
       { seg: 30, cap0: !1, cap1: !0, shape: (R) => 1 + 0.012 * Math.cos(R * 7) },
     ));
   // 盖面奶白圆斑
   t.paint(MgC.spot, { ao: 0.95, mat: K.fur, line: 0 });
   for (const [R, I, P, F] of [
-    [0.36, 1.72, 0.52, 0.15],
-    [-0.3, 1.86, 0.44, 0.12],
-    [0.08, 1.98, -0.34, 0.13],
-    [-0.56, 1.66, -0.2, 0.11],
-    [0.62, 1.6, -0.28, 0.1],
-    [-0.12, 1.6, 0.62, 0.09],
+    [0.28, 1.62, 0.44, 0.14],
+    [-0.24, 1.74, 0.36, 0.115],
+    [0.04, 1.86, -0.26, 0.12],
+    [-0.42, 1.56, -0.16, 0.1],
+    [0.44, 1.5, -0.24, 0.095],
+    [-0.08, 1.52, 0.5, 0.09],
   ])
     t.ball(R, I, P, F, F * 0.34, F, 0, 180);
-  // 脸（长在菌柄中段）
+  // 脸（长在菌柄正面）
   (t.bone(i.neck).paint(16777215, { ao: 0.96, mat: K.skin, line: 0 }),
-    t.ball(0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180),
-    t.ball(-0.175, 1.245, 0.4, 0.105, 0.125, 0.07, 0, 180),
+    t.ball(0.155, 1.06, 0.34, 0.1, 0.12, 0.068, 0, 180),
+    t.ball(-0.155, 1.06, 0.34, 0.1, 0.12, 0.068, 0, 180),
     t.paint(MgC.eye, { ao: 0.98, mat: K.skin, line: 0 }),
-    t.ball(0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180),
-    t.ball(-0.17, 1.24, 0.455, 0.05, 0.062, 0.032, 0, 180),
+    t.ball(0.15, 1.055, 0.395, 0.048, 0.06, 0.031, 0, 180),
+    t.ball(-0.15, 1.055, 0.395, 0.048, 0.06, 0.031, 0, 180),
     t.paint(MgC.blush, { ao: 0.95, mat: K.skin, line: 0 }),
-    t.ball(0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180),
-    t.ball(-0.305, 1.145, 0.33, 0.075, 0.045, 0.028, 0, 180),
+    t.ball(0.275, 0.97, 0.27, 0.072, 0.043, 0.027, 0, 180),
+    t.ball(-0.275, 0.97, 0.27, 0.072, 0.043, 0.027, 0, 180),
     t.paint(MgC.mouth, { ao: 0.97, mat: K.skin, line: 0 }),
-    t.ball(0, 1.105, 0.44, 0.075, 0.036, 0.026, 0, 180));
+    t.ball(0, 0.94, 0.38, 0.072, 0.035, 0.025, 0, 180));
   // 短粗手臂
   t.sym((R) => {
     const _ = [
-        [R * 0.3, 1.27, 0.02],
-        [R * 0.4, 1.08, 0.05],
-        [R * 0.46, 0.9, 0.07],
-        [R * 0.47, 0.83, 0.08],
+        [R * 0.34, 1.18, 0.02],
+        [R * 0.44, 1.0, 0.05],
+        [R * 0.47, 0.86, 0.07],
+        [R * 0.47, 0.8, 0.08],
       ],
       k = [R > 0 ? i.armL : i.armR, R > 0 ? i.foreL : i.foreR, R > 0 ? i.handL : i.handR];
     (t.bind(Zi(k, _, i.chest)).paint(MgC.stalk, { c2: MgC.stalkShade, ao: 0.9, ao2: 1, mat: K.skin }),
-      t.limb(_[0], _[2], 0.15, 0.125, { seg: 9, bulge: 0.09 }),
+      t.limb(_[0], _[2], 0.145, 0.12, { seg: 9, bulge: 0.09 }),
       t.bone(R > 0 ? i.handL : i.handR).paint(MgC.stalkShade, { c2: MgC.stalk, ao: 0.92, mat: K.skin }),
-      t.ball(R * 0.47, 0.87, 0.075, 0.15, 0.135, 0.15, 0, 180));
+      t.ball(R * 0.47, 0.83, 0.075, 0.145, 0.13, 0.145, 0, 180));
   });
   const a = s.tmp,
     h = (R, I, P) => {
@@ -2231,20 +2235,31 @@ function bBg() {
             (P.glow = 2.6));
           break;
         }
+        case "roll": {
+          // 侧倒成菌轮：整体绕左右轴转 90° 躺平，再按时间继续翻滚
+          (nf(a, s.spin),
+            Un(n, R, a, () => {
+              const L = 90 + ((I.time * 620) % 360),
+                B = Math.min(1, I.time * 3.2);
+              (R.rot(i.root, L * B, 0, 0), R.add(i.root, 0, -0.18 * B, 0.12 * B));
+            }),
+            (P.glow = 2.2));
+          break;
+        }
         case "channel": {
           (Un(n, R, s.channel, () => Yo(n, R, I.time, I.seed, 0.8)),
             (P.glow = 1 + 0.5 * (0.5 + 0.5 * Math.sin(I.time * 5))));
           break;
         }
         default: {
-          (nf(a, s.stance),
+          (nf(a, MgN),
             Un(n, R, a, () => Yo(n, R, I.time, I.seed, 1.2)),
             (P.glow = 1 + 0.12 * Math.sin(I.time * 3)));
         }
       }
     };
   return (
-    t.bakeGrounding(2.13),
+    t.bakeGrounding(2.01),
     {
       key: "hero:mushroom",
       geometry: t.build(),

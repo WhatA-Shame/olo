@@ -3,7 +3,6 @@
 //
 // 退出码: 0 全通过 / 1 有失败项 / 2 环境起不来
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +15,7 @@ if (!heroId) {
   process.exit(2);
 }
 const shots = argv.includes('--shots');
+const debug = argv.includes('--debug');
 const modular = argv.includes('--modular');
 const argOf = (k, d) => {
   const i = argv.indexOf(k);
@@ -48,9 +48,9 @@ async function cleanup(code) {
     } catch {}
   }
   const bad = results.filter((r) => !r.pass);
-  console.log(`\n${bad.length === 0 ? '全部通过' : `${bad.length} 项失败`} (${results.length} 项检查)`);
-  process.exit(code ?? (bad.length === 0 ? 0 : 1));
-}
+  if (code === 2 || results.length === 0) console.log('\n✗ 验证流程中断，未完成检查');
+  else console.log(`\n${bad.length === 0 ? '全部通过' : `${bad.length} 项失败`} (${results.length} 项检查)`);
+  process.exit(code ?? (bad.length === 0 ? 0 : 1));}
 process.on('SIGINT', () => cleanup(2));
 
 const http = async (url, opt) => {
@@ -86,7 +86,9 @@ const CHROME = [
 async function ensureChrome() {
   if (await up(`http://127.0.0.1:${CDP}/json/version`)) return console.log('· 无头浏览器已在运行');
   if (!CHROME) fail('找不到 Chrome，请手动指定路径');
-  const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'herocheck-'));
+  // 浏览器配置目录放在仓库内（.herocheck/profile），避免在 C 盘临时目录里堆积占满磁盘
+  const profile = path.join(SHOT_DIR, 'profile');
+  fs.mkdirSync(profile, { recursive: true });
   const ch = spawn(
     CHROME,
     [
@@ -120,6 +122,16 @@ async function connect() {
     if (m.id && pending.has(m.id)) {
       pending.get(m.id)(m);
       pending.delete(m.id);
+      return;
+    }
+    if (!debug) return;
+    if (m.method === 'Runtime.exceptionThrown') {
+      const d = m.params.exceptionDetails;
+      console.log('  ! 异常:', d.text, d.exception?.description?.split('\n').slice(0, 3).join(' / ') || '');
+    } else if (m.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(m.params.type)) {
+      console.log('  ! 控制台:', (m.params.args || []).map((a) => a.value ?? a.description).join(' ').slice(0, 240));
+    } else if (m.method === 'Log.entryAdded' && m.params.entry.level === 'error') {
+      console.log('  ! 日志:', m.params.entry.text.slice(0, 240));
     }
   });
   await new Promise((r) => ws.addEventListener('open', r));
@@ -141,10 +153,10 @@ const main = async () => {
   await ensureServer();
   await ensureChrome();
   const { ws, send, ev } = await connect();
-  const shot = async (name) => {
+  const shot = async (name, clip) => {
     if (!shots) return;
     fs.mkdirSync(SHOT_DIR, { recursive: true });
-    const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 60 });
+    const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale: 2.4 } } : {}) });
     fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-${name}.jpg`), Buffer.from(r.result.data, 'base64'));
   };
   const clickAt = async (x, y) => {
@@ -175,6 +187,10 @@ const main = async () => {
   // 进战场
   await send('Runtime.enable');
   await send('Page.enable');
+  await send('Log.enable');
+  // 复用 profile 时浏览器会缓存 dist/index.html，必须关掉缓存，否则截到的是旧版本
+  await send('Network.enable');
+  await send('Network.setCacheDisabled', { cacheDisabled: true });
   await send('Page.navigate', { url: URL_ });
   await sleep(6000);
   if (!(await waitFor(`[...document.querySelectorAll('button,div,a,span')].some(e=>(e.textContent||'').trim()==='开始对战')`, '标题页', 45000)))
@@ -192,6 +208,7 @@ const main = async () => {
   const cls = await ev(`document.querySelector('[data-hero="${heroId}"]').className`);
   ok('选将卡片可点选', typeof cls === 'string' && /active|selected|chosen/i.test(cls), cls);
   await shot('select');
+  await shot('model', { x: 340, y: 130, width: 420, height: 340 });
 
   await clickText('开始对战');
   const inBattle = await waitFor(
@@ -240,16 +257,46 @@ const main = async () => {
             const d=${JSON.stringify(d)};
             w.command(u.id,{type:"cast",slot:"${slot}",dir:{x:d.x,y:d.y}}); return u.skills.${slot}.cd;})()`;
     const cd = await ev(expr);
-    ok(`${slot} 释放成功`, typeof cd === 'number' && cd > 0, cd === 0 ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）' : `cd ${cd}`);
-    await sleep(220);
+    await sleep(260);
+    // 长持续技能（滚轮/引导）会一直挂着，这里确认它真的进入了状态
+    const state = await ev(`(()=>{const u=${U}; return JSON.stringify({
+      dash: u.rt.dash ? u.rt.dash.anim : null, s2: !!u.rt.mushS2, anim: u.anim, mana: Math.round(u.mana) });})()`);
+    const st = JSON.parse(state && !state.__err ? state : '{}');
+    const channeling = st.s2 === true;
+    ok(
+      `${slot} 释放成功`,
+      (typeof cd === 'number' && cd > 0) || channeling,
+      channeling ? '引导中（cd 由引导结束设置）' : cd === 0 ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）' : `cd ${cd}`,
+    );
+    if (slot === 's1') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
+    if (slot === 's1') {
+      // 滚轮要能被移动指令改向：发一个垂直方向的移动指令，看冲刺方向是否跟着转
+      const before = await ev(`(()=>{const u=${U}; const d=u.rt.dash; return d?JSON.stringify({x:+d.dirX.toFixed(2),y:+d.dirY.toFixed(2)}):null;})()`);
+      await ev(`(()=>{const w=window.__moba.world,u=${U};
+        w.command(u.id,{type:"moveTo",pos:{x:u.pos.x - 9, y:u.pos.y - 9}}); return 1;})()`);
+      await sleep(420);
+      const after = await ev(`(()=>{const u=${U}; const d=u.rt.dash; return d?JSON.stringify({x:+d.dirX.toFixed(2),y:+d.dirY.toFixed(2)}):null;})()`);
+      const b = before && !before.__err ? JSON.parse(before) : null;
+      const a = after && !after.__err ? JSON.parse(after) : null;
+      const turned = !!(b && a && (Math.abs(a.x - b.x) > 0.15 || Math.abs(a.y - b.y) > 0.15));
+      ok('Q 可以控制方向', turned, `dir ${b ? `${b.x},${b.y}` : '?'} → ${a ? `${a.x},${a.y}` : '?'}`);
+    }
+    if (slot === 's2') ok('E 进入持续喷吐', st.s2 === true, `channel=${st.s2} anim=${st.anim}`);
     await shot(slot);
-    await sleep(1200);
+    // 收尾：结束冲刺/引导，避免影响下一个技能
+    await ev(`(()=>{const u=${U}; u.rt.dash && (u.rt.dash.left=0); u.rt.mushS2=null; return 1;})()`);
+    await sleep(900);
     return cd;
   };
 
   const before = await ev(`JSON.stringify(window.__hcFx)`);
+  const mana0 = await ev(`${U}.mana`);
   await cast('s1');
+  const mana1 = await ev(`${U}.mana`);
   await cast('s2');
+  await sleep(600);
+  const mana2 = await ev(`${U}.mana`);
+  ok('E 持续消耗法力', typeof mana2 === 'number' && mana2 < mana1, `${Math.round(mana1)} → ${Math.round(mana2)}`);
   await cast('ult', 'pos');
   await sleep(1800);
 

@@ -90,57 +90,115 @@ Oi("mushroom", "s1", {
   aimRange: 9,
   cast(n) {
     const { sim: t, caster: e } = n,
-      s = n.val("chargeTime"),
+      s = n.val("rollTime"),
       i = n.val("dashSpeed"),
       a = n.val("maxSpeed"),
       o = n.val("accel"),
       r = oa(n, "damage", { ad: "adRatio" }),
-      l = n.val("impactRadius");
+      l = n.val("impactRadius"),
+      c = n.val("tickInterval"),
+      knocked = new Set(),
+      foe = ia(e.team),
+      hitOk = (u) => u.kind !== "tower" && u.kind !== "core" && foe(u);
     (ds(t, "mushroom_s1_dash", n.origin, e.team, { unitId: e.id, dir: Cs(n.dir) }),
       Hm(t, e, {
         dir: n.dir,
-        distance: 999,
+        distance: 9999,
         speed: i,
-        hitRadius: e.radius + 0.55,
-        filter: ia(e.team, { heroesOnly: !0 }),
-        anim: "spin",
-        onHit(c) {
-          const f = Cs(c.pos);
-          ds(t, "mushroom_s1_impact", f, e.team, { unitId: e.id, radius: l });
-          for (const d of Pr(t, c.pos, l, ia(e.team))) (wo(n, d, r, "physical"), yS(t, d, n.val("knockup"), e));
-          return !0;
+        hitRadius: e.radius + 0.7,
+        filter: hitOk,
+        anim: "roll",
+        onHit(d) {
+          const h = Cs(d.pos);
+          ds(t, "mushroom_s1_impact", h, e.team, { unitId: e.id, radius: l });
+          for (const u of Pr(t, d.pos, l, hitOk)) {
+            (wo(n, u, r, "physical"),
+              u.id === d.id && !knocked.has(u.id) && (knocked.add(u.id), yS(t, u, n.val("knockup"), e)));
+          }
+          return !1;
         },
       }),
-      vS(t, e, "spin", s, !1));
-    const c = t.state.time;
-    let v = 0;
+      vS(t, e, "roll", s, !1));
+    // 每 0.08 秒：加速、跟随移动指令转向、周期性清空命中记录（同一目标可被反复碾）
+    const f0 = t.state.time;
+    let resetAt = 0,
+      tick = 0;
     const f = () => {
       const d = e.rt.dash;
-      if (!e.alive || !d || d.anim !== "spin") return;
-      const h = t.state.time - c;
+      if (!e.alive || !d || d.anim !== "roll") return;
+      const h = t.state.time - f0;
       if (h >= s) return void iu(t, e, "arrived");
-      ((d.speed = Math.min(a, i + h * o)),
-        v++ % 3 === 0 && ds(t, "mushroom_s1_trail", e.pos, e.team, { unitId: e.id }),
-        t.schedule(0.08, f));
+      d.speed = Math.min(a, i + h * o);
+      const p = e.rt.path;
+      if (p && e.rt.pathIdx < p.length) {
+        const g = p[e.rt.pathIdx],
+          y = g.x - e.pos.x,
+          k = g.y - e.pos.y,
+          v = Math.hypot(y, k);
+        v > 0.5 && ((d.dirX = y / v), (d.dirY = k / v), (e.facing = Math.atan2(k, y)));
+      }
+      if (h >= resetAt) {
+        (d.hitIds.length = 0, (resetAt = h + c));
+      }
+      (tick++ % 2 === 0 && ds(t, "mushroom_s1_trail", e.pos, e.team, { unitId: e.id }), t.schedule(0.08, f));
     };
     t.schedule(0.08, f);
   },
 });
 
+function stopMushS2(n, t, e) {
+  t.rt.mushS2 = null;
+  t.skills.s2.cd = e;
+}
+
 Oi("mushroom", "s2", {
+  lockTime: 0,
   cast(n) {
     const { sim: t, caster: e } = n,
-      s = oa(n, "damage", { ap: "apRatio" });
-    (ds(t, "mushroom_s2_spray", e.pos, e.team, {
+      s = e.rt;
+    if (s.mushS2) {
+      // 再按一次 = 主动收起（把这次按键的法力退回去）
+      return void (n.def && (e.mana = Math.min(e.stats.maxMana, e.mana + n.def.manaCost[n.level - 1])),
+      stopMushS2(t, e, 1.2));
+    }
+    const i = n.val("manaPerSec"),
+      a = oa(n, "damage", { ap: "apRatio" }),
+      o = n.val("slow"),
+      r = n.val("slowDur"),
+      l = n.val("channelTime"),
+      c = n.val("tickInterval"),
+      f = Cs(n.dir);
+    (e.skills.s2.cd = 0, (s.mushS2 = { until: t.state.time + l, nextTick: 0, nextFx: 0, dir: f }));
+    (e.facing = Math.atan2(f.y, f.x), vS(t, e, "cast_s2", l, !1));
+    const d = () => ds(t, "mushroom_s2_spray", e.pos, e.team, {
       unitId: e.id,
-      dir: Cs(n.dir),
+      dir: Cs(s.mushS2 ? s.mushS2.dir : f),
       radius: n.range,
       angle: n.angle,
-    }),
-      t.schedule(0.06, () => {
-        for (const i of $j(t, e.pos, n.dir, n.range, n.angle, ia(e.team)))
-          (wo(n, i, s, "magic"), tr(t, i, n.val("slow"), n.val("slowDur"), e, "mushroom_s2"));
-      }));
+    });
+    d();
+    const h = () => {
+      const u = s.mushS2;
+      if (!u) return;
+      if (!e.alive || s.stunned || t.state.time >= u.until) return void stopMushS2(t, e, 1.5);
+      const m = i * 0.1;
+      if (e.mana < m) return void stopMushS2(t, e, 1.5);
+      if (
+        ((e.mana -= m),
+        t.state.time >= u.nextTick &&
+          ((u.nextTick = t.state.time + c),
+          (() => {
+            for (const x of $j(t, e.pos, u.dir, n.range, n.angle, ia(e.team)))
+              (wo(n, x, a, "magic"), tr(t, x, o, r, e, "mushroom_s2"));
+          })()),
+        t.state.time >= u.nextFx)
+      ) {
+        u.nextFx = t.state.time + 0.3;
+        d();
+      }
+      t.schedule(0.1, h);
+    };
+    t.schedule(0.1, h);
   },
 });
 
