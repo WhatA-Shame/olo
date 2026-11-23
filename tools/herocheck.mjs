@@ -255,12 +255,12 @@ const main = async () => {
   const d = dir && !dir.__err ? JSON.parse(dir) : { x: 1, y: 0 };
   console.log(`· 释放方向 (${d.x}, ${d.y})`);
 
-  const cast = async (slot, kind) => {
+  const cast = async (slot, kind, dist = 11) => {
     const expr =
       kind === 'pos'
         ? `(()=>{const w=window.__moba.world,u=${U}; u.skills.ult.cd=0; u.rt.lockUntil=0;
             const d=${JSON.stringify(d)};
-            w.command(u.id,{type:"cast",slot:"${slot}",pos:{x:u.pos.x+d.x*11,y:u.pos.y+d.y*11}}); return u.skills.${slot}.cd;})()`
+            w.command(u.id,{type:"cast",slot:"${slot}",pos:{x:u.pos.x+d.x*${dist},y:u.pos.y+d.y*${dist}}}); return u.skills.${slot}.cd;})()`
         : `(()=>{const w=window.__moba.world,u=${U}; u.skills.${slot}.cd=0; u.rt.lockUntil=0;
             const d=${JSON.stringify(d)};
             w.command(u.id,{type:"cast",slot:"${slot}",dir:{x:d.x,y:d.y}}); return u.skills.${slot}.cd;})()`;
@@ -271,10 +271,18 @@ const main = async () => {
       dash: u.rt.dash ? u.rt.dash.anim : null, s2: !!u.rt.mushS2, anim: u.anim, mana: Math.round(u.mana) });})()`);
     const st = JSON.parse(state && !state.__err ? state : '{}');
     const channeling = st.s2 === true;
+    // 杯杯菇的 Q 冷却从滚动结束才开始算，刚放出来 cd 一定是 0，用"进入滚轮"当成功信号
+    const rollStarted = heroId === 'mushroom' && slot === 's1' && st.dash === 'roll';
     ok(
       `${slot} 释放成功`,
-      (typeof cd === 'number' && cd > 0) || channeling,
-      channeling ? '引导中（cd 由引导结束设置）' : cd === 0 ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）' : `cd ${cd}`,
+      (typeof cd === 'number' && cd > 0) || channeling || rollStarted,
+      channeling
+        ? '引导中（cd 由引导结束设置）'
+        : rollStarted
+          ? '滚轮中（cd 从滚动结束开始算）'
+          : cd === 0
+            ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）'
+            : `cd ${cd}`,
     );
     // 滚轮/持续引导是杯杯菇特有的，别的英雄不做这两条断言
     if (slot === 's1' && heroId === 'mushroom') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
@@ -307,6 +315,10 @@ const main = async () => {
     // 收尾：结束冲刺/引导，避免影响下一个技能
     await ev(`(()=>{const u=${U}; u.rt.dash && (u.rt.dash.left=0); u.rt.mushS2=null; return 1;})()`);
     await sleep(900);
+    if (slot === 's1' && heroId === 'mushroom') {
+      const cd2 = await ev(`(()=>{const u=${U}; return +u.skills.s1.cd.toFixed(1);})()`);
+      ok('Q 冷却从滚动结束才开始算', typeof cd2 === 'number' && cd2 > 5, `滚完 cd ${cd2}`);
+    }
     return cd;
   };
 
@@ -336,8 +348,75 @@ const main = async () => {
   await sleep(600);
   const mana2 = await ev(`${U}.mana`);
   ok('E 持续消耗法力', typeof mana2 === 'number' && mana2 < mana1, `${Math.round(mana1)} → ${Math.round(mana2)}`);
-  await cast('ult', 'pos');
-  await sleep(1800);
+  if (heroId === 'mushroom')
+    await ev(`(()=>{const u=${U}; u.__preUlt=JSON.stringify({x:+u.pos.x.toFixed(1),y:+u.pos.y.toFixed(1)}); return 1;})()`);
+  await cast('ult', 'pos', heroId === 'mushroom' ? 46 : 11);
+  if (heroId === 'mushroom') {
+    await sleep(200);
+    const mu = await ev(`(()=>{const u=${U}; return u.rt.mushUlt ? JSON.stringify({x:+u.rt.mushUlt.x.toFixed(1),y:+u.rt.mushUlt.y.toFixed(1),r:+u.rt.mushUlt.radius.toFixed(1),left:+(u.rt.mushUlt.until-window.__moba.state.time).toFixed(2)}) : 'none';})()`);
+    await sleep(600);
+    const zoom = await ev(`(()=>{const r=window.__moba.renderer; const g=r&&r.engine&&r.engine.rig; return g?JSON.stringify({z:+g.zoomK.toFixed(2),w:+g.zoomWant.toFixed(2),peek:!!g.ultPeek}):'no-rig';})()`);
+    ok('大招蓄力时镜头拉远', (()=>{ try { const o=JSON.parse(zoom); return o.z>1.15 && o.peek; } catch { return false; } })(), `zoom ${zoom}`);
+    ok('大招进入蓄力并记录落点', typeof mu === 'string' && mu !== 'none', `${mu}`);
+  }
+  // 杯杯菇大招是全图跳，蓄力期间镜头会拉远——这里趁蓄力截一张，落地后再截一张
+  if (heroId === 'mushroom' && shots) {
+    await sleep(900);
+    await shot('ultcharge');
+  }
+  if (heroId === 'mushroom') {
+    // 轮询到落地那一刻再截图，冲击波只存在 0.4 秒
+    for (let i = 0; i < 80; i++) {
+      if ((await ev(`(()=>{const u=${U}; return !u.rt.mushUlt;})()`)) === true) break;
+      await sleep(60);
+    }
+  } else await sleep(1800);
+  if (heroId === 'mushroom') {
+    const mv = await ev(`(()=>{const u=${U}; return JSON.stringify({x:+u.pos.x.toFixed(1),y:+u.pos.y.toFixed(1),anim:u.anim});})()`);
+    const p0 = await ev(`(()=>{const u=${U}; return u.__preUlt || null;})()`);
+    ok('大招把英雄送到远处落点', typeof mv === 'string' && (()=>{ try { const o=JSON.parse(mv); if(!p0) return false; const q=JSON.parse(p0); return Math.hypot(o.x-q.x,o.y-q.y) > 20; } catch { return false; } })(), `落点 ${mv} 起点 ${p0}`);
+  }
+  if (heroId === 'mushroom' && shots) await shot('ultland');
+
+  // 被动：普攻/技能都能叠层，叠满爆开时给自己等量护盾
+  if (heroId === 'mushroom') {
+    let maxStacks = 0,
+      shieldSeen = 0,
+      bursts = 0,
+      prev = 0,
+      firstD = -1,
+      firstKind = '?';
+    // 每轮重新挑最近的敌人：目标会走会死，锁死一个 id 很容易白跑
+    for (let i = 0; i < 160; i++) {
+      const r = await ev(`(()=>{const w=window.__moba.world,u=${U};
+        let best=null,bd=1e9;
+        for (const o of w.units) { if(!o.alive||o.team===u.team||o.kind==='tower'||o.kind==='core') continue;
+          const d=Math.hypot(o.pos.x-u.pos.x,o.pos.y-u.pos.y); if(d<bd){bd=d;best=o;} }
+        if(!best) return null;
+        let st=0; for(const b of u.buffs) if(b.id==='mushroom_passive') st=Math.max(st,b.stacks);
+        if (bd > 1.9) w.command(u.id,{type:"moveTo",pos:{x:best.pos.x,y:best.pos.y}});
+        else w.command(u.id,{type:"attack",targetId:best.id});
+        return JSON.stringify({st, sh:Math.round(u.shield), d:+bd.toFixed(1), kind:best.kind});})()`);
+      if (!r || r.__err) break;
+      const o = JSON.parse(r);
+      if (firstD < 0) ((firstD = o.d), (firstKind = o.kind));
+      maxStacks = Math.max(maxStacks, o.st);
+      shieldSeen = Math.max(shieldSeen, o.sh);
+      if (o.st === 0 && prev >= 5) bursts++;
+      prev = o.st;
+      if (bursts > 0 && shieldSeen > 0) break;
+      await sleep(200);
+    }
+    // 护盾可能一眨眼就被对面打爆，补一条 shield 事件作为"确实给过盾"的旁证
+    const fxs = await ev(`JSON.stringify(window.__hcFx||[])`);
+    const sawShieldFx = typeof fxs === 'string' && /shield/.test(fxs);
+    ok('被动能被普攻叠层', maxStacks >= 1, `最高 ${maxStacks} 层（目标 ${firstKind}，初始距离 ${firstD}）`);
+    ok(
+      '被动叠满爆开并给护盾',
+      bursts > 0 && (shieldSeen > 0 || sawShieldFx),
+      `爆开 ${bursts} 次，护盾峰值 ${shieldSeen}${sawShieldFx ? '（有 shield 事件）' : ''}`,
+    );
+  }
 
   const fx = await ev(`JSON.stringify(window.__hcFx)`);
   const keys = JSON.parse(fx && !fx.__err ? fx : '[]');

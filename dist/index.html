@@ -1799,6 +1799,14 @@ var FS = {
     },
     { loud: -20, len: 0.7, gap: 0.1, poly: 2, rev: 0.14 }
   ),
+  fx_mushroom_passive_burst: At(
+    "\u6280\u80FD\u65BD\u653E",
+    "\u676F\u676F\u83C7\xB7\u83CC\u4E1D\u7F20\u7F1A",
+    (n) => {
+      n.osc({ w: "triangle", f: 320, f1: 120, ft: 0.16, a: 3e-3, d: 0.28, g: 0.4 }), n.noise({ k: "pink", flt: "bandpass", fc: 1800, fc1: 700, q: 0.8, a: 4e-3, d: 0.22, g: 0.42 }), n.osc({ w: "sine", f: 520, f1: 780, ft: 0.2, a: 0.01, d: 0.3, g: 0.16 });
+    },
+    { loud: -18, len: 0.5, gap: 0.12, rev: 0.2 }
+  ),
   cast_mushroom_ult: At(
     "\u6280\u80FD\u65BD\u653E",
     "\u676F\u676F\u83C7\xB7\u84C4\u529B",
@@ -2365,7 +2373,7 @@ var Se = {
     lane: "top",
     difficulty: 2,
     lore: "\u5C71\u91CC\u957F\u51FA\u6765\u7684\u4E00\u6735\u6210\u4E86\u7CBE\u7684\u8611\u83C7\u3002\u83CC\u67C4\u53C8\u7C97\u53C8\u8F6F\uFF0C\u7D2B\u7EA2\u7684\u4F1E\u76D6\u50CF\u5012\u6263\u7684\u4E00\u53EA\u5927\u676F\u5B50\uFF0C\u5B62\u5B50\u4E00\u55B7\u5C31\u662F\u4E00\u56E2\u545B\u4EBA\u7684\u7C89\u96FE\u3002\u5B83\u81EA\u5DF1\u4E5F\u4E0D\u592A\u6E05\u695A\u4E3A\u4EC0\u4E48\u8981\u4E0A\u6218\u573A\uFF0C\u53EA\u662F\u89C9\u5F97\u7AD9\u5728\u6700\u524D\u9762\u3001\u628A\u540C\u4F34\u6321\u5728\u8EAB\u540E\uFF0C\u662F\u4EF6\u5F88\u81EA\u7136\u7684\u4E8B\u3002",
-    tips: "\u4F60\u662F\u961F\u4F0D\u6700\u524D\u9762\u90A3\u5835\u8F6F\u5899\uFF1A\u4E00\u6280\u80FD\u300C\u6EDA\u83CC\u51B2\u950B\u300D\u7F29\u6210\u83CC\u7403\u8D8A\u6EDA\u8D8A\u5FEB\uFF0C\u649E\u5230\u4EBA\u5C31\u628A\u4EBA\u9876\u98DE\uFF1B\u4E8C\u6280\u80FD\u300C\u5B62\u5B50\u55B7\u5410\u300D\u671D\u524D\u55B7\u4E00\u56E2\u9525\u5F62\u5B62\u5B50\uFF0C\u53C8\u75BC\u53C8\u9ECF\u4EBA\uFF1B\u5927\u62DB\u300C\u5929\u964D\u83CC\u76D6\u300D\u84C4\u529B\u540E\u8DF3\u5230\u5F88\u8FDC\u7684\u843D\u70B9\u7838\u4E0B\u6765\uFF0C\u843D\u70B9\u4F1A\u5148\u4EAE\u51FA\u6765\uFF0C\u8BB0\u5F97\u63D0\u524D\u91CF\u3002\u88AB\u52A8\u6BCF\u7B2C\u56DB\u4E0B\u666E\u653B\u4F1A\u7F20\u4F4F\u5BF9\u624B\u3002",
+    tips: "\u4F60\u662F\u961F\u4F0D\u6700\u524D\u9762\u90A3\u5835\u8F6F\u5899\uFF1A\u666E\u653B\u548C\u6280\u80FD\u547D\u4E2D\u90FD\u4F1A\u6512\u83CC\u4E1D\uFF0C\u6512\u6EE1 7 \u5C42\u5C31\u70B8\u5F00\uFF0C\u987A\u624B\u7ED9\u81EA\u5DF1\u7CCA\u4E00\u5C42\u7B49\u91CF\u7684\u62A4\u76FE\uFF1B\u4E00\u6280\u80FD\u300C\u6EDA\u83CC\u51B2\u950B\u300D\u7F29\u6210\u83CC\u8F6E\u8D8A\u6EDA\u8D8A\u5FEB\uFF0C\u7B2C\u4E00\u6B21\u649E\u5230\u4EBA\u80FD\u628A\u4EBA\u9876\u98DE\uFF1B\u4E8C\u6280\u80FD\u300C\u5B62\u5B50\u55B7\u5410\u300D\u55B7\u51FA\u53C8\u8FDC\u53C8\u7A84\u7684\u4E00\u9053\u5B62\u5B50\u96FE\uFF0C\u4E3B\u8981\u5403\u6CD5\u5F3A\uFF1B\u5927\u62DB\u300C\u5929\u964D\u83CC\u76D6\u300D\u53EF\u4EE5\u7838\u5230\u5730\u56FE\u4EFB\u610F\u4E00\u70B9\uFF0C\u98DE\u5F97\u8D8A\u8FDC\u7838\u5F97\u8D8A\u72E0\u3001\u8303\u56F4\u8D8A\u5927\uFF0C\u843D\u70B9\u4F1A\u5148\u4EAE\u51FA\u6765\uFF0C\u8BB0\u5F97\u63D0\u524D\u91CF\u3002",
     attackType: "melee",
     radius: 0.82,
     base: {
@@ -2384,10 +2392,10 @@ var Se = {
     basicAttack: { windup: 0.42, damageType: "physical" },
     passive: {
       name: "\u83CC\u4E1D\u7F20\u7F1A",
-      brief: "\u6BCF\u7B2C\u56DB\u4E0B\u666E\u653B\u7F20\u4F4F\u5BF9\u624B\uFF0C\u989D\u5916\u4F24\u5BB3\u5E76\u51CF\u901F",
-      tags: ["slow"],
-      desc: "\u6BCF\u7B2C\u56DB\u6B21\u666E\u653B\u4F1A\u7529\u51FA\u4E00\u675F\u83CC\u4E1D\uFF0C\u5BF9\u76EE\u6807\u989D\u5916\u9020\u6210\u81EA\u8EAB {hpRatio%} \u6700\u5927\u751F\u547D\u7684\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
-      values: { hits: 4, hpRatio: 0.035, slow: 0.25, slowDur: 1 }
+      brief: "\u666E\u653B\u4E0E\u6280\u80FD\u547D\u4E2D\u90FD\u79EF\u6512\u83CC\u4E1D\uFF0C7 \u5C42\u7206\u5F00\uFF1A\u989D\u5916\u4F24\u5BB3 + \u7B49\u91CF\u62A4\u76FE",
+      tags: ["slow", "shield"],
+      desc: "\u666E\u653B\u548C\u6280\u80FD\u547D\u4E2D\u90FD\u4F1A\u79EF\u6512 1 \u5C42\u83CC\u4E1D\uFF08\u4E8C\u6280\u80FD\u6BCF\u6BB5\u6700\u591A 1 \u5C42\uFF09\u3002\u53E0\u5230 {hits} \u5C42\u65F6\u70B8\u5F00\uFF1A\u5BF9\u76EE\u6807\u989D\u5916\u9020\u6210 {hpRatio%} \u6700\u5927\u751F\u547D\u7684\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF08{slowDur} \u79D2\uFF09\uFF0C\u540C\u65F6\u7ED9\u81EA\u5DF1\u5957\u4E0A\u4E00\u5C42\u7B49\u540C\u4E8E\u8BE5\u4F24\u5BB3\u7684\u62A4\u76FE\uFF0C\u6301\u7EED {shieldDur} \u79D2\u3002",
+      values: { hits: 7, hpRatio: 0.05, slow: 0.3, slowDur: 1.2, shieldDur: 4 }
     },
     skills: {
       s1: {
@@ -2395,18 +2403,19 @@ var Se = {
         name: "\u6EDA\u83CC\u51B2\u950B",
         brief: "\u4FA7\u5012\u6210\u83CC\u8F6E\u6301\u7EED\u6EDA\u52A8\uFF0C\u53EF\u8F6C\u5411\uFF0C\u78BE\u5230\u5C31\u75BC",
         tags: ["dash", "control"],
-        desc: "\u628A\u8EAB\u5B50\u4FA7\u8FC7\u6765\u7F29\u6210\u4E00\u53EA\u83CC\u8F6E\uFF0C\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u6EDA\u52A8 {rollTime} \u79D2\uFF0C\u671F\u95F4\u7528\u79FB\u52A8\u6307\u4EE4\u53EF\u4EE5\u4E0D\u65AD\u6539\u53D8\u65B9\u5411\uFF1A\u901F\u5EA6\u4ECE {dashSpeed} \u4E00\u8DEF\u63D0\u5230 {maxSpeed}\u3002\u88AB\u78BE\u8FC7\u7684\u654C\u4EBA\u6BCF {tickInterval} \u79D2\u53D7\u5230 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\uFF0C\u7B2C\u4E00\u6B21\u88AB\u78BE\u5230\u4F1A\u88AB\u9876\u98DE {knockup} \u79D2\u3002\u649E\u5899\u5373\u505C\u3002",
+        desc: "\u628A\u8EAB\u5B50\u4FA7\u8FC7\u6765\u7F29\u6210\u4E00\u53EA\u83CC\u8F6E\uFF0C\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u6EDA\u52A8 {rollTime} \u79D2\uFF0C\u671F\u95F4\u7528\u79FB\u52A8\u6307\u4EE4\u53EF\u4EE5\u4E0D\u65AD\u6539\u53D8\u65B9\u5411\uFF1A\u901F\u5EA6\u4ECE {dashSpeed} \u4E00\u8DEF\u63D0\u5230 {maxSpeed}\u3002\u88AB\u78BE\u8FC7\u7684\u654C\u4EBA\u6BCF {tickInterval} \u79D2\u53D7\u5230 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u7269\u7406\u4F24\u5BB3\u3002\u6BCF\u4E2A\u5355\u4F4D\u7B2C\u4E00\u6B21\u88AB\u649E\u5230\u4F1A\u88AB\u9876\u98DE {knockup} \u79D2\uFF0C\u4E4B\u540E\u518D\u649E\u53EA\u53D7 {followRatio%} \u7684\u4F24\u5BB3\u4E0E\u51FB\u98DE\u3002\u649E\u5899\u5373\u505C\uFF0C\u51B7\u5374\u4ECE\u6EDA\u52A8\u7ED3\u675F\u540E\u624D\u5F00\u59CB\u8BA1\u7B97\u3002",
         maxLevel: 6,
         cooldown: [16, 15, 14, 13, 12, 11],
         manaCost: [60, 65, 70, 75, 80, 85],
         cast: { type: "direction", range: 9, width: 2.4 },
         values: {
           damage: [70, 105, 140, 175, 210, 245],
-          adRatio: 0.25,
+          hpRatio: 0.02,
           knockup: 0.85,
+          followRatio: 0.4,
           dashSpeed: 11,
-          maxSpeed: 18,
-          accel: 7,
+          maxSpeed: 12.6,
+          accel: 1.6,
           rollTime: 10,
           tickInterval: 0.5,
           impactRadius: 2.2
@@ -2422,10 +2431,10 @@ var Se = {
         maxLevel: 6,
         cooldown: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
         manaCost: [25, 28, 31, 34, 37, 40],
-        cast: { type: "cone", range: 6.2, angle: 100 * (Math.PI / 180) },
+        cast: { type: "cone", range: 9.2, angle: 56 * (Math.PI / 180) },
         values: {
           damage: [22, 30, 38, 46, 54, 62],
-          apRatio: 0.06,
+          apRatio: 0.18,
           slow: 0.4,
           slowDur: 1.2,
           manaPerSec: [30, 33, 36, 39, 42, 45],
@@ -2437,19 +2446,23 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u5929\u964D\u83CC\u76D6",
-        brief: "\u84C4\u529B\u6570\u79D2\u540E\u8DC3\u5411\u8FDC\u5904\uFF0C\u7838\u5730\u51FB\u98DE",
+        brief: "\u5168\u56FE\u84C4\u529B\u8DC3\u51FB\uFF0C\u98DE\u5F97\u8D8A\u8FDC\u7838\u5F97\u8D8A\u72E0",
         tags: ["control", "dash"],
-        desc: "\u8E72\u4E0B\u628A\u83CC\u76D6\u538B\u5F97\u5431\u5431\u54CD\uFF0C\u84C4\u529B {warnTime} \u79D2\uFF08\u843D\u70B9\u4F1A\u63D0\u524D\u4EAE\u51FA\u8B66\u793A\uFF09\uFF1B\u968F\u540E\u9AD8\u9AD8\u8DC3\u8D77\u7838\u5411\u76EE\u6807\u533A\u57DF\uFF0C\u9020\u6210 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002\u84C4\u529B\u4E0E\u8DC3\u8D77\u671F\u95F4\u514D\u75AB\u63A7\u5236\u3002",
+        desc: "\u8E72\u4E0B\u628A\u83CC\u76D6\u538B\u5F97\u5431\u5431\u54CD\uFF0C\u84C4\u529B {warnTime} \u79D2\uFF08\u843D\u70B9\u4F1A\u63D0\u524D\u4EAE\u51FA\u8B66\u793A\uFF09\uFF0C\u53EF\u4EE5\u7838\u5411\u5730\u56FE\u4E0A\u4EFB\u610F\u4E00\u70B9\u3002\u98DE\u5F97\u8D8A\u8FDC\u7838\u5F97\u8D8A\u72E0\uFF1A\u843D\u5730\u534A\u5F84\u4ECE {radiusMin} \u4E00\u8DEF\u957F\u5230 {radiusMax}\uFF0C\u4F24\u5BB3\u6700\u591A\u518D\u7FFB\u4E00\u500D\uFF1B\u547D\u4E2D\u9020\u6210 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002\u84C4\u529B\u4E0E\u8DC3\u8D77\u671F\u95F4\u514D\u75AB\u63A7\u5236\u3002",
         maxLevel: 3,
         cooldown: [70, 62, 54],
         manaCost: [110, 120, 130],
-        cast: { type: "position", range: 16, radius: 4.6 },
+        cast: { type: "position", range: 120, radius: 3.4 },
         values: {
           damage: [300, 450, 600],
           hpRatio: 0.06,
           knockup: 0.9,
           warnTime: 1.8,
-          leapTime: 0.6
+          leapTime: 0.6,
+          radiusMin: 3.4,
+          radiusMax: 9,
+          farRange: 60,
+          farDamage: 1
         },
         castTime: 0.2
       }
@@ -22046,9 +22059,12 @@ var WL = class {
   pointerPan = 0;
   tallWant = 0;
   tallK = 0;
+  zoomWant = 1;
+  zoomK = 1;
   aspect = 16 / 9;
   follow = new dt();
   peek = null;
+  ultPeek = null;
   focus = new dt();
   snapped = false;
   trauma = 0;
@@ -22099,6 +22115,14 @@ var WL = class {
   setTallFocus(t) {
     this.tallWant = Math.max(0, t);
   }
+  // 镜头拉远倍率（>1 拉远），用于全图大招蓄力时看清落点
+  setZoom(t) {
+    this.zoomWant = t > 0 ? t : 1;
+  }
+  // 大招这类"临时把镜头挪到别处"用的焦点，和指针拖拽的 peek 分开，避免互相抢
+  setUltPeek(t, e) {
+    t === null ? this.ultPeek = null : (this.ultPeek ??= new dt()).set(t, 0, e);
+  }
   setTopView(t, e = 76) {
     this.topView = t, this.topHalf = e, this.applyLens(), this.snapped = false;
   }
@@ -22134,8 +22158,8 @@ var WL = class {
     let i, a;
     if (this.topView) i = 0, a = 0;
     else {
-      const f = this.peek ?? this.follow;
-      if (i = f.x, a = f.z - (this.peek ? 0 : this.lead), !this.override) {
+      const f = this.ultPeek ?? this.peek ?? this.follow;
+      if (i = f.x, a = f.z - (this.ultPeek || this.peek ? 0 : this.lead), !this.override) {
         let d = 0, h = 0;
         if (this.reach && !this.peek) {
           const v = this.reach.x - i, _ = this.reach.z - a, k = this.groundZ(UL), M = this.groundZ(-(cb + (OL - cb) * this.tall));
@@ -22159,11 +22183,13 @@ var WL = class {
       const f = i - this.focus.x, d = a - this.focus.z;
       if (f * f + d * d > 2025) this.focus.set(i, 0, a);
       else {
-        const h = 1 - Math.exp(-(this.peek ? 14 : 9) * t);
+        const h = 1 - Math.exp(-(this.ultPeek ? 4 : this.peek ? 14 : 9) * t);
         this.focus.x += f * h, this.focus.z += d * h;
       }
     }
-    const o = this.override ? this.override.yaw * ua : 0, r = this.topView || this.override ? this.distance : this.distance * (1 + VL * this.tallK), l = Math.cos(this.pitch) * r, c = Math.sin(this.pitch) * r;
+    const o = this.override ? this.override.yaw * ua : 0;
+    this.zoomK += (this.zoomWant - this.zoomK) * (1 - Math.exp(-5 * t));
+    const r = (this.topView || this.override ? this.distance : this.distance * (1 + VL * this.tallK)) * this.zoomK, l = Math.cos(this.pitch) * r, c = Math.sin(this.pitch) * r;
     if (e.position.set(this.focus.x + Math.sin(o) * l, c, this.focus.z + Math.cos(o) * l), e.up.set(0, 1, 0), this.topView && e.up.set(0, 0, -1), e.lookAt(this.focus.x, 0, this.focus.z), this.trauma > 0) {
       this.shakeTime += t;
       const f = this.shakeTime, d = this.trauma * this.trauma, h = Math.sin(f * 61.3) * 0.6 + Math.sin(f * 37.1 + 1.3) * 0.4, u = Math.sin(f * 53.7 + 2.1) * 0.6 + Math.sin(f * 29.9 + 0.4) * 0.4, m = Math.sin(f * 44.3 + 4.2), x = this.distance * Math.tan(e.fov / 2 * ua) * Math.min(1, this.aspect) / 10.4;
@@ -23518,6 +23544,13 @@ function qM(n, t, e) {
       }
     }
     T = G > 0, s.rig.setTallFocus(G);
+    const mu2 = B && B.alive ? B.rt?.mushUlt : null;
+    if (mu2 && L.time < mu2.until) {
+      const et = Math.min(1, Math.hypot(mu2.x - mu2.fromX, mu2.y - mu2.fromY) / 55);
+      s.rig.setZoom(1 + 0.9 * et), s.rig.setUltPeek((mu2.fromX + mu2.x) * 0.5, (mu2.fromY + mu2.y) * 0.5);
+    } else {
+      s.rig.setZoom(1), s.rig.setUltPeek(null);
+    }
   }, A = () => {
     if (S) return;
     p = true, l.dt = 0, s.updateCamera(0);
@@ -29352,6 +29385,21 @@ var mJD = (n, t) => {
       1.6
     );
   }
+  const P = n.particles.use(Mt.bubble), O = n.n(7);
+  for (let d = 0; d < O; d++) {
+    const m = f.next(), x = o + h * 0.75 - l * 0.75 * m, p = r * f.range(0.15, 0.8);
+    P.spawn(
+      e + Math.cos(x) * p,
+      f.range(0.55, 1.7),
+      s + Math.sin(x) * p,
+      Math.cos(x) * f.range(1.2, 3.4),
+      f.range(0.2, 1.1),
+      Math.sin(x) * f.range(1.2, 3.4),
+      f.range(0.35, 0.62),
+      f.range(0.22, 0.5),
+      f.range(0.9, 1.5)
+    );
+  }
   n.light(e + i * r * 0.45, s + a * r * 0.45, 1.4, Mu2.glow, 5, r * 1.5, 0.34);
 };
 var mZD = (n, t, e) => {
@@ -29394,11 +29442,32 @@ var mXD = (n, t) => {
   }
   n.light(e, s, 1, Mu2.accent, 5, 5, 1.5);
 };
+var mBD = (n, t) => {
+  const e = t.pos.x, s = t.pos.y, i = n.rnd;
+  n.decals.add(Xt.ring, e, s, 1.9, 0.34).params(1, 0.08).color(Mu2.accent, 1.9).under(W.shadow, 0.34), n.decals.add(Xt.zone, e, s, 1.1, 0.36).params(10, 0.1).color(Mu2.glow, 1.4, 0.7).under(W.shadow, 0.28);
+  const a = n.particles.use(Mt.wisp);
+  for (let o = 0; o < 12; o++) {
+    const r = i.next() * Math.PI * 2, l = i.range(0.3, 1.2);
+    a.spawn(
+      e + Math.cos(r) * l,
+      i.range(0.3, 1.4),
+      s + Math.sin(r) * l,
+      -Math.cos(r) * i.range(0.6, 2),
+      i.range(0.8, 2.4),
+      -Math.sin(r) * i.range(0.6, 2),
+      0.55,
+      0.5,
+      0.9
+    );
+  }
+  n.light(e, s, 1, Mu2.accent, 4, 4, 0.28);
+};
 var mMD = {
   mushroom_s1_dash: mSD,
   mushroom_s1_trail: mTD,
   mushroom_s1_impact: mQD,
   mushroom_s2_spray: mJD,
+  mushroom_passive_burst: mBD,
   mushroom_ult_land: mZD,
   mushroom_ult_charge: mXD
 };
@@ -49838,7 +49907,7 @@ var FB = {
   star_blessing: () => `\u5DE8\u7075buff(\u661F\u9668\u795D\u798F)\uFF1A\u4F24\u5BB3 +${Ps(yn.blessingDamage)}\uFF0C\u6301\u7EED\u56DE\u8840\uFF0C\u6211\u65B9\u5C0F\u5175\u66F4\u5F3A\u3002\u6253\u6389\u661F\u9668\u5DE8\u7075\u540E\u5168\u961F\u83B7\u5F97\uFF0C\u6301\u7EED ${yn.blessingDuration} \u79D2\u3002`,
   panyue_passive: (n) => `\u76FE\u51FB\u84C4\u52BF ${n.stacks}/3\uFF1A\u7B2C\u4E09\u6B21\u666E\u653B\u6539\u7528\u5927\u76FE\u7838\u5730\uFF0C\u9644\u5E26\u989D\u5916\u4F24\u5BB3\u4E0E\u51CF\u901F\u3002`,
   panyue_bulwark: () => "\u62E5\u76FE\u800C\u7ACB\uFF1A\u62A4\u76FE\u751F\u6548\u4E2D\uFF0C\u76FE\u7834\u6216\u5230\u671F\u5373\u7ED3\u675F\u3002",
-  mushroom_passive: (n) => `\u83CC\u4E1D\u84C4\u52BF ${n.stacks}/3\uFF1A\u7B2C\u56DB\u4E0B\u666E\u653B\u7F20\u4F4F\u5BF9\u624B\uFF0C\u9644\u5E26\u989D\u5916\u4F24\u5BB3\u4E0E\u51CF\u901F\u3002`,
+  mushroom_passive: (n) => `\u83CC\u4E1D\u84C4\u52BF ${n.stacks}/6\uFF1A\u53E0\u6EE1 7 \u5C42\u65F6\u7206\u5F00\uFF0C\u989D\u5916\u9020\u6210\u6700\u5927\u751F\u547D\u4F24\u5BB3\u5E76\u7ED9\u81EA\u5DF1\u4E00\u5C42\u7B49\u91CF\u62A4\u76FE\u3002`,
   chijin_ember: () => "\u4E0B\u4E00\u6B21\u666E\u653B\u53D8\u4E3A\u91CD\u65A7\uFF0C\u5E76\u56DE\u590D\u81EA\u8EAB\u751F\u547D\u3002",
   chijin_blaze: (n) => n.value > 0 ? `\u653B\u901F\u63D0\u9AD8 ${Ps(n.value)}\u3002` : "\u653B\u901F\u5927\u5E45\u63D0\u9AD8\u3002",
   chijin_spin: () => "\u65A7\u5F71\u6301\u7EED\u5288\u780D\u5468\u56F4\u654C\u4EBA\uFF1B\u671F\u95F4\u514D\u75AB\u51CF\u901F\u5E76\u83B7\u5F97\u51CF\u4F24\u3002",
@@ -58045,7 +58114,7 @@ var Oa = {
   mushroom: {
     s1: bi("mushroom", "s1", {
       roles: ["engage", "chase"],
-      damage: Gi("physical", { ad: "adRatio" }),
+      damage: Gi("physical", { hp: "hpRatio" }),
       cc: [{ kind: "knockup", duration: ze("mushroom", "s1", "knockup"), value: 0 }],
       mobility: {
         kind: "dash",
@@ -62937,17 +63006,22 @@ Oi("panyue", "ult", {
   }
 });
 var mP2 = Se.mushroom.passive.values;
+function mushStack(t, e, s) {
+  if (!e.alive || !s || !s.alive || Ss(e) || Ss(s)) return;
+  const i = am(e, "mushroom_passive");
+  if (i < mP2.hits - 1) {
+    Wn(t, e, "mushroom_passive", { duration: 1 / 0, maxStacks: mP2.hits - 1, sourceId: e.id });
+    return;
+  }
+  Va(t, e, "mushroom_passive");
+  const a = wo({ sim: t, caster: e, slot: "passive" }, s, e.stats.maxHp * mP2.hpRatio, "magic");
+  s.alive && tr(t, s, mP2.slow, mP2.slowDur, e, "mushroom_passive"), a > 0 && // 每层护盾用独立 key，Vf 会把同类护盾的 value 累加，等于"伤害多少盾就多少"
+  Wn(t, e, "shield", { duration: mP2.shieldDur, value: a, sourceId: e.id }), ds(t, "mushroom_passive_burst", e.pos, e.team, { unitId: e.id, targetId: s.id, amount: a });
+}
 tu("mushroom", {
-  modifyBasicAttack(n, t, e, s) {
-    Ss(e) || am(t, "mushroom_passive") >= mP2.hits - 1 && (s.bonusMagic += t.stats.maxHp * mP2.hpRatio);
-  },
+  // 叠满那一击的额外伤害统一由 mushStack 里的 wo() 结算，这里不再往普攻里加 bonusMagic，否则会算两遍
   onBasicAttackHit(n, t, e) {
-    if (Ss(e)) return;
-    if (am(t, "mushroom_passive") >= mP2.hits - 1) {
-      Va(n, t, "mushroom_passive"), ds(n, "hit_magic", e.pos, t.team, { unitId: t.id, targetId: e.id }), e.alive && tr(n, e, mP2.slow, mP2.slowDur, t, "mushroom_passive");
-      return;
-    }
-    Wn(n, t, "mushroom_passive", { duration: 1 / 0, maxStacks: mP2.hits - 1, sourceId: t.id });
+    Ss(e) || mushStack(n, t, e);
   }
 });
 Oi("mushroom", "s1", {
@@ -62957,7 +63031,12 @@ Oi("mushroom", "s1", {
   aimSpeed: $a("mushroom", "s1", "dashSpeed"),
   aimRange: 9,
   cast(n) {
-    const { sim: t, caster: e } = n, s = n.val("rollTime"), i = n.val("dashSpeed"), a = n.val("maxSpeed"), o = n.val("accel"), r = oa(n, "damage", { ad: "adRatio" }), l = n.val("impactRadius"), c = n.val("tickInterval"), knocked = /* @__PURE__ */ new Set(), foe = ia(e.team), hitOk = (u) => u.kind !== "tower" && u.kind !== "core" && foe(u);
+    const { sim: t, caster: e } = n, s = n.val("rollTime"), i = n.val("dashSpeed"), a = n.val("maxSpeed"), o = n.val("accel"), r = oa(n, "damage", { hp: "hpRatio" }), l = n.val("impactRadius"), c = n.val("tickInterval"), weak = n.val("followRatio"), cdMax = e.skills.s1.cdMax, hitCount = /* @__PURE__ */ new Map(), foe = ia(e.team), hitOk = (u) => u.kind !== "tower" && u.kind !== "core" && foe(u);
+    let settled = false;
+    const settle = () => {
+      settled || (settled = true, e.skills.s1.cd = cdMax);
+    };
+    e.skills.s1.cd = 0;
     ds(t, "mushroom_s1_dash", n.origin, e.team, { unitId: e.id, dir: Cs(n.dir) }), Hm(t, e, {
       dir: n.dir,
       distance: 9999,
@@ -62969,7 +63048,10 @@ Oi("mushroom", "s1", {
         const h = Cs(d.pos);
         ds(t, "mushroom_s1_impact", h, e.team, { unitId: e.id, radius: l });
         for (const u of Pr(t, d.pos, l, hitOk)) {
-          wo(n, u, r, "physical"), u.id === d.id && !knocked.has(u.id) && (knocked.add(u.id), yS(t, u, n.val("knockup"), e));
+          const m = hitCount.get(u.id) ?? 0;
+          hitCount.set(u.id, m + 1);
+          const x = m === 0 ? 1 : weak;
+          wo(n, u, r * x, "physical"), u.alive && yS(t, u, n.val("knockup") * x, e), mushStack(t, e, u);
         }
         return false;
       }
@@ -62978,9 +63060,9 @@ Oi("mushroom", "s1", {
     let resetAt = 0, tick = 0;
     const f = () => {
       const d = e.rt.dash;
-      if (!e.alive || !d || d.anim !== "roll") return;
+      if (!e.alive || !d || d.anim !== "roll") return void settle();
       const h = t.state.time - f02;
-      if (h >= s) return void iu(t, e, "arrived");
+      if (h >= s) return settle(), void iu(t, e, "arrived");
       d.speed = Math.min(a, i + h * o);
       const p = e.rt.path;
       if (p && e.rt.pathIdx < p.length) {
@@ -63023,8 +63105,9 @@ Oi("mushroom", "s2", {
       const m = i * 0.1;
       if (e.mana < m) return void stopMushS2(t, e, 1.5);
       if (e.mana -= m, t.state.time >= u.nextTick && (u.nextTick = t.state.time + c, (() => {
+        let stacked = false;
         for (const x of $j(t, e.pos, u.dir, n.range, n.angle, ia(e.team)))
-          wo(n, x, a, "magic"), tr(t, x, o, r, e, "mushroom_s2");
+          wo(n, x, a, "magic"), tr(t, x, o, r, e, "mushroom_s2"), stacked || (stacked = true, mushStack(t, e, x));
       })()), t.state.time >= u.nextFx) {
         u.nextFx = t.state.time + 0.3;
         d();
@@ -63039,18 +63122,21 @@ Oi("mushroom", "ult", {
   noAnim: true,
   aimLead: $a("mushroom", "ult", "warnTime"),
   cast(n) {
-    const { sim: t, caster: e } = n, s = n.val("warnTime"), i = n.val("leapTime"), a = Cs(n.origin), o = { x: n.targetPos.x, y: n.targetPos.y };
+    const { sim: t, caster: e } = n, s = n.val("warnTime"), i = n.val("leapTime"), a = Cs(n.origin), o = { x: n.targetPos.x, y: n.targetPos.y }, dist = Math.hypot(o.x - a.x, o.y - a.y), k = Math.min(1, dist / Math.max(1, n.val("farRange"))), radius = n.val("radiusMin") + (n.val("radiusMax") - n.val("radiusMin")) * k, dmg = oa(n, "damage", { hp: "hpRatio" }) * (1 + n.val("farDamage") * k), leap = i + k * 0.55, knock = n.val("knockup");
     Wn(t, e, "unstoppable", {
-      duration: s + i + 0.1,
+      duration: s + leap + 0.1,
       sourceId: e.id,
       key: "mushroom_ult",
       merge: "replace"
-    }), ds(t, "mushroom_ult_charge", a, e.team, { unitId: e.id }), vS(t, e, "channel", s, false), Zo(t, { visual: "telegraph", owner: e, pos: o, radius: n.radius, duration: s + i }), t.schedule(s, () => {
-      e.alive && fW(t, e, o.x, o.y, i, (r) => {
-        if (r !== "arrived" || !e.alive) return;
-        const l = Cs(e.pos), c = oa(n, "damage", { hp: "hpRatio" });
-        ds(t, "mushroom_ult_land", l, e.team, { unitId: e.id, radius: n.radius });
-        for (const f of Pr(t, l, n.radius, ia(e.team))) wo(n, f, c, "magic"), yS(t, f, n.val("knockup"), e);
+    }), ds(t, "mushroom_ult_charge", a, e.team, { unitId: e.id }), vS(t, e, "channel", s, false), Zo(t, { visual: "telegraph", owner: e, pos: o, radius, duration: s + leap }), // 蓄力期间把镜头拉远并把焦点挪到"人—落点"中间，全图跳的时候才看得见落点
+    e.rt.mushUlt = { until: t.state.time + s + leap, x: o.x, y: o.y, fromX: a.x, fromY: a.y, radius }, t.schedule(s, () => {
+      e.alive && fW(t, e, o.x, o.y, leap, (r) => {
+        if (r !== "arrived" || !e.alive) return void (e.rt.mushUlt = null);
+        const l = Cs(e.pos);
+        ds(t, "mushroom_ult_land", l, e.team, { unitId: e.id, radius });
+        for (const f of Pr(t, l, radius, ia(e.team)))
+          wo(n, f, dmg, "magic"), f.alive && yS(t, f, knock, e), mushStack(t, e, f);
+        e.rt.mushUlt = null;
       });
     });
   }

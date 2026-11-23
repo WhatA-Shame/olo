@@ -1783,7 +1783,7 @@ const ze = $a,
     mushroom: {
       s1: bi("mushroom", "s1", {
         roles: ["engage", "chase"],
-        damage: Gi("physical", { ad: "adRatio" }),
+        damage: Gi("physical", { hp: "hpRatio" }),
         cc: [{ kind: "knockup", duration: ze("mushroom", "s1", "knockup"), value: 0 }],
         mobility: {
           kind: "dash",

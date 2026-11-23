@@ -1171,6 +1171,14 @@ function qM(n, t, e) {
         }
       }
       ((T = G > 0), s.rig.setTallFocus(G));
+      // 杯杯菇大招蓄力/滞空：镜头拉远并把焦点挪到「人—落点」中间，全图跳也看得见落点
+      const mu = B && B.alive ? B.rt?.mushUlt : null;
+      if (mu && L.time < mu.until) {
+        const et = Math.min(1, Math.hypot(mu.x - mu.fromX, mu.y - mu.fromY) / 55);
+        (s.rig.setZoom(1 + 0.9 * et), s.rig.setUltPeek((mu.fromX + mu.x) * 0.5, (mu.fromY + mu.y) * 0.5));
+      } else {
+        (s.rig.setZoom(1), s.rig.setUltPeek(null));
+      }
     },
     A = () => {
       if (S) return;

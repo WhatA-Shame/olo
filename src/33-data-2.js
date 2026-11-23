@@ -293,7 +293,7 @@ const NB = {
       `巨灵buff(星陨祝福)：伤害 +${Ps(yn.blessingDamage)}，持续回血，我方小兵更强。打掉星陨巨灵后全队获得，持续 ${yn.blessingDuration} 秒。`,
     panyue_passive: (n) => `盾击蓄势 ${n.stacks}/3：第三次普攻改用大盾砸地，附带额外伤害与减速。`,
     panyue_bulwark: () => "拥盾而立：护盾生效中，盾破或到期即结束。",
-    mushroom_passive: (n) => `菌丝蓄势 ${n.stacks}/3：第四下普攻缠住对手，附带额外伤害与减速。`,
+    mushroom_passive: (n) => `菌丝蓄势 ${n.stacks}/6：叠满 7 层时爆开，额外造成最大生命伤害并给自己一层等量护盾。`,
     chijin_ember: () => "下一次普攻变为重斧，并回复自身生命。",
     chijin_blaze: (n) => (n.value > 0 ? `攻速提高 ${Ps(n.value)}。` : "攻速大幅提高。"),
     chijin_spin: () => "斧影持续劈砍周围敌人；期间免疫减速并获得减伤。",

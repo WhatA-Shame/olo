@@ -66,19 +66,28 @@ Oi("panyue", "ult", {
 
 const mP = Se.mushroom.passive.values;
 
+// 被动：普攻与技能命中都攒 1 层菌丝，叠满爆开（额外魔法伤害 + 等量护盾）
+// 注意 Wn/Va/tr/ds 的第一个参数都是 sim，不是施法上下文；wo 要的是 {sim,caster,slot}
+function mushStack(t, e, s) {
+  if (!e.alive || !s || !s.alive || Ss(e) || Ss(s)) return;
+  const i = am(e, "mushroom_passive");
+  if (i < mP.hits - 1) {
+    Wn(t, e, "mushroom_passive", { duration: 1 / 0, maxStacks: mP.hits - 1, sourceId: e.id });
+    return;
+  }
+  Va(t, e, "mushroom_passive");
+  const a = wo({ sim: t, caster: e, slot: "passive" }, s, e.stats.maxHp * mP.hpRatio, "magic");
+  (s.alive && tr(t, s, mP.slow, mP.slowDur, e, "mushroom_passive"),
+    a > 0 &&
+      // 每层护盾用独立 key，Vf 会把同类护盾的 value 累加，等于"伤害多少盾就多少"
+      Wn(t, e, "shield", { duration: mP.shieldDur, value: a, sourceId: e.id }),
+    ds(t, "mushroom_passive_burst", e.pos, e.team, { unitId: e.id, targetId: s.id, amount: a }));
+}
+
 tu("mushroom", {
-  modifyBasicAttack(n, t, e, s) {
-    Ss(e) || (am(t, "mushroom_passive") >= mP.hits - 1 && (s.bonusMagic += t.stats.maxHp * mP.hpRatio));
-  },
+  // 叠满那一击的额外伤害统一由 mushStack 里的 wo() 结算，这里不再往普攻里加 bonusMagic，否则会算两遍
   onBasicAttackHit(n, t, e) {
-    if (Ss(e)) return;
-    if (am(t, "mushroom_passive") >= mP.hits - 1) {
-      (Va(n, t, "mushroom_passive"),
-        ds(n, "hit_magic", e.pos, t.team, { unitId: t.id, targetId: e.id }),
-        e.alive && tr(n, e, mP.slow, mP.slowDur, t, "mushroom_passive"));
-      return;
-    }
-    Wn(n, t, "mushroom_passive", { duration: 1 / 0, maxStacks: mP.hits - 1, sourceId: t.id });
+    Ss(e) || mushStack(n, t, e);
   },
 });
 
@@ -94,12 +103,20 @@ Oi("mushroom", "s1", {
       i = n.val("dashSpeed"),
       a = n.val("maxSpeed"),
       o = n.val("accel"),
-      r = oa(n, "damage", { ad: "adRatio" }),
+      r = oa(n, "damage", { hp: "hpRatio" }),
       l = n.val("impactRadius"),
       c = n.val("tickInterval"),
-      knocked = new Set(),
+      weak = n.val("followRatio"),
+      // 冷却从滚动结束后才开始算：cast 里先把 cd 清掉，等滚动收尾再补上（cdMax 已经含 CDR）
+      cdMax = e.skills.s1.cdMax,
+      hitCount = new Map(),
       foe = ia(e.team),
       hitOk = (u) => u.kind !== "tower" && u.kind !== "core" && foe(u);
+    let settled = !1;
+    const settle = () => {
+      settled || ((settled = !0), (e.skills.s1.cd = cdMax));
+    };
+    e.skills.s1.cd = 0;
     (ds(t, "mushroom_s1_dash", n.origin, e.team, { unitId: e.id, dir: Cs(n.dir) }),
       Hm(t, e, {
         dir: n.dir,
@@ -112,8 +129,11 @@ Oi("mushroom", "s1", {
           const h = Cs(d.pos);
           ds(t, "mushroom_s1_impact", h, e.team, { unitId: e.id, radius: l });
           for (const u of Pr(t, d.pos, l, hitOk)) {
-            (wo(n, u, r, "physical"),
-              u.id === d.id && !knocked.has(u.id) && (knocked.add(u.id), yS(t, u, n.val("knockup"), e)));
+            // 每个单位第一次被撞：满额伤害 + 满额击飞；之后每次只有 40%
+            const m = hitCount.get(u.id) ?? 0;
+            hitCount.set(u.id, m + 1);
+            const x = m === 0 ? 1 : weak;
+            (wo(n, u, r * x, "physical"), u.alive && yS(t, u, n.val("knockup") * x, e), mushStack(t, e, u));
           }
           return !1;
         },
@@ -125,9 +145,10 @@ Oi("mushroom", "s1", {
       tick = 0;
     const f = () => {
       const d = e.rt.dash;
-      if (!e.alive || !d || d.anim !== "roll") return;
+      // 被打断（不再处于 roll 冲刺）也要把冷却补上，否则会白嫖一个 0cd 的滚
+      if (!e.alive || !d || d.anim !== "roll") return void settle();
       const h = t.state.time - f0;
-      if (h >= s) return void iu(t, e, "arrived");
+      if (h >= s) return (settle(), void iu(t, e, "arrived"));
       d.speed = Math.min(a, i + h * o);
       const p = e.rt.path;
       if (p && e.rt.pathIdx < p.length) {
@@ -188,8 +209,12 @@ Oi("mushroom", "s2", {
         t.state.time >= u.nextTick &&
           ((u.nextTick = t.state.time + c),
           (() => {
+            // 每段（每 tick）最多叠 1 层被动，不管锥形里有几个目标
+            let stacked = !1;
             for (const x of $j(t, e.pos, u.dir, n.range, n.angle, ia(e.team)))
-              (wo(n, x, a, "magic"), tr(t, x, o, r, e, "mushroom_s2"));
+              (wo(n, x, a, "magic"),
+                tr(t, x, o, r, e, "mushroom_s2"),
+                stacked || ((stacked = !0), mushStack(t, e, x)));
           })()),
         t.state.time >= u.nextFx)
       ) {
@@ -211,24 +236,34 @@ Oi("mushroom", "ult", {
       s = n.val("warnTime"),
       i = n.val("leapTime"),
       a = Cs(n.origin),
-      o = { x: n.targetPos.x, y: n.targetPos.y };
+      o = { x: n.targetPos.x, y: n.targetPos.y },
+      // 全图范围：飞得越远，落地半径越大、伤害越高、滞空越久
+      dist = Math.hypot(o.x - a.x, o.y - a.y),
+      k = Math.min(1, dist / Math.max(1, n.val("farRange"))),
+      radius = n.val("radiusMin") + (n.val("radiusMax") - n.val("radiusMin")) * k,
+      dmg = oa(n, "damage", { hp: "hpRatio" }) * (1 + n.val("farDamage") * k),
+      leap = i + k * 0.55,
+      knock = n.val("knockup");
     (Wn(t, e, "unstoppable", {
-      duration: s + i + 0.1,
+      duration: s + leap + 0.1,
       sourceId: e.id,
       key: "mushroom_ult",
       merge: "replace",
     }),
       ds(t, "mushroom_ult_charge", a, e.team, { unitId: e.id }),
       vS(t, e, "channel", s, !1),
-      Zo(t, { visual: "telegraph", owner: e, pos: o, radius: n.radius, duration: s + i }),
+      Zo(t, { visual: "telegraph", owner: e, pos: o, radius, duration: s + leap }),
+      // 蓄力期间把镜头拉远并把焦点挪到"人—落点"中间，全图跳的时候才看得见落点
+      (e.rt.mushUlt = { until: t.state.time + s + leap, x: o.x, y: o.y, fromX: a.x, fromY: a.y, radius }),
       t.schedule(s, () => {
         e.alive &&
-          fW(t, e, o.x, o.y, i, (r) => {
-            if (r !== "arrived" || !e.alive) return;
-            const l = Cs(e.pos),
-              c = oa(n, "damage", { hp: "hpRatio" });
-            ds(t, "mushroom_ult_land", l, e.team, { unitId: e.id, radius: n.radius });
-            for (const f of Pr(t, l, n.radius, ia(e.team))) (wo(n, f, c, "magic"), yS(t, f, n.val("knockup"), e));
+          fW(t, e, o.x, o.y, leap, (r) => {
+            if (r !== "arrived" || !e.alive) return void (e.rt.mushUlt = null);
+            const l = Cs(e.pos);
+            ds(t, "mushroom_ult_land", l, e.team, { unitId: e.id, radius });
+            for (const f of Pr(t, l, radius, ia(e.team)))
+              (wo(n, f, dmg, "magic"), f.alive && yS(t, f, knock, e), mushStack(t, e, f));
+            e.rt.mushUlt = null;
           });
       }));
   },

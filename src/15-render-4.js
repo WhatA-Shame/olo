@@ -1433,9 +1433,12 @@ class WL {
   pointerPan = 0;
   tallWant = 0;
   tallK = 0;
+  zoomWant = 1;
+  zoomK = 1;
   aspect = 16 / 9;
   follow = new dt();
   peek = null;
+  ultPeek = null;
   focus = new dt();
   snapped = !1;
   trauma = 0;
@@ -1508,6 +1511,14 @@ class WL {
   setTallFocus(t) {
     this.tallWant = Math.max(0, t);
   }
+  // 镜头拉远倍率（>1 拉远），用于全图大招蓄力时看清落点
+  setZoom(t) {
+    this.zoomWant = t > 0 ? t : 1;
+  }
+  // 大招这类"临时把镜头挪到别处"用的焦点，和指针拖拽的 peek 分开，避免互相抢
+  setUltPeek(t, e) {
+    t === null ? (this.ultPeek = null) : (this.ultPeek ??= new dt()).set(t, 0, e);
+  }
   setTopView(t, e = 76) {
     ((this.topView = t), (this.topHalf = e), this.applyLens(), (this.snapped = !1));
   }
@@ -1546,8 +1557,8 @@ class WL {
     let i, a;
     if (this.topView) ((i = 0), (a = 0));
     else {
-      const f = this.peek ?? this.follow;
-      if (((i = f.x), (a = f.z - (this.peek ? 0 : this.lead)), !this.override)) {
+      const f = this.ultPeek ?? this.peek ?? this.follow;
+      if (((i = f.x), (a = f.z - (this.ultPeek || this.peek ? 0 : this.lead)), !this.override)) {
         let d = 0,
           h = 0;
         if (this.reach && !this.peek) {
@@ -1582,12 +1593,14 @@ class WL {
         d = a - this.focus.z;
       if (f * f + d * d > 2025) this.focus.set(i, 0, a);
       else {
-        const h = 1 - Math.exp(-(this.peek ? 14 : 9) * t);
+        const h = 1 - Math.exp(-(this.ultPeek ? 4 : this.peek ? 14 : 9) * t);
         ((this.focus.x += f * h), (this.focus.z += d * h));
       }
     }
-    const o = this.override ? this.override.yaw * ua : 0,
-      r = this.topView || this.override ? this.distance : this.distance * (1 + VL * this.tallK),
+    const o = this.override ? this.override.yaw * ua : 0;
+    this.zoomK += (this.zoomWant - this.zoomK) * (1 - Math.exp(-5 * t));
+    const r =
+      (this.topView || this.override ? this.distance : this.distance * (1 + VL * this.tallK)) * this.zoomK,
       l = Math.cos(this.pitch) * r,
       c = Math.sin(this.pitch) * r;
     if (

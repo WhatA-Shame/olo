@@ -327,6 +327,25 @@ const AD = (n, t, e) => {
         1.6,
       );
     }
+    // 孢子气泡：从嘴里滚出来、边飘边胀破的一串半透明泡泡
+    const P = n.particles.use(Mt.bubble),
+      O = n.n(7);
+    for (let d = 0; d < O; d++) {
+      const m = f.next(),
+        x = o + h * 0.75 - l * 0.75 * m,
+        p = r * f.range(0.15, 0.8);
+      P.spawn(
+        e + Math.cos(x) * p,
+        f.range(0.55, 1.7),
+        s + Math.sin(x) * p,
+        Math.cos(x) * f.range(1.2, 3.4),
+        f.range(0.2, 1.1),
+        Math.sin(x) * f.range(1.2, 3.4),
+        f.range(0.35, 0.62),
+        f.range(0.22, 0.5),
+        f.range(0.9, 1.5),
+      );
+    }
     n.light(e + i * r * 0.45, s + a * r * 0.45, 1.4, Mu.glow, 5, r * 1.5, 0.34);
   },
   mZD = (n, t, e) => {
@@ -379,11 +398,37 @@ const AD = (n, t, e) => {
     }
     n.light(e, s, 1, Mu.accent, 5, 5, 1.5);
   },
+  mBD = (n, t) => {
+    // 被动「菌丝缠缚」炸开：目标身上一圈菌丝 + 自己身上一层护盾光
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 1.9, 0.34).params(1, 0.08).color(Mu.accent, 1.9).under(W.shadow, 0.34),
+      n.decals.add(Xt.zone, e, s, 1.1, 0.36).params(10, 0.1).color(Mu.glow, 1.4, 0.7).under(W.shadow, 0.28));
+    const a = n.particles.use(Mt.wisp);
+    for (let o = 0; o < 12; o++) {
+      const r = i.next() * Math.PI * 2,
+        l = i.range(0.3, 1.2);
+      a.spawn(
+        e + Math.cos(r) * l,
+        i.range(0.3, 1.4),
+        s + Math.sin(r) * l,
+        -Math.cos(r) * i.range(0.6, 2),
+        i.range(0.8, 2.4),
+        -Math.sin(r) * i.range(0.6, 2),
+        0.55,
+        0.5,
+        0.9,
+      );
+    }
+    n.light(e, s, 1, Mu.accent, 4, 4, 0.28);
+  },
   mMD = {
     mushroom_s1_dash: mSD,
     mushroom_s1_trail: mTD,
     mushroom_s1_impact: mQD,
     mushroom_s2_spray: mJD,
+    mushroom_passive_burst: mBD,
     mushroom_ult_land: mZD,
     mushroom_ult_charge: mXD,
   },
