@@ -2171,11 +2171,15 @@ function bBg() {
       return;
     }
     if (st === "cast_s1" || st === "dash" || st === "roll") {
-      // 侧滚 = 侧手翻：绕"前进轴"整圈转，肚子始终朝着前进方向，头在竖直平面里划圆。
-      // 抬升跟着旋转角走（起手 0、翻到头顶朝下时最高），否则站在地上的那一刻会凭空浮起来。
+      // 放平横躺侧滚：先把身体放倒成水平 —— 头从朝上转成朝侧向、肚子仍朝前进方向，
+      // 再绕头脚轴整圈滚，像圆木贴地向前滚。
+      //   沿头脚轴回退半个身长让身体居中；抬到 r_max(=1.02) 让最低点刚好贴地。
       const ang = ((I.t || 0) * 620) % 360;
-      const lift = 0.65 * Math.abs(Math.sin((ang * Math.PI) / 360));
-      (rest(R), R.add(rootJ, 0, ang, 0), R.move(rootJ, 0, lift, 0), (P.glow = 2.4));
+      (rest(R),
+        R.add(rootJ, 0, 90, 0), // 放平：模型 +Z(头) → 世界 +X(侧向)
+        R.add(rootJ, 0, 0, ang), // 绕头脚轴滚
+        R.move(rootJ, -1.04, 1.02, 0),
+        (P.glow = 2.4));
       return;
     }
     if (st === "attack" || st === "attack2") {
