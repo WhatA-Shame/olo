@@ -352,11 +352,28 @@ const main = async () => {
     await ev(`(()=>{const u=${U}; u.__preUlt=JSON.stringify({x:+u.pos.x.toFixed(1),y:+u.pos.y.toFixed(1)}); return 1;})()`);
   await cast('ult', 'pos', heroId === 'mushroom' ? 46 : 11);
   if (heroId === 'mushroom') {
-    await sleep(200);
-    const mu = await ev(`(()=>{const u=${U}; return u.rt.mushUlt ? JSON.stringify({x:+u.rt.mushUlt.x.toFixed(1),y:+u.rt.mushUlt.y.toFixed(1),r:+u.rt.mushUlt.radius.toFixed(1),left:+(u.rt.mushUlt.until-window.__moba.state.time).toFixed(2)}) : 'none';})()`);
-    await sleep(600);
-    const zoom = await ev(`(()=>{const r=window.__moba.renderer; const g=r&&r.engine&&r.engine.rig; return g?JSON.stringify({z:+g.zoomK.toFixed(2),w:+g.zoomWant.toFixed(2),peek:!!g.ultPeek}):'no-rig';})()`);
-    ok('大招蓄力时镜头拉远', (()=>{ try { const o=JSON.parse(zoom); return o.z>1.15 && o.peek; } catch { return false; } })(), `zoom ${zoom}`);
+    // 指令是排队执行的，蓄力状态出现时间不固定，轮询一会儿
+    let mu = 'none',
+      zoom = 'none',
+      zk = 0;
+    for (let i = 0; i < 14; i++) {
+      if (mu === 'none')
+        mu = await ev(`(()=>{const u=${U}; return u.rt.mushUlt ? JSON.stringify({x:+u.rt.mushUlt.x.toFixed(1),y:+u.rt.mushUlt.y.toFixed(1),r:+u.rt.mushUlt.radius.toFixed(1),left:+(u.rt.mushUlt.until-window.__moba.state.time).toFixed(2)}) : 'none';})()`);
+      zoom = await ev(`(()=>{const r=window.__moba.renderer; const g=r&&r.engine&&r.engine.rig; return g?JSON.stringify({z:+g.zoomK.toFixed(2),w:+g.zoomWant.toFixed(2),peek:!!g.ultPeek}):'no-rig';})()`);
+      try {
+        zk = JSON.parse(zoom).z;
+      } catch {}
+      if (zk > 1.15) break;
+      await sleep(80);
+    }
+    const zobj = (() => {
+      try {
+        return JSON.parse(zoom);
+      } catch {
+        return {};
+      }
+    })();
+    ok('大招蓄力时镜头拉远', zobj.z > 1.15 && zobj.peek === true, `zoom ${zoom}`);
     ok('大招进入蓄力并记录落点', typeof mu === 'string' && mu !== 'none', `${mu}`);
   }
   // 杯杯菇大招是全图跳，蓄力期间镜头会拉远——这里趁蓄力截一张，落地后再截一张

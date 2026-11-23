@@ -2100,14 +2100,15 @@ function bBg() {
   const HR = heroRig(),
     mesh = heroMesh(),
     t = new Ls();
-  // 外部骨架：bind 存世界位置（蒙皮用），local 存父坐标系下的位移（solve 用）
+  // 外部骨架：local 存父坐标系下的位移（solve 用）；bindWorld/bindQW 存绑定世界变换，
+  // 蒙皮时现算 M = T(worldPos)·R(worldQ·bindQW⁻¹)·T(-bindWorld)，顶点留在绑定世界空间
   // 不能直接用 Wa.add：它把 local 当"世界差"算，而 glTF 的父骨骼是带旋转的
-  // bind 全零：顶点已经被预变换到各自主骨骼的 bind 局部空间，
-  // 蒙皮就成了 wp + rotate(worldQ, v')，不需要再减 bind 世界位置
   const rig = {
     names: HR.names,
     parent: HR.parent,
     bind: new Float32Array(HR.names.length * 3),
+    bindWorld: HR.bindWorld,
+    bindQW: HR.bindWQ,
     local: HR.localPos,
     chains: [],
     get count() {
@@ -2170,11 +2171,12 @@ function bBg() {
       return;
     }
     if (st === "cast_s1" || st === "dash" || st === "roll") {
-      // 侧躺平滚：Rx(90°) 先把身体放倒（头朝侧向），再绕自身头脚轴 Ry 转 —— 像轮胎那样滚，
-      // 不是绕前进轴自转（那样是烤串）。放倒后身体有一半沉到地下，抬 0.95；再沿侧向 -1 把它摆回单位中心
+      // 侧滚 = 侧手翻：绕"前进轴"整圈转，肚子始终朝着前进方向，头在竖直平面里划圆。
+      // 之前是先 Rx(90) 把身体前倾放倒、再绕自身头脚轴自转，结果头顶朝前、像钻头一样钻地。
+      // 现在只留 Ry（模型 Z 朝上，绕 Y 转 = 在竖直平面里翻），并把旋转中心抬到身体中部。
       (rest(R),
-        R.add(rootJ, 90, ((I.t || 0) * 620) % 360, 0),
-        R.move(rootJ, 0, 1.05, -1.0),
+        R.add(rootJ, 0, ((I.t || 0) * 620) % 360, 0),
+        R.move(rootJ, 0, 0.65, 0),
         (P.glow = 2.4));
       return;
     }
@@ -2202,7 +2204,9 @@ function bBg() {
       return;
     }
     if (st === "move" || st === "run") {
-      (play(R, "run", I.time * 1.6, true), (P.glow = 1));
+      // 片段被做成 in-place 之后，步幅是按 1.25 秒 2.24 米做的；单位实际移速 5.5，
+      // 播放倍率要跟着提上去，否则脚会明显打滑
+      (play(R, "run", I.time * 2.6, true), (P.glow = 1));
       return;
     }
     // 待机：这套模型没有 idle 片段，回绑定姿态 + 轻微呼吸

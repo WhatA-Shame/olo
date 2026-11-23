@@ -142,63 +142,14 @@ function worldOf(i, cache) {
   });
 }
 
-// ── 网格 ─────────────────────────────────────────────────
-const P = [], N = [], U = [], I = [], SK = [];
-let vBase = 0;
+// ── 骨骼邻接表 ───────────────────────────────────────────
+// 判断两根骨骼是否"相邻"（父子或兄弟），用于决定能否安全双骨骼混合。
+// 引擎 shader 只混两根骨骼，非相邻骨骼的 bindWorld 相差太大，mix 会撕裂。
 const ca = Math.cos(ROTY), sa = Math.sin(ROTY);
-for (const mesh of json.meshes) {
-  for (const prim of mesh.primitives) {
-    const at = prim.attributes;
-    if (at.POSITION == null) continue;
-    const pos = acc(at.POSITION);
-    const nor = at.NORMAL != null ? acc(at.NORMAL) : null;
-    const uv = at.TEXCOORD_0 != null ? acc(at.TEXCOORD_0) : null;
-    const jt = at.JOINTS_0 != null ? acc(at.JOINTS_0) : null;
-    const wt = at.WEIGHTS_0 != null ? acc(at.WEIGHTS_0) : null;
-    const cnt = pos.length / 3;
-    for (let i = 0; i < cnt; i++) {
-      let x = pos[i * 3] * SCALE, y = pos[i * 3 + 1] * SCALE, z = pos[i * 3 + 2] * SCALE;
-      if (ROTY) [x, z] = [x * ca + z * sa, -x * sa + z * ca];
-      P.push(x, y, z);
-      if (nor) {
-        let nx = nor[i * 3], ny = nor[i * 3 + 1], nz = nor[i * 3 + 2];
-        if (ROTY) [nx, nz] = [nx * ca + nz * sa, -nx * sa + nz * ca];
-        N.push(nx, ny, nz);
-      } else N.push(0, 1, 0);
-      if (uv) U.push(uv[i * 2], uv[i * 2 + 1]);
-      else U.push(0, 0);
-      // 引擎 shader 只混两根骨骼：取权重最大的两个再归一化
-      if (jt && wt) {
-        const idx = [jt[i * 4], jt[i * 4 + 1], jt[i * 4 + 2], jt[i * 4 + 3]];
-        const w = [wt[i * 4], wt[i * 4 + 1], wt[i * 4 + 2], wt[i * 4 + 3]];
-        let a = 0, b = 1;
-        if (w[1] > w[0]) { a = 1; b = 0; }
-        for (let k = 2; k < 4; k++) {
-          if (w[k] > w[a]) { b = a; a = k; }
-          else if (w[k] > w[b]) b = k;
-        }
-        const sum = w[a] + w[b] || 1;
-        // 顶点已经按主骨骼预变换过，第二骨骼再用同一份坐标会撕裂；先只取主骨骼
-        SK.push(idx[a], idx[a], 1);
-      } else SK.push(0, 0, 1);
-    }
-    const idx = prim.indices != null ? acc(prim.indices) : null;
-    if (idx) {
-      for (let i = 0; i < idx.length; i += 3) {
-        const a = idx[i] + vBase, b = idx[i + 1] + vBase, c = idx[i + 2] + vBase;
-        if (FLIP) I.push(a, c, b);
-        else I.push(a, b, c);
-      }
-    } else {
-      for (let i = 0; i < cnt; i += 3) I.push(i + vBase, i + vBase + 1, i + vBase + 2);
-    }
-    vBase += cnt;
-  }
-}
-
-// ── 骨架 ─────────────────────────────────────────────────
 const skin = json.skins && json.skins[0];
 let RIG = null;
+let boneAdj = null; // Set<"a:b">（a<b）
+let twistToMain = null; // Map<boneIndex, mainBoneIndex>
 if (skin) {
   const joints = skin.joints;
   const cache = {};
@@ -209,6 +160,36 @@ if (skin) {
     while (p >= 0 && !jindex.has(p)) p = nodeParent[p];
     return p >= 0 ? jindex.get(p) : -1;
   });
+
+  // 构建邻接表
+  boneAdj = new Set();
+  const adjKey = (a, b) => Math.min(a, b) + ':' + Math.max(a, b);
+  for (let i = 0; i < joints.length; i++) {
+    if (parent[i] >= 0) boneAdj.add(adjKey(i, parent[i]));
+  }
+  // 兄弟关系
+  const siblings = new Map();
+  for (let i = 0; i < joints.length; i++) {
+    const p = parent[i];
+    if (p < 0) continue;
+    if (!siblings.has(p)) siblings.set(p, []);
+    siblings.get(p).push(i);
+  }
+  for (const [, sibs] of siblings)
+    for (let a = 0; a < sibs.length; a++)
+      for (let b = a + 1; b < sibs.length; b++)
+        boneAdj.add(adjKey(sibs[a], sibs[b]));
+
+  // 找 Twist 骨骼的主骨骼：沿 parent 链向上直到找到非 Twist 骨骼
+  twistToMain = new Map();
+  for (let i = 0; i < joints.length; i++) {
+    const nm = json.nodes[joints[i]].name || '';
+    if (!nm.includes('Twist')) continue;
+    let p = parent[i];
+    while (p >= 0 && (json.nodes[joints[p]].name || '').includes('Twist')) p = parent[p];
+    if (p >= 0) twistToMain.set(i, p);
+  }
+
   const bindWorld = [], bindQ = [], localPos = [], bindWQ = [];
   for (let i = 0; i < joints.length; i++) {
     const w = worldOf(joints[i], cache);
@@ -243,28 +224,86 @@ if (skin) {
   };
 }
 
-// ── 顶点预变换 ───────────────────────────────────────────
-// 引擎蒙皮是 ps.xyz + ps.w * qrot(q, position)，隐含"bind 姿态世界四元数 = 单位"。
-// glTF 骨架的父级带旋转，直接灌会整体炸开。标准做法：把顶点先转到各自主骨骼的
-// bind 局部空间，bind 位置归零，之后 ps 就等于关节世界位置、q 就是世界四元数。
-if (RIG) {
-  const bq = RIG.bindWQ;
-  for (let i = 0; i < P.length / 3; i++) {
-    const j = SK[i * 3];
-    const q = [bq[j * 4], bq[j * 4 + 1], bq[j * 4 + 2], bq[j * 4 + 3]];
-    const iq = [-q[0], -q[1], -q[2], q[3]];
-    const vx = P[i * 3] - RIG.bindWorld[j * 3],
-      vy = P[i * 3 + 1] - RIG.bindWorld[j * 3 + 1],
-      vz = P[i * 3 + 2] - RIG.bindWorld[j * 3 + 2];
-    const r = rot(iq, [vx, vy, vz]);
-    P[i * 3] = r[0];
-    P[i * 3 + 1] = r[1];
-    P[i * 3 + 2] = r[2];
-    // 法线同样只转不位移
-    const nn = rot(iq, [N[i * 3], N[i * 3 + 1], N[i * 3 + 2]]);
-    N[i * 3] = nn[0];
-    N[i * 3 + 1] = nn[1];
-    N[i * 3 + 2] = nn[2];
+// ── 顶点 ─────────────────────────────────────────────────
+// 顶点保持在"绑定世界空间"（只做了 SCALE 和 ROTY）。骨骼侧由引擎现算
+// M = T(worldPos)·R(worldQ)·R(bindQW)⁻¹·T(-bindWorld)，等价于标准线性混合蒙皮，
+// 两根骨骼吃同一份坐标，所以双骨骼不会撕裂，也不用把顶点预变换到骨骼局部空间。
+//
+// 权重处理策略（消除撕裂）：
+// 1. Twist 骨骼权重合并到主骨骼（沿 parent 链向上找到的第一个非 Twist 骨骼）
+// 2. 合并后取权重最大的两根骨骼；若它们在骨架里不相邻（非父子/兄弟），
+//    则把第二根的权重也并入主骨骼 → 单骨骼，避免 mix 撕裂
+// 3. 相邻骨骼对（如 Foot/Toe、Upperarm/Twist01）保留双骨骼混合
+const P = [], N = [], U = [], I = [], SK = [];
+let vBase = 0;
+const adjKey = (a, b) => Math.min(a, b) + ':' + Math.max(a, b);
+let skinSingle = 0, skinDual = 0, skinMerged = 0;
+for (const mesh of json.meshes) {
+  for (const prim of mesh.primitives) {
+    const at = prim.attributes;
+    if (at.POSITION == null) continue;
+    const pos = acc(at.POSITION);
+    const nor = at.NORMAL != null ? acc(at.NORMAL) : null;
+    const uv = at.TEXCOORD_0 != null ? acc(at.TEXCOORD_0) : null;
+    const jt = at.JOINTS_0 != null ? acc(at.JOINTS_0) : null;
+    const wt = at.WEIGHTS_0 != null ? acc(at.WEIGHTS_0) : null;
+    const cnt = pos.length / 3;
+    for (let i = 0; i < cnt; i++) {
+      let x = pos[i * 3] * SCALE, y = pos[i * 3 + 1] * SCALE, z = pos[i * 3 + 2] * SCALE;
+      if (ROTY) [x, z] = [x * ca + z * sa, -x * sa + z * ca];
+      P.push(x, y, z);
+      if (nor) {
+        let nx = nor[i * 3], ny = nor[i * 3 + 1], nz = nor[i * 3 + 2];
+        if (ROTY) [nx, nz] = [nx * ca + nz * sa, -nx * sa + nz * ca];
+        N.push(nx, ny, nz);
+      } else N.push(0, 1, 0);
+      if (uv) U.push(uv[i * 2], uv[i * 2 + 1]);
+      else U.push(0, 0);
+
+      if (jt && wt && skin) {
+        // 1. 合并 Twist 骨骼权重到主骨骼
+        const origIdx = [jt[i * 4], jt[i * 4 + 1], jt[i * 4 + 2], jt[i * 4 + 3]];
+        const origW = [wt[i * 4], wt[i * 4 + 1], wt[i * 4 + 2], wt[i * 4 + 3]];
+        const merged = new Map();
+        for (let k = 0; k < 4; k++) {
+          if (origW[k] < 1e-4) continue;
+          const target = twistToMain.get(origIdx[k]) ?? origIdx[k];
+          merged.set(target, (merged.get(target) || 0) + origW[k]);
+        }
+        // 2. 取权重最大的两根
+        const sorted = [...merged.entries()].sort((a, b) => b[1] - a[1]);
+        if (sorted.length === 0 || sorted[0][1] < 1e-4) {
+          SK.push(0, 0, 1);
+          skinSingle++;
+        } else if (sorted.length === 1 || (sorted.length >= 2 && sorted[1][1] < 1e-4)) {
+          SK.push(sorted[0][0], sorted[0][0], 1);
+          skinSingle++;
+        } else {
+          const a = sorted[0][0], b = sorted[1][0];
+          // 3. 检查邻接性：非相邻骨骼对回退单骨骼，避免 mix 撕裂
+          if (boneAdj.has(adjKey(a, b))) {
+            const sum = sorted[0][1] + sorted[1][1];
+            SK.push(a, b, sorted[0][1] / sum);
+            skinDual++;
+          } else {
+            // 非相邻：第二根权重并入主骨骼
+            SK.push(a, a, 1);
+            skinMerged++;
+          }
+        }
+      } else SK.push(0, 0, 1);
+    }
+    const idx = prim.indices != null ? acc(prim.indices) : null;
+    if (idx) {
+      for (let i = 0; i < idx.length; i += 3) {
+        const a = idx[i] + vBase, b = idx[i + 1] + vBase, c = idx[i + 2] + vBase;
+        if (FLIP) I.push(a, c, b);
+        else I.push(a, b, c);
+      }
+    } else {
+      for (let i = 0; i < cnt; i += 3) I.push(i + vBase, i + vBase + 1, i + vBase + 2);
+    }
+    vBase += cnt;
   }
 }
 
@@ -338,15 +377,41 @@ function sampleAnim(anim) {
       data[o + 6] = qq[3];
     }
   }
-  // 根关节做 in-place：水平位移归零、垂直只保留相对首帧的起伏，
-  // 否则 Mixamo 的 root motion 会让角色在游戏里自己往前飘
+  // in-place：彻底剥离根位移，只留关节摆动。
+  // 问题：Tripo 烘焙在 Hip 上的前进位移不是纯线性的（步态有加速减速），
+  // 只减首尾线性漂移会留下非线性残余，让模型在跑步时持续偏移（"位移超出"）。
+  // 做法：
+  //   a) 减首尾线性漂移（去掉整体平移趋势）
+  //   b) 每根骨骼再减去自己的首帧偏移（让循环首帧 = 绑定姿态，消除恒定偏移）
+  //   c) 根关节水平归零、垂直只留相对首帧的起伏
+  for (let j = 0; j < skin.joints.length; j++) {
+    const o0 = j * 7,
+      oN = ((frames - 1) * skin.joints.length + j) * 7;
+    const dx = data[oN] - data[o0],
+      dy = data[oN + 1] - data[o0 + 1],
+      dz = data[oN + 2] - data[o0 + 2];
+    if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) < 1e-5) continue;
+    for (let f = 0; f < frames; f++) {
+      const o = (f * skin.joints.length + j) * 7,
+        k = frames > 1 ? f / (frames - 1) : 0;
+      ((data[o] -= dx * k), (data[o + 1] -= dy * k), (data[o + 2] -= dz * k));
+    }
+  }
+  // 每根骨骼减去首帧偏移：让动画从绑定姿态开始，消除残余恒定偏移
+  for (let j = 0; j < skin.joints.length; j++) {
+    const o0 = j * 7,
+      bx = data[o0], by = data[o0 + 1], bz = data[o0 + 2];
+    for (let f = 0; f < frames; f++) {
+      const o = (f * skin.joints.length + j) * 7;
+      ((data[o] -= bx), (data[o + 1] -= by), (data[o + 2] -= bz));
+    }
+  }
+  // 根关节归零：水平位移直接不要
   if (RIG) {
-    const rj = RIG.rootI,
-      bo = rj * 7,
-      by = data[bo + 1];
+    const rj = RIG.rootI;
     for (let f = 0; f < frames; f++) {
       const o = (f * skin.joints.length + rj) * 7;
-      ((data[o] = 0), (data[o + 1] -= by), (data[o + 2] = 0));
+      ((data[o] = 0), (data[o + 2] = 0));
     }
   }
   return { frames, dur, data };
@@ -406,6 +471,7 @@ export function heroRig() {
     parent: HERO_RIG.parent,
     bindWorld: dec(HERO_RIG.bindWorld, Float32Array),
     bindQ: dec(HERO_RIG.bindQ, Float32Array),
+    bindWQ: dec(HERO_RIG.bindWQ, Float32Array),
     localPos: dec(HERO_RIG.localPos, Float32Array),
   });
 }
@@ -456,6 +522,7 @@ ${RIG ? `export const HERO_RIG = {
   parent: ${JSON.stringify(RIG.parent)},
   bindWorld: "${b64(Float32Array.from(RIG.bindWorld))}",
   bindQ: "${b64(Float32Array.from(RIG.bindQ))}",
+  bindWQ: "${b64(Float32Array.from(RIG.bindWQ))}",
   localPos: "${b64(Float32Array.from(RIG.localPos))}",
 };` : 'export const HERO_RIG = null;'}
 
@@ -465,6 +532,8 @@ ${animBody}
 `;
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, body);
+const totalVerts = P.length / 3;
+const skinInfo = skin ? `单骨${skinSingle}(${(skinSingle/totalVerts*100).toFixed(0)}%) 双骨${skinDual}(${(skinDual/totalVerts*100).toFixed(0)}%) 合并${skinMerged}(${(skinMerged/totalVerts*100).toFixed(0)}%)` : '无骨骼';
 console.log(
-  `写出 ${out}\n  顶点 ${P.length / 3}  三角 ${I.length / 3}  关节 ${RIG ? RIG.names.length : 0}  动画 ${Object.keys(ANIMS).join('/') || '无'}  文件 ${Math.round(body.length / 1024)}KB`,
+  `写出 ${out}\n  顶点 ${totalVerts}  三角 ${I.length / 3}  关节 ${RIG ? RIG.names.length : 0}  动画 ${Object.keys(ANIMS).join('/') || '无'}  文件 ${Math.round(body.length / 1024)}KB\n  蒙皮 ${skinInfo}`,
 );

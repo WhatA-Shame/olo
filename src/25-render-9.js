@@ -1334,6 +1334,8 @@ class sw {
 }
 
 const Aa = [0, 0, 0],
+  pb = [0, 0, 0, 0],
+  qb = [0, 0, 0, 0],
   dp = [0, 0, 0],
   no = [0, 0, 0, 1],
   _l = [0, 0, 0, 1],
@@ -1540,11 +1542,29 @@ class bU {
       a = this.wp,
       o = this.wq,
       r = this.ws,
-      l = s.bind;
+      l = s.bind,
+      // 外部导入的骨架：顶点留在绑定世界空间，这里现算
+      // M = T(worldPos)·R(worldQ·bindQW⁻¹)·T(-bindWorld)，等价于标准 LBS，双骨骼天然可用
+      BW = s.bindWorld,
+      BQ = s.bindQW;
     for (let c = 0; c < i; c++) {
-      const f = r[c];
+      const f = r[c],
+        d = e + c * 8;
+      if (BW) {
+        ((pb[0] = -BQ[c * 4]), (pb[1] = -BQ[c * 4 + 1]), (pb[2] = -BQ[c * 4 + 2]), (pb[3] = BQ[c * 4 + 3]));
+        Ua(o, c * 4, pb, 0, qb, 0);
+        Da(qb, 0, BW[c * 3] * f, BW[c * 3 + 1] * f, BW[c * 3 + 2] * f, Aa, 0);
+        ((t[d] = a[c * 3] - Aa[0]),
+          (t[d + 1] = a[c * 3 + 1] - Aa[1]),
+          (t[d + 2] = a[c * 3 + 2] - Aa[2]),
+          (t[d + 3] = f),
+          (t[d + 4] = qb[0]),
+          (t[d + 5] = qb[1]),
+          (t[d + 6] = qb[2]),
+          (t[d + 7] = qb[3]));
+        continue;
+      }
       Da(o, c * 4, l[c * 3] * f, l[c * 3 + 1] * f, l[c * 3 + 2] * f, Aa, 0);
-      const d = e + c * 8;
       ((t[d] = a[c * 3] - Aa[0]),
         (t[d + 1] = a[c * 3 + 1] - Aa[1]),
         (t[d + 2] = a[c * 3 + 2] - Aa[2]),
