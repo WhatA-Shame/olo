@@ -142,14 +142,10 @@ function worldOf(i, cache) {
   });
 }
 
-// ── 骨骼邻接表 ───────────────────────────────────────────
-// 判断两根骨骼是否"相邻"（父子或兄弟），用于决定能否安全双骨骼混合。
-// 引擎 shader 只混两根骨骼，非相邻骨骼的 bindWorld 相差太大，mix 会撕裂。
+// ── 骨架 ─────────────────────────────────────────────────
 const ca = Math.cos(ROTY), sa = Math.sin(ROTY);
 const skin = json.skins && json.skins[0];
 let RIG = null;
-let boneAdj = null; // Set<"a:b">（a<b）
-let twistToMain = null; // Map<boneIndex, mainBoneIndex>
 if (skin) {
   const joints = skin.joints;
   const cache = {};
@@ -160,35 +156,6 @@ if (skin) {
     while (p >= 0 && !jindex.has(p)) p = nodeParent[p];
     return p >= 0 ? jindex.get(p) : -1;
   });
-
-  // 构建邻接表
-  boneAdj = new Set();
-  const adjKey = (a, b) => Math.min(a, b) + ':' + Math.max(a, b);
-  for (let i = 0; i < joints.length; i++) {
-    if (parent[i] >= 0) boneAdj.add(adjKey(i, parent[i]));
-  }
-  // 兄弟关系
-  const siblings = new Map();
-  for (let i = 0; i < joints.length; i++) {
-    const p = parent[i];
-    if (p < 0) continue;
-    if (!siblings.has(p)) siblings.set(p, []);
-    siblings.get(p).push(i);
-  }
-  for (const [, sibs] of siblings)
-    for (let a = 0; a < sibs.length; a++)
-      for (let b = a + 1; b < sibs.length; b++)
-        boneAdj.add(adjKey(sibs[a], sibs[b]));
-
-  // 找 Twist 骨骼的主骨骼：沿 parent 链向上直到找到非 Twist 骨骼
-  twistToMain = new Map();
-  for (let i = 0; i < joints.length; i++) {
-    const nm = json.nodes[joints[i]].name || '';
-    if (!nm.includes('Twist')) continue;
-    let p = parent[i];
-    while (p >= 0 && (json.nodes[joints[p]].name || '').includes('Twist')) p = parent[p];
-    if (p >= 0) twistToMain.set(i, p);
-  }
 
   const bindWorld = [], bindQ = [], localPos = [], bindWQ = [];
   for (let i = 0; i < joints.length; i++) {
@@ -230,14 +197,14 @@ if (skin) {
 // 两根骨骼吃同一份坐标，所以双骨骼不会撕裂，也不用把顶点预变换到骨骼局部空间。
 //
 // 权重处理策略（消除撕裂）：
-// 1. Twist 骨骼权重合并到主骨骼（沿 parent 链向上找到的第一个非 Twist 骨骼）
-// 2. 合并后取权重最大的两根骨骼；若它们在骨架里不相邻（非父子/兄弟），
-//    则把第二根的权重也并入主骨骼 → 单骨骼，避免 mix 撕裂
-// 3. 相邻骨骼对（如 Foot/Toe、Upperarm/Twist01）保留双骨骼混合
+// 这类低模的网格是许多互不相连的碎片。撕裂只可能发生在同一碎片内部 ——
+// 同一碎块的相邻顶点被分到完全不同的骨骼，碎块就被拉开。所以分两步：
+//   1. 按连通块判定每个碎片的"骨骼族"（头/躯干/左右臂/左右腿）
+//   2. 每片只允许本族骨骼参与，权重 = 1/(到骨骼线段距离)²，取前二归一化
+// 纯几何权重是顶点位置的连续函数，同一碎块内不可能出现突变 → 结构上不可能撕裂。
 const P = [], N = [], U = [], I = [], SK = [];
+const domBone = []; // 每个顶点：原版权重最大的那根骨骼，用于按碎块投票
 let vBase = 0;
-const adjKey = (a, b) => Math.min(a, b) + ':' + Math.max(a, b);
-let skinSingle = 0, skinDual = 0, skinMerged = 0;
 for (const mesh of json.meshes) {
   for (const prim of mesh.primitives) {
     const at = prim.attributes;
@@ -260,38 +227,14 @@ for (const mesh of json.meshes) {
       if (uv) U.push(uv[i * 2], uv[i * 2 + 1]);
       else U.push(0, 0);
 
-      if (jt && wt && skin) {
-        // 1. 合并 Twist 骨骼权重到主骨骼
-        const origIdx = [jt[i * 4], jt[i * 4 + 1], jt[i * 4 + 2], jt[i * 4 + 3]];
-        const origW = [wt[i * 4], wt[i * 4 + 1], wt[i * 4 + 2], wt[i * 4 + 3]];
-        const merged = new Map();
+      if (jt && wt) {
+        let best = 0, bw = -1;
         for (let k = 0; k < 4; k++) {
-          if (origW[k] < 1e-4) continue;
-          const target = twistToMain.get(origIdx[k]) ?? origIdx[k];
-          merged.set(target, (merged.get(target) || 0) + origW[k]);
+          const w = wt[i * 4 + k];
+          if (w > bw) ((bw = w), (best = jt[i * 4 + k]));
         }
-        // 2. 取权重最大的两根
-        const sorted = [...merged.entries()].sort((a, b) => b[1] - a[1]);
-        if (sorted.length === 0 || sorted[0][1] < 1e-4) {
-          SK.push(0, 0, 1);
-          skinSingle++;
-        } else if (sorted.length === 1 || (sorted.length >= 2 && sorted[1][1] < 1e-4)) {
-          SK.push(sorted[0][0], sorted[0][0], 1);
-          skinSingle++;
-        } else {
-          const a = sorted[0][0], b = sorted[1][0];
-          // 3. 检查邻接性：非相邻骨骼对回退单骨骼，避免 mix 撕裂
-          if (boneAdj.has(adjKey(a, b))) {
-            const sum = sorted[0][1] + sorted[1][1];
-            SK.push(a, b, sorted[0][1] / sum);
-            skinDual++;
-          } else {
-            // 非相邻：第二根权重并入主骨骼
-            SK.push(a, a, 1);
-            skinMerged++;
-          }
-        }
-      } else SK.push(0, 0, 1);
+        domBone.push(best);
+      } else domBone.push(0);
     }
     const idx = prim.indices != null ? acc(prim.indices) : null;
     if (idx) {
@@ -304,6 +247,125 @@ for (const mesh of json.meshes) {
       for (let i = 0; i < cnt; i += 3) I.push(i + vBase, i + vBase + 1, i + vBase + 2);
     }
     vBase += cnt;
+  }
+}
+
+// ── 蒙皮权重：按碎片重算 ─────────────────────────────────
+const nV = P.length / 3;
+let skinSingle = 0, skinDual = 0, islandCount = 0;
+SK.length = nV * 3;
+if (!skin) {
+  for (let v = 0; v < nV; v++) ((SK[v * 3] = 0), (SK[v * 3 + 1] = 0), (SK[v * 3 + 2] = 1));
+} else {
+  const bname = RIG.names;
+  const nB = bname.length;
+  const BW = RIG.bindWorld;
+  const bp = (i) => [BW[i * 3], BW[i * 3 + 1], BW[i * 3 + 2]];
+  const d3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+  // 骨骼线段：自身 → 距离最远的子节点（脊柱继续向上、大腿指向膝盖、锁骨指向上臂）。
+  // 叶骨骼没有子节点，沿 父→自身 方向外延一小段，给它一点体积。
+  const kids = Array.from({ length: nB }, () => []);
+  for (let i = 0; i < nB; i++) if (RIG.parent[i] >= 0) kids[RIG.parent[i]].push(i);
+  const SEG = [];
+  for (let i = 0; i < nB; i++) {
+    const a = bp(i);
+    let best = -1, bd = -1;
+    for (const c of kids[i]) {
+      const d = d3(a, bp(c));
+      if (d > bd) ((bd = d), (best = c));
+    }
+    if (best >= 0 && bd > 0.02) SEG.push([a, bp(best)]);
+    else {
+      const pp = RIG.parent[i] >= 0 ? bp(RIG.parent[i]) : [a[0], a[1] - 1, a[2]];
+      let d = [a[0] - pp[0], a[1] - pp[1], a[2] - pp[2]];
+      const L = Math.hypot(d[0], d[1], d[2]) || 1;
+      d = [d[0] / L, d[1] / L, d[2] / L];
+      SEG.push([a, [a[0] + d[0] * 0.3, a[1] + d[1] * 0.3, a[2] + d[2] * 0.3]]);
+    }
+  }
+  const segDist = (v, s) => {
+    const [a, b] = s;
+    const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const ap = [v[0] - a[0], v[1] - a[1], v[2] - a[2]];
+    const L2 = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2 || 1;
+    let t = (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / L2;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    return Math.hypot(ap[0] - ab[0] * t, ap[1] - ab[1] * t, ap[2] - ab[2] * t);
+  };
+
+  // 骨骼族（按命名判定，Twist 辅助骨会自然归到它所属的肢体）
+  const famOf = (n) => {
+    if (/head/i.test(n)) return 'head';
+    const L = /^l([_.]|eft)/i.test(n);
+    if (/(thigh|calf|shin|foot|toe|leg)/i.test(n)) return L ? 'legL' : 'legR';
+    if (/(upperarm|forearm|hand|arm)/i.test(n)) return L ? 'armL' : 'armR';
+    return 'torso';
+  };
+  // 辅助 Twist 骨不参与候选：它和主骨几乎重合，占掉第二个骨骼槽没有意义
+  const famBones = {};
+  for (let i = 0; i < nB; i++) {
+    if (/twist/i.test(bname[i])) continue;
+    const f = famOf(bname[i]);
+    (famBones[f] || (famBones[f] = [])).push(i);
+  }
+  // 中轴链 = 躯干 + 头（头紧接脖子，同属中轴，必须能互相过渡）
+  const CENTER = [...(famBones.torso || []), ...(famBones.head || [])];
+  // 每族允许的骨骼 = 本族 + 中轴（肢体要能平滑过渡到身体）
+  const allow = {};
+  for (const f of ['head', 'armL', 'armR', 'legL', 'legR']) allow[f] = [...(famBones[f] || []), ...CENTER];
+  allow.torso = CENTER;
+  const ALL_BONES = Array.from({ length: nB }, (_, i) => i).filter((i) => !/twist/i.test(bname[i]));
+
+  // 连通块
+  const uf = new Int32Array(nV);
+  for (let i = 0; i < nV; i++) uf[i] = i;
+  const find = (a) => {
+    while (uf[a] !== a) ((uf[a] = uf[uf[a]]), (a = uf[a]));
+    return a;
+  };
+  for (let i = 0; i < I.length; i += 3) {
+    const r = find(I[i]);
+    uf[find(I[i + 1])] = r;
+    uf[find(I[i + 2])] = r;
+  }
+  const islands = new Map();
+  for (let v = 0; v < nV; v++) {
+    const r = find(v);
+    if (!islands.has(r)) islands.set(r, []);
+    islands.get(r).push(v);
+  }
+  islandCount = islands.size;
+
+  for (const [, verts] of islands) {
+    // 按原版权重投票决定这一碎片的族
+    const vote = {};
+    for (const v of verts) {
+      const f = famOf(bname[domBone[v]] || '');
+      vote[f] = (vote[f] || 0) + 1;
+    }
+    let fam = 'torso', fv = -1;
+    for (const [f, k] of Object.entries(vote)) if (k > fv) ((fv = k), (fam = f));
+    let cand = allow[fam];
+    if (!cand || !cand.length) cand = ALL_BONES.length ? ALL_BONES : Array.from({ length: nB }, (_, i) => i);
+
+    for (const v of verts) {
+      const p = [P[v * 3], P[v * 3 + 1], P[v * 3 + 2]];
+      let b0 = cand[0], w0 = -1, b1 = cand[0], w1 = -1;
+      for (const b of cand) {
+        const w = 1 / (segDist(p, SEG[b]) + 0.02) ** 2;
+        if (w > w0) ((w1 = w0), (b1 = b0), (w0 = w), (b0 = b));
+        else if (w > w1) ((w1 = w), (b1 = b));
+      }
+      const s = w0 + w1;
+      if (s <= 0 || w1 < w0 * 0.02) {
+        ((SK[v * 3] = b0), (SK[v * 3 + 1] = b0), (SK[v * 3 + 2] = 1));
+        skinSingle++;
+      } else {
+        ((SK[v * 3] = b0), (SK[v * 3 + 1] = b1), (SK[v * 3 + 2] = w0 / s));
+        skinDual++;
+      }
+    }
   }
 }
 
@@ -533,7 +595,7 @@ ${animBody}
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, body);
 const totalVerts = P.length / 3;
-const skinInfo = skin ? `单骨${skinSingle}(${(skinSingle/totalVerts*100).toFixed(0)}%) 双骨${skinDual}(${(skinDual/totalVerts*100).toFixed(0)}%) 合并${skinMerged}(${(skinMerged/totalVerts*100).toFixed(0)}%)` : '无骨骼';
+const skinInfo = skin ? `单骨${skinSingle}(${(skinSingle/totalVerts*100).toFixed(0)}%) 双骨${skinDual}(${(skinDual/totalVerts*100).toFixed(0)}%) 碎片${islandCount}个` : '无骨骼';
 console.log(
   `写出 ${out}\n  顶点 ${totalVerts}  三角 ${I.length / 3}  关节 ${RIG ? RIG.names.length : 0}  动画 ${Object.keys(ANIMS).join('/') || '无'}  文件 ${Math.round(body.length / 1024)}KB\n  蒙皮 ${skinInfo}`,
 );
