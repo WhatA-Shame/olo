@@ -240,10 +240,12 @@ const main = async () => {
 
   // 挑一个可行走方向
   const dir = await ev(`(() => { const w=window.__moba.world,u=${U};
-    for (let i=0;i<16;i++){ const a=i*Math.PI/8, dx=Math.cos(a), dy=Math.sin(a);
-      let free=0; for (const d of [4,8,12]) if (w.nav.isFree(u.pos.x+dx*d, u.pos.y+dy*d, 1)) free++;
-      if (free===3) return JSON.stringify({x:+dx.toFixed(3),y:+dy.toFixed(3)}); }
-    return null; })()`);
+    // 滚轮会一直滚到撞墙，所以要挑一条够长的空走廊
+    let best=null, bestD=0;
+    for (let i=0;i<24;i++){ const a=i*Math.PI/12, dx=Math.cos(a), dy=Math.sin(a);
+      let d=0; for (const k of [3,6,9,12,15,18,21,24]) { if (!w.nav.isFree(u.pos.x+dx*k, u.pos.y+dy*k, 1)) break; d=k; }
+      if (d>bestD) { bestD=d; best={x:+dx.toFixed(3),y:+dy.toFixed(3)}; } }
+    return best && bestD>=9 ? JSON.stringify(best) : null; })()`);
   const d = dir && !dir.__err ? JSON.parse(dir) : { x: 1, y: 0 };
   console.log(`· 释放方向 (${d.x}, ${d.y})`);
 
@@ -269,6 +271,7 @@ const main = async () => {
       channeling ? '引导中（cd 由引导结束设置）' : cd === 0 ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）' : `cd ${cd}`,
     );
     if (slot === 's1') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
+
     if (slot === 's1') {
       // 滚轮要能被移动指令改向：发一个垂直方向的移动指令，看冲刺方向是否跟着转
       const before = await ev(`(()=>{const u=${U}; const d=u.rt.dash; return d?JSON.stringify({x:+d.dirX.toFixed(2),y:+d.dirY.toFixed(2)}):null;})()`);
@@ -280,6 +283,10 @@ const main = async () => {
       const a = after && !after.__err ? JSON.parse(after) : null;
       const turned = !!(b && a && (Math.abs(a.x - b.x) > 0.15 || Math.abs(a.y - b.y) > 0.15));
       ok('Q 可以控制方向', turned, `dir ${b ? `${b.x},${b.y}` : '?'} → ${a ? `${a.x},${a.y}` : '?'}`);
+      if (shots) {
+        await sleep(500);
+        await shot('roll', { x: 0, y: 0, width: 1088, height: 615 });
+      }
     }
     if (slot === 's2') ok('E 进入持续喷吐', st.s2 === true, `channel=${st.s2} anim=${st.anim}`);
     await shot(slot);
