@@ -6,3 +6,4 @@ desktop.ini
 tools/report.json
 tools/plan.json
 tools/.build.bundle.js
+.herocheck/

@@ -99,6 +99,10 @@ node split.mjs ../_recover/game.pretty.js ../src 70000
 
 ## 新增英雄：杯杯菇（第 6 位）
 
+> 要再加一个英雄，先看 **[docs/ADD-HERO.md](docs/ADD-HERO.md)**（接入点清单 + 五个坑），改完跑
+> `node tools/herocheck.mjs <heroId> --shots` 一条命令验证：自动起服务器和无头浏览器、断言选中的英雄、
+> 放三个技能、检查特效事件与运行时异常，跑完自动关。
+
 紫伞盖蘑菇，坦克 / 上路。模型、技能、音效、AI 全部按原工程的约定接入，未改动任何既有英雄。
 
 | 技能 | 效果 | 实现 |
