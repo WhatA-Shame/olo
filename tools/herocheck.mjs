@@ -18,6 +18,8 @@ if (!heroId) {
 const shots = argv.includes('--shots');
 // --anim=move：选将台直接预览指定动作（引擎侧读 ?anim=）
 const ANIM = (argv.find((a) => a.startsWith('--anim=')) || '').split('=')[1] || '';
+// --q=passive=1：往 URL 上再挂一串调试参数（选将台预览用）
+const Q = (argv.find((a) => a.startsWith('--q=')) || '').slice(4);
 const debug = argv.includes('--debug');
 const ZOOM = argv.includes('--zoom');
 // --close=x,y,w,h：选将台额外截一块放大 6 倍的小图，看手/武器细节
@@ -250,7 +252,8 @@ const main = async () => {
   // 复用 profile 时浏览器会缓存 dist/index.html，必须关掉缓存，否则截到的是旧版本
   await send('Network.enable');
   await send('Network.setCacheDisabled', { cacheDisabled: true });
-  await send('Page.navigate', { url: URL_ + (ANIM ? (URL_.includes('?') ? '&' : '?') + 'anim=' + ANIM : '') });
+  const qs = [ANIM ? 'anim=' + ANIM : '', Q].filter(Boolean).join('&');
+  await send('Page.navigate', { url: URL_ + (qs ? (URL_.includes('?') ? '&' : '?') + qs : '') });
   await sleep(6000);
   if (!(await waitFor(`[...document.querySelectorAll('button,div,a,span')].some(e=>(e.textContent||'').trim()==='开始对战')`, '标题页', 45000)))
     fail('标题页没出来，页面可能报错了');
@@ -310,6 +313,15 @@ const main = async () => {
       clip: { x: cx, y: cy, width: cw, height: ch, scale: cs || 6 },
     });
     fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-close.jpg`), Buffer.from(r.result.data, 'base64'));
+  }
+
+  // --selectonly：截完选将台就退出。核对姿势/贴图这种"只看一眼"的活儿，
+  // 不用把整局对战跑一遍（那一大段要一分多钟）。
+  if (argv.includes('--selectonly')) {
+    console.log(`\n选将台截图完成（${SHOT_DIR}），--selectonly 直接退出`);
+    ws.close();
+    await cleanup();
+    return;
   }
 
   await clickText('开始对战');
@@ -526,6 +538,18 @@ const main = async () => {
   const before = await ev(`JSON.stringify(window.__hcFx)`);
   const mana0 = await ev(`${U}.mana`);
   await cast('s1');
+  // 牛伟的被动「血怒」：放完技能 4 秒内下一斧变重斧（额外伤害 + 回血），
+  // 动画那边靠这个 buff 把普攻换成劈砍（见 26-core-5.js 的 attack 分支 + 31-render-10.js 的 O.passive）。
+  // buff 名字改了而渲染那边没跟着改的话，劈砍就永远不触发，所以在这儿钉一条。
+  if (heroId === 'chijin') {
+    await sleep(420);
+    const bf = await ev(`(()=>{const u=${U}; return JSON.stringify(u.buffs.map((b)=>b.id));})()`);
+    ok(
+      '被动「血怒」挂上了（下一斧变重斧 → 播劈砍）',
+      typeof bf === 'string' && bf.includes('chijin_ember'),
+      `身上 buff: ${bf}`,
+    );
+  }
   // 无头浏览器里没有 vsync，模拟时间跑得比真实时间快得多：自然回蓝（~5/秒）能在两次 ev 往返之间
   // 就把 50 点的蓝耗抹平，读出来永远是「没扣」。所以这里做两件事：
   //   ① 蓝压到 90% 留出扣减空间；② 把 s2 的 cost 临时放大到 600，让扣蓝幅度远大于回蓝噪声。

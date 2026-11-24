@@ -49,6 +49,23 @@ function gB(n, t) {
       } catch {
         return "idle";
       }
+    })(),
+    // ?passive=1：把"被动强化普攻"的标记塞进预览输入，方便单独看那一下劈砍
+    qPassive = (() => {
+      try {
+        return new URLSearchParams(location.search).get("passive") === "1" ? 1 : 0;
+      } catch {
+        return 0;
+      }
+    })(),
+    // ?p=0.45：把动作冻结在 45% 的位置（截图核对姿势用，不然截到哪一帧全看运气）
+    qFreeze = (() => {
+      try {
+        const v = parseFloat(new URLSearchParams(location.search).get("p"));
+        return Number.isFinite(v) && v >= 0 && v <= 1 ? v : -1;
+      } catch {
+        return -1;
+      }
     })();
   let f = t,
     d = qAnim,
@@ -75,6 +92,8 @@ function gB(n, t) {
         s.scene.add(a),
         (d = qAnim),
         (h = 0),
+        // 一次性动作必须给个时长：原来 u 一直是 0，?anim=attack 第一帧就被判成"播完了"退回 idle
+        (u = qAnim === "idle" || qAnim === "move" ? 0 : qAnim === "cast_ult" ? 2.6 : 1.1),
         r.snap(),
         k());
     },
@@ -114,13 +133,14 @@ function gB(n, t) {
       const T = r.input;
       // move 是循环动作（?anim=move 调试时用），不能按一次性动作那样播完就回 idle
       const cyc = d === "idle" || d === "move";
-      (d !== "idle" && d !== "move" && ((h += w), h >= u && ((d = "idle"), (h = 0))),
+      (d !== "idle" && d !== "move" && qFreeze < 0 && ((h += w), h >= u && ((d = "idle"), (h = 0))),
         (T.anim = d),
         (T.time = x),
         (T.t = cyc ? x : h),
-        (T.p = cyc ? 0 : Math.min(1, h / u)),
+        (T.p = qFreeze >= 0 ? qFreeze : cyc ? 0 : Math.min(1, h / u)),
         (T.variant = m),
         (T.windup = 0.35),
+        (T.passive = qPassive),
         (T.stride = 0),
         (T.speed = 0));
       const E = d === "leap" ? 4 * 1.5 * T.p * (1 - T.p) : 0;

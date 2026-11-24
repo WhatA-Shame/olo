@@ -743,6 +743,9 @@ function PO() {
     spawnT: -1,
     hitT: 99,
     team: 0,
+    // 被动强化普攻的标记（牛伟的「血怒」：放完技能后下一斧变重斧）。
+    // animate 里拿它决定这一斧是普通普攻还是劈砍，见 26-core-5.js 的 attack 分支。
+    passive: 0,
   };
 }
 
@@ -1581,6 +1584,8 @@ function lB(n) {
         (O.variant = D.variant),
         (O.team = D.team),
         (O.mode = 0),
+        // 身上挂着「血怒」= 这一斧是重斧，动画那边换成劈砍
+        (O.passive = Q.kind === "hero" && Q.buffs.length > 0 && Q.buffs.some((ft) => ft.id === "chijin_ember") ? 1 : 0),
         (D.hitT = U >= 0 ? U : 99),
         (O.hitT = D.hitT),
         D.spawnT >= 0)

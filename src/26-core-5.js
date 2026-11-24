@@ -15,6 +15,7 @@ import { heroMesh as nwMesh, heroMap as nwMap, heroRig as nwRig, heroAnim as nwA
 import { heroMesh as nmMesh, heroMap as nmMap, heroRig as nmRig, heroAnim as nmAnim } from './45-niumo-mesh.js';
 import { heroMesh as nm2Mesh, heroMap as nm2Map, heroRig as nm2Rig, heroAnim as nm2Anim } from './45-niumo2-mesh.js';
 import { nx } from './08-three-4.js';
+import { chopPose, spinPose, chantPose } from './26-pose.js';
 import { Am, Em, En, Fi, Gh, K, Lh, Mf, P0, Qn, S0, Tm, Un, Vh, Wh, Xi, Yo, bt, cw, ge, he, ho, jh, jl, lw, nf, pt, sf, ta, vp, wU, zs } from './25-render-9.js';
 
 class Ls {
@@ -2331,6 +2332,17 @@ function bNw() {
     handLJ = jid("L_Hand"),
     upperRJ = jid("R_Upperarm"),
     upperLJ = jid("L_Upperarm");
+  const JN = {
+    root: rootJ,
+    chest: chestJ,
+    head: headJ,
+    upperR: upperRJ,
+    foreR: jid("R_Forearm"),
+    handR: handRJ,
+    upperL: upperLJ,
+    foreL: jid("L_Forearm"),
+    handL: handLJ,
+  };
   (t.bone(rootJ), t.rawMesh(mesh, { mat: K.skin, gloss: 0.34, line: 1, ao: 1 }));
 
   // ── 补一把八卦宣花斧 ────────────────────────────────────────
@@ -2507,6 +2519,15 @@ function bNw() {
       return;
     }
     if (st === "attack" || st === "attack2") {
+      // 被动「血怒」触发的那一斧是重斧（额外伤害 + 回血），换成真正的举斧劈砍；
+      // 普通普攻还是拳击片段。状态由引擎按 buff chijin_ember 传进 I.passive。
+      if (I.passive) {
+        (rest(R),
+          armsDown(R),
+          chopPose(R, JN, I.p, { lift: 158, tiltDown: 96, lean: 22, twist: 14 }),
+          (P.glow = 1 + 2.4 * ho(I.p, 0.42, 0.3)));
+        return;
+      }
       (play(R, "box_03", I.t * 2.2, false), (P.glow = 1 + 1.4 * ho(I.p, 0.36, 0.2)));
       return;
     }
@@ -2521,8 +2542,9 @@ function bNw() {
       return;
     }
     if (st === "cast_ult" || st === "spin") {
-      // 抡圆了砍：拿舞蹈片段当整体转身，正好是一圈一圈的旋身
-      (play(R, "dance_05", I.t * 2.2, false), (P.glow = 1 + 1.6 * I.p));
+      // 「狂牛旋风」：自己摆一个旋身 —— 整个人绕竖直轴转，斧头甩成一条横线。
+      // （原来是借 dance_05 舞蹈片段：转是转了，但那是跳舞，不是抡斧。）
+      (rest(R), spinPose(R, JN, I.time, { p: I.p }), (P.glow = 1 + 2.2 * I.p));
       return;
     }
     if (st === "hit" || st === "hurt") {
@@ -2601,80 +2623,98 @@ function buildNiumo(MOD) {
     handLJ = jid("L_Hand"),
     upperRJ = jid("R_Upperarm"),
     upperLJ = jid("L_Upperarm");
+  const JN = {
+    root: rootJ,
+    chest: chestJ,
+    head: headJ,
+    upperR: upperRJ,
+    foreR: jid("R_Forearm"),
+    handR: handRJ,
+    upperL: upperLJ,
+    foreL: jid("L_Forearm"),
+    handL: handLJ,
+  };
   (t.bone(rootJ),
     t.rawMesh(mesh, { mat: K.skin, gloss: 0.34, line: 1, ao: 1, color: [1.22, 0.8, 0.66] }));
 
   // ── 十字巨剑 ────────────────────────────────────────────────
   // 剑身立着握在右手里：剑格做成横向大十字，剑身中间一道发光竖槽。
-  // 剑柄要够长——手腕点 HY 落在柄的中段，手下还留一截，才看得出是「握着」而不是「顶着」。
-  // 剑柄同样穿过拳头质心（偏移量跟牛伟的斧头一样）
-  // 握点同样走手骨局部空间（见 handGripAt）：每套网格的手大小/朝向都不一样，
-  // 世界偏移写死一个值会握到空气里，甚至穿到手背外面。
-  const [HX, HY, HZ] = handGripAt(HR, handRJ, MOD.grip[0], MOD.grip[1], MOD.grip[2]),
+  // 剑柄要够长——握点在柄的中段，手下还留一截，才看得出是「握着」而不是「顶着」。
+  // **顶点写在手骨局部坐标里**（跟牛伟的斧头同一套做法，见 handFrame 上的说明）：
+  // 拳头的握孔是手骨局部 Z，所以柄轴必须沿 +Z；按世界 Y 立一根杆的话，
+  // 换算到局部几乎是沿手指方向，看着像"剑贴在拳头外侧"而不是被手攥住。
+  const M_SWORD = handMatrix(HR, handRJ, MOD.grip[0], MOD.grip[1], MOD.grip[2]).multiply(
+    // 作者坐标系 → 手骨局部：X→-X（剑格沿掌背→掌心）、Y→+Z（柄沿握孔）、Z→+Y（剑面法线）
+    new Ke().set(-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1),
+  );
+  const HX = 0,
+    HY = 0,
+    HZ = 0,
     pommelY = HY - 0.62,
     guardY = HY + 0.14,
     bladeY = HY + 0.18,
     tipY = HY + 1.24;
   (t.bone(handRJ), (t.uvX = 0.24), (t.uvY = 0.24));
+  t.g(M_SWORD, () => {
+    // 剑柄 + 柄头
+    t.paint(0x6b5038, { gloss: 0.2, mat: K.leather, ao: 0.9, grain: 0.05 });
+    t.tube(
+      [
+        [HX, pommelY + 0.04, HZ, 0.045, 0.045],
+        [HX, pommelY + 0.13, HZ, 0.055, 0.055],
+        [HX, HY - 0.34, HZ, 0.052, 0.052],
+        [HX, HY - 0.06, HZ, 0.054, 0.054],
+        [HX, HY + 0.04, HZ, 0.058, 0.058],
+        [HX, guardY - 0.06, HZ, 0.05, 0.05],
+      ],
+      { seg: 7, crease: 50 },
+    );
+    // 握把缠皮：正好压在拳头那一段
+    t.paint(0x4a382a, { gloss: 0.24, mat: K.leather, ao: 0.88 });
+    t.tube(
+      [
+        [HX, HY - 0.32, HZ, 0.056, 0.056],
+        [HX, HY - 0.25, HZ, 0.066, 0.066],
+        [HX, HY + 0.02, HZ, 0.066, 0.066],
+        [HX, HY + 0.08, HZ, 0.057, 0.057],
+      ],
+      { seg: 8, crease: 50 },
+    );
+    t.paint(0xf2c46a, { gloss: 0.7, mat: K.metal, ao: 0.95 });
+    t.ball(HX, pommelY + 0.02, HZ, 0.07, 0.06, 0.07, 1);
 
-  // 剑柄 + 柄头
-  t.paint(0x6b5038, { gloss: 0.2, mat: K.leather, ao: 0.9, grain: 0.05 });
-  t.tube(
-    [
-      [HX, pommelY + 0.04, HZ, 0.045, 0.045],
-      [HX, pommelY + 0.13, HZ, 0.055, 0.055],
-      [HX, HY - 0.34, HZ, 0.052, 0.052],
-      [HX, HY - 0.06, HZ, 0.054, 0.054],
-      [HX, HY + 0.04, HZ, 0.058, 0.058],
-      [HX, guardY - 0.06, HZ, 0.05, 0.05],
-    ],
-    { seg: 7, crease: 50 },
-  );
-  // 握把缠皮：正好压在拳头那一段
-  t.paint(0x4a382a, { gloss: 0.24, mat: K.leather, ao: 0.88 });
-  t.tube(
-    [
-      [HX, HY - 0.32, HZ, 0.056, 0.056],
-      [HX, HY - 0.25, HZ, 0.066, 0.066],
-      [HX, HY + 0.02, HZ, 0.066, 0.066],
-      [HX, HY + 0.08, HZ, 0.057, 0.057],
-    ],
-    { seg: 8, crease: 50 },
-  );
-  t.paint(0xf2c46a, { gloss: 0.7, mat: K.metal, ao: 0.95 });
-  t.ball(HX, pommelY + 0.02, HZ, 0.07, 0.06, 0.07, 1);
+    // 十字剑格：横条 + 两端上翘
+    t.paint(0x9aa3b0, { c2: 0xc6cfda, gloss: 0.8, mat: K.metal, ao: 1 });
+    t.box(HX, guardY, HZ, 0.74, 0.095, 0.14, 0.03);
+    for (const s of [-1, 1]) {
+      t.box(HX + s * 0.39, guardY + 0.055, HZ, 0.11, 0.16, 0.12, 0.03);
+      t.ball(HX + s * 0.39, guardY + 0.15, HZ, 0.05, 0.05, 0.05, 1);
+    }
 
-  // 十字剑格：横条 + 两端上翘
-  t.paint(0x9aa3b0, { c2: 0xc6cfda, gloss: 0.8, mat: K.metal, ao: 1 });
-  t.box(HX, guardY, HZ, 0.74, 0.095, 0.14, 0.03);
-  for (const s of [-1, 1]) {
-    t.box(HX + s * 0.39, guardY + 0.055, HZ, 0.11, 0.16, 0.12, 0.03);
-    t.ball(HX + s * 0.39, guardY + 0.15, HZ, 0.05, 0.05, 0.05, 1);
-  }
-
-  // 剑身：左右对称的长条，靠近剑尖收成尖
-  const MB = new Ke();
-  (MB.setPosition(HX, bladeY, HZ),
-    t.paint(0xaeb8c6, { c2: 0xdbe3ee, gloss: 0.9, mat: K.metal, ao: 1 }),
-    t.g(MB, () =>
-      t.extrude(
-        [
-          [0.115, 0.02],
-          [0.115, 0.72],
-          [0.085, 0.93],
-          [0.0, 1.06],
-          [-0.085, 0.93],
-          [-0.115, 0.72],
-          [-0.115, 0.02],
-        ],
-        0.075,
-        0.028,
-      ),
-    ));
-  // 剑身中槽的长明火
-  t.paint(0xff9a4a, { gloss: 0.2, mat: K.crystal, ao: 1, glow: 2.4 });
-  t.box(HX, bladeY + 0.42, HZ, 0.042, 0.66, 0.098, 0.012);
-  t.box(HX, guardY, HZ, 0.1, 0.1, 0.2, 0.02);
+    // 剑身：左右对称的长条，靠近剑尖收成尖
+    const MB = new Ke();
+    (MB.setPosition(HX, bladeY, HZ),
+      t.paint(0xaeb8c6, { c2: 0xdbe3ee, gloss: 0.9, mat: K.metal, ao: 1 }),
+      t.g(MB, () =>
+        t.extrude(
+          [
+            [0.115, 0.02],
+            [0.115, 0.72],
+            [0.085, 0.93],
+            [0.0, 1.06],
+            [-0.085, 0.93],
+            [-0.115, 0.72],
+            [-0.115, 0.02],
+          ],
+          0.075,
+          0.028,
+        ),
+      ));
+    // 剑身中槽的长明火
+    t.paint(0xff9a4a, { gloss: 0.2, mat: K.crystal, ao: 1, glow: 2.4 });
+    t.box(HX, bladeY + 0.42, HZ, 0.042, 0.66, 0.098, 0.012);
+    t.box(HX, guardY, HZ, 0.1, 0.1, 0.2, 0.02);
+  });
 
   // 把关键帧写进 pose
   const play = (R, name, time, loop) => {
@@ -2718,13 +2758,15 @@ function buildNiumo(MOD) {
   // 待机/受击这类"没有片段"的状态手动把上臂放下来，手腕回正一点让剑跟着竖直。
   // 下放角度按模型给：牛伟那套绑定姿态本来就是 A 姿，26° 就够；
   // 牛魔两个形态都是标准 T 姿势（手臂完全水平），得放到 70° 以上才像自然站立。
-  const armsDown = (R) => (
-    R.add(upperRJ, 0, 0, MOD.armDown),
-    R.add(upperLJ, 0, 0, -MOD.armDown),
-    R.add(handRJ, 0, 0, -MOD.armWrist),
-    R.add(handLJ, 0, 0, MOD.armWrist),
-    R
-  );
+  // 右手还要额外绕手骨 X 轴（掌背→掌心）翻 90°：把握孔从"朝前"转成"朝上"，剑才立得起来。
+  const HAND_ROLL = 90,
+    armsDown = (R) => (
+      R.add(upperRJ, 0, 0, MOD.armDown),
+      R.add(upperLJ, 0, 0, -MOD.armDown),
+      R.add(handRJ, HAND_ROLL, 0, -MOD.armWrist),
+      R.add(handLJ, 0, 0, MOD.armWrist),
+      R
+    );
 
   const h = (R, I, P) => {
     const st = I.anim;
@@ -2734,31 +2776,28 @@ function buildNiumo(MOD) {
       return;
     }
     if (st === "cast_s1") {
-      // 这具牛头人只有 5 个片段（box_03/chop/dance_05/defeat_03/run），
-      // box_03 是蹲伏出拳、chop 是 6.5 秒趴地长循环，拿来当挥剑都不像。
-      // 所以挥砍直接用 rest 打底 + 躯干/头/持剑手叠欧拉角，姿势可控也够读。
-      rest(R);
-      const k = Math.sin(Math.min(1, Math.max(0, I.p)) * Math.PI),
-        w = Math.sin(Math.min(1, I.p / 0.35) * Math.PI * 0.5); // 起手抬得早、落得慢
-      (R.add(chestJ, -2 - 8 * k, 24 * k - 6 * w, 0),
-        R.add(headJ, 2 + 6 * k, -14 * k, 0),
-        R.add(handRJ, -52 * k - 22 * w, 0, 0),
+      // 烈焰斩：举剑砸下去。原来手调的腕角是给"世界竖直的剑"配的，
+      // 剑改成沿握孔之后那套角度全作废，直接走劈砍。
+      (rest(R),
+        armsDown(R),
+        chopPose(R, JN, I.p, { lift: 150, tiltDown: 102, lean: 20, twist: 16, yaw: -50 }),
+        R.move(rootJ, 0, 0, 0.07 * Math.sin(Math.min(1, I.p) * Math.PI)),
         (P.glow = 1 + 2.6 * ho(I.p, 0.42, 0.3)));
       return;
     }
     if (st === "cast_s2" || st === "dash" || st === "roll") {
-      // 烈焰行军：边往前走边喷火，用跑步片段顶着
-      (play(R, MOD.runAnim, I.time * 2.2, true), (P.glow = 2.2));
+      // 烈焰行军：定身 2 秒站着喷火，用咏唱姿态。
+      // （原来拿跑步片段顶着，看着像边跑边吐火；这技能本来就是"站着喷、期间定身"。）
+      // 底子用 rest()：T 姿时上臂局部 X 轴≈世界竖直，绕它转是把手臂在水平面里往前甩。
+      (rest(R), chantPose(R, JN, I.time, I.p), (P.glow = 2.2));
       return;
     }
     if (st === "attack" || st === "attack2") {
-      // 普攻也是 box_03（蹲伏出拳），同样换成站姿甩剑
-      rest(R);
-      const k = Math.sin(Math.min(1, Math.max(0, I.p)) * Math.PI);
-      (R.add(chestJ, -3 - 9 * k, 18 * k, 0),
-        R.add(headJ, 2 + 5 * k, -9 * k, 0),
-        R.add(handRJ, -38 * k, 0, 0),
-        (P.glow = 1 + 1.6 * ho(I.p, 0.36, 0.2)));
+      // 普攻：真·举剑劈砍。原来只是把手腕拧 38°，看着像原地甩剑。
+      (rest(R),
+        armsDown(R),
+        chopPose(R, JN, I.p, { lift: 146, tiltDown: 100, lean: 16, twist: 10, yaw: -50 }),
+        (P.glow = 1 + 1.8 * ho(I.p, 0.36, 0.2)));
       return;
     }
     if (st === "channel") {
@@ -2769,14 +2808,16 @@ function buildNiumo(MOD) {
       return;
     }
     if (st === "cast_ult" || st === "spin") {
-      // 变身：后仰咆哮 + 双手（持剑手）往两侧张开，靠 glow 拉满表现力
+      // 变身：后仰咆哮 + 双臂往两侧张开、剑举在手里，靠 glow 拉满表现力。
+      // 必须走 armsDown，否则剑会停在 rest 的"朝正前方"，看着像端着长矛。
       rest(R);
       const k = Math.min(1, I.p / 0.3),
         b = Math.sin(I.time * 9) * 1.6;
-      (R.add(chestJ, 10 * k + b, 0, 0),
+      (armsDown(R),
+        R.add(upperRJ, 0, 0, -52 * k),
+        R.add(upperLJ, 0, 0, 52 * k),
+        R.add(chestJ, 10 * k + b, 0, 0),
         R.add(headJ, 14 * k + b, 0, 0),
-        R.add(handRJ, -70 * k, 0, 26 * k),
-        R.add(handLJ, -70 * k, 0, -26 * k),
         R.move(rootJ, 0, -0.06 * k, 0),
         (P.glow = 1 + 2.4 * k));
       return;
