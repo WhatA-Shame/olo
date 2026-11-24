@@ -488,14 +488,35 @@ if (skin && json.animations) {
 }
 
 // ── 贴图 ─────────────────────────────────────────────────
+// 顺便把宽高读出来：heroMap() 的占位图必须和真实贴图同尺寸（见那边的注释）
+function imageSize(bytes, mime) {
+  if (mime === 'image/png') return [bytes.readUInt32BE(16), bytes.readUInt32BE(20)];
+  for (let i = 2; i < bytes.length - 9; ) {
+    if (bytes[i] !== 0xff) {
+      i++;
+      continue;
+    }
+    const mk = bytes[i + 1];
+    // SOF0..SOF15（跳过 DHT/JPG/DAC）
+    if (mk >= 0xc0 && mk <= 0xcf && mk !== 0xc4 && mk !== 0xc8 && mk !== 0xcc)
+      return [bytes.readUInt16BE(i + 7), bytes.readUInt16BE(i + 5)];
+    i += 2 + bytes.readUInt16BE(i + 2);
+  }
+  return [512, 512];
+}
+
 let texData = '';
+let texW = 512,
+  texH = 512;
 const mat0 = (json.materials || []).find((m) => m.pbrMetallicRoughness && m.pbrMetallicRoughness.baseColorTexture);
 if (mat0) {
   const tex = json.textures[mat0.pbrMetallicRoughness.baseColorTexture.index];
   const img = json.images[tex.source];
   const bv = json.bufferViews[img.bufferView];
   const bytes = bin.subarray(bv.byteOffset || 0, (bv.byteOffset || 0) + bv.byteLength);
-  texData = `data:${img.mimeType || 'image/jpeg'};base64,${Buffer.from(bytes).toString('base64')}`;
+  const mime = img.mimeType || 'image/jpeg';
+  [texW, texH] = imageSize(bytes, mime);
+  texData = `data:${mime};base64,${Buffer.from(bytes).toString('base64')}`;
 }
 
 const b64 = (arr) => Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength).toString('base64');
@@ -516,6 +537,9 @@ const dec = (b64, T) => {
 };
 
 let _mesh = null;
+// 贴图尺寸：heroMap() 的占位图必须用同一个尺寸（原因见 heroMap 里的注释）
+const TEX_W = ${texW},
+  TEX_H = ${texH};
 export function heroMesh() {
   return (_mesh ??= {
     pos: dec(HERO_MESH.pos, Float32Array),
@@ -555,19 +579,32 @@ export function heroMap() {
   // glTF 的 UV 原点在左上，three 默认 flipY=true 会把它上下翻过来
   tex.flipY = false;
   const c = document.createElement('canvas');
-  c.width = c.height = 1;
+  // 占位图必须和真实贴图同尺寸：three 的 texStorage2D 是不可变存储，
+  // 第一次上传按占位图尺寸分配，之后换图只走 texSubImage2D ——
+  // 尺寸对不上就被整张丢弃，模型永远停在占位色（就是"白模"的由来）。
+  c.width = TEX_W;
+  c.height = TEX_H;
   const g = c.getContext('2d');
-  g.fillStyle = '#fff';
-  g.fillRect(0, 0, 1, 1);
+  // 占位色用近似肤色而不是纯白：贴图还没解码完时，立绘/头像至少不是刺眼的白模
+  g.fillStyle = '#c9a888';
+  g.fillRect(0, 0, TEX_W, TEX_H);
   tex.image = c;
   tex.needsUpdate = true;
   if (HERO_MESH.tex) {
     const img = new Image();
-    img.onload = () => ((tex.image = img), (tex.needsUpdate = true));
+    img.onload = () => {
+      ((tex.image = img), (tex.needsUpdate = true));
+      // 贴图是异步解码的：先渲染出来的立绘/头像会是白模，通知界面重画。
+      // 32-ui.js 的 MAP_HEROES 里必须登记这个英雄，否则回调来了也不会重画。
+      globalThis.__sfTextureReady?.();
+    };
     img.src = HERO_MESH.tex;
   }
   return (_map = tex);
 }
+// 模块一加载就开始解码，别等第一次建模时才去拉。
+// 少了这行，选将台会在解码完成前就把立绘渲染进缓存，头像永远是白模（牛魔就是这么漏的）。
+if (typeof document !== 'undefined') setTimeout(() => heroMap(), 0);
 
 export const HERO_MESH = {
   verts: ${P.length / 3},

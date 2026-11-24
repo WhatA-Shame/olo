@@ -10,6 +10,9 @@ const dec = (b64, T) => {
   return new T(u8.buffer);
 };
 
+// 贴图尺寸：heroMap() 的占位图必须用同一个尺寸（原因见 heroMap 里的注释）
+const TEX_W = 512,
+  TEX_H = 512;
 let _mesh = null;
 export function heroMesh() {
   return (_mesh ??= {
@@ -50,19 +53,30 @@ export function heroMap() {
   // glTF 的 UV 原点在左上，three 默认 flipY=true 会把它上下翻过来
   tex.flipY = false;
   const c = document.createElement('canvas');
-  c.width = c.height = 1;
+  // 占位图必须和真实贴图同尺寸：three 的 texStorage2D 是不可变存储，
+  // 第一次上传按占位图尺寸分配，之后换图只走 texSubImage2D ——
+  // 尺寸对不上就被整张丢弃，模型永远停在占位色（就是"白模"的由来）。
+  c.width = TEX_W;
+  c.height = TEX_H;
   const g = c.getContext('2d');
-  g.fillStyle = '#fff';
-  g.fillRect(0, 0, 1, 1);
+  // 贴图解码完之前先用近似肤色打底，避免整片纯白（立绘会白模）
+  g.fillStyle = '#c9a888';
+  g.fillRect(0, 0, TEX_W, TEX_H);
   tex.image = c;
   tex.needsUpdate = true;
   if (HERO_MESH.tex) {
     const img = new Image();
-    img.onload = () => ((tex.image = img), (tex.needsUpdate = true));
+    img.onload = () => {
+      ((tex.image = img), (tex.needsUpdate = true));
+      // 贴图是异步解码的：先渲染出来的立绘/头像会是白模，通知界面重画
+      globalThis.__sfTextureReady?.();
+    };
     img.src = HERO_MESH.tex;
   }
   return (_map = tex);
 }
+// 模块一加载就开始解码，别等第一次建模时才去拉（漏了这行选将台的立绘就永远是白模）
+if (typeof document !== 'undefined') setTimeout(() => heroMap(), 0);
 
 export const HERO_MESH = {
   verts: 3478,

@@ -158,6 +158,45 @@ async function connect() {
 }
 
 const main = async () => {
+  // 静态检查 1：外部 GLB 的网格模块必须在加载时预热贴图解码。
+  // 少了这一行，选将台会在解码完成前把立绘渲染进 j1 缓存，头像就是永久白模
+  // （牛魔两套模型就是这么漏的：生成器模板里没有这行，手工补的时候漏掉了它们）。
+  // 静态检查 2：占位图必须和真实贴图同尺寸 —— three 的 texStorage2D 是不可变存储，
+  // 第一次上传按占位图尺寸分配，之后换图只走 texSubImage2D，尺寸对不上整张就被丢弃，
+  // 模型永远停在占位色（这是"白模"的第二个成因，比第一个隐蔽得多）。
+  const texSize = (buf, mime) => {
+    if (mime === 'image/png') return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
+    for (let i = 2; i < buf.length - 9; ) {
+      if (buf[i] !== 0xff) {
+        i++;
+        continue;
+      }
+      const mk = buf[i + 1];
+      if (mk >= 0xc0 && mk <= 0xcf && mk !== 0xc4 && mk !== 0xc8 && mk !== 0xcc)
+        return [buf.readUInt16BE(i + 7), buf.readUInt16BE(i + 5)];
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+    return [0, 0];
+  };
+  const meshFiles = fs.readdirSync(path.join(root, 'src')).filter((f) => /^45-.+-mesh\.js$/.test(f));
+  const srcOf = (f) => fs.readFileSync(path.join(root, 'src', f), 'utf8');
+  const noWarm = meshFiles.filter((f) => !srcOf(f).includes('setTimeout(() => heroMap(), 0)'));
+  ok('外部网格模块都预热贴图解码', noWarm.length === 0, noWarm.length ? `漏了 ${noWarm.join(', ')}` : `${meshFiles.length} 个模块`);
+  const badSize = [];
+  for (const f of meshFiles) {
+    const s = srcOf(f);
+    const w = /const TEX_W = (\d+)/.exec(s);
+    const h = /TEX_H = (\d+)/.exec(s);
+    const m = /tex: "data:image\/(jpeg|png);base64,([^"]+)"/.exec(s);
+    if (!w || !h || !m) {
+      badSize.push(`${f}(缺 TEX_W/TEX_H 或贴图)`);
+      continue;
+    }
+    const [iw, ih] = texSize(Buffer.from(m[2], 'base64'), m[1]);
+    if (+w[1] !== iw || +h[1] !== ih) badSize.push(`${f}(占位 ${w[1]}×${h[1]} ≠ 贴图 ${iw}×${ih})`);
+  }
+  ok('占位图尺寸和真实贴图一致', badSize.length === 0, badSize.length ? badSize.join('; ') : `${meshFiles.length} 个模块`);
+
   await ensureServer();
   await ensureChrome();
   const { ws, send, ev } = await connect();
@@ -217,6 +256,38 @@ const main = async () => {
   await sleep(1000);
   const cls = await ev(`document.querySelector('[data-hero="${heroId}"]').className`);
   ok('选将卡片可点选', typeof cls === 'string' && /active|selected|chosen/i.test(cls), cls);
+  // 外部 GLB 英雄的头像/立绘是异步解码贴图后重画的，等一会儿再截，否则截到的是白模
+  await sleep(2200);
+  // 立绘白模回归：外部 GLB 英雄的头像走「先渲染进 j1 缓存 → 贴图解码完再作废重画」。
+  // 只要网格模块漏了「模块加载就预热解码」那一行，或漏了 __sfTextureReady 回调，
+  // 头像就会永久停在 1×1 占位纯色上——截图上只是一块灰，肉眼很容易放过。这里直接数颜色。
+  const port = await ev(`(() => {
+    const img = document.querySelector('img[data-sf-portrait="${heroId}"]');
+    if (!img) return JSON.stringify({ err: 'no-img' });
+    const w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h) return JSON.stringify({ err: 'no-size', src: (img.src || '').slice(0, 24) });
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, w, h).data;
+    const set = new Set();
+    let n = 0, r = 0, gg = 0, b = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 200) continue;
+      n++; r += d[i]; gg += d[i + 1]; b += d[i + 2];
+      set.add(((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4));
+    }
+    if (!n) return JSON.stringify({ err: 'all-transparent' });
+    return JSON.stringify({ w, h, colors: set.size, avg: [Math.round(r / n), Math.round(gg / n), Math.round(b / n)] });
+  })()`);
+  let pt = null;
+  try { pt = JSON.parse(port); } catch {}
+  ok(
+    '选将台头像/立绘不是白模',
+    !!pt && !pt.err && pt.colors >= 8,
+    pt ? (pt.err ? `读不到头像：${pt.err}` : `${pt.w}×${pt.h}，${pt.colors} 种颜色，均色 rgb(${pt.avg.join(',')})`) : String(port),
+  );
   await shot('select');
   await shot('model', { x: 340, y: 130, width: 420, height: 340 });
   // --close=x,y,w,h：选将台再切一块更小的区域放大，专门看手/武器这种小细节
