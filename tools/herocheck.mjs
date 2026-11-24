@@ -274,8 +274,12 @@ const main = async () => {
 
   // 技能等级 / 蓝量 / 冷却 + 钩子
   const prep = await ev(`(() => { const w=window.__moba.world,u=${U};
-    if(!w.__hcHook){ const orig=w.emit.bind(w); window.__hcFx=[]; w.emit=(e)=>{ if(e&&e.type==='fx') window.__hcFx.push(e.key); return orig(e); }; w.__hcHook=1; }
-    window.__hcFx=[]; window.__hcErr=[];
+    if(!w.__hcHook){ const orig=w.emit.bind(w); window.__hcFx=[]; window.__hcRej=[];
+      // 施法被拒（等级/冷却/蓝量/无目标/被控）只会 emit 一个 reject 事件，不发特效，
+      // 所以测试里"cd 仍是 0"要能读出原因，不然只能靠猜。
+      w.emit=(e)=>{ if(e&&e.type==='fx') window.__hcFx.push(e.key);
+        if(e&&e.type==='reject') window.__hcRej.push(e.reason); return orig(e); }; w.__hcHook=1; }
+    window.__hcFx=[]; window.__hcRej=[]; window.__hcErr=[];
     window.addEventListener('error',e=>{ window.__hcErr.push(((e.error&&e.error.stack)||e.message||'').slice(0,300)); });
     // 蓝量留出余量：直接拉 99999 会被下一帧夹到上限，之后「技能消耗法力」就测不出来了
     u.mana=Math.round(u.stats.maxMana*0.7); u.hp=u.stats.maxHp; u.level=Math.max(u.level,12);
@@ -317,12 +321,25 @@ const main = async () => {
   }
 
   const cast = async (slot, kind, dist = 11, tail = true) => {
+    // 荆轲的大招是 target 型（必须给 targetId），发 pos/dir 会被直接判 no_target 静默拒绝。
+    // 这里先问一次技能定义，是 target 型就挑最近的敌人、把人挪到射程内再指过去。
+    const ctype = await ev(`(()=>{const u=${U};const s=u.h&&u.h.def&&u.h.def.skills&&u.h.def.skills["${slot}"];return s&&s.cast?s.cast.type:"?";})()`);
+    if (slot === 'ult') console.log(`· ${slot} 施法类型 ${ctype}`);
     const expr =
-      kind === 'pos'
-        ? `(()=>{const w=window.__moba.world,u=${U}; u.skills.ult.cd=0; u.rt.lockUntil=0;
+      ctype === 'target'
+        ? `(()=>{const w=window.__moba.world,u=${U}; u.skills["${slot}"].cd=0; u.rt.lockUntil=0;
+            let best=null,bd=1e9;
+            for(const o of w.units){ if(o.team===u.team||!o.alive||o.kind!=="hero") continue;
+              const dd=Math.hypot(o.pos.x-u.pos.x,o.pos.y-u.pos.y); if(dd<bd){bd=dd;best=o;} }
+            if(!best) { w.__hcTarget='none'; return 0; }
+            if(bd>6){ u.pos.x=best.pos.x+3; u.pos.y=best.pos.y; }
+            w.__hcTarget=best.id+':'+best.kind+':'+bd.toFixed(1);
+            w.command(u.id,{type:"cast",slot:"${slot}",targetId:best.id}); return u.skills["${slot}"].cd;})()`
+        : kind === 'pos'
+          ? `(()=>{const w=window.__moba.world,u=${U}; u.skills.ult.cd=0; u.rt.lockUntil=0;
             const d=${JSON.stringify(d)};
             w.command(u.id,{type:"cast",slot:"${slot}",pos:{x:u.pos.x+d.x*${dist},y:u.pos.y+d.y*${dist}}}); return u.skills.${slot}.cd;})()`
-        : `(()=>{const w=window.__moba.world,u=${U}; u.skills.${slot}.cd=0; u.rt.lockUntil=0;
+          : `(()=>{const w=window.__moba.world,u=${U}; u.skills.${slot}.cd=0; u.rt.lockUntil=0;
             const d=${JSON.stringify(d)};
             w.command(u.id,{type:"cast",slot:"${slot}",dir:{x:d.x,y:d.y}}); return u.skills.${slot}.cd;})()`;
     const cd = await ev(expr);
@@ -357,6 +374,7 @@ const main = async () => {
     const channeling = st.s2 === true;
     // 杯杯菇的 Q 冷却从滚动结束才开始算，刚放出来 cd 一定是 0，用"进入滚轮"当成功信号
     const rollStarted = heroId === 'mushroom' && slot === 's1' && st.dash === 'roll';
+    const rej = await ev(`(window.__hcRej||[]).slice(-3).join(',')+(window.__moba.world.__hcTarget?' tgt='+window.__moba.world.__hcTarget:'')`);
     ok(
       `${slot} 释放成功`,
       (typeof cd === 'number' && cd > 0) || channeling || rollStarted,
@@ -365,7 +383,7 @@ const main = async () => {
         : rollStarted
           ? '滚轮中（cd 从滚动结束开始算）'
           : cd === 0
-            ? 'cd 仍是 0 = 被静默拒绝（等级/锁定/蓝量）'
+            ? `cd 仍是 0 = 被拒（${rej || '无 reject 事件，可能没排上队'}）`
             : `cd ${cd}`,
     );
     // 滚轮/持续引导是杯杯菇特有的，别的英雄不做这两条断言

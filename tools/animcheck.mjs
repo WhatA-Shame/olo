@@ -32,8 +32,12 @@ const qrot = (q, v) => {
   ];
 };
 
+// heroId → 网格模块名。多数英雄同名前缀，但牛伟（chijin）换皮后文件叫 niuwei，
+// 牛魔开大形态和本体共用 niumo 的骨架，这里都按「骨架所在文件」映射。
+const MESH_FILE = { chijin: 'niuwei' };
+
 export function loadModel(heroId = 'mushroom') {
-  const file = path.join(root, 'src', `45-${heroId}-mesh.js`);
+  const file = path.join(root, 'src', `45-${MESH_FILE[heroId] || heroId}-mesh.js`);
   if (!fs.existsSync(file)) return null;
   const src = fs.readFileSync(file, 'utf8');
   const arr = (key) => {
@@ -102,6 +106,7 @@ export function solveAt(model, anim, frame) {
 const REQUIRED_BY_HERO = {
   mushroom: ['run', 'box_01', 'fall', 'front_kick_02', 'hit_to_head'],
   niumo: ['walk', 'defeat_03'],
+  chijin: ['run', 'box_03', 'chop', 'dance_05', 'defeat_03'],
 };
 const REQUIRED = [];
 const MIN_MOVE = 0.3;
@@ -109,7 +114,7 @@ const MIN_MOVE = 0.3;
 // 返回 { ok, detail }，供 herocheck 汇总
 export function animReport(heroId = 'mushroom') {
   const model = loadModel(heroId);
-  if (!model) return { ok: false, detail: `找不到 src/45-${heroId}-mesh.js` };
+  if (!model) return { ok: false, detail: `找不到 src/45-${MESH_FILE[heroId] || heroId}-mesh.js` };
   const names = Object.keys(model.anims);
   if (!names.length) return { ok: false, detail: '模型里没有动画数据' };
 
