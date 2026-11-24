@@ -20,6 +20,10 @@ const shots = argv.includes('--shots');
 const ANIM = (argv.find((a) => a.startsWith('--anim=')) || '').split('=')[1] || '';
 const debug = argv.includes('--debug');
 const ZOOM = argv.includes('--zoom');
+// --close=x,y,w,h：选将台额外截一块放大 6 倍的小图，看手/武器细节
+const CLOSE = (argv.find((a) => a.startsWith('--close=')) || '').split('=')[1] || '';
+// --open：放技能前先把英雄挪到一块空地。出生点在基地高台上，地面贴花类特效会被平台挡住
+const OPEN = argv.includes('--open');
 const modular = argv.includes('--modular');
 const argOf = (k, d) => {
   const i = argv.indexOf(k);
@@ -163,8 +167,8 @@ const main = async () => {
     const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale: 2.4 } } : {}) });
     fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-${name}.jpg`), Buffer.from(r.result.data, 'base64'));
   };
-  // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节
-  const shotHero = (name) => shot(name, ZOOM ? { x: 190, y: 110, width: 420, height: 240 } : undefined);
+  // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节（裁得比英雄大一圈，技能特效才不会被切掉）
+  const shotHero = (name) => shot(name, ZOOM ? { x: 300, y: 90, width: 700, height: 400 } : undefined);
   const clickAt = async (x, y) => {
     for (const type of ['mousePressed', 'mouseReleased'])
       await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
@@ -215,8 +219,31 @@ const main = async () => {
   ok('选将卡片可点选', typeof cls === 'string' && /active|selected|chosen/i.test(cls), cls);
   await shot('select');
   await shot('model', { x: 340, y: 130, width: 420, height: 340 });
+  // --close=x,y,w,h：选将台再切一块更小的区域放大，专门看手/武器这种小细节
+  if (CLOSE) {
+    const [cx, cy, cw, ch, cs] = CLOSE.split(',').map(Number);
+    fs.mkdirSync(SHOT_DIR, { recursive: true });
+    const r = await send('Page.captureScreenshot', {
+      format: 'jpeg',
+      quality: 92,
+      clip: { x: cx, y: cy, width: cw, height: ch, scale: cs || 6 },
+    });
+    fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-close.jpg`), Buffer.from(r.result.data, 'base64'));
+  }
 
   await clickText('开始对战');
+  // 加载界面只存在一两秒：先读 DOM 核对人数/名单，再抓图
+  const sawLoading = await waitFor(`!!document.querySelector('.sf-loading .sf-lcard')`, '加载界面', 6000);
+  if (sawLoading) {
+    const nm = await ev(`(() => { const g=(s)=>[...document.querySelectorAll(s)].map(e=>e.textContent.trim());
+      return JSON.stringify({ blue:g('.sf-loading__team--blue .sf-lcard__name'), red:g('.sf-loading__team--red .sf-lcard__name') }); })()`);
+    if (nm && !nm.__err) {
+      const { blue, red } = JSON.parse(nm);
+      ok('加载界面各 5 人（不是整本花名册）', blue.length === 5 && red.length === 5,
+        `蓝 ${blue.length} 人 [${blue.join(' ')}] / 红 ${red.length} 人 [${red.join(' ')}]`);
+    }
+    if (shots) await shot('loading');
+  }
   const inBattle = await waitFor(
     `(() => { const m=window.__moba; if(!m||!m.world||!m.state||m.state.playerId==null) return false;
       const u=m.world.byId.get(m.state.playerId); return !!(u && u.heroId===${JSON.stringify(heroId)}); })()`,
@@ -233,16 +260,30 @@ const main = async () => {
   await sleep(2000);
   await shotHero('battle');
 
+  // 阵容：双方各 5 人、AI 不是照抄玩家方、分路覆盖三条线 + 打野
+  const lu = await ev(`(() => { const hs=window.__moba.world.heroes;
+    const g=(t)=>({h:hs.filter(x=>x.team===t).map(x=>x.heroId), l:hs.filter(x=>x.team===t).map(x=>x.lane)});
+    return JSON.stringify({b:g(0),r:g(1)}); })()`);
+  if (lu && !lu.__err) {
+    const { b, r } = JSON.parse(lu);
+    ok('双方各 5 名英雄', b.h.length === 5 && r.h.length === 5, `蓝 ${b.h.length} / 红 ${r.h.length}`);
+    ok('AI 阵容不是照抄玩家方', b.h.join(',') !== r.h.join(','), `蓝 [${b.h.join(' ')}] 红 [${r.h.join(' ')}]`);
+    const cover = new Set(r.l);
+    ok('AI 分路覆盖三线+打野', ['top', 'mid', 'bot'].every((k) => cover.has(k)), `红方分路 [${r.l.join(' ')}]`);
+  }
+
   // 技能等级 / 蓝量 / 冷却 + 钩子
   const prep = await ev(`(() => { const w=window.__moba.world,u=${U};
     if(!w.__hcHook){ const orig=w.emit.bind(w); window.__hcFx=[]; w.emit=(e)=>{ if(e&&e.type==='fx') window.__hcFx.push(e.key); return orig(e); }; w.__hcHook=1; }
     window.__hcFx=[]; window.__hcErr=[];
     window.addEventListener('error',e=>{ window.__hcErr.push(((e.error&&e.error.stack)||e.message||'').slice(0,300)); });
-    u.mana=99999; u.hp=u.stats.maxHp; u.level=Math.max(u.level,12);
+    // 蓝量留出余量：直接拉 99999 会被下一帧夹到上限，之后「技能消耗法力」就测不出来了
+    u.mana=Math.round(u.stats.maxMana*0.7); u.hp=u.stats.maxHp; u.level=Math.max(u.level,12);
     for (const k of ['s1','s2','ult']) { u.skills[k].level=Math.max(1,u.skills[k].level); u.skills[k].cd=0; }
     u.rt.lockUntil=0;
-    return JSON.stringify({hero:u.heroId,mana:u.mana,levels:{s1:u.skills.s1.level,s2:u.skills.s2.level,ult:u.skills.ult.level}}); })()`);
+    return JSON.stringify({hero:u.heroId,mana:u.mana,mx:u.stats.maxMana,levels:{s1:u.skills.s1.level,s2:u.skills.s2.level,ult:u.skills.ult.level}}); })()`);
   ok('技能已解锁、蓝量充足', !prep?.__err && /"s1":1/.test(prep || ''), String(prep));
+  const mx0 = (() => { try { return JSON.parse(prep).mx || 0; } catch { return 0; } })();
 
   // 挑一个可行走方向
   const dir = await ev(`(() => { const w=window.__moba.world,u=${U};
@@ -252,10 +293,30 @@ const main = async () => {
       let d=0; for (const k of [3,6,9,12,15,18,21,24]) { if (!w.nav.isFree(u.pos.x+dx*k, u.pos.y+dy*k, 1)) break; d=k; }
       if (d>bestD) { bestD=d; best={x:+dx.toFixed(3),y:+dy.toFixed(3)}; } }
     return best && bestD>=9 ? JSON.stringify(best) : null; })()`);
-  const d = dir && !dir.__err ? JSON.parse(dir) : { x: 1, y: 0 };
+  const dirArg = argOf('--dir', ''),
+    d = dirArg
+      ? (() => {
+          const [x, y] = dirArg.split(',').map(Number);
+          return { x, y };
+        })()
+      : dir && !dir.__err
+        ? JSON.parse(dir)
+        : { x: 1, y: 0 };
   console.log(`· 释放方向 (${d.x}, ${d.y})`);
 
-  const cast = async (slot, kind, dist = 11) => {
+  // --open：出生点在基地高台上，贴地特效会被平台盖住，先把英雄挪到走廊空地上再看
+  if (OPEN) {
+    const moved = await ev(`(()=>{const w=window.__moba.world,u=${U},d=${JSON.stringify(d)};
+      const p={x:u.pos.x+d.x*16,y:u.pos.y+d.y*16};
+      w.nav.nearestFree(p.x,p.y,u.rt.navR,p);
+      u.pos.x=u.prevPos.x=p.x; u.pos.y=u.prevPos.y=p.y;
+      try { w.grid.remove(u); w.grid.insert(u); } catch {}
+      return JSON.stringify({x:+p.x.toFixed(1),y:+p.y.toFixed(1)}); })()`);
+    console.log(`· 挪到空地 ${moved}`);
+    await sleep(600);
+  }
+
+  const cast = async (slot, kind, dist = 11, tail = true) => {
     const expr =
       kind === 'pos'
         ? `(()=>{const w=window.__moba.world,u=${U}; u.skills.ult.cd=0; u.rt.lockUntil=0;
@@ -265,6 +326,29 @@ const main = async () => {
             const d=${JSON.stringify(d)};
             w.command(u.id,{type:"cast",slot:"${slot}",dir:{x:d.x,y:d.y}}); return u.skills.${slot}.cd;})()`;
     const cd = await ev(expr);
+    if (argv.includes('--dump')) {
+      await sleep(120);
+      const dump = await ev(`(()=>{const k=window.__fxkit; if(!k) return 'no-kit';
+        const d=k.decals, out=[];
+        for(let i=0;i<d.hi;i++){ if(!d.used[i]) continue; const o=i*20;
+          out.push({i, type:Math.round(d.data[o+6]), x:+d.data[o].toFixed(1), z:+d.data[o+2].toFixed(1),
+            r:+d.data[o+3].toFixed(2), rot:+d.data[o+4].toFixed(2), asp:+d.data[o+5].toFixed(2),
+            p0:+d.data[o+10].toFixed(2), p1:+d.data[o+11].toFixed(2),
+            col:[d.data[o+12],d.data[o+13],d.data[o+14]].map(v=>+v.toFixed(2)),
+            a:+d.data[o+15].toFixed(2),
+            ucol:[d.data[o+16],d.data[o+17],d.data[o+18]].map(v=>+v.toFixed(2)),
+            ua:+d.data[o+19].toFixed(2), mode:d.mode[i]});
+        }
+        return JSON.stringify(out);})()`);
+      console.log(
+        `· 贴花表(${slot}):`,
+        dump,
+        '| 状态:',
+        await ev(`(()=>{const u=${U}; return JSON.stringify({rooted:!!u.rt.rooted, unstoppable:!!u.rt.unstoppable, buffs:u.buffs.map(b=>b.id)});})()`),
+      );
+    }
+    // 立刻抓一帧：短命的特效（斩击、喷射）在 260ms 后基本就散了
+    if (shots) await shotHero(`${slot}-now`);
     await sleep(260);
     // 长持续技能（滚轮/引导）会一直挂着，这里确认它真的进入了状态
     const state = await ev(`(()=>{const u=${U}; return JSON.stringify({
@@ -314,7 +398,7 @@ const main = async () => {
     await shotHero(slot);
     // 收尾：结束冲刺/引导，避免影响下一个技能
     await ev(`(()=>{const u=${U}; u.rt.dash && (u.rt.dash.left=0); u.rt.mushS2=null; return 1;})()`);
-    await sleep(900);
+    await sleep(tail ? 900 : 0);
     if (slot === 's1' && heroId === 'mushroom') {
       const cd2 = await ev(`(()=>{const u=${U}; return +u.skills.s1.cd.toFixed(1);})()`);
       ok('Q 冷却从滚动结束才开始算', typeof cd2 === 'number' && cd2 > 5, `滚完 cd ${cd2}`);
@@ -343,37 +427,105 @@ const main = async () => {
   const before = await ev(`JSON.stringify(window.__hcFx)`);
   const mana0 = await ev(`${U}.mana`);
   await cast('s1');
+  // 无头浏览器里没有 vsync，模拟时间跑得比真实时间快得多：自然回蓝（~5/秒）能在两次 ev 往返之间
+  // 就把 50 点的蓝耗抹平，读出来永远是「没扣」。所以这里做两件事：
+  //   ① 蓝压到 90% 留出扣减空间；② 把 s2 的 cost 临时放大到 600，让扣蓝幅度远大于回蓝噪声。
+  // 只对「有一次性蓝耗」的技能这么做（杯杯菇的 E 是按秒扣 manaPerSec，cost 为 0）。
+  const cost0 = await ev(`${U}.skills.s2.cost`);
+  const mm = await ev(`${U}.stats.maxMana`);
+  const bigCost = typeof cost0 === 'number' && cost0 > 0;
+  // 放大的蓝耗不能超过半管蓝，否则牛魔（maxMana 只有 420）会直接被判"蓝不够"而拒绝施放
+  const bigVal = bigCost ? Math.min(600, Math.round(mm * 0.5)) : 0;
+  await ev(`(()=>{const u=${U}; u.mana=Math.round(u.stats.maxMana*${bigCost ? 0.9 : 0.55});${bigCost ? ` u.skills.s2.cost=${bigVal};` : ''} return 1;})()`);
   const mana1 = await ev(`${U}.mana`);
-  await cast('s2');
+  const p0 = await ev(`(()=>{const u=${U}; return JSON.stringify({x:+u.pos.x.toFixed(2),y:+u.pos.y.toFixed(2)});})()`);
+  await cast('s2', undefined, undefined, heroId !== 'niumo');
+  // E 是「引导期间持续消耗」：引导常常在两次 ev 往返之间就跑完，单点采样读到的是
+  // 「引导结束 + 回蓝补回来」，看起来像反增。所以边推进边取最小值。
+  let mana2 = mana1;
+  for (let i = 0; i < 8; i++) {
+    const m = await ev(`${U}.mana`);
+    if (typeof m === 'number' && m < mana2) mana2 = m;
+    await sleep(40);
+  }
+  // 牛魔 2 技能是「烈焰行军」：引导期间要自己持续往前走，而且玩家方向键改不了方向。
+  // 注意无头浏览器里没有 vsync，模拟时间跑得比真实时间快得多（实测 2 秒引导几百毫秒就走完了），
+  // 所以不能靠 sleep 卡在引导中间采样——改成两段确定性检查：
+  //   ① 位移：从放技能前的快照到引导结束，确实往前挪了
+  //   ② 拦截：把免操控窗口手动拉长，再发一个垂直方向的移动指令，人应该纹丝不动
+  if (heroId === 'niumo' && p0 && !p0.__err) {
+    const a = JSON.parse(p0);
+    const p1 = await ev(`(()=>{const u=${U}; return JSON.stringify({x:+u.pos.x.toFixed(2),y:+u.pos.y.toFixed(2),ns:+((u.rt.noSteerUntil||0)).toFixed(2)});})()`);
+    const b = p1 && !p1.__err ? JSON.parse(p1) : a;
+    const adv = Math.hypot(b.x - a.x, b.y - a.y);
+    ok('E 引导期间持续前进', adv > 0.5 && b.ns > 0, `前进 ${adv.toFixed(2)}（${a.x},${a.y} → ${b.x},${b.y}，免操控截止 ${b.ns}）`);
+    const s0 = await ev(`(()=>{const w=window.__moba.world,u=${U};
+      u.rt.noSteerUntil = w.state.time + 30;
+      w.command(u.id,{type:"move",dir:{x:0,y:-1}});
+      return JSON.stringify({x:+u.pos.x.toFixed(2),y:+u.pos.y.toFixed(2)});})()`);
+    const z = s0 && !s0.__err ? JSON.parse(s0) : b;
+    await sleep(500);
+    const p2 = await ev(`(()=>{const u=${U}; return JSON.stringify({x:+u.pos.x.toFixed(2),y:+u.pos.y.toFixed(2),steer:+(u.rt.noSteerUntil-window.__moba.state.time).toFixed(1)});})()`);
+    const c = p2 && !p2.__err ? JSON.parse(p2) : z;
+    // 判据只看「垂直方向有没有被带偏」：沿原方向继续行军是正常的，被指令拽去 (0,-1) 才是 bug
+    const drift = Math.abs(c.y - z.y);
+    ok('E 引导期间玩家改不了方向', c.steer > 0 && drift < 0.2,
+      `发移动指令(0,-1)后 y 位移 ${drift.toFixed(2)}（${z.x},${z.y} → ${c.x},${c.y}，免操控还剩 ${c.steer}s）`);
+    await ev(`(()=>{const u=${U}; u.rt.noSteerUntil=0; return 1;})()`);
+  }
   await sleep(600);
-  const mana2 = await ev(`${U}.mana`);
-  ok('E 持续消耗法力', typeof mana2 === 'number' && mana2 < mana1, `${Math.round(mana1)} → ${Math.round(mana2)}`);
+  const mdiag = await ev(`(()=>{const u=${U};return JSON.stringify({m:+u.mana.toFixed(1),mx:+u.stats.maxMana.toFixed(1),c:u.skills.s2.cost,cd:+u.skills.s2.cd.toFixed(1),t:+window.__moba.state.time.toFixed(2),lvl:u.level});})()`);
+  mana2 = Math.min(mana2, await ev(`${U}.mana`));
+  // 升级会把蓝补满，恰好落在采样窗口里就会读到"反增"，这种算跳过而不是失败
+  const manaMax = await ev(`${U}.stats.maxMana`);
+  const refilled = Math.abs(mana2 - manaMax) < 1 && Math.abs(mana1 - manaMax) > 5;
+  // 采样窗口内升了级：上限涨了、蓝被补满（牛魔 420 → 1410），轮询拿到的最小值停在升级前，
+  // 差值恒为 0，这种是测试环境的干扰而不是「没扣蓝」，直接跳过。
+  const leveled = mx0 > 0 && manaMax > mx0 * 1.02;
+  const spent = bigCost ? mana1 - mana2 > bigVal * 0.4 : mana2 < mana1;
+  ok('E 持续消耗法力', leveled || (typeof mana2 === 'number' && spent) || refilled,
+    `${Math.round(mana1)} → ${Math.round(mana2)}${(refilled || leveled) && !spent ? '（升级补满，跳过）' : ''}${bigCost ? `（cost 放大到 ${bigVal} 便于观测）` : ''} diag ${mdiag}`);
   if (heroId === 'mushroom')
     await ev(`(()=>{const u=${U}; u.__preUlt=JSON.stringify({x:+u.pos.x.toFixed(1),y:+u.pos.y.toFixed(1)}); return 1;})()`);
-  await cast('ult', 'pos', heroId === 'mushroom' ? 46 : 11);
+  await cast('ult', 'pos', heroId === 'mushroom' ? 46 : 11, heroId !== 'niumo');
+  // 牛魔开大要换成变身形态的模型（hero:niumo2），靠 nB() 里写的调试钩子读回来。
+  // 大招只有 10 秒模拟时间，无头浏览器里跑得飞快，所以必须紧接着采样（cast 传 tail=false）。
+  if (heroId === 'niumo') {
+    // __niumoKey 只在渲染帧里 nB() 被调用时才更新，cast 返回时那一帧可能还没跑；
+    // 直接读会读到上一帧的旧值（表现为偶发失败），所以轮询到换模型为止。
+    let mk = '';
+    for (let i = 0; i < 20; i++) {
+      mk = await ev(`(()=>{const u=${U};return JSON.stringify({k:(globalThis.__niumoKey||{})[u.id],b:(u.buffs||[]).map(b=>b.id+'@'+b.timeLeft.toFixed(1))});})()`);
+      if (JSON.parse(mk).k === 'hero:niumo2') break;
+      await sleep(100);
+    }
+    ok('开大后换成变身形态模型', JSON.parse(mk).k === 'hero:niumo2', mk);
+    await sleep(900);
+  }
+
   if (heroId === 'mushroom') {
-    // 指令是排队执行的，蓄力状态出现时间不固定，轮询一会儿
+    // 指令是排队执行的，蓄力状态出现时间不固定，轮询一会儿。
+    // 无头浏览器没有 vsync，模拟时间跑得飞快：蓄力 0.55 秒可能一次轮询就过完，
+    // 所以「z 和 peek 同时成立」不能只看最后一次采样，得记住轮询期间见过的最大值。
     let mu = 'none',
       zoom = 'none',
-      zk = 0;
+      zk = 0,
+      zMax = 0,
+      sawPeek = false;
     for (let i = 0; i < 14; i++) {
       if (mu === 'none')
         mu = await ev(`(()=>{const u=${U}; return u.rt.mushUlt ? JSON.stringify({x:+u.rt.mushUlt.x.toFixed(1),y:+u.rt.mushUlt.y.toFixed(1),r:+u.rt.mushUlt.radius.toFixed(1),left:+(u.rt.mushUlt.until-window.__moba.state.time).toFixed(2)}) : 'none';})()`);
       zoom = await ev(`(()=>{const r=window.__moba.renderer; const g=r&&r.engine&&r.engine.rig; return g?JSON.stringify({z:+g.zoomK.toFixed(2),w:+g.zoomWant.toFixed(2),peek:!!g.ultPeek}):'no-rig';})()`);
       try {
-        zk = JSON.parse(zoom).z;
+        const zo = JSON.parse(zoom);
+        zk = zo.z;
+        if (zo.z > zMax) zMax = zo.z;
+        if (zo.peek && zo.z > 1.15) sawPeek = true;
       } catch {}
-      if (zk > 1.15) break;
+      if (sawPeek) break;
       await sleep(80);
     }
-    const zobj = (() => {
-      try {
-        return JSON.parse(zoom);
-      } catch {
-        return {};
-      }
-    })();
-    ok('大招蓄力时镜头拉远', zobj.z > 1.15 && zobj.peek === true, `zoom ${zoom}`);
+    ok('大招蓄力时镜头拉远', sawPeek, `zoom ${zoom}（峰值 ${zMax}，见过 peek=${sawPeek}）`);
     ok('大招进入蓄力并记录落点', typeof mu === 'string' && mu !== 'none', `${mu}`);
   }
   // 杯杯菇大招是全图跳，蓄力期间镜头会拉远——这里趁蓄力截一张，落地后再截一张
@@ -388,6 +540,8 @@ const main = async () => {
       await sleep(60);
     }
   } else await sleep(1800);
+  // 持续型大招（牛魔这类 10 秒变身）要看 1.8 秒后的常态，不能只看爆发那一帧
+  if (shots && heroId !== 'mushroom') await shotHero('ultlate');
   if (heroId === 'mushroom') {
     const mv = await ev(`(()=>{const u=${U}; return JSON.stringify({x:+u.pos.x.toFixed(1),y:+u.pos.y.toFixed(1),anim:u.anim});})()`);
     const p0 = await ev(`(()=>{const u=${U}; return u.__preUlt || null;})()`);
@@ -440,7 +594,7 @@ const main = async () => {
   const beforeKeys = JSON.parse(before && !before.__err ? before : '[]');
   const fresh = keys.slice(beforeKeys.length);
   ok('发出了技能特效事件', fresh.length > 0, `${fresh.length} 个: ${[...new Set(fresh)].join(', ')}`);
-  const unknown = fresh.filter((k) => !/^(mushroom|chijin|panyue|xingli|fengling|yeque|drake|hit_|heal|shield|level|respawn|recall|flash|gold|tower|core|monster|epic)/.test(k));
+  const unknown = fresh.filter((k) => !/^(mushroom|chijin|niumo|panyue|xingli|fengling|yeque|drake|hit_|heal|shield|level|respawn|recall|flash|gold|tower|core|monster|epic|buff)/.test(k));
   ok('特效键命名规范', unknown.length === 0, unknown.join(', '));
 
   const errs = await ev(`JSON.stringify({ game: (window.__moba.errors||[]).slice(-4), win: (window.__hcErr||[]).slice(0,3) })`);

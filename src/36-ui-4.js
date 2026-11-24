@@ -117,9 +117,11 @@ const jH = Jn(`
 }
 `);
 
-function qH(n, t, e, s, i) {
+function qH(n, t, e, s, i, lnIn) {
   const a = Se[t],
     o = z("span", "sf-lcard__role", _e(Ar(a.role)), a.roleName),
+    // 分路以对局阵容为准（AI 是自由分路），没给就退回推荐分路
+    ln = lnIn || a.lane,
     r = z(
       "div",
       `sf-lcard${s ? " is-me" : ""}`,
@@ -131,7 +133,7 @@ function qH(n, t, e, s, i) {
         o,
         z("span", "sf-lcard__name", a.name),
         z("span", "sf-lcard__title", a.title),
-        z("span", "sf-lcard__lane", _e(k3(a.lane)), S3[a.lane]),
+        z("span", "sf-lcard__lane", _e(k3(ln)), S3[ln]),
       ),
     );
   return (
@@ -143,8 +145,11 @@ function qH(n, t, e, s, i) {
   );
 }
 
-function XH(n, t, e) {
+function XH(n, t, e, lu) {
   (Hf(), Zn("sf-menu-loading", jH));
+  // 只列真实参战的 5 人，不是整本花名册；没传阵容时退回蓝/红各 5 个
+  const roster = (y) => (y === 0 ? lu?.blue : lu?.red) || Ml.slice(0, 5),
+    me = lu?.me || t.heroId;
   const s = (y) =>
       z(
         "section",
@@ -155,7 +160,11 @@ function XH(n, t, e) {
           y === 0 ? "蓝色方" : "红色方",
           z("small", null, y === 0 ? "我方" : `敌方 · AI ${hh[t.difficulty].label}`),
         ),
-        z("div", "sf-loading__cards", ...Ml.map((v, _) => qH(e, v, y, y === 0 && v === t.heroId, _))),
+        z(
+          "div",
+          "sf-loading__cards",
+          ...roster(y).map((v, _) => qH(e, v, y, y === 0 && v === me, _, (y === 0 ? lu?.blueLanes : lu?.redLanes)?.[_])),
+        ),
       ),
     i = z("span"),
     a = z("p", "sf-loading__tip", _e(Vt("info")), i),
@@ -174,7 +183,7 @@ function XH(n, t, e) {
           "sf-loading__mode",
           "5v5 对战",
           z("i"),
-          `你的英雄：${z0(t.heroId)}`,
+          `你的英雄：${z0(me)}`,
           z("i"),
           `对手难度：${hh[t.difficulty].label}`,
         ),

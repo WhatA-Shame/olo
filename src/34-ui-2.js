@@ -450,6 +450,8 @@ const S3 = { top: "上路", mid: "中路", bot: "下路", jungle: "打野" },
     chijin_ember: { name: "越砍越勇", kind: "buff" },
     chijin_blaze: { name: "半路杀出 · 攻速", kind: "buff" },
     chijin_spin: { name: "抡圆了砍", kind: "buff" },
+    niumo_flame: { name: "磨砂火焰", kind: "debuff" },
+    niumo_ult: { name: "烈焰牛魔", kind: "buff" },
     xingli_mark: { name: "余音", kind: "debuff" },
     fengling_gale: { name: "连射", kind: "buff" },
     fengling_crit: { name: "下一箭必暴", kind: "buff" },
@@ -553,6 +555,8 @@ const k4 =
     chijin_ember: () => Ia("chijin", "passive"),
     chijin_blaze: () => Ia("chijin", "s2"),
     chijin_spin: () => Ia("chijin", "ult"),
+    niumo_flame: () => Ia("niumo", "s2"),
+    niumo_ult: () => Ia("niumo", "ult"),
     xingli_mark: () => Ia("xingli", "passive"),
     fengling_gale: () => Ia("fengling", "passive"),
     fengling_crit: () => Ia("fengling", "s2"),
@@ -586,6 +590,7 @@ const Ml = kr,
     fengling: { survive: 3.8, damage: 9.6, control: 5, mobility: 6.8, ease: 6.6 },
     yeque: { survive: 5.4, damage: 9.2, control: 3.4, mobility: 9.6, ease: 3.6 },
     mushroom: { survive: 9.4, damage: 4.2, control: 9.2, mobility: 7.2, ease: 8.6 },
+    niumo: { survive: 9.2, damage: 7, control: 4.2, mobility: 4.6, ease: 8.4 },
   },
   hh = {
     easy: { label: "简单", desc: "敌人反应慢、技能不准、很少越线；队友也不强，输赢看你。适合第一次玩。" },
@@ -609,7 +614,7 @@ function Zh(n, t, e) {
   }
   if (a) {
     const o = document.createElement("img");
-    ((o.alt = z0(s)), (o.draggable = !1));
+    ((o.alt = z0(s)), (o.draggable = !1), (o.dataset.sfPortrait = t));
     const r = Z1.has(a);
     ((o.decoding = r ? "sync" : "async"),
       r && i.classList.add("is-loaded"),

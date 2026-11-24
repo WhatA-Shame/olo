@@ -208,6 +208,7 @@ function WG(n, t) {
 const jG = {
     panyue: { fleeHp: 0.22, recallHp: 0.33, engage: 0.9, initiator: !0, diveBackline: 0.2, support: !0 },
     chijin: { fleeHp: 0.23, recallHp: 0.34, engage: 0.82, initiator: !0, diveBackline: 0.5, support: !1 },
+    niumo: { fleeHp: 0.2, recallHp: 0.3, engage: 0.86, initiator: !0, diveBackline: 0.7, support: !1 },
     xingli: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: !1, diveBackline: 0, support: !1 },
     fengling: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: !1, diveBackline: 0, support: !1 },
     yeque: { fleeHp: 0.28, recallHp: 0.38, engage: 0.94, initiator: !1, diveBackline: 1.2, support: !1 },
@@ -1351,6 +1352,7 @@ const pV = {
     fengling: { cast_s1: "s1", dash: "s2", cast_ult: "ult" },
     yeque: { dash: "s1", cast_s2: "s2", cast_ult: "ult" },
     mushroom: { cast_s1: "s1", spin: "s1", dash: "s1", cast_s2: "s2", leap: "ult" },
+    niumo: { cast_s1: "s1", dash: "s2", cast_ult: "ult" },
   },
   mV = 20,
   gV = 10,
@@ -1799,9 +1801,10 @@ function e5(n, t) {
 const f6 = {
     panyue: { slot: "s1", reach: 9 },
     chijin: { slot: "s2", reach: 5.5 },
+    niumo: { slot: "s2", reach: 6 },
     xingli: null,
     fengling: null,
     yeque: { slot: "s1", reach: 6.5 },
   },
-  d6 = { panyue: 1.2, chijin: 0.7, xingli: 0.8, fengling: 0.6, yeque: 0.9 };
+  d6 = { panyue: 1.2, chijin: 0.7, niumo: 0.7, xingli: 0.8, fengling: 0.6, yeque: 0.9 };
 export { VG, zk, WG, jG, se, Kp, T1, e6, qG, XG, YG, n6, KG, iy, Fk, rf, ye, JG, nV, sV, Uk, a6, E1, dV, hV, uV, vV, Ms, t5, bV, wV, MV, kV, SV, e5, f6, d6 };

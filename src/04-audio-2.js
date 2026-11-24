@@ -1030,6 +1030,7 @@ class TT {
 const ET = {
     panyue: "atk_panyue_swing",
     chijin: "atk_chijin_swing",
+    niumo: "atk_chijin_swing",
     xingli: "atk_xingli_charge",
     fengling: "atk_fengling_draw",
     yeque: "atk_yeque_swing",

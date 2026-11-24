@@ -1191,6 +1191,13 @@ const Lt = (n) => new Ut(n),
       accent: Lt(10967295),
       dark: Lt(2031134),
     },
+    niumo: {
+      glow: Lt(16734751),
+      hot: Lt(16765066),
+      deep: Lt(9382418),
+      accent: Lt(16751164),
+      dark: Lt(2826525),
+    },
   },
   W = {
     white: Lt(16777215),

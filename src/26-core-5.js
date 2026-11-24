@@ -11,6 +11,9 @@ import { Ee } from './04-audio-2.js';
 import { Ke } from './06-three-2.js';
 import { Ae, Bn, On, hm, um } from './07-three-3.js';
 import { heroMesh, heroMap, heroRig, heroAnim } from './45-mushroom-mesh.js';
+import { heroMesh as nwMesh, heroMap as nwMap, heroRig as nwRig, heroAnim as nwAnim } from './45-niuwei-mesh.js';
+import { heroMesh as nmMesh, heroMap as nmMap, heroRig as nmRig, heroAnim as nmAnim } from './45-niumo-mesh.js';
+import { heroMesh as nm2Mesh, heroMap as nm2Map, heroRig as nm2Rig, heroAnim as nm2Anim } from './45-niumo2-mesh.js';
 import { nx } from './08-three-4.js';
 import { Am, Em, En, Fi, Gh, K, Lh, Mf, P0, Qn, S0, Tm, Un, Vh, Wh, Xi, Yo, bt, cw, ge, he, ho, jh, jl, lw, nf, pt, sf, ta, vp, wU, zs } from './25-render-9.js';
 
@@ -2245,6 +2248,557 @@ function bBg() {
   );
 }
 
+// 手骨局部坐标 → 绑定世界坐标。
+// 武器握点必须写在手骨局部空间里：手模型是摊开的手掌（手指不能弯），
+// 只有把柄放进掌心那道凹槽，手指才会从后面兜住它、看起来是握着的。
+// 按世界坐标硬偏移的坑：手的局部轴在世界里是斜的（牛伟的手约 -X 偏上 26°），
+// 沿世界 -X 挪 0.118 实际等于沿局部 +X 挪 0.107 —— 直接跑到**手背外侧**，
+// 渲染出来就是"棍子粘在手背上"。
+// 局部轴约定（这几套 Tripo 骨架都一致）：X 掌背→掌心（负 = 掌心侧）、Y 腕→指尖、Z 拇指→小指。
+function handGripAt(HR, j, gx, gy, gz) {
+  const q = [HR.bindWQ[j * 4], HR.bindWQ[j * 4 + 1], HR.bindWQ[j * 4 + 2], HR.bindWQ[j * 4 + 3]],
+    rot = (v) => {
+      const [x, y, z, w] = q,
+        tx = 2 * (y * v[2] - z * v[1]),
+        ty = 2 * (z * v[0] - x * v[2]),
+        tz = 2 * (x * v[1] - y * v[0]);
+      return [
+        v[0] + w * tx + (y * tz - z * ty),
+        v[1] + w * ty + (z * tx - x * tz),
+        v[2] + w * tz + (x * ty - y * tx),
+      ];
+    },
+    AX = rot([1, 0, 0]),
+    AY = rot([0, 1, 0]),
+    AZ = rot([0, 0, 1]);
+  return [0, 1, 2].map(
+    (k) => HR.bindWorld[j * 3 + k] + gx * AX[k] + gy * AY[k] + gz * AZ[k],
+  );
+}
+
+// 牛伟：外部 GLB 网格（41 骨骼 / 5 段动画，Tripo 出品）+ 程序化补的一柄大斧。
+// 模型本身没画武器，斧头用单骨骼刚性蒙皮挂在右手上，随手臂动画一起甩。
+function bNw() {
+  const HR = nwRig(),
+    mesh = nwMesh(),
+    t = new Ls();
+  // 外部骨架：local 存父坐标系下的位移；bindWorld/bindQW 存绑定世界变换。
+  // 蒙皮时现算 M = T(worldPos)·R(worldQ·bindQW⁻¹)·T(-bindWorld)，顶点留在绑定世界空间。
+  const rig = {
+    names: HR.names,
+    parent: HR.parent,
+    bind: new Float32Array(HR.names.length * 3),
+    bindWorld: HR.bindWorld,
+    bindQW: HR.bindWQ,
+    local: HR.localPos,
+    chains: [],
+    get count() {
+      return HR.names.length;
+    },
+  };
+  const N = HR.names.length,
+    jid = (k) => {
+      const i = HR.names.indexOf(k);
+      return i < 0 ? 0 : i;
+    },
+    rootJ = HR.parent.indexOf(-1),
+    chestJ = jid("Spine02"),
+    headJ = jid("Head"),
+    handRJ = jid("R_Hand"),
+    handLJ = jid("L_Hand"),
+    upperRJ = jid("R_Upperarm"),
+    upperLJ = jid("L_Upperarm");
+  (t.bone(rootJ), t.rawMesh(mesh, { mat: K.skin, gloss: 0.34, line: 1, ao: 1 }));
+
+  // ── 补一把八卦宣花斧 ────────────────────────────────────────
+  // 顶点直接写在绑定世界空间里，skin 全部给右手骨骼（weight=1 → 完全刚性跟随）。
+  // 注意：外部网格的 basecolor 是整片乘上去的，没法只给斧头关贴图，
+  // 所以把斧头的 uv 钉死在一个接近纯白的贴图点上（实测 192/196/197），
+  // 颜色再按 ~1.3 倍预补偿，乘完正好落回想要的金属/木柄色。
+  // 握点（手骨局部空间，见 handGripAt 上的说明）：
+  // gx -0.14：柄心嵌进掌心面（掌心表面在 -0.12）→ 手指从前面挡掉半截，看着像攥着
+  // gy +0.13：落在指根那一排，不贴腕关节（贴腕会被护腕吃掉一整截）
+  // gz +0.02：偏拇指侧，柄正好从虎口（拇指与食指之间）穿出来
+  const [HX, HY, HZ] = handGripAt(HR, handRJ, -0.14, 0.13, 0.02),
+    // 握点落在柄的下三分之一：柄底 HY-0.46（离地一拳），柄顶 HY+0.92（斧刃在肩侧，不挡前臂）
+    botY = HY - 0.46,
+    topY = HY + 0.92;
+  (t.bone(handRJ), (t.uvX = 0.24), (t.uvY = 0.24));
+
+  // 木柄
+  t.paint(0xe6b478, { gloss: 0.12, mat: K.leather, ao: 0.9, grain: 0.06 });
+  t.tube(
+    [
+      [HX, botY, HZ, 0.044, 0.044],
+      [HX, botY + 0.07, HZ, 0.055, 0.055],
+      [HX, HY - 0.34, HZ, 0.047, 0.047],
+      [HX, HY + 0.22, HZ, 0.049, 0.049],
+      [HX, topY - 0.14, HZ, 0.052, 0.052],
+      [HX, topY, HZ, 0.058, 0.058],
+    ],
+    { seg: 7, crease: 60 },
+  );
+  // 握把缠皮
+  t.paint(0x7a6248, { gloss: 0.22, mat: K.leather, ao: 0.88 });
+  t.tube(
+    [
+      [HX, HY - 0.22, HZ, 0.056, 0.056],
+      [HX, HY - 0.14, HZ, 0.063, 0.063],
+      [HX, HY + 0.09, HZ, 0.063, 0.063],
+      [HX, HY + 0.17, HZ, 0.056, 0.056],
+    ],
+    { seg: 8, crease: 50 },
+  );
+  // 柄底铜箍
+  t.paint(0xf2c46a, { gloss: 0.62, mat: K.metal, ao: 0.95 });
+  t.tube(
+    [
+      [HX, botY - 0.03, HZ, 0.026, 0.026],
+      [HX, botY + 0.01, HZ, 0.068, 0.068],
+      [HX, botY + 0.09, HZ, 0.064, 0.064],
+      [HX, botY + 0.12, HZ, 0.05, 0.05],
+    ],
+    { seg: 8, crease: 50 },
+  );
+  // 斧头套箍
+  t.paint(0xbfc4cc, { gloss: 0.72, mat: K.metal, ao: 0.95 });
+  t.tube(
+    [
+      [HX, topY - 0.34, HZ, 0.062, 0.062],
+      [HX, topY - 0.28, HZ, 0.078, 0.078],
+      [HX, topY - 0.02, HZ, 0.078, 0.078],
+      [HX, topY + 0.05, HZ, 0.056, 0.056],
+    ],
+    { seg: 8, crease: 50 },
+  );
+  // 斧刃：在「左右→上下」平面上画轮廓再挤厚度（不转向 = 刃面正对角色正前方，正面看是一整块宽刃）
+  // 主体往 -X（远离身体）甩出去，靠身体一侧留一小块反刃，两侧都有刃口才像双刃宣花斧
+  const MB = new Ke();
+  (MB.setPosition(HX, topY, HZ),
+    t.paint(0xa9b3c2, { c2: 0xd7dee9, gloss: 0.9, mat: K.metal, ao: 1 }),
+    t.g(MB, () =>
+      t.extrude(
+        [
+          [0.24, 0.12],
+          [0.04, 0.2],
+          [-0.08, 0.36],
+          [-0.3, 0.33],
+          [-0.5, 0.18],
+          [-0.58, -0.02],
+          [-0.48, -0.22],
+          [-0.3, -0.36],
+          [-0.1, -0.44],
+          [0.02, -0.28],
+          [0.24, -0.18],
+        ],
+        0.085,
+        0.045,
+      ),
+    ));
+  // 斧面上的铜铆钉（刃面两侧各两颗，给平贴的刃面加点体积感）
+  t.paint(0xf2c46a, { gloss: 0.7, mat: K.metal, ao: 0.95 });
+  for (const s of [-1, 1]) {
+    t.ball(HX - 0.03, topY + 0.12, HZ + s * 0.046, 0.028, 0.028, 0.014, 1);
+    t.ball(HX - 0.03, topY - 0.1, HZ + s * 0.046, 0.028, 0.028, 0.014, 1);
+  }
+
+  // 把关键帧写进 pose（值已经是"相对绑定姿态的偏移"）
+  const play = (R, name, time, loop) => {
+    const a = nwAnim(name);
+    if (!a) return;
+    const span = a.dur,
+      fpos = loop
+        ? ((time % span) / span) * (a.frames - 1)
+        : Math.min(a.frames - 1, (time / span) * (a.frames - 1)),
+      f0 = Math.floor(fpos),
+      f1 = Math.min(a.frames - 1, f0 + 1),
+      w = fpos - f0,
+      d = a.data;
+    for (let j = 0; j < N; j++) {
+      const o0 = (f0 * N + j) * 7,
+        o1 = (f1 * N + j) * 7,
+        p3 = j * 3,
+        p4 = j * 4;
+      ((R.t[p3] = d[o0] + (d[o1] - d[o0]) * w),
+        (R.t[p3 + 1] = d[o0 + 1] + (d[o1 + 1] - d[o0 + 1]) * w),
+        (R.t[p3 + 2] = d[o0 + 2] + (d[o1 + 2] - d[o0 + 2]) * w));
+      const x = d[o0 + 3] + (d[o1 + 3] - d[o0 + 3]) * w,
+        y = d[o0 + 4] + (d[o1 + 4] - d[o0 + 4]) * w,
+        z = d[o0 + 5] + (d[o1 + 5] - d[o0 + 5]) * w,
+        ww = d[o0 + 6] + (d[o1 + 6] - d[o0 + 6]) * w,
+        l = Math.hypot(x, y, z, ww) || 1;
+      ((R.q[p4] = x / l), (R.q[p4 + 1] = y / l), (R.q[p4 + 2] = z / l), (R.q[p4 + 3] = ww / l));
+    }
+  };
+  // pose.q 存绝对局部四元数，静息态要填绑定值
+  const rest = (R) => {
+    R.t.fill(0);
+    for (let j = 0; j < N; j++) {
+      ((R.q[j * 4] = HR.bindQ[j * 4]),
+        (R.q[j * 4 + 1] = HR.bindQ[j * 4 + 1]),
+        (R.q[j * 4 + 2] = HR.bindQ[j * 4 + 2]),
+        (R.q[j * 4 + 3] = HR.bindQ[j * 4 + 3]));
+    }
+  };
+
+  // 绑定姿态是双臂外张的 A 姿（上臂几乎横着出去），没有 idle 片段可放的时候直接 rest()
+  // 出来就是"T 姿势"。这里手动把两条上臂放下来 26°，手腕再回正 12°——
+  // 回正是为了让斧头跟着手一起转回来、保持基本竖直，不然斧头会横着甩出去、柄底戳到地上。
+  const ARM_DOWN = 26,
+    ARM_WRIST = 12,
+    armsDown = (R) => (
+      R.add(upperRJ, 0, 0, ARM_DOWN),
+      R.add(upperLJ, 0, 0, -ARM_DOWN),
+      R.add(handRJ, 0, 0, -ARM_WRIST),
+      R.add(handLJ, 0, 0, ARM_WRIST),
+      R
+    );
+
+  // 片段映射：run→移动、box_03→普攻、chop→技能挥砍、dance_05→大招转圈、defeat_03→阵亡
+  const h = (R, I, P) => {
+    const st = I.anim;
+    if (st === "dead") {
+      (play(R, MOD.deathAnim, Math.min(3.2, I.t * 3), false),
+        (P.glow = Math.max(0.15, 1 - I.t * 1.2)));
+      return;
+    }
+    if (st === "cast_s1") {
+      (play(R, "chop", I.t * 2.4, false), (P.glow = 1 + 2.2 * ho(I.p, 0.42, 0.3)));
+      return;
+    }
+    if (st === "cast_s2" || st === "dash" || st === "roll") {
+      // 半路杀出：直接用挥砍片段的后半段，看起来像提斧冲上去劈一刀
+      (play(R, "chop", 1.5 + I.t * 1.8, false), (P.glow = 2.2));
+      return;
+    }
+    if (st === "attack" || st === "attack2") {
+      (play(R, "box_03", I.t * 2.2, false), (P.glow = 1 + 1.4 * ho(I.p, 0.36, 0.2)));
+      return;
+    }
+    if (st === "channel") {
+      const s = Math.sin(I.time * 13.5),
+        c = Math.sin(I.time * 7.3);
+      (play(R, "box_03", I.t * 1.6, false),
+        R.add(chestJ, -3.5 + s * 1.8, 0, c * 1.4),
+        R.add(headJ, 2.5 + s * 2.6, c * 1.2, 0),
+        R.move(rootJ, 0, s * 0.012, 0),
+        (P.glow = 1 + 2 * ho(I.p, 0.45, 0.3)));
+      return;
+    }
+    if (st === "cast_ult" || st === "spin") {
+      // 抡圆了砍：拿舞蹈片段当整体转身，正好是一圈一圈的旋身
+      (play(R, "dance_05", I.t * 2.2, false), (P.glow = 1 + 1.6 * I.p));
+      return;
+    }
+    if (st === "hit" || st === "hurt") {
+      const k = Math.max(0, 1 - I.t * 3.5);
+      (rest(R),
+        armsDown(R),
+        R.add(chestJ, -9 * k, 0, 6 * k),
+        R.add(headJ, -7 * k, 0, 0),
+        (P.glow = 1));
+      return;
+    }
+    if (st === "move" || st === "run") {
+      (play(R, "run", I.time * 2.2, true), (P.glow = 1));
+      return;
+    }
+    // 待机：这套片段里没有 idle，回绑定姿态 + 把手臂放下来 + 轻微呼吸
+    const b = Math.sin(I.time * 2.2);
+    (rest(R),
+      armsDown(R),
+      R.add(chestJ, b * 1.6, 0, 0),
+      R.add(headJ, -b * 1.2, 0, 0),
+      R.move(rootJ, 0, b * 0.012, 0),
+      (P.glow = 1 + 0.12 * Math.sin(I.time * 3)));
+  };
+
+  return {
+    key: "hero:chijin",
+    geometry: t.build(),
+    map: nwMap(),
+    rig,
+    height: 2.15,
+    radius: 0.7,
+    scale: 1.0,
+    stride: MgW.stride,
+    triangles: t.triangleCount,
+    attach: {
+      head: { joint: headJ, x: 0, y: 0.3, z: 0 },
+      chest: { joint: chestJ, x: 0, y: 0.1, z: 0 },
+      handR: { joint: handRJ, x: 0, y: -0.07, z: 0 },
+      handL: { joint: handLJ, x: 0, y: -0.07, z: 0 },
+      weapon: { joint: handRJ, x: 0, y: 0.1, z: 0 },
+      muzzle: { joint: handRJ, x: 0, y: 0.1, z: 0 },
+    },
+    blend: () => 0.12,
+    animate: h,
+  };
+}
+
+// 牛魔：和牛伟同一套牛头人网格，换成熔岩色调 + 一柄十字巨剑。
+// 网格贴图不能按英雄换，所以用 rawMesh 的 color 参数给整体压一层暖红。
+function buildNiumo(MOD) {
+  const HR = MOD.rig(),
+    mesh = MOD.mesh(),
+    t = new Ls();
+  const rig = {
+    names: HR.names,
+    parent: HR.parent,
+    bind: new Float32Array(HR.names.length * 3),
+    bindWorld: HR.bindWorld,
+    bindQW: HR.bindWQ,
+    local: HR.localPos,
+    chains: [],
+    get count() {
+      return HR.names.length;
+    },
+  };
+  const N = HR.names.length,
+    jid = (k) => {
+      const i = HR.names.indexOf(k);
+      return i < 0 ? 0 : i;
+    },
+    rootJ = HR.parent.indexOf(-1),
+    chestJ = jid("Spine02"),
+    headJ = jid("Head"),
+    handRJ = jid("R_Hand"),
+    handLJ = jid("L_Hand"),
+    upperRJ = jid("R_Upperarm"),
+    upperLJ = jid("L_Upperarm");
+  (t.bone(rootJ),
+    t.rawMesh(mesh, { mat: K.skin, gloss: 0.34, line: 1, ao: 1, color: [1.22, 0.8, 0.66] }));
+
+  // ── 十字巨剑 ────────────────────────────────────────────────
+  // 剑身立着握在右手里：剑格做成横向大十字，剑身中间一道发光竖槽。
+  // 剑柄要够长——手腕点 HY 落在柄的中段，手下还留一截，才看得出是「握着」而不是「顶着」。
+  // 剑柄同样穿过拳头质心（偏移量跟牛伟的斧头一样）
+  // 握点同样走手骨局部空间（见 handGripAt）：每套网格的手大小/朝向都不一样，
+  // 世界偏移写死一个值会握到空气里，甚至穿到手背外面。
+  const [HX, HY, HZ] = handGripAt(HR, handRJ, MOD.grip[0], MOD.grip[1], MOD.grip[2]),
+    pommelY = HY - 0.62,
+    guardY = HY + 0.14,
+    bladeY = HY + 0.18,
+    tipY = HY + 1.24;
+  (t.bone(handRJ), (t.uvX = 0.24), (t.uvY = 0.24));
+
+  // 剑柄 + 柄头
+  t.paint(0x6b5038, { gloss: 0.2, mat: K.leather, ao: 0.9, grain: 0.05 });
+  t.tube(
+    [
+      [HX, pommelY + 0.04, HZ, 0.045, 0.045],
+      [HX, pommelY + 0.13, HZ, 0.055, 0.055],
+      [HX, HY - 0.34, HZ, 0.052, 0.052],
+      [HX, HY - 0.06, HZ, 0.054, 0.054],
+      [HX, HY + 0.04, HZ, 0.058, 0.058],
+      [HX, guardY - 0.06, HZ, 0.05, 0.05],
+    ],
+    { seg: 7, crease: 50 },
+  );
+  // 握把缠皮：正好压在拳头那一段
+  t.paint(0x4a382a, { gloss: 0.24, mat: K.leather, ao: 0.88 });
+  t.tube(
+    [
+      [HX, HY - 0.32, HZ, 0.056, 0.056],
+      [HX, HY - 0.25, HZ, 0.066, 0.066],
+      [HX, HY + 0.02, HZ, 0.066, 0.066],
+      [HX, HY + 0.08, HZ, 0.057, 0.057],
+    ],
+    { seg: 8, crease: 50 },
+  );
+  t.paint(0xf2c46a, { gloss: 0.7, mat: K.metal, ao: 0.95 });
+  t.ball(HX, pommelY + 0.02, HZ, 0.07, 0.06, 0.07, 1);
+
+  // 十字剑格：横条 + 两端上翘
+  t.paint(0x9aa3b0, { c2: 0xc6cfda, gloss: 0.8, mat: K.metal, ao: 1 });
+  t.box(HX, guardY, HZ, 0.74, 0.095, 0.14, 0.03);
+  for (const s of [-1, 1]) {
+    t.box(HX + s * 0.39, guardY + 0.055, HZ, 0.11, 0.16, 0.12, 0.03);
+    t.ball(HX + s * 0.39, guardY + 0.15, HZ, 0.05, 0.05, 0.05, 1);
+  }
+
+  // 剑身：左右对称的长条，靠近剑尖收成尖
+  const MB = new Ke();
+  (MB.setPosition(HX, bladeY, HZ),
+    t.paint(0xaeb8c6, { c2: 0xdbe3ee, gloss: 0.9, mat: K.metal, ao: 1 }),
+    t.g(MB, () =>
+      t.extrude(
+        [
+          [0.115, 0.02],
+          [0.115, 0.72],
+          [0.085, 0.93],
+          [0.0, 1.06],
+          [-0.085, 0.93],
+          [-0.115, 0.72],
+          [-0.115, 0.02],
+        ],
+        0.075,
+        0.028,
+      ),
+    ));
+  // 剑身中槽的长明火
+  t.paint(0xff9a4a, { gloss: 0.2, mat: K.crystal, ao: 1, glow: 2.4 });
+  t.box(HX, bladeY + 0.42, HZ, 0.042, 0.66, 0.098, 0.012);
+  t.box(HX, guardY, HZ, 0.1, 0.1, 0.2, 0.02);
+
+  // 把关键帧写进 pose
+  const play = (R, name, time, loop) => {
+    const a = MOD.anim(name);
+    if (!a) return;
+    const span = a.dur,
+      fpos = loop
+        ? ((time % span) / span) * (a.frames - 1)
+        : Math.min(a.frames - 1, (time / span) * (a.frames - 1)),
+      f0 = Math.floor(fpos),
+      f1 = Math.min(a.frames - 1, f0 + 1),
+      w = fpos - f0,
+      d = a.data;
+    for (let j = 0; j < N; j++) {
+      const o0 = (f0 * N + j) * 7,
+        o1 = (f1 * N + j) * 7,
+        p3 = j * 3,
+        p4 = j * 4;
+      ((R.t[p3] = d[o0] + (d[o1] - d[o0]) * w),
+        (R.t[p3 + 1] = d[o0 + 1] + (d[o1 + 1] - d[o0 + 1]) * w),
+        (R.t[p3 + 2] = d[o0 + 2] + (d[o1 + 2] - d[o0 + 2]) * w));
+      const x = d[o0 + 3] + (d[o1 + 3] - d[o0 + 3]) * w,
+        y = d[o0 + 4] + (d[o1 + 4] - d[o0 + 4]) * w,
+        z = d[o0 + 5] + (d[o1 + 5] - d[o0 + 5]) * w,
+        ww = d[o0 + 6] + (d[o1 + 6] - d[o0 + 6]) * w,
+        l = Math.hypot(x, y, z, ww) || 1;
+      ((R.q[p4] = x / l), (R.q[p4 + 1] = y / l), (R.q[p4 + 2] = z / l), (R.q[p4 + 3] = ww / l));
+    }
+  };
+  const rest = (R) => {
+    R.t.fill(0);
+    for (let j = 0; j < N; j++) {
+      ((R.q[j * 4] = HR.bindQ[j * 4]),
+        (R.q[j * 4 + 1] = HR.bindQ[j * 4 + 1]),
+        (R.q[j * 4 + 2] = HR.bindQ[j * 4 + 2]),
+        (R.q[j * 4 + 3] = HR.bindQ[j * 4 + 3]));
+    }
+  };
+
+  // 绑定姿态双臂外张，没有 idle 片段，rest() 出来就是 T 姿势。
+  // 待机/受击这类"没有片段"的状态手动把上臂放下来，手腕回正一点让剑跟着竖直。
+  // 下放角度按模型给：牛伟那套绑定姿态本来就是 A 姿，26° 就够；
+  // 牛魔两个形态都是标准 T 姿势（手臂完全水平），得放到 70° 以上才像自然站立。
+  const armsDown = (R) => (
+    R.add(upperRJ, 0, 0, MOD.armDown),
+    R.add(upperLJ, 0, 0, -MOD.armDown),
+    R.add(handRJ, 0, 0, -MOD.armWrist),
+    R.add(handLJ, 0, 0, MOD.armWrist),
+    R
+  );
+
+  const h = (R, I, P) => {
+    const st = I.anim;
+    if (st === "dead") {
+      (play(R, MOD.deathAnim, Math.min(3.2, I.t * 3), false),
+        (P.glow = Math.max(0.15, 1 - I.t * 1.2)));
+      return;
+    }
+    if (st === "cast_s1") {
+      // 这具牛头人只有 5 个片段（box_03/chop/dance_05/defeat_03/run），
+      // box_03 是蹲伏出拳、chop 是 6.5 秒趴地长循环，拿来当挥剑都不像。
+      // 所以挥砍直接用 rest 打底 + 躯干/头/持剑手叠欧拉角，姿势可控也够读。
+      rest(R);
+      const k = Math.sin(Math.min(1, Math.max(0, I.p)) * Math.PI),
+        w = Math.sin(Math.min(1, I.p / 0.35) * Math.PI * 0.5); // 起手抬得早、落得慢
+      (R.add(chestJ, -2 - 8 * k, 24 * k - 6 * w, 0),
+        R.add(headJ, 2 + 6 * k, -14 * k, 0),
+        R.add(handRJ, -52 * k - 22 * w, 0, 0),
+        (P.glow = 1 + 2.6 * ho(I.p, 0.42, 0.3)));
+      return;
+    }
+    if (st === "cast_s2" || st === "dash" || st === "roll") {
+      // 烈焰行军：边往前走边喷火，用跑步片段顶着
+      (play(R, MOD.runAnim, I.time * 2.2, true), (P.glow = 2.2));
+      return;
+    }
+    if (st === "attack" || st === "attack2") {
+      // 普攻也是 box_03（蹲伏出拳），同样换成站姿甩剑
+      rest(R);
+      const k = Math.sin(Math.min(1, Math.max(0, I.p)) * Math.PI);
+      (R.add(chestJ, -3 - 9 * k, 18 * k, 0),
+        R.add(headJ, 2 + 5 * k, -9 * k, 0),
+        R.add(handRJ, -38 * k, 0, 0),
+        (P.glow = 1 + 1.6 * ho(I.p, 0.36, 0.2)));
+      return;
+    }
+    if (st === "channel") {
+      const s = Math.sin(I.time * 13.5);
+      (rest(R),
+        R.add(chestJ, -3 + s * 1.8, 0, 0),
+        (P.glow = 1 + 2 * ho(I.p, 0.45, 0.3)));
+      return;
+    }
+    if (st === "cast_ult" || st === "spin") {
+      // 变身：后仰咆哮 + 双手（持剑手）往两侧张开，靠 glow 拉满表现力
+      rest(R);
+      const k = Math.min(1, I.p / 0.3),
+        b = Math.sin(I.time * 9) * 1.6;
+      (R.add(chestJ, 10 * k + b, 0, 0),
+        R.add(headJ, 14 * k + b, 0, 0),
+        R.add(handRJ, -70 * k, 0, 26 * k),
+        R.add(handLJ, -70 * k, 0, -26 * k),
+        R.move(rootJ, 0, -0.06 * k, 0),
+        (P.glow = 1 + 2.4 * k));
+      return;
+    }
+    if (st === "hit" || st === "hurt") {
+      const k = Math.max(0, 1 - I.t * 3.5);
+      (rest(R),
+        armsDown(R),
+        R.add(chestJ, -9 * k, 0, 6 * k),
+        R.add(headJ, -7 * k, 0, 0),
+        (P.glow = 1));
+      return;
+    }
+    if (st === "move" || st === "run") {
+      (play(R, MOD.runAnim, I.time * 2.2, true), (P.glow = 1.2));
+      return;
+    }
+    const b = Math.sin(I.time * 2.2);
+    (rest(R),
+      armsDown(R),
+      R.add(chestJ, b * 1.6, 0, 0),
+      R.add(headJ, -b * 1.2, 0, 0),
+      R.move(rootJ, 0, b * 0.012, 0),
+      (P.glow = 1.15 + 0.2 * Math.sin(I.time * 3)));
+  };
+
+  return {
+    key: MOD.key,
+    geometry: t.build(),
+    map: MOD.map(),
+    rig,
+    height: MOD.height,
+    radius: MOD.radius,
+    scale: 1.0,
+    stride: MgW.stride,
+    triangles: t.triangleCount,
+    attach: {
+      head: { joint: headJ, x: 0, y: 0.3, z: 0 },
+      chest: { joint: chestJ, x: 0, y: 0.1, z: 0 },
+      handR: { joint: handRJ, x: 0, y: -0.07, z: 0 },
+      handL: { joint: handLJ, x: 0, y: -0.07, z: 0 },
+      weapon: { joint: handRJ, x: 0, y: 1.28, z: 0 },
+      muzzle: { joint: handRJ, x: 0, y: 1.28, z: 0 },
+    },
+    blend: () => 0.12,
+    animate: h,
+  };
+}
+
+// 牛魔有两个形态：常规（穿铠甲那版）和开大变身。两套模型骨架完全一致，
+// 所以只把「网格/贴图/动画/关键参数」抽成 MOD 传进来，姿态逻辑共用一份。
+const NM_BASE = { rig: nmRig, mesh: nmMesh, map: nmMap, anim: nmAnim, key: "hero:niumo", height: 2.15, radius: 0.74, runAnim: "walk", deathAnim: "defeat_03", grip: [-0.06, 0.14, 0.02], armDown: 74, armWrist: 55 },
+  NM_ULT = { rig: nm2Rig, mesh: nm2Mesh, map: nm2Map, anim: nm2Anim, key: "hero:niumo2", height: 2.15, radius: 0.74, runAnim: "run", deathAnim: "fall", grip: [-0.03, 0.15, 0.02], armDown: 74, armWrist: 55 };
+const bNm = () => buildNiumo(NM_BASE),
+  bNm2 = () => buildNiumo(NM_ULT);
+
+
 function AU() {
   const { h: n, b: t, extra: e } = SU(),
     s = TU(n),
@@ -2417,4 +2971,4 @@ const jt = {
   uw = 1.2,
   pw = Math.PI / 180,
   Ra = { tip: 0.86, string: 0.2 };
-export { Ls, Bl, Zi, Li, Js, qh, Cm, Xh, Ox, Wd, af, Bx, R8, _p, Ko, AU, bBg, jt, RU, uw, pw, Ra };
+export { Ls, Bl, Zi, Li, Js, qh, Cm, Xh, Ox, Wd, af, Bx, R8, _p, Ko, AU, bBg, bNw, bNm, bNm2, jt, RU, uw, pw, Ra };

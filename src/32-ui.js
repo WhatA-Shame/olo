@@ -110,7 +110,7 @@ function gB(n, t) {
       y = requestAnimationFrame(S);
       const w = Math.min(0.1, Math.max(0, (b - v) / 1e3));
       if (((v = b), !n.isConnected || document.hidden || !l)) return;
-      ((x += w), (p = v3[f][0] + Math.sin(x * 0.5) * v3[f][1]));
+      ((x += w), (p = (v3[f] || v3.chijin)[0] + Math.sin(x * 0.5) * (v3[f] || v3.chijin)[1]));
       const T = r.input;
       // move 是循环动作（?anim=move 调试时用），不能按一次性动作那样播完就回 idle
       const cyc = d === "idle" || d === "move";
@@ -202,6 +202,23 @@ function l4(n, t) {
 let dh = null,
   c4 = !1,
   k2 = !1;
+
+// 外部 GLB 英雄的贴图是异步解码的，第一次渲染立绘时可能还没到位 → 白模。
+// 贴图 onload 后回调这里，把这些英雄的立绘缓存作废、重画，并把页面上已经贴出去的图换掉。
+const MAP_HEROES = ["chijin", "niumo", "mushroom"];
+let mapFixTries = 0;
+globalThis.__sfTextureReady = () => {
+  if (mapFixTries++ > 4) return;
+  let stale = !1;
+  for (const h of MAP_HEROES) if (j1.delete(h)) stale = !0;
+  if (!stale) return;
+  for (const img of document.querySelectorAll("img[data-sf-portrait]")) {
+    const id = img.dataset.sfPortrait;
+    if (!MAP_HEROES.includes(id)) continue;
+    const u = xB(id);
+    if (u) img.src = u;
+  }
+};
 
 function z8() {
   const n = dh;

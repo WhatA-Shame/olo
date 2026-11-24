@@ -1822,6 +1822,29 @@ const ze = $a,
         dodgeable: !0,
       }),
     },
+    niumo: {
+      s1: bi("niumo", "s1", {
+        roles: ["waveclear", "poke"],
+        damage: Gi("physical", { ad: "adRatio" }),
+        duration: ze("niumo", "s1", "trailDur"),
+      }),
+      s2: bi("niumo", "s2", {
+        // 站定喷火：没有位移了，别让 AI 当突进用（会站着被白打）
+        roles: ["waveclear", "poke"],
+        damage: Gi("magic", { base: "sprayDmg", ad: "sprayAd" }),
+        duration: ze("niumo", "s2", "duration"),
+        delay: E0("niumo", "s2"),
+        lock: 0,
+        immunity: "unstoppable",
+        dodgeable: !0,
+      }),
+      ult: bi("niumo", "ult", {
+        roles: ["buff", "zone"],
+        damage: Gi("magic", { base: "perStack", ad: "adRatio" }),
+        duration: ze("niumo", "ult", "duration"),
+        immunity: "unstoppable",
+      }),
+    },
   };
 
 kr.flatMap((n) => [Oa[n].s1, Oa[n].s2, Oa[n].ult]);
@@ -1833,11 +1856,13 @@ const OG = {
     fengling: ["s1", "ult", "s2"],
     yeque: ["s2", "s1", "ult"],
     mushroom: ["ult", "s1", "s2"],
+    niumo: ["ult", "s1", "s2"],
   },
   BG = {
     telegraph: "incoming",
     xingli_s2_well: "incoming",
     chijin_ult_spin: "damage",
+    niumo_trail: "damage",
     xingli_ult_storm: "damage",
     fengling_ult_rain: "damage",
     panyue_ult_fissure: "slow",

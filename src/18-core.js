@@ -2032,6 +2032,7 @@ const yc = ws.panyue,
   rd = ws.chijin,
   Zr = ws.xingli,
   Ku = ws.fengling,
+  nM = ws.niumo,
   TP = Lt(16760928),
   EP = Lt(15249520),
   Pb = {
@@ -2049,6 +2050,63 @@ const yc = ws.panyue,
       },
       update(n, t) {
         n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius).params(t.t);
+      },
+    },
+    niumo_trail: {
+      create(n, t) {
+        // [0] 旋涡 = 火苗本体；[1] 柔光池 = 地面被烤热的那一圈
+        const e = Gd(n, t, Xt.swirl, 0.07);
+        n.decals.at(e).params(2, -3).color(nM.hot, 2.2, 0.8).under(nM.dark, 0.35);
+        const g = Gd(n, t, Xt.glow, 0.07);
+        n.decals.at(g).params(1, 0).color(nM.glow, 1.5, 0.55).under(nM.deep, 0.1);
+        // 每摊火落地时先烧一下地面，火路才有「一路烧过去」的重量（别太黑，否则读成脏印子）
+        n.decals
+          .add(Xt.scorch, t.x, t.z, t.radius * 0.95, t.duration)
+          .params(0, 0)
+          .color(W.black, 0.4)
+          .under(nM.deep, 0.42);
+        const s = n.particles.use(Mt.plume).tint(nM.hot, nM.deep);
+        for (let i = 4; i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = t.radius * a.range(0.1, 0.8);
+          s.spawn(
+            t.x + Math.cos(o) * r,
+            0.25,
+            t.z + Math.sin(o) * r,
+            a.signed() * 0.4,
+            a.range(1.8, 3),
+            a.signed() * 0.4,
+            a.range(0.7, 1.1),
+            0.48,
+            0.3,
+          );
+        }
+      },
+      update(n, t, e) {
+        const s = Math.min(1, t.age * 5) * Math.max(0, Math.min(1, (t.duration - t.age) * 2)),
+          r = t.radius * (0.86 + 0.14 * Math.sin(t.age * 7 + t.phase));
+        (n.decals.at(t.slots[0]).at(t.x, t.z).radius(r),
+          n.decals.at(t.slots[1]).at(t.x, t.z).radius(r * 1.45));
+        for (let i = xc(n, t, e, 5); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            c = t.radius * Math.sqrt(a.next()) * 0.9;
+          n.particles
+            .use(Mt.ember)
+            .tint(nM.hot, nM.deep)
+            .spawn(
+              t.x + Math.cos(o) * c,
+              0.1,
+              t.z + Math.sin(o) * c,
+              a.signed() * 0.3,
+              a.range(0.9, 2),
+              a.signed() * 0.3,
+              a.range(0.4, 0.75) * s,
+              0.14,
+              0.04,
+            );
+        }
       },
     },
     panyue_s2_aura: {

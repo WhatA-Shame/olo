@@ -635,18 +635,23 @@ const $B = {
       ),
   },
   pn = {
-    red: "#d2402a",
-    deep: "#7c1f14",
-    dark: "#1e1719",
+    red: "#b8442c",
+    deep: "#4a2317",
+    dark: "#241a15",
     iron: "#4a4447",
     steel: "#c9ced6",
     edge: "#fff4e2",
-    gold: "#e2a13a",
-    goldL: "#ffd98a",
-    glow: "#ff7a2a",
-    hot: "#ffe7a3",
+    gold: "#c8a05a",
+    goldL: "#f0d79b",
+    glow: "#ff8a3c",
+    hot: "#ffd9a0",
     wood: "#6b4a2e",
     heal: "#6fe3a1",
+    skull: "#cfc4b2",
+    horn: "#e8dfcc",
+    muzzle: "#8d7b68",
+    crack: "#ffb066",
+    speed: "#ffcf8f",
   },
   Bp = fn("ax", 1, 0, 23, 0, [
     [0, pn.iron],
@@ -667,15 +672,120 @@ function Hp(n, t = 26) {
   );
 }
 
+// 牛魔：牛头人 + 十字巨剑 + 火焰。图标母题是「牛头 / 火 / 剑」，
+// 被动和三个技能各取一个组合，跟牛伟那套斧头图标区分开。
+const niumoPal = {
+    red: "#c0331c",
+    deep: "#4a1a10",
+    dark: "#241110",
+    iron: "#4a4447",
+    steel: "#d8d2c8",
+    edge: "#fff2df",
+    gold: "#e0a04a",
+    goldL: "#ffd28a",
+    glow: "#ff5a1f",
+    hot: "#ffb066",
+    wood: "#5c3a24",
+  },
+  niumoBlade = fn("swd", -7, 0, 7, 0, [
+    [0, niumoPal.iron],
+    [0.45, "#8d9299"],
+    [0.82, niumoPal.steel],
+    [1, niumoPal.edge],
+  ]);
+
+// 十字巨剑：细长剑身 + 横格 + 柄，默认朝上
+function niumoSword(n) {
+  return (
+    `<g transform="${n}">` +
+    `<path d="M0 -30L4.6 -23V4H-4.6V-23Z" fill="url(#@swd)" stroke="${xe}" stroke-width="1.3" stroke-linejoin="round"/>` +
+    `<path d="M0 -26V2" stroke="${niumoPal.hot}" stroke-width="1.6" stroke-linecap="round"/>` +
+    `<path d="M-13.5 4H13.5V10.5H-13.5Z" fill="${niumoPal.gold}" stroke="${xe}" stroke-width="1.1" stroke-linejoin="round"/>` +
+    `<path d="M-3.6 10.5H3.6V21H-3.6Z" fill="${niumoPal.wood}" stroke="${xe}" stroke-width="1"/>` +
+    `<path d="M0 21L-3.4 26.5H3.4Z" fill="${niumoPal.gold}" stroke="${xe}" stroke-width="1" stroke-linejoin="round"/>` +
+    `</g>`
+  );
+}
+
+const niumoIcons = {
+    passive: () =>
+      dn(
+        Rs("niumo"),
+        je("g", niumoPal.glow) + je("gh", niumoPal.hot, 0.9) + niumoBlade,
+        We("g", 32, 38, 22) +
+          `<path d="M32 4Q38 10 36 15Q40 13 41 9Q46 17 38 23Q34 26 32 23Q26 26 22 22Q17 16 21 10Q23 15 27 15Q25 9 32 4Z" fill="${niumoPal.hot}" stroke="${xe}" stroke-width="1.300" stroke-linejoin="round"/>` +
+          `<path d="M18 27Q7 23 5 13Q13 19 21 22Z" fill="${niumoPal.gold}" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/><path d="M46 27Q57 23 59 13Q51 19 43 22Z" fill="${niumoPal.gold}" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/>` +
+          `<path d="M32 23Q45 23 47 37Q48 49 38 55H26Q16 49 17 37Q19 23 32 23Z" fill="${niumoPal.steel}" stroke="${xe}" stroke-width="1.600" stroke-linejoin="round"/>` +
+          `<path d="M25 44Q32 40.500 39 44Q39 52.500 32 54Q25 52.500 25 44Z" fill="${niumoPal.wood}" stroke="${xe}" stroke-width="1.300" stroke-linejoin="round"/>` +
+          `<ellipse cx="28.500" cy="47.500" rx="1.700" ry="2.300" fill="${xe}"/><ellipse cx="35.500" cy="47.500" rx="1.700" ry="2.300" fill="${xe}"/>` +
+          `<path d="M22.500 35L28.500 37.500M41.500 35L35.500 37.500" stroke="${xe}" stroke-width="2.200" stroke-linecap="round"/>` +
+          `<path d="${hn(47.500, 18, 3.4)}" fill="${niumoPal.edge}"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("niumo"),
+        je("g", niumoPal.glow) +
+          niumoBlade +
+          fn("fire", 0, 0, 62, 0, [
+            [0, niumoPal.deep, 0],
+            [0.4, niumoPal.glow, 0.9],
+            [1, niumoPal.hot],
+          ]),
+        We("g", 30, 32, 24) +
+          `<path d="M2 47Q16 40 32 45Q48 50 62 40" fill="none" stroke="url(#@fire)" stroke-width="7.500" stroke-linecap="round" opacity=".85"/><path d="M2 47Q16 40 32 45Q48 50 62 40" fill="none" stroke="${niumoPal.hot}" stroke-width="2.400" stroke-linecap="round"/>` +
+          niumoSword("translate(32 31) rotate(36) scale(1.020)") +
+          b1(51, 21, 2, niumoPal.gold),
+      ),
+    s2: () =>
+      dn(
+        Rs("niumo"),
+        je("g", niumoPal.glow) +
+          niumoBlade +
+          fn("jet", 0, 0, 62, 0, [
+            [0, niumoPal.glow, 0.95],
+            [1, niumoPal.hot, 0],
+          ]),
+        We("g", 26, 32, 22) +
+          `<path d="M24 21Q46 26 63 32Q46 38 24 43Z" fill="url(#@jet)" opacity=".9"/><path d="M27 27Q46 29 58 32" fill="none" stroke="${niumoPal.hot}" stroke-width="2" stroke-linecap="round"/>` +
+          `<path d="M9 19Q21 15 27 24Q31 33 24 41Q16 47 9 43Q3 32 9 19Z" fill="${niumoPal.steel}" stroke="${xe}" stroke-width="1.500" stroke-linejoin="round"/>` +
+          `<path d="M11 19Q8 9 15 5Q15 14 19 18Z" fill="${niumoPal.gold}" stroke="${xe}" stroke-width="1.200" stroke-linejoin="round"/>` +
+          `<path d="M8 30L16 32" stroke="${xe}" stroke-width="2.200" stroke-linecap="round"/>` +
+          b1(48, 48, 2, niumoPal.gold),
+      ),
+    ult: () =>
+      dn(
+        Rs("niumo", !0),
+        je("g", niumoPal.glow, 1) +
+          niumoBlade +
+          fn("ring", 0, 0, 0, 34, [
+            [0, niumoPal.hot, 0],
+            [1, niumoPal.glow, 0.9],
+          ]),
+        We("g", 32, 32, 30) +
+          `<circle cx="32" cy="32" r="26" fill="none" stroke="url(#@ring)" stroke-width="2.200" stroke-dasharray="7 4" opacity=".8"/>` +
+          `<path d="M32 5Q38 11 36 16Q40 14 41 10Q46 18 38 24Q34 27 32 24Q26 27 22 23Q17 17 21 11Q23 16 27 16Q25 9 32 5Z" fill="${niumoPal.hot}" stroke="${xe}" stroke-width="1.200" stroke-linejoin="round"/>` +
+          `<path d="M32 24Q44 24 46 36Q47 47 38 54H26Q17 47 18 36Q20 24 32 24Z" fill="${niumoPal.steel}" stroke="${xe}" stroke-width="1.500" stroke-linejoin="round"/>` +
+          `<path d="M26 44Q32 41 38 44Q38 52 32 53.500Q26 52 26 44Z" fill="${niumoPal.wood}" stroke="${xe}" stroke-width="1.200" stroke-linejoin="round"/>` +
+          `<path d="M23 36L29 38.500M41 36L35 38.500" stroke="${xe}" stroke-width="2.200" stroke-linecap="round"/>` +
+          b1(23, 19, 2, niumoPal.gold),
+      ),
+  };
+
+// 牛伟：牛头人巨斧战士。图标统一走「牛头 + 斧」两个母题，
+// 被动/冲撞用牛头骨，横扫/旋风用斧刃轨迹。
 const GB = {
     passive: () =>
       dn(
         Rs("chijin"),
         je("g", pn.glow) + je("gh", pn.heal, 0.9) + Bp,
-        We("g", 36, 22, 24) +
-          Hp("translate(22.500 34) rotate(-30) scale(1.160)", 21) +
-          We("gh", 48, 48, 13) +
-          `<path d="M45.400 40H50.600V45.400H56V50.600H50.600V56H45.400V50.600H40V45.400H45.400Z" fill="#effff5" stroke="#12603a" stroke-width="1.400" stroke-linejoin="round"/><path d="M47 41.800H49V47H54.200" fill="none" stroke="${pn.heal}" stroke-width="1.300" stroke-linecap="round" stroke-linejoin="round"/><path d="${hn(47.5, 13, 3.4)}" fill="${pn.edge}"/>`,
+        We("g", 32, 34, 23) +
+          `<path d="M18 21Q7 17 5 5Q13 12 21 15Z" fill="${pn.horn}" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/><path d="M46 21Q57 17 59 5Q51 12 43 15Z" fill="${pn.horn}" stroke="${xe}" stroke-width="1.400" stroke-linejoin="round"/>` +
+          `<path d="M32 13Q45 13 47 29Q48 42 38 50H26Q16 42 17 29Q19 13 32 13Z" fill="${pn.skull}" stroke="${xe}" stroke-width="1.600" stroke-linejoin="round"/>` +
+          `<path d="M25 38Q32 34.500 39 38Q39 48 32 49.500Q25 48 25 38Z" fill="${pn.muzzle}" stroke="${xe}" stroke-width="1.300" stroke-linejoin="round"/>` +
+          `<ellipse cx="28.500" cy="42" rx="1.700" ry="2.300" fill="${xe}"/><ellipse cx="35.500" cy="42" rx="1.700" ry="2.300" fill="${xe}"/>` +
+          `<path d="M22.500 30L28.500 32.500M41.500 30L35.500 32.500" stroke="${xe}" stroke-width="2.200" stroke-linecap="round"/>` +
+          `<path d="M45.400 40H50.600V45.400H56V50.600H50.600V56H45.400V50.600H40V45.400H45.400Z" fill="#effff5" stroke="#12603a" stroke-width="1.400" stroke-linejoin="round"/><path d="M47 41.800H49V47H54.200" fill="none" stroke="${pn.heal}" stroke-width="1.300" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `<path d="${hn(47.5, 13, 3.4)}" fill="${pn.edge}"/>`,
       ),
     s1: () =>
       dn(
@@ -688,25 +798,26 @@ const GB = {
             [0.8, pn.gold],
             [1, pn.edge],
           ]),
-        We("g", 22, 30, 22) +
-          `<path d="M60 31.500A27.500 27.500 0 0 0 8 34.500L21 37.500A23 23 0 0 1 60 31.500Z" fill="url(#@sw)"/><path d="M48 18.500A27.500 27.500 0 0 0 8 34.500" fill="none" stroke="${pn.edge}" stroke-width="1.700" stroke-linecap="round"/><path d="M55 37Q44 28 30 31" fill="none" stroke="${pn.goldL}" stroke-width="1.200" stroke-linecap="round" opacity=".7"/>` +
+        We("g", 26, 30, 23) +
+          `<path d="M58 28A26 26 0 0 0 8 32L21 35A23 23 0 0 1 58 28Z" fill="url(#@sw)"/><path d="M45 14A26 26 0 0 0 8 32" fill="none" stroke="${pn.edge}" stroke-width="1.700" stroke-linecap="round"/>` +
+          `<path d="M6 53L14 49L19 54L26 48L32 53" fill="none" stroke="${pn.crack}" stroke-width="1.700" stroke-linecap="round" stroke-linejoin="round"/>` +
           Hp("translate(21 31) rotate(8) matrix(0 .8 .8 0 0 0)", 0) +
-          b1(38.5, 56, 1, pn.gold),
+          b1(38.5, 55, 2, pn.gold),
       ),
     s2: () =>
       dn(
         Rs("chijin"),
-        je("g", pn.glow) +
-          Bp +
-          fn("st", 0, 0, 30, 0, [
-            [0, pn.glow, 0],
-            [1, pn.hot, 0.95],
-          ]),
-        '<g transform="rotate(-9 32 32)">' +
-          We("g", 46, 30, 19) +
-          `<path d="M0 17H24M-2 26.500H17M2 39H21" fill="none" stroke="url(#@st)" stroke-width="2.800" stroke-linecap="round"/><path d="M20 12Q34 8 46 13M22 47Q33 50 42 47" fill="none" stroke="${pn.goldL}" stroke-width="1.400" stroke-linecap="round" opacity=".75"/>` +
-          Hp("translate(37 28.500) rotate(90) scale(.9)", 30) +
-          `<path d="${hn(59.5, 28.5, 4)}" fill="#fffdf2"/></g>` +
+        je("g", pn.glow) + Bp,
+        '<g transform="rotate(-8 32 32)">' +
+          We("g", 40, 31, 21) +
+          `<path d="M1 17H19M-1 27H13M3 39H17" fill="none" stroke="${pn.speed}" stroke-width="2.800" stroke-linecap="round"/>` +
+          `<path d="M27 17Q24 7 31 3Q31 11 35 16Z" fill="${pn.horn}" stroke="${xe}" stroke-width="1.300" stroke-linejoin="round"/><path d="M41 17Q45 6 54 3Q48 12 47 18Z" fill="${pn.horn}" stroke="${xe}" stroke-width="1.300" stroke-linejoin="round"/>` +
+          `<path d="M25 20Q38 14 47 23Q54 31 48 41Q42 50 30 49Q20 46 19 35Q19 25 25 20Z" fill="${pn.skull}" stroke="${xe}" stroke-width="1.500" stroke-linejoin="round"/>` +
+          `<path d="M45 33Q54 33 55 39.500Q54 46 45 46Z" fill="${pn.muzzle}" stroke="${xe}" stroke-width="1.200" stroke-linejoin="round"/>` +
+          `<ellipse cx="50" cy="37" rx="1.500" ry="2" fill="${xe}"/>` +
+          `<path d="M31 28L40 30.500" stroke="${xe}" stroke-width="2.200" stroke-linecap="round"/>` +
+          `<path d="${hn(50, 22, 4)}" fill="#fffdf2"/>` +
+          "</g>" +
           b1(15, 55.5, 2, pn.gold),
       ),
     ult: () => {
@@ -723,7 +834,11 @@ const GB = {
             [1, pn.edge],
           ]),
         We("g", 32, 32, 30) +
-          `<circle cx="32" cy="32" r="26.500" fill="none" stroke="${pn.hot}" stroke-width="1.100" stroke-dasharray="9 5" opacity=".65"/><g>${n}${t}</g><g transform="rotate(180 32 32)">${n}${t}</g><circle cx="32" cy="32" r="10.500" fill="${pn.dark}" fill-opacity=".55" stroke="${pn.gold}" stroke-width="1"/>` +
+          `<circle cx="32" cy="32" r="26.500" fill="none" stroke="${pn.hot}" stroke-width="1.100" stroke-dasharray="9 5" opacity=".65"/><g>${n}${t}</g><g transform="rotate(180 32 32)">${n}${t}</g>` +
+          `<circle cx="32" cy="32" r="12" fill="${pn.dark}" fill-opacity=".72" stroke="${pn.gold}" stroke-width="1"/>` +
+          `<path d="M25.500 27Q20 24 19 16.500Q25 21 29 23.500Z" fill="${pn.horn}" stroke="${xe}" stroke-width="1"/><path d="M38.500 27Q44 24 45 16.500Q39 21 35 23.500Z" fill="${pn.horn}" stroke="${xe}" stroke-width="1"/>` +
+          `<path d="M32 24.500Q39 24.500 39.500 32Q39 38.500 32 39.500Q25 38.500 24.500 32Q25 24.500 32 24.500Z" fill="${pn.skull}" stroke="${xe}" stroke-width="1.200" stroke-linejoin="round"/>` +
+          `<path d="M29 34H35" stroke="${xe}" stroke-width="1.400" stroke-linecap="round"/>` +
           b1(26.1, 36.5, 3, pn.gold),
       );
     },
@@ -1057,7 +1172,7 @@ const qB = {
         `<ellipse cx="32" cy="55" rx="19" ry="4.5" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M26 21v10M32 21v15M38 21v10" stroke="#c4a2ff" stroke-width="2.1" stroke-linecap="round" opacity=".8"/><path d="M18 20Q19 7 32 7Q45 7 46 20Q39 16 32 16Q25 16 18 20Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><circle cx="27" cy="14" r="2.2" fill="#f7efdd"/><circle cx="38" cy="13" r="1.6" fill="#f7efdd"/><path d="M32 40l-7 8h4v6h6v-6h4z" fill="#f3e7d0" stroke="#070b16" stroke-width="1.4" stroke-linejoin="round"/>`,
       ),
   },
-  XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB, mushroom: mB };
+  XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB, mushroom: mB, niumo: niumoIcons };
 
 function Ia(n, t) {
   return XB[n][t]();

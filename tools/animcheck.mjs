@@ -98,7 +98,12 @@ export function solveAt(model, anim, frame) {
 }
 
 // 引擎状态用到的片段，必须真的能动（fire 例外：原片段几乎是静止持势，引擎里另叠了抖动）
-const REQUIRED = ['run', 'box_01', 'fall', 'front_kick_02', 'hit_to_head'];
+// 每个英雄的片段名不一样（牛魔只有 walk/defeat_03，没有 run），所以按英雄列。
+const REQUIRED_BY_HERO = {
+  mushroom: ['run', 'box_01', 'fall', 'front_kick_02', 'hit_to_head'],
+  niumo: ['walk', 'defeat_03'],
+};
+const REQUIRED = [];
 const MIN_MOVE = 0.3;
 
 // 返回 { ok, detail }，供 herocheck 汇总
@@ -110,6 +115,7 @@ export function animReport(heroId = 'mushroom') {
 
   const lines = [];
   const dead = [];
+  const REQUIRED = REQUIRED_BY_HERO[heroId] || [];
   for (const n of names) {
     const a = model.anims[n];
     if (a.frames < 2) return { ok: false, detail: `${n} 只有 ${a.frames} 帧` };

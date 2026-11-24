@@ -1929,7 +1929,7 @@ function su(n, t, e, s, i, a) {
 
 const Om = (n) => (n === 1 ? Math.PI * 0.75 : -Math.PI * 0.25);
 
-function KV(n, t, e, s, i) {
+function KV(n, t, e, s, i, laneIn) {
   const a = Se[s],
     o = n.map.bases[e],
     r = o.spawns[t % o.spawns.length],
@@ -1960,7 +1960,8 @@ function KV(n, t, e, s, i) {
       heroId: s,
       name: a.name,
       isPlayer: i,
-      lane: a.lane,
+      // 分路由对局阵容指定（AI 会自由分路），没给就退回英雄的推荐分路
+      lane: laneIn || a.lane,
       level: 1,
       xp: 0,
       xpToNext: Z6(1),

@@ -52,17 +52,24 @@ export function heroMap() {
   const c = document.createElement('canvas');
   c.width = c.height = 1;
   const g = c.getContext('2d');
-  g.fillStyle = '#fff';
+  // 贴图解码完之前先用近似底色打底，避免整片纯白（立绘会白模）
+  g.fillStyle = '#e2dbcf';
   g.fillRect(0, 0, 1, 1);
   tex.image = c;
   tex.needsUpdate = true;
   if (HERO_MESH.tex) {
     const img = new Image();
-    img.onload = () => ((tex.image = img), (tex.needsUpdate = true));
+    img.onload = () => {
+      ((tex.image = img), (tex.needsUpdate = true));
+      // 贴图是异步解码的：先渲染出来的立绘/头像会是白模，通知界面重画
+      globalThis.__sfTextureReady?.();
+    };
     img.src = HERO_MESH.tex;
   }
   return (_map = tex);
 }
+// 模块一加载就开始解码，别等第一次建模时才去拉
+if (typeof document !== 'undefined') setTimeout(() => heroMap(), 0);
 
 export const HERO_MESH = {
   verts: 3268,

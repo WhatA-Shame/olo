@@ -1,0 +1,31 @@
+import path from 'node:path'; import { fileURLToPath } from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const MESH=process.argv[2]||'45-niuwei-mesh.js';
+const {heroRig,heroMesh}=await import(`../src/${MESH}`);
+const R=heroRig(),M=heroMesh();
+const J=k=>R.names.indexOf(k), handJ=J('R_Hand');
+const BWQ=[0,1,2,3].map(k=>R.bindWQ[handJ*4+k]);
+const qRot=(q,v)=>{const[x,y,z,w]=q;const t=[2*(y*v[2]-z*v[1]),2*(z*v[0]-x*v[2]),2*(x*v[1]-y*v[0])];
+  return [v[0]+w*t[0]+(y*t[2]-z*t[1]),v[1]+w*t[1]+(z*t[0]-x*t[2]),v[2]+w*t[2]+(x*t[1]-y*t[0])];};
+const AX=qRot(BWQ,[1,0,0]),AY=qRot(BWQ,[0,1,0]),AZ=qRot(BWQ,[0,0,1]);
+const HP=[R.bindWorld[handJ*3],R.bindWorld[handJ*3+1],R.bindWorld[handJ*3+2]];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const NV=M.pos.length/3, domBone=i=>(M.skin[i*3+2]>0.5?M.skin[i*3]:M.skin[i*3+1]);
+const L=[];
+for(let i=0;i<NV;i++){ if(domBone(i)!==handJ)continue;
+  const v=[M.pos[i*3]-HP[0],M.pos[i*3+1]-HP[1],M.pos[i*3+2]-HP[2]];
+  L.push([dot(v,AX),dot(v,AY),dot(v,AZ)]); }
+const zone=(z0,z1,y0,y1)=>L.filter(p=>p[2]>=z0&&p[2]<=z1&&p[1]>=y0&&p[1]<=y1);
+const stat=(name,ps)=>{ if(!ps.length){console.log(name,'空');return;}
+  const xs=ps.map(p=>p[0]).sort((a,b)=>a-b);
+  console.log(`${name}: n=${ps.length}  X 中位 ${xs[xs.length>>1].toFixed(3)}  X∈[${xs[0].toFixed(3)},${xs[xs.length-1].toFixed(3)}]  Y均 ${(ps.reduce((s,p)=>s+p[1],0)/ps.length).toFixed(3)}`); };
+console.log('— 拇指（Z 0.16..0.28）—');
+stat('  基部 y0.16-0.24', zone(0.16,0.28,0.16,0.24));
+stat('  梢部 y0.24-0.30', zone(0.16,0.28,0.24,0.30));
+console.log('— 小指（Z -0.28..-0.14）—');
+stat('  基部 y0.10-0.22', zone(-0.28,-0.14,0.10,0.22));
+stat('  梢部 y0.38-0.48', zone(-0.28,-0.14,0.38,0.48));
+console.log('— 掌心中央（Z -0.10..0.10, y0.10-0.20）—');
+stat('  中央', zone(-0.10,0.10,0.10,0.20));
+console.log('\n局部轴向（世界）: AX',AX.map(v=>v.toFixed(3)).join(','),' AY',AY.map(v=>v.toFixed(3)).join(','),' AZ',AZ.map(v=>v.toFixed(3)).join(','));
+console.log('腕关节世界', HP.map(v=>v.toFixed(3)).join(','));

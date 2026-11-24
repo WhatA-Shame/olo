@@ -1896,6 +1896,9 @@ function Aj(n, t, e) {
   }
   if (!t.alive) return;
   const s = t.rt;
+  // 强制前进的引导技能（牛魔 2 技能）：位移由技能自己推，玩家的移动指令直接吞掉，
+  // 否则一按方向键就会走 D6→Ga 把引导取消掉
+  if ((e.type === "move" || e.type === "moveTo") && s.noSteerUntil > n.state.time) return;
   switch (e.type) {
     case "move": {
       const i = Yc(e.dir) ? Math.hypot(e.dir.x, e.dir.y) : 0;

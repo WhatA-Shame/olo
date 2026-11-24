@@ -20,7 +20,7 @@ import { Yt, fs } from './14-three-7.js';
 import { aa, as, sh, ux, zf } from './15-render-4.js';
 import { xo } from './18-core.js';
 import { Ct, En, K, Kn, Ux, Wa, Xe, bU, bt, p2, pt, sw } from './25-render-9.js';
-import { AU, Ls, bBg } from './26-core-5.js';
+import { AU, Ls, bBg, bNm, bNm2, bNw } from './26-core-5.js';
 import { PU, UU } from './27-core-6.js';
 import { $U, KU, ZU, jU } from './28-core-7.js';
 import { JU, QU, fO, lO } from './29-core-8.js';
@@ -798,11 +798,13 @@ class of {
 
 const Gx = {
     "hero:panyue": UU,
-    "hero:chijin": AU,
+    "hero:chijin": bNw,
     "hero:xingli": $U,
     "hero:fengling": PU,
     "hero:yeque": jU,
     "hero:mushroom": bBg,
+    "hero:niumo": bNm,
+    "hero:niumo2": bNm2,
     "minion:melee": KU,
     "minion:ranged": ZU,
     "minion:siege": QU,
@@ -1225,8 +1227,15 @@ const f0 = { hero: !1, minion: !1, monster: !1, tower: !0, core: !0 },
 
 function nB(n) {
   switch (n.kind) {
-    case "hero":
-      return Vx(n.heroId);
+    case "hero": {
+      // 牛魔开大换成变身形态的模型（骨架一样，只是网格/贴图不同）
+      const k =
+        n.heroId === "niumo" && n.buffs && n.buffs.some((b) => b.id === "niumo_ult") ? "hero:niumo2" : Vx(n.heroId);
+      // 场上可能同时有多个牛魔（玩家 + AI），钩子按单位 id 分开记，
+      // 否则后渲染的那个会把前一个的值覆盖掉，测试读到的永远是 AI 的普通形态。
+      n.heroId === "niumo" && ((globalThis.__niumoKey ??= {})[n.id] = k);
+      return k;
+    }
     case "minion":
       return DO(n.minionType);
     case "tower":
@@ -1767,6 +1776,12 @@ function lB(n) {
           const N = $[ut];
           s.set(N.id, N);
           let J = e.get(N.id);
+          // 形态变了（牛魔开大/变身结束）就把视图拆掉重建，否则会一直用旧网格
+          if (J && J.def && J.def.key !== nB(N)) {
+            const oi = i.indexOf(J);
+            oi >= 0 && i.splice(oi, 1);
+            (e.delete(N.id), (J = void 0));
+          }
           (J ? J.dying >= 0 && ((J.dying = -1), (J.fresh = !0)) : ((J = q(N, Q)), e.set(N.id, J), i.push(J)),
             H(J, N, D));
         }
@@ -1939,6 +1954,7 @@ const cB = {
     fengling: { cast_s1: ["cast_s1", 1], cast_s2: ["dash", 0.5], cast_ult: ["cast_ult", 1.2] },
     yeque: { cast_s1: ["dash", 0.45], cast_s2: ["cast_s2", 0.8], cast_ult: ["cast_ult", 1] },
     mushroom: { cast_s1: ["spin", 1.6], cast_s2: ["cast_s2", 0.9], cast_ult: ["cast_ult", 1.2] },
+    niumo: { cast_s1: ["cast_s1", 0.9], cast_s2: ["dash", 2], cast_ult: ["cast_ult", 1.2] },
   },
   Ac = { side: 0.07, top: 0.06, bottom: 0.12 },
   a4 = { top: 3.2, halfW: 1.2 },
@@ -1949,6 +1965,7 @@ const cB = {
     fengling: { drop: 0.24, dist: 2.75, yaw: 26, x: 0.06, anim: "channel" },
     yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 },
     mushroom: { drop: 0.12, dist: 3.2, yaw: 0, x: 0 },
+    niumo: { drop: 0.24, dist: 3, yaw: -12, x: -0.06 },
   },
   o4 = new Map(),
   r4 = new Float32Array(512);
@@ -1999,6 +2016,7 @@ function dB(n, t, e) {
 const v3 = {
     panyue: [-0.44, 0.44],
     chijin: [-0.38, 0.44],
+    niumo: [-0.42, 0.44],
     xingli: [0.25, 0.8],
     fengling: [0.25, 0.8],
     yeque: [0.25, 0.8],
@@ -2025,7 +2043,7 @@ function uB(n, t) {
         a.settle(),
         dB(t, a, p));
     },
-    [l, c] = v3[n];
+    [l, c] = v3[n] || v3.chijin;
   for (let h = 0; h <= 8; h++) r("idle", 0, 0, l + c * Math.sin(((h / 8) * 2 - 1) * Math.PI * 0.5), s);
   for (const h of [0, 1])
     for (const u of [0.2, 0.35, 0.5]) for (const m of [l - c, l, l + c]) r("attack", u, h, m, i);

@@ -10,7 +10,7 @@
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { v0 } from './01-audio.js';
-import { Se, kr } from './02-data.js';
+import { Nh, Se, kr } from './02-data.js';
 import { zT } from './04-audio-2.js';
 import { MI } from './16-render-5.js';
 import { xo } from './18-core.js';
@@ -389,6 +389,246 @@ Oi("chijin", "ult", {
           Jj(l, e);
         },
       }));
+  },
+});
+
+// ── 牛魔 ────────────────────────────────────────────────────
+// 火焰层数「磨砂火焰」是 s2 的被动部分，但 s1 的火路和 ult 的火路也会叠，
+// 所以单独抽成 nmFlame() 给三个技能共用。
+const NMP = Se.niumo.passive.values,
+  NMS1 = Se.niumo.skills.s1,
+  NMS2 = Se.niumo.skills.s2,
+  NMSU = Se.niumo.skills.ult;
+
+const nmS2Lv = (t) => Math.max(1, t.skills.s2.level),
+  nmUltLv = (t) => Math.max(1, t.skills.ult.level),
+  nmFlameDps = (t) => Nh(NMS2, "flameDps", nmS2Lv(t));
+
+function nmFlammable(u) {
+  return u.kind === "hero" || u.kind === "minion" || u.kind === "monster";
+}
+
+// 叠一层火焰：每层每秒掉 dps 点魔法伤害，最多 7 层，重复施加会刷新持续时间并把 dps 更新到当前等级
+function nmFlame(sim, src, u, dps) {
+  if (!u.alive || !nmFlammable(u)) return;
+  Wn(sim, u, "niumo_flame", {
+    sourceId: src.id,
+    duration: Nh(NMS2, "flameDur", nmS2Lv(src)),
+    value: dps,
+    maxStacks: Nh(NMS2, "maxStacks", 1),
+    stacks: 1,
+    tickInterval: 1,
+    onTick(s, b) {
+      const o = s.byId.get(b.sourceId);
+      o && o.alive && u.alive && zh(s, o, u, b.value * b.stacks, "magic", "s2");
+    },
+  });
+}
+
+// 直线命中：先按半径粗筛，再算「点到线段」的距离，避免用锥形近似出来的边角误差
+function nmLine(sim, from, dir, range, halfW, filter) {
+  const out = [],
+    seen = new Set();
+  for (let i = 0; i <= 6; i++) {
+    const k = (i / 6) * range,
+      p = { x: from.x + dir.x * k, y: from.y + dir.y * k };
+    for (const u of Pr(sim, p, halfW + 1.5, filter)) {
+      if (seen.has(u.id)) continue;
+      const ex = u.pos.x - from.x,
+        ey = u.pos.y - from.y,
+        proj = ex * dir.x + ey * dir.y,
+        c = proj < 0 ? 0 : proj > range ? range : proj,
+        dx = from.x + dir.x * c - u.pos.x,
+        dy = from.y + dir.y * c - u.pos.y;
+      if (Math.hypot(dx, dy) > halfW + u.radius) continue;
+      (seen.add(u.id), out.push(u));
+    }
+  }
+  return out;
+}
+
+// 火路：沿线段铺几堆火做视觉，再用一个区域按线段判定伤害（一个区域 tick 一次，不会重叠多打）
+function nmTrail(sim, owner, from, dir, range, halfW, dps, dur, tick, fdps) {
+  for (let i = 0; i < 4; i++) {
+    const k = ((i + 0.5) / 4) * range;
+    Zo(sim, {
+      visual: "niumo_trail",
+      owner,
+      pos: { x: from.x + dir.x * k, y: from.y + dir.y * k },
+      radius: halfW * 0.95,
+      duration: dur,
+    });
+  }
+  Zo(sim, {
+    visual: "niumo_trail",
+    owner,
+    pos: { x: from.x + dir.x * range * 0.5, y: from.y + dir.y * range * 0.5 },
+    radius: halfW * 0.6,
+    duration: dur,
+    tickInterval: tick,
+    firstTick: 0.06,
+    onTick(s) {
+      for (const u of nmLine(s, from, dir, range, halfW, ia(owner.team)))
+        u.alive && (zh(s, owner, u, dps, "magic", "s1"), nmFlame(s, owner, u, fdps));
+    },
+  });
+}
+
+tu("niumo", {
+  // 被动：攻速 -30%
+  statMods(n, t, e) {
+    e.asPct -= NMP.asPenalty;
+  },
+  // 被动：普攻伤害 140%~250%，最大生命越高越接近上限
+  modifyBasicAttack(n, t, e, s) {
+    const k = Math.min(1, Math.max(0, (t.stats.maxHp - NMP.hpBase) / NMP.hpSpan));
+    s.mult *= NMP.dmgMin + (NMP.dmgMax - NMP.dmgMin) * k;
+  },
+  // 大招期间：普攻吃掉目标身上所有火焰层数，每层追加伤害并回血
+  onBasicAttackHit(n, t, e) {
+    if (Ss(e) || !Ba(t, "niumo_ult")) return;
+    const b = Dh(e, "niumo_flame");
+    if (!b || b.stacks <= 0) return;
+    const st = b.stacks,
+      lv = nmUltLv(t);
+    (Va(n, e, "niumo_flame"),
+      ds(n, "niumo_burst", e.pos, t.team, { unitId: t.id, targetId: e.id }),
+      zh(n, t, e, st * (Nh(NMSU, "perStack", lv) + Nh(NMSU, "adRatio", lv) * t.stats.ad), "magic", "ult"),
+      xS(n, t, t, t.stats.maxHp * Nh(NMSU, "healPerStack", lv) * st));
+  },
+});
+
+Oi("niumo", "s1", {
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    Wm(n, n.def.castTime * 0.4, () => {
+      const from = Cs(e.pos),
+        dir = Cs(n.dir),
+        len = n.range,
+        hw = n.width * 0.5;
+      ds(t, "niumo_s1_slash", from, e.team, {
+        unitId: e.id,
+        dir,
+        radius: len,
+        // 视觉角度有个下限：太窄的锥形 decal / 弧光在俯视角度下几乎看不见
+        angle: Math.max(0.5, Math.atan2(hw, len) * 2),
+      });
+      for (const u of nmLine(t, from, dir, len, hw, ia(e.team)))
+        wo(n, u, oa(n, "damage", { ad: "adRatio" }), "physical");
+      nmTrail(
+        t,
+        e,
+        from,
+        dir,
+        len,
+        hw,
+        n.val("burnDps"),
+        n.val("trailDur"),
+        n.val("tick"),
+        nmFlameDps(e),
+      );
+    });
+  },
+});
+
+Oi("niumo", "s2", {
+  movement: !0,
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dir = Cs(n.dir),
+      dur = n.val("duration"),
+      len = n.range,
+      hw = n.width * 0.5,
+      fdps = nmFlameDps(e),
+      // 8 段 → 24 段，总伤害不变：每段 1/3
+      segs = Math.max(1, n.val("segments")),
+      tick = dur / segs,
+      dmg = (n.val("sprayDmg") + n.val("sprayAd") * e.stats.ad) * (8 / segs),
+      // 叠层节奏也不变：每 3 段叠一次，整段下来还是 8 次
+      stackEvery = segs / 8,
+      // 「烈焰行军」边喷边往前走：位移由脚本自己推（上一版上了 root，结果连自己的前进也锁住了）。
+      // 玩家不能自己操控方向 —— 移动指令在 Aj 里被 noSteerUntil 吞掉。
+      march = e.stats.moveSpeed * 0.45,
+      // 火锥贴花得跟着人走：每 0.2 秒重铺一张短命锥，靠重叠维持「一直在喷」
+      coneEvery = Math.max(1, Math.round(0.2 / tick));
+    // 只上免控，不上定身（定身会把脚本自己的前进一起锁掉）
+    (Wn(t, e, "unstoppable", { duration: dur, sourceId: e.id, key: "niumo_march" }),
+      (e.rt.noSteerUntil = t.state.time + dur),
+      (e.facing = Math.atan2(dir.y, dir.x)));
+    let left = dur,
+      i = 0;
+    const step = () => {
+      if (!e.alive) return;
+      // 先前进，再按新位置喷，锥形和伤害线才跟着人走；撞墙就原地喷
+      const nx = e.pos.x + dir.x * march * tick,
+        ny = e.pos.y + dir.y * march * tick;
+      t.nav.isFree(nx, ny, e.rt.navR) && ((e.pos.x = nx), (e.pos.y = ny));
+      const from = Cs(e.pos),
+        idx = i++,
+        stack = idx % stackEvery === 0,
+        cone = idx % coneEvery === 0;
+      ((e.facing = Math.atan2(dir.y, dir.x)),
+        ds(t, "niumo_s2_spray", from, e.team, {
+          unitId: e.id,
+          dir,
+          radius: len,
+          // 只有部分段重铺火锥本体（0.32 秒），其余段只添火星，锥形才会跟着人往前推
+          cone,
+          duration: 0.32,
+          // 视觉角度有个下限：太窄的锥形 decal / 弧光在俯视角度下几乎看不见
+          angle: Math.max(0.5, Math.atan2(hw, len) * 2),
+        }),
+        (left -= tick),
+        left > 1e-6 && t.schedule(tick, step));
+      for (const u of nmLine(t, from, dir, len, hw, ia(e.team))) {
+        if (!u.alive) continue;
+        (zh(t, e, u, dmg, "magic", "s2"), stack && nmFlame(t, e, u, fdps));
+      }
+    };
+    step();
+  },
+});
+
+Oi("niumo", "ult", {
+  noAnim: !0,
+  lockTime: 0,
+  movement: !0,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dur = n.val("duration"),
+      tick = n.val("trailTick"),
+      tdur = n.val("trailDur"),
+      tdps = n.val("trailDps"),
+      fdps = nmFlameDps(e);
+    (ds(t, "niumo_ult_start", e.pos, e.team, { unitId: e.id, duration: dur }),
+      Wn(t, e, "niumo_ult", { duration: dur, sourceId: e.id, merge: "replace" }),
+      Wn(t, e, "unstoppable", { duration: dur, sourceId: e.id, key: "niumo_ult" }));
+    // 每隔 trailTick 在脚下留一团火，自己烧一会儿再灭
+    let left = dur;
+    const step = () => {
+      if (!e.alive) return;
+      const p = Cs(e.pos);
+      (Zo(t, {
+        visual: "niumo_trail",
+        owner: e,
+        pos: p,
+        radius: 1.55,
+        duration: tdur,
+        tickInterval: 0.6,
+        firstTick: 0.12,
+        onTick(s) {
+          for (const u of Pr(s, p, 1.55 + 1.5, ia(e.team)))
+            u.alive &&
+              Math.hypot(u.pos.x - p.x, u.pos.y - p.y) <= 1.55 + u.radius &&
+              (zh(s, e, u, tdps, "magic", "ult"), nmFlame(s, e, u, fdps));
+        },
+      }),
+        (left -= tick),
+        left > 1e-6 && t.schedule(tick, step));
+    };
+    step();
   },
 });
 
@@ -856,6 +1096,40 @@ const vq = 6,
   bq = 5e4,
   _q = 0.2;
 
+// 双方阵容：蓝方 = 玩家 + 4 名英雄（沿用各自推荐分路，选将页展示的就是这个）；
+// 红方 = AI 自由选人（优先用蓝方没选的英雄，不够再从剩下里补）＋ 自由分路（模板打乱）。
+// 同一个 seed 结果稳定，方便复现；返回结果同时喂给加载界面和真正的对局，两边不会再对不上。
+const LINEUP_LANES = ["top", "mid", "bot", "bot", "jungle"];
+function lineupOf(seed, playerHero) {
+  let x = ((seed >>> 0) ^ 0x9e3779b9) >>> 0;
+  const rnd = () => ((x = (x * 1664525 + 1013904223) >>> 0), x / 4294967296),
+    shuffle = (arr) => {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = (rnd() * (i + 1)) | 0,
+          t = a[i];
+        ((a[i] = a[j]), (a[j] = t));
+      }
+      return a;
+    },
+    pool = kr.slice(),
+    me = pool.includes(playerHero) ? playerHero : pool[0],
+    blue = [me, ...shuffle(pool.filter((h) => h !== me)).slice(0, 4)],
+    // 红方先吃掉蓝方没用到的英雄，剩下的从全部英雄里随机补，凑满 5 人
+    red = shuffle(pool.filter((h) => !blue.includes(h))).slice(0, 2),
+    fill = shuffle(pool.filter((h) => !red.includes(h)));
+  while (red.length < 5 && fill.length) red.push(fill.shift());
+  while (red.length < 5) red.push(me);
+  const laneTpl = shuffle(LINEUP_LANES);
+  return {
+    me,
+    blue,
+    red,
+    blueLanes: blue.map((h) => Se[h].lane),
+    redLanes: red.map((h, i) => laneTpl[i % laneTpl.length]),
+  };
+}
+
 class wq {
   state;
   config;
@@ -924,15 +1198,23 @@ class wq {
       ]));
     const a = () => Array.from({ length: 10 }, () => ({ x: 0, y: 0, time: -999 }));
     this.lastSeen = [a(), a()];
-    const o = [s, ...kr.filter((c) => c !== s).slice(0, 4)];
-    for (const c of [0, 1])
-      o.forEach((f, d) => {
-        const h = KV(this, c * 5 + d, c, f, c === 0 && d === 0);
+    // 阵容：加载界面传来的那份优先（保证界面显示的就是真实参战名单），否则按 seed 现算
+    const lu =
+      t.lineup && t.lineup.blue?.length === 5 && t.lineup.red?.length === 5
+        ? t.lineup
+        : lineupOf(t.seed, s);
+    this.lineup = lu;
+    for (const c of [0, 1]) {
+      const list = c === 0 ? lu.blue : lu.red,
+        lanes = (c === 0 ? lu.blueLanes : lu.redLanes) || [];
+      list.forEach((f, d) => {
+        const h = KV(this, c * 5 + d, c, f, c === 0 && d === 0, lanes[d]);
         (this.addUnit(h),
           this.heroes.push(h),
           (this.state.teams[c].gold += h.goldEarned),
           h.isPlayer && (this.state.playerId = h.id));
       });
+    }
     for (const c of this.map.towers) {
       const f = QV(this, c);
       ((this.towers[c.team][c.lane][c.tier - 1] = f),
@@ -1443,7 +1725,9 @@ async function Uq(n, t, e, s) {
   _y();
   const { app: i, audio: a, perf: o } = n;
   n.setPhase("loading");
-  const r = XH(i, t, n.menuHost),
+  // 阵容先算出来：加载界面按它列人，进对局再把同一份传下去，界面和实际参战不会再对不上
+  const lu = lineupOf(e.seed, t.heroId),
+    r = XH(i, t, n.menuHost, lu),
     l = to(),
     c = document.createElement("div");
   c.className = "app-match";
@@ -1471,6 +1755,7 @@ async function Uq(n, t, e, s) {
         difficulty: t.difficulty,
         autoPlay: e.autoPlay,
         autoBuy: n.getSettings().autoBuy,
+        lineup: lu,
       },
       y = Mq(g),
       v = y.state;

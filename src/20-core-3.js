@@ -859,7 +859,7 @@ class l8 {
   trackers = [];
   tmp = new dt();
   constructor(t) {
-    ((this.ctx = t), (this.atlas = DI()));
+    ((this.ctx = t), (this.atlas = DI()), (window.__fxkit = this));
     const e = Qu[t.settings.name] ?? Qu.high;
     ((this.density = e.scale),
       (this.particles = new rP(this.atlas, e.cap)),

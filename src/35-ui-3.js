@@ -79,7 +79,7 @@ const I2 = { passive: "被动", s1: "一技能", s2: "二技能", ult: "大招" 
   animation: sf-spin 48s linear infinite; }
 .sf-select__ring--in { height: min(62%, 72vw); opacity: 0.4; animation-duration: 36s; animation-direction: reverse; }
 /* 画布蒙版三层相交：四角的椭圆渐隐 + 左右两边、底边的线性渐隐。椭圆那层在边的中段几乎不透明，
-   长兵器(程咬金的斧、樊哙的盾)伸出画布时会被边缘一刀切断；加上线性渐隐后是渐渐淡出 */
+   长兵器(牛伟的斧、樊哙的盾)伸出画布时会被边缘一刀切断；加上线性渐隐后是渐渐淡出 */
 .sf-select__canvas {
   position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, #000 0, #000 93%, transparent 100%), radial-gradient(ellipse 72% 78% at 50% 50%, #000 62%, transparent 100%);
@@ -1293,7 +1293,7 @@ const GH = [
     "被防御塔连续命中，伤害会越打越高——及时退出攻击范围。",
     "连杀会抬高你的赏金，被终结时对手将获得额外金币。",
     "樊哙的大盾最扛打：让他先冲，其他人跟上。",
-    "程咬金放完技能后的下一下普攻会回血，换血别光放技能。",
+    "牛伟放完技能后的下一下普攻会回血，换血别光放技能。",
     "王昭君的技能打中同一个人三次会眩晕，被她连中两下就该躲了。",
     "李广站着不动连续射击会越射越快，优先打断他。",
     "荆轲专挑残血下手：血量低于四成时离他远一点。",
