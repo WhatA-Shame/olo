@@ -40455,7 +40455,7 @@ function bBg() {
     animate: h
   };
 }
-function handGripAt(HR2, j, gx2, gy2, gz2) {
+function handFrame(HR2, j) {
   const q = [HR2.bindWQ[j * 4], HR2.bindWQ[j * 4 + 1], HR2.bindWQ[j * 4 + 2], HR2.bindWQ[j * 4 + 3]], rot = (v) => {
     const [x, y, z10, w] = q, tx2 = 2 * (y * v[2] - z10 * v[1]), ty2 = 2 * (z10 * v[0] - x * v[2]), tz2 = 2 * (x * v[1] - y * v[0]);
     return [
@@ -40463,10 +40463,38 @@ function handGripAt(HR2, j, gx2, gy2, gz2) {
       v[1] + w * ty2 + (z10 * tx2 - x * tz2),
       v[2] + w * tz2 + (x * ty2 - y * tx2)
     ];
-  }, AX = rot([1, 0, 0]), AY = rot([0, 1, 0]), AZ = rot([0, 0, 1]);
-  return [0, 1, 2].map(
-    (k) => HR2.bindWorld[j * 3 + k] + gx2 * AX[k] + gy2 * AY[k] + gz2 * AZ[k]
-  );
+  };
+  return {
+    o: [HR2.bindWorld[j * 3], HR2.bindWorld[j * 3 + 1], HR2.bindWorld[j * 3 + 2]],
+    ax: rot([1, 0, 0]),
+    ay: rot([0, 1, 0]),
+    az: rot([0, 0, 1])
+  };
+}
+function handGripAt(HR2, j, gx2, gy2, gz2) {
+  const F = handFrame(HR2, j);
+  return [0, 1, 2].map((k) => F.o[k] + gx2 * F.ax[k] + gy2 * F.ay[k] + gz2 * F.az[k]);
+}
+function handMatrix(HR2, j, gx2 = 0, gy2 = 0, gz2 = 0) {
+  const F = handFrame(HR2, j), o = handGripAt(HR2, j, gx2, gy2, gz2), M = new Ke();
+  return M.set(
+    F.ax[0],
+    F.ay[0],
+    F.az[0],
+    o[0],
+    F.ax[1],
+    F.ay[1],
+    F.az[1],
+    o[1],
+    F.ax[2],
+    F.ay[2],
+    F.az[2],
+    o[2],
+    0,
+    0,
+    0,
+    1
+  ), M;
 }
 function bNw() {
   const HR2 = heroRig2(), mesh = heroMesh2(), t = new Ls();
@@ -40487,76 +40515,83 @@ function bNw() {
     return i < 0 ? 0 : i;
   }, rootJ = HR2.parent.indexOf(-1), chestJ = jid("Spine02"), headJ = jid("Head"), handRJ = jid("R_Hand"), handLJ = jid("L_Hand"), upperRJ = jid("R_Upperarm"), upperLJ = jid("L_Upperarm");
   t.bone(rootJ), t.rawMesh(mesh, { mat: K.skin, gloss: 0.34, line: 1, ao: 1 });
-  const [HX, HY, HZ] = handGripAt(HR2, handRJ, -0.14, 0.13, 0.02), botY = HY - 0.46, topY = HY + 0.92;
+  const M_AXE = handMatrix(HR2, handRJ, 0.02, 0.16, 0).multiply(
+    // 作者坐标系 → 手骨局部：柄沿 +Y、刃往 -X、宽面 ±Z（沿用改造前的写法，只换原点）
+    //   X→-X（刃往局部 +X = 世界里朝身体外侧）、Y→+Z（柄沿握孔）、Z→+Y（宽面法线沿手指方向）
+    new Ke().set(-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1)
+  );
+  const HX = 0, HY = 0, HZ = 0, botY = -0.46, topY = 0.92;
   t.bone(handRJ), t.uvX = 0.24, t.uvY = 0.24;
-  t.paint(15119480, { gloss: 0.12, mat: K.leather, ao: 0.9, grain: 0.06 });
-  t.tube(
-    [
-      [HX, botY, HZ, 0.044, 0.044],
-      [HX, botY + 0.07, HZ, 0.055, 0.055],
-      [HX, HY - 0.34, HZ, 0.047, 0.047],
-      [HX, HY + 0.22, HZ, 0.049, 0.049],
-      [HX, topY - 0.14, HZ, 0.052, 0.052],
-      [HX, topY, HZ, 0.058, 0.058]
-    ],
-    { seg: 7, crease: 60 }
-  );
-  t.paint(8020552, { gloss: 0.22, mat: K.leather, ao: 0.88 });
-  t.tube(
-    [
-      [HX, HY - 0.22, HZ, 0.056, 0.056],
-      [HX, HY - 0.14, HZ, 0.063, 0.063],
-      [HX, HY + 0.09, HZ, 0.063, 0.063],
-      [HX, HY + 0.17, HZ, 0.056, 0.056]
-    ],
-    { seg: 8, crease: 50 }
-  );
-  t.paint(15909994, { gloss: 0.62, mat: K.metal, ao: 0.95 });
-  t.tube(
-    [
-      [HX, botY - 0.03, HZ, 0.026, 0.026],
-      [HX, botY + 0.01, HZ, 0.068, 0.068],
-      [HX, botY + 0.09, HZ, 0.064, 0.064],
-      [HX, botY + 0.12, HZ, 0.05, 0.05]
-    ],
-    { seg: 8, crease: 50 }
-  );
-  t.paint(12567756, { gloss: 0.72, mat: K.metal, ao: 0.95 });
-  t.tube(
-    [
-      [HX, topY - 0.34, HZ, 0.062, 0.062],
-      [HX, topY - 0.28, HZ, 0.078, 0.078],
-      [HX, topY - 0.02, HZ, 0.078, 0.078],
-      [HX, topY + 0.05, HZ, 0.056, 0.056]
-    ],
-    { seg: 8, crease: 50 }
-  );
-  const MB2 = new Ke();
-  MB2.setPosition(HX, topY, HZ), t.paint(11121602, { c2: 14147305, gloss: 0.9, mat: K.metal, ao: 1 }), t.g(
-    MB2,
-    () => t.extrude(
+  t.g(M_AXE, () => {
+    t.paint(15119480, { gloss: 0.12, mat: K.leather, ao: 0.9, grain: 0.06 });
+    t.tube(
       [
-        [0.24, 0.12],
-        [0.04, 0.2],
-        [-0.08, 0.36],
-        [-0.3, 0.33],
-        [-0.5, 0.18],
-        [-0.58, -0.02],
-        [-0.48, -0.22],
-        [-0.3, -0.36],
-        [-0.1, -0.44],
-        [0.02, -0.28],
-        [0.24, -0.18]
+        [HX, botY, HZ, 0.044, 0.044],
+        [HX, botY + 0.07, HZ, 0.055, 0.055],
+        [HX, HY - 0.34, HZ, 0.047, 0.047],
+        [HX, HY + 0.22, HZ, 0.049, 0.049],
+        [HX, topY - 0.14, HZ, 0.052, 0.052],
+        [HX, topY, HZ, 0.058, 0.058]
       ],
-      0.085,
-      0.045
-    )
-  );
-  t.paint(15909994, { gloss: 0.7, mat: K.metal, ao: 0.95 });
-  for (const s of [-1, 1]) {
-    t.ball(HX - 0.03, topY + 0.12, HZ + s * 0.046, 0.028, 0.028, 0.014, 1);
-    t.ball(HX - 0.03, topY - 0.1, HZ + s * 0.046, 0.028, 0.028, 0.014, 1);
-  }
+      { seg: 7, crease: 60 }
+    );
+    t.paint(8020552, { gloss: 0.22, mat: K.leather, ao: 0.88 });
+    t.tube(
+      [
+        [HX, HY - 0.22, HZ, 0.056, 0.056],
+        [HX, HY - 0.14, HZ, 0.063, 0.063],
+        [HX, HY + 0.09, HZ, 0.063, 0.063],
+        [HX, HY + 0.17, HZ, 0.056, 0.056]
+      ],
+      { seg: 8, crease: 50 }
+    );
+    t.paint(15909994, { gloss: 0.62, mat: K.metal, ao: 0.95 });
+    t.tube(
+      [
+        [HX, botY - 0.03, HZ, 0.026, 0.026],
+        [HX, botY + 0.01, HZ, 0.068, 0.068],
+        [HX, botY + 0.09, HZ, 0.064, 0.064],
+        [HX, botY + 0.12, HZ, 0.05, 0.05]
+      ],
+      { seg: 8, crease: 50 }
+    );
+    t.paint(12567756, { gloss: 0.72, mat: K.metal, ao: 0.95 });
+    t.tube(
+      [
+        [HX, topY - 0.34, HZ, 0.062, 0.062],
+        [HX, topY - 0.28, HZ, 0.078, 0.078],
+        [HX, topY - 0.02, HZ, 0.078, 0.078],
+        [HX, topY + 0.05, HZ, 0.056, 0.056]
+      ],
+      { seg: 8, crease: 50 }
+    );
+    const MB2 = new Ke();
+    MB2.setPosition(HX, topY, HZ), t.paint(11121602, { c2: 14147305, gloss: 0.9, mat: K.metal, ao: 1 }), t.g(
+      MB2,
+      () => t.extrude(
+        [
+          [0.24, 0.12],
+          [0.04, 0.2],
+          [-0.08, 0.36],
+          [-0.3, 0.33],
+          [-0.5, 0.18],
+          [-0.58, -0.02],
+          [-0.48, -0.22],
+          [-0.3, -0.36],
+          [-0.1, -0.44],
+          [0.02, -0.28],
+          [0.24, -0.18]
+        ],
+        0.085,
+        0.045
+      )
+    );
+    t.paint(15909994, { gloss: 0.7, mat: K.metal, ao: 0.95 });
+    for (const s of [-1, 1]) {
+      t.ball(HX - 0.03, topY + 0.12, HZ + s * 0.046, 0.028, 0.028, 0.014, 1);
+      t.ball(HX - 0.03, topY - 0.1, HZ + s * 0.046, 0.028, 0.028, 0.014, 1);
+    }
+  });
   const play = (R, name, time, loop) => {
     const a = heroAnim2(name);
     if (!a) return;
@@ -40574,7 +40609,7 @@ function bNw() {
       R.q[j * 4] = HR2.bindQ[j * 4], R.q[j * 4 + 1] = HR2.bindQ[j * 4 + 1], R.q[j * 4 + 2] = HR2.bindQ[j * 4 + 2], R.q[j * 4 + 3] = HR2.bindQ[j * 4 + 3];
     }
   };
-  const ARM_DOWN = 26, ARM_WRIST = 12, armsDown = (R) => (R.add(upperRJ, 0, 0, ARM_DOWN), R.add(upperLJ, 0, 0, -ARM_DOWN), R.add(handRJ, 0, 0, -ARM_WRIST), R.add(handLJ, 0, 0, ARM_WRIST), R);
+  const ARM_DOWN = 26, ARM_WRIST = 12, HAND_ROLL = 90, armsDown = (R) => (R.add(upperRJ, 0, 0, ARM_DOWN), R.add(upperLJ, 0, 0, -ARM_DOWN), R.add(handRJ, HAND_ROLL, 0, 0), R.add(handRJ, 0, 0, -ARM_WRIST), R.add(handLJ, 0, 0, ARM_WRIST), R);
   const h = (R, I, P) => {
     const st = I.anim;
     if (st === "dead") {

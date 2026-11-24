@@ -22,6 +22,7 @@ const debug = argv.includes('--debug');
 const ZOOM = argv.includes('--zoom');
 // --close=x,y,w,h：选将台额外截一块放大 6 倍的小图，看手/武器细节
 const CLOSE = (argv.find((a) => a.startsWith('--close=')) || '').split('=')[1] || '';
+const CROP = (argv.find((a) => a.startsWith('--crop=')) || '').split('=')[1] || '';
 // --open：放技能前先把英雄挪到一块空地。出生点在基地高台上，地面贴花类特效会被平台挡住
 const OPEN = argv.includes('--open');
 const modular = argv.includes('--modular');
@@ -200,14 +201,23 @@ const main = async () => {
   await ensureServer();
   await ensureChrome();
   const { ws, send, ev } = await connect();
-  const shot = async (name, clip) => {
+  const shot = async (name, clip, scale = 2.4) => {
     if (!shots) return;
     fs.mkdirSync(SHOT_DIR, { recursive: true });
-    const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale: 2.4 } } : {}) });
+    const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale } } : {}) });
     fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-${name}.jpg`), Buffer.from(r.result.data, 'base64'));
   };
-  // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节（裁得比英雄大一圈，技能特效才不会被切掉）
-  const shotHero = (name) => shot(name, ZOOM ? { x: 300, y: 90, width: 700, height: 400 } : undefined);
+  // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节（裁得比英雄大一圈，技能特效才不会被切掉）。
+  // --crop=x,y,w,h,s：自己指定裁切框和放大倍数（战场相机是固定俯视，英雄基本钉在屏幕同一处，
+  // 想把手/武器看清楚就用这个）。
+  const shotHero = (name) => {
+    if (!ZOOM) return shot(name);
+    if (CROP) {
+      const [x, y, w, h, s] = CROP.split(',').map(Number);
+      return shot(name, { x, y, width: w, height: h }, s || 5);
+    }
+    return shot(name, { x: 300, y: 90, width: 700, height: 400 });
+  };
   const clickAt = async (x, y) => {
     for (const type of ['mousePressed', 'mouseReleased'])
       await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
