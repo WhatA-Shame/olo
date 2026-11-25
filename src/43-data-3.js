@@ -136,7 +136,10 @@ function _o(n, t) {
         (pe.armorPen += u.armorPen ?? 0),
         (pe.magicPen += u.magicPen ?? 0),
         (pe.hpRegen += u.hpRegen ?? 0),
-        (pe.manaRegen += u.manaRegen ?? 0));
+        (pe.manaRegen += u.manaRegen ?? 0),
+        (pe.hpToAdPct += u.hpToAdPct ?? 0),
+        (pe.shieldPower += u.shieldPower ?? 0),
+        (pe.healPower += u.healPower ?? 0));
     }
     s && (pe.cdr += yn.frostCdr);
     const f = t.h.hooks;
@@ -155,7 +158,8 @@ function _o(n, t) {
   if (
     ((r.maxHp = (o.maxHp + pe.hp) * (1 + pe.hpPct)),
     (r.maxMana = o.maxMana + pe.mana),
-    (r.ad = (o.ad + pe.ad) * (1 + pe.adPct)),
+    // 哑铃：最大生命的一部分直接换成物攻（先算 maxHp，再算 ad，顺序不能反）
+    (r.ad = (o.ad + pe.ad + r.maxHp * pe.hpToAdPct) * (1 + pe.adPct)),
     (r.ap = (o.ap + pe.ap) * (1 + pe.apPct)),
     (r.armor = o.armor + pe.armor),
     (r.mr = o.mr + pe.mr),
@@ -175,6 +179,9 @@ function _o(n, t) {
     (r.magicPen = Math.min(M6, o.magicPen + pe.magicPen)),
     (r.hpRegen = o.hpRegen + pe.hpRegen + (i ? r.maxHp * yn.blessingRegen : 0)),
     (r.manaRegen = o.manaRegen + pe.manaRegen + (s ? r.maxMana * yn.frostManaRegen : 0)),
+    // 护盾效率 / 治疗加成：裸装是 0，装备叠上来（小兵/塔的 base 里没有这两个字段）
+    (r.shieldPower = (o.shieldPower ?? 0) + pe.shieldPower),
+    (r.healPower = (o.healPower ?? 0) + pe.healPower),
     t.alive && (r.maxHp > l && (t.hp += r.maxHp - l), r.maxMana > c && (t.mana += r.maxMana - c)),
     t.hp > r.maxHp && (t.hp = r.maxHp),
     t.mana > r.maxMana && (t.mana = r.maxMana));
@@ -1374,6 +1381,13 @@ function A6(n, t, e) {
 
 function Wn(n, t, e, s) {
   if (!t.alive) return null;
+  // 护盾效率：按"给盾的人"放大（没有来源就算被套盾的人自己）。
+  // 三条套盾路径（jj / 技能 shield / 44-data-4 的保命盾）最后都走这里，所以只改一处就全覆盖。
+  if (e === "shield" && (s.value ?? 0) > 0) {
+    const src = (s.sourceId ?? -1) >= 0 ? n.byId.get(s.sourceId) : null,
+      sp = (src ?? t).stats?.shieldPower ?? 0;
+    sp > 0 && (s = { ...s, value: s.value * (1 + sp) });
+  }
   const i = lj.has(e);
   if ((i || e === "slow") && iS(t, e)) return null;
   const a = s.sourceId ?? -1,
@@ -1678,7 +1692,7 @@ function useItemActive(n, t, e) {
       break;
     }
     case "heal": {
-      const amt = act.amount + t.stats.maxHp * act.hpRatio;
+      const amt = (act.amount + t.stats.maxHp * act.hpRatio) * (1 + (t.stats.healPower ?? 0));
       for (const u of Pr(n, here, act.radius, (v) => v.team === t.team && v.alive && (v.kind === "hero" || v.kind === "minion")))
         gy(n, u, u, amt) > 0 && n.fx("heal", u.pos, u.team, { unitId: u.id });
       break;
@@ -1933,6 +1947,12 @@ function hS(n, t, e, s = !1) {
     i !== "recall" && vy(n, t),
     f.type !== "self" && (t.facing = Math.atan2(d.dir.y, d.dir.x)),
     xy(n, t));
+  // 耗蓝被动（饭盒/野生狗奶）：全游戏只有这一个扣蓝点，挂在这儿最稳
+  if (t.kind === "hero" && a.cost > 0)
+    for (let hv = 0; hv < t.h.hooks.length; hv++) {
+      const hk = t.h.hooks[hv];
+      hk.onManaSpent && hk.onManaSpent(n, t, a.cost);
+    }
   const m = h ? h.castTime : 0,
     x = c.lockTime ?? m;
   (x > 0 && (o.lockUntil = r + x), h && m > 0 && !c.noAnim && eu(n, t, `cast_${i}`, m, !0));
@@ -2446,7 +2466,9 @@ function gS(n, t, e, s, i) {
 }
 
 function xS(n, t, e, s, i = !1) {
-  const a = gy(n, t, e, s);
+  // 治疗加成按"奶人的那个人"放大。吸血/泉水回复不走这里，所以不会被它放大
+  const hp = (t.stats?.healPower ?? 0) > 0 ? s * (1 + t.stats.healPower) : s,
+    a = gy(n, t, e, hp);
   return (i && a > 0 && n.fx("heal", e.pos, e.team, { unitId: e.id }), a);
 }
 

@@ -15,7 +15,7 @@ import { $8, EB, G8, Hf, Jn, V8, Wx, X8, Zn, _e, j8, po, z } from './32-ui.js';
 import { B0, C2, Hn, Ia, K1, KB, Kh, Ln, Mi, Mr, Pe, Vo, We, Wo, _4, ak, dn, ek, fn, hn, ik, je, ln, ok, sk, w3, w4, xe } from './33-data-2.js';
 
 const tH = {
-  boots: (n) => {
+  slippers: (n) => {
     const t = B0(n, "#e9c873", 0.6),
       e = (i) =>
         `<path d="${i}" fill="none" stroke="${xe}" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><path d="${i}" fill="none" stroke="${Hn(t, 0.35)}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
@@ -37,14 +37,14 @@ const tH = {
         `<circle cx="31.5" cy="31" r="3.2" fill="${Hn(t, 0.5)}" ${Pe(1.1)}/>`,
     );
   },
-  boots_guard: (n) =>
+  liberation_shoes: (n) =>
     C2(
       n,
       w4("pl", 16, 10, 30, 36),
       "",
       `<path d="M17 13H28V28.5L22.5 34L17 28.5Z" fill="url(#@pl)" ${Pe(1.1)}/><path d="M22.5 15V31" stroke="#ffffff" stroke-width="1" opacity=".7"/><path d="M37 36.5L44 40Q49 42.5 49 48V51H35.5Z" fill="url(#@pl)" ${Pe(1.1)}/><circle cx="19.5" cy="15.5" r="1" fill="${xe}"/><circle cx="25.5" cy="15.5" r="1" fill="${xe}"/><circle cx="39" cy="48" r="1" fill="${xe}"/><circle cx="45.5" cy="48" r="1" fill="${xe}"/><path d="M11.5 3.5H33.5L31.5 9.5H13.5Z" fill="${Hn(n, 0.45)}" ${Pe(1.1)}/>`,
     ),
-  boots_arcane: (n) =>
+  canvas_shoes: (n) =>
     C2(
       n,
       je("gs", "#ffe7ad", 1),
@@ -53,7 +53,7 @@ const tH = {
         We("gs", 23, 25, 12) +
         `<path d="${hn(23, 25, 7.5, 0.2)}" fill="#fff4d6" stroke="#8a5a14" stroke-width=".7"/><path d="M14.5 54H49.5" stroke="#8fe9ff" stroke-width="1.6" stroke-linecap="round"/><path d="${hn(45, 22, 3.4)}" fill="#ffffff"/><path d="${hn(52, 33, 2.4)}" fill="#c9f6ff"/><circle cx="40" cy="12" r="1.2" fill="#c9f6ff"/>`,
     ),
-  boots_fury: (n) =>
+  running_shoes: (n) =>
     C2(
       n,
       fn("wg", 2, 10, 24, 38, [
@@ -63,286 +63,471 @@ const tH = {
       `<path d="M0 50H9M3 44H9" stroke="${Hn(n, 0.5)}" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>`,
       `<path d="M25 27Q9 23 2 9Q13 14 25 18Z" fill="url(#@wg)" ${Pe(1.1)}/><path d="M25 32Q11 31 3 21Q13 24.5 25 25.5Z" fill="url(#@wg)" ${Pe(1.1)}/><path d="M25 37Q14 38.5 7 32.5Q15 33.5 25 32Z" fill="url(#@wg)" ${Pe(1.1)}/><circle cx="25.5" cy="27.5" r="3" fill="#f3cf85" ${Pe(1)}/>`,
     ),
-  starfall_blade: (n) =>
+  // ══ 下面是"现代市井"的十个形制，按外形分族，所有装备都指到其中之一 ══
+  // 一件手绘图标是 20~40 行 SVG，63 件挨个画不现实；同族共用一套画法、只换配色，
+  // 视觉上仍然是"一套里的"。要单独美化某一件，就在 tH 里加同名键覆盖 tHx。
+
+  // 棍棒：警棍 / 钢管 / 铁链 / 指虎 / 扳手 / 球棒 / 大锤 / 撬棍 / 哑铃 / 钢钉
+  blunt: (n) =>
     dn(
       Mi(n),
-      fn("bl", 0, 2, 0, 42, [
-        [0, "#fffbe9"],
-        [0.45, n],
-        [1, Ln(n, 0.4)],
-      ]) +
-        je("g", n, 0.85) +
-        je("gs", "#fff6dc", 1),
-      `<path d="M60 22L42 40M52 8L40 20" stroke="${Hn(n, 0.4)}" stroke-width="1.3" stroke-linecap="round" opacity=".5"/><g transform="rotate(40 32 32)">` +
-        We("g", 32, 20, 24) +
-        `<path d="M32 1L40 13L38.4 42H25.6L24 13Z" fill="url(#@bl)" ${Pe()}/><path d="M32 1L40 13L38.4 42H32Z" fill="#6a2f00" opacity=".26"/><path d="M32 7V40" stroke="#fffdf2" stroke-width="1.3" stroke-linecap="round" opacity=".9"/><path d="M16.5 39.5Q24 44 32 41.5Q40 44 47.5 39.5L45.5 47Q38 46 32 48.5Q26 46 18.5 47Z" fill="#3a4257" stroke="#f3cf85" stroke-width="1.2" stroke-linejoin="round"/><rect x="29.4" y="47.6" width="5.2" height="8" fill="${KB}" ${Pe(1)}/><path d="M32 55L35.4 58.6L32 62.2L28.6 58.6Z" fill="${n}" ${Pe(1)}/>` +
-        We("gs", 32, 44.5, 7) +
-        `<path d="${hn(32, 44.5, 4.6)}" fill="#fffdf2"/>` +
-        We("gs", 32, 3, 9) +
-        `<path d="${hn(32, 3, 5.5, 0.14)}" fill="#ffffff"/></g>`,
-    ),
-  sunchaser_bow: (n) => {
-    const t =
-        "M25.5 2.5Q19.5 5 22 9.5Q31 13 36.5 21Q42 29 39.5 32Q42 35 36.5 43Q31 51 22 54.5Q19.5 59 25.5 61.5",
-      e = (s, i) =>
-        `<g transform="translate(0 ${s})" opacity="${i}"><path d="M13 32H52" stroke="#fff7da" stroke-width="1.8" stroke-linecap="round"/><path d="M50 27.5L60 32L50 36.5L53 32Z" fill="#ffffff"/></g>`;
-    return dn(
-      Mi(n),
-      fn("bw", 0, 2, 0, 62, [
-        [0, "#4a3018"],
-        [0.16, n],
-        [0.5, Hn(n, 0.5)],
-        [0.84, n],
-        [1, "#4a3018"],
-      ]) + je("g", n, 0.8),
-      We("g", 36, 30, 26) +
-        '<g transform="rotate(-38 32 32)">' +
-        e(-10, 0.22) +
-        e(10, 0.38) +
-        `<path d="M22.5 6.5L11 32L22.5 57.5" fill="none" stroke="#fff7da" stroke-width="1.1" stroke-linejoin="round"/><path d="${t}" fill="none" stroke="${xe}" stroke-width="6.6" stroke-linecap="round"/><path d="${t}" fill="none" stroke="url(#@bw)" stroke-width="4.4" stroke-linecap="round"/><path d="M30 13.5Q35 17.5 38 23M30 50.5Q35 46.5 38 41" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity=".55"/><rect x="37" y="27" width="5.6" height="10" rx="1.6" fill="#7a4a1c" ${Pe(1)}/><path d="M37 30.3H42.6M37 33.7H42.6" stroke="#f3cf85" stroke-width=".9"/><path d="M11 32H53" stroke="${xe}" stroke-width="3.6" stroke-linecap="round"/><path d="M11 32H53" stroke="#fff7da" stroke-width="1.8" stroke-linecap="round"/><path d="M50 27L61.5 32L50 37L53.5 32Z" fill="#ffffff" ${Pe(1)}/><path d="M11 32L8 28H13L16.5 32L13 36H8Z" fill="#ff8a3a" ${Pe(0.9)}/></g>`,
-    );
-  },
-  blood_scythe: (n) =>
-    dn(
-      Mi(n),
-      fn("bl", 27.5, 0, 36.5, 0, [
-        [0, ak],
-        [0.28, sk],
-        [0.62, "#d9dee6"],
-        [1, n],
-      ]) + je("g", n, 0.7),
-      '<g transform="rotate(42 32 32)">' +
-        We("g", 32, 22, 22) +
-        `<path d="M28 1.5L36 10V43H28Z" fill="url(#@bl)" ${Pe()}/><path d="M30.3 7V41" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity=".85"/><path d="M36 10V43" stroke="${n}" stroke-width="1.6" opacity=".9"/><path d="M26.5 43H37.5V46.6H26.5Z" fill="#f3cf85" ${Pe(1)}/><rect x="29.2" y="46.6" width="5.6" height="8.4" fill="${Ln(n, 0.55)}" ${Pe(1)}/><path d="M29.2 49.3H34.8M29.2 52.1H34.8" stroke="#f3cf85" stroke-width=".9"/><circle cx="32" cy="59" r="4" fill="none" stroke="${xe}" stroke-width="4.6"/><circle cx="32" cy="59" r="4" fill="none" stroke="#f3cf85" stroke-width="2.4"/></g><path d="M45 30Q48.5 35 45 38.2Q41.5 35 45 30Z" fill="#ff5a55" ${Pe(0.8)}/><path d="M38 41Q40.3 44.4 38 46.6Q35.7 44.4 38 41Z" fill="#ff5a55" ${Pe(0.8)}/>`,
-    ),
-  piercing_spear: (n) =>
-    dn(
-      Mi(n),
-      w4("hd", -8, -16, 8, 8) + je("g", "#ffffff", 0.7),
-      `<g fill="none" stroke="${Hn(n, 0.25)}" stroke-width="2.6" stroke-linecap="round" opacity=".8"><path d="M21 17A19 19 0 0 0 11.5 39"/><path d="M19 49.5A19 19 0 0 0 46 46.5"/><path d="M49.5 38A19 19 0 0 0 49 27"/></g><path d="M14 26L20 29M40 51L38 45M52.5 33L46.5 33" stroke="${Hn(n, 0.5)}" stroke-width="1.3" stroke-linecap="round" opacity=".7"/><path d="M9 57L42 22" stroke="${xe}" stroke-width="5.6" stroke-linecap="round"/><path d="M9 57L42 22" stroke="${_4}" stroke-width="3" stroke-linecap="round"/><path d="M38.5 25Q31.5 25.5 29.5 34Q34.5 32 40.5 31Z" fill="#e0453f" ${Pe(0.9)}/><circle cx="9" cy="57" r="2.8" fill="${ik}" ${Pe(1)}/><g transform="translate(44 20) rotate(45)"><path d="M0 2L-9.5 1.5L-15 -5L-13.5 4.5L-9 8.5H0Z" fill="url(#@hd)" ${Pe()}/><path d="M-1 5H-9.5L-13 0" fill="none" stroke="#ffffff" stroke-width=".9" stroke-linejoin="round" opacity=".7"/><path d="M0 -16L6.2 -3L0 3.5L-6.2 -3Z" fill="url(#@hd)" ${Pe()}/><path d="M0 -14V2" stroke="#ffffff" stroke-width="1" opacity=".8"/><rect x="-3.4" y="7.5" width="6.8" height="3.6" rx="1" fill="#f3cf85" ${Pe(0.9)}/></g>` +
-        We("g", 56.5, 8.5, 8) +
-        `<path d="${hn(56.5, 8.5, 4.2, 0.14)}" fill="#ffffff"/>`,
-    ),
-  phantom_edge: (n) => {
-    const t = "M27 42Q20.5 21 32.5 7Q40 -1.5 48.5 7.5Q41.5 5.5 38 12Q30.5 24 35.5 42Z";
-    return dn(
-      Mi(n),
-      fn("bl", 22, 0, 46, 0, [
-        [0, "#ffffff"],
-        [0.45, Hn(n, 0.55)],
-        [1, n],
-      ]) +
-        je("g", n, 0.8) +
-        je("gs", "#ffffff", 1),
-      `<g transform="translate(-1 2) rotate(30 32 32)"><path d="${t}" transform="translate(-8 3)" fill="${n}" opacity=".26"/>` +
-        We("g", 34, 20, 22) +
-        `<path d="${t}" fill="url(#@bl)" ${Pe()}/><path d="M29.5 40Q24 22 34 9.5Q39.5 3 45 6" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity=".9"/><path d="M22 42H40.5Q42.5 42 42.5 44.2Q42.5 46.4 40.5 46.4H22Q20 46.4 20 44.2Q20 42 22 42Z" fill="#2a2244" stroke="${Hn(n, 0.2)}" stroke-width="1.1"/><rect x="28.6" y="46.4" width="5.4" height="9.2" fill="#15131f" ${Pe(1)}/><path d="M28.6 49.4H34M28.6 52.4H34" stroke="${n}" stroke-width="1"/><path d="M31.3 55.6L35 59.3L31.3 63L27.6 59.3Z" fill="${Hn(n, 0.2)}" ${Pe(1)}/>` +
-        We("gs", 48, 7, 9) +
-        `<path d="${hn(48, 7, 6.5, 0.12)}" fill="#ffffff"/></g>`,
-    );
-  },
-  astral_staff: (n) =>
-    dn(
-      Mi(n),
-      fn("st", 35, 5, 55, 25, [
-        [0, "#ffffff"],
-        [1, n],
-      ]) + je("g", n, 1),
-      `<path d="M16 59L38 26" stroke="${xe}" stroke-width="5.8" stroke-linecap="round"/><path d="M16 59L38 26" stroke="#9fb7e8" stroke-width="3" stroke-linecap="round"/><path d="M22 46.5L26 49.2M29.5 35.5L33.5 38.2" stroke="#f3cf85" stroke-width="2" stroke-linecap="round"/><path d="M38 26Q28 20 33 8M38 26Q46 32 57 26" fill="none" stroke="${xe}" stroke-width="5" stroke-linecap="round"/><path d="M38 26Q28 20 33 8M38 26Q46 32 57 26" fill="none" stroke="#f3cf85" stroke-width="2.6" stroke-linecap="round"/><circle cx="38" cy="26" r="3.2" fill="#fff4d6" ${Pe(1)}/>` +
-        We("g", 45, 15, 17) +
-        `<ellipse cx="45" cy="15" rx="14" ry="4.6" transform="rotate(-25 45 15)" fill="none" stroke="#c9f6ff" stroke-width="1.1" opacity=".8"/><path d="${hn(45, 15, 11, 0.22)}" fill="url(#@st)" stroke="${Ln(n, 0.5)}" stroke-width=".8"/><path d="${hn(45, 15, 5)}" fill="#ffffff"/><circle cx="16" cy="59" r="2.6" fill="#f3cf85" ${Pe(1)}/><circle cx="14" cy="22" r="1.3" fill="#c9f6ff"/><path d="${hn(20, 13, 2.8)}" fill="#ffffff"/>`,
-    ),
-  void_crown: (n) =>
-    dn(
-      Mi(n),
-      ok("cr", n, 8, 10, 56, 52) +
-        Vo("vo", 32, 34, 8.5, [
-          [0, "#000000"],
-          [0.55, "#1c0845"],
-          [1, n],
-        ]) +
-        je("g", n, 0.85),
-      We("g", 32, 32, 28) +
-        `<path d="M11 44L7.5 19L21 30L32 10.5L43 30L56.5 19L53 44Z" fill="url(#@cr)" ${Pe()}/><path d="M21 30L22.5 44M43 30L41.5 44" stroke="${Ln(n, 0.55)}" stroke-width="1.1" opacity=".55"/><path d="M7.5 19L21 30L32 10.5" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" opacity=".55"/><path d="M10.5 44H53.5V51Q53.5 53.5 51 53.5H13Q10.5 53.5 10.5 51Z" fill="#241c42" stroke="${Hn(n, 0.4)}" stroke-width="1.2"/><path d="M20 46L22.6 48.8L20 51.6L17.4 48.8ZM44 46L46.6 48.8L44 51.6L41.4 48.8ZM32 46L34.6 48.8L32 51.6L29.4 48.8Z" fill="${Hn(n, 0.6)}"/><circle cx="7.5" cy="19" r="2.8" fill="#ece2ff" ${Pe(1)}/><circle cx="56.5" cy="19" r="2.8" fill="#ece2ff" ${Pe(1)}/><circle cx="32" cy="10.5" r="3.2" fill="#ece2ff" ${Pe(1)}/><circle cx="32" cy="34" r="7.8" fill="url(#@vo)" stroke="#ece2ff" stroke-width="1.3"/><path d="M27.5 32Q29.5 28.5 33.5 29" fill="none" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".85"/>`,
-    ),
-  winter_scepter: (n) =>
-    dn(
-      Mi(n),
-      fn("ic", 30, 6, 56, 32, [
-        [0, "#ffffff"],
-        [1, n],
-      ]) + je("g", n, 0.9),
-      `<path d="M14 59L37 27" stroke="${xe}" stroke-width="5.8" stroke-linecap="round"/><path d="M14 59L37 27" stroke="#c4d8e8" stroke-width="3" stroke-linecap="round"/><path d="M20 47.5L24 50.5M27 37.5L31 40.5" stroke="#5c7fa6" stroke-width="2" stroke-linecap="round"/><path d="M35 33L27 27L36 27.5Z" fill="#e8fbff" ${Pe(1)}/><path d="M39 33L47 36L40.5 29Z" fill="${n}" ${Pe(1)}/>` +
-        We("g", 43, 19, 20) +
-        `<path d="${Mr(43, 19, 6, 14.5, 5.2)}" fill="url(#@ic)" stroke="#1b4a66" stroke-width="1.1" stroke-linejoin="round"/><path d="M43 4.5V33.5M30.4 11.8L55.6 26.2M30.4 26.2L55.6 11.8" stroke="#ffffff" stroke-width=".9" opacity=".75"/><path d="${Mr(43, 19, 6, 5.6, 3.4)}" fill="#ffffff"/><circle cx="14" cy="59" r="2.6" fill="#c4d8e8" ${Pe(1)}/><g stroke="#e8fbff" stroke-width="1.2" stroke-linecap="round"><path d="M14 14V22M10.5 16L17.5 20M10.5 20L17.5 16"/><path d="M53 42V48M50.4 43.5L55.6 46.5M50.4 46.5L55.6 43.5"/></g>`,
-    ),
-  sage_codex: (n) => {
-    let t = "",
-      e = "";
-    for (let s = 0; s < 7; s++) {
-      const i = 9.5 + s * 5.2,
-        a = 13 + (s % 2) * 1.2;
-      ((t += `<rect x="${i.toFixed(1)}" y="${a.toFixed(1)}" width="4.8" height="38" rx="1" fill="url(#@bm)" ${Pe(0.9)}/>`),
-        s > 0 &&
-          (e += `M${(i + 1.3).toFixed(1)} 27h2.2M${(i + 1.3).toFixed(1)} 31h2.2M${(i + 1.3).toFixed(1)} 35h2.2M${(i + 1.3).toFixed(1)} 39h2.2`));
-    }
-    return dn(
-      Mi(n),
-      fn("bm", 0, 12, 0, 52, [
+      fn('bd', 18, 8, 48, 56, [
         [0, Hn(n, 0.5)],
         [0.5, n],
-        [1, Ln(n, 0.45)],
-      ]) +
-        fn("rl", 45, 0, 56, 0, [
-          [0, Ln(n, 0.35)],
-          [0.45, Hn(n, 0.35)],
-          [1, Ln(n, 0.6)],
-        ]) +
-        je("g", "#fff6dc", 0.85),
-      '<g transform="rotate(-8 32 32)">' +
-        We("g", 28, 33, 24) +
-        t +
-        `<path d="${e}" stroke="#5a3a12" stroke-width="1.3" stroke-linecap="round"/><path d="M8.5 20.5H47M8.5 45H47" stroke="${xe}" stroke-width="3.2" stroke-linecap="round"/><path d="M8.5 20.5H47M8.5 45H47" stroke="#c8523c" stroke-width="1.7" stroke-linecap="round"/><rect x="45.5" y="10" width="10" height="44" rx="5" fill="url(#@rl)" ${Pe(1.2)}/><ellipse cx="50.5" cy="13" rx="3.6" ry="1.8" fill="${Ln(n, 0.62)}"/><path d="M45.5 20.5H55.5M45.5 45H55.5" stroke="#c8523c" stroke-width="1.7"/><path d="M48 17V50" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity=".5"/><path d="M50.5 54V60" stroke="#c8523c" stroke-width="1.5" stroke-linecap="round"/><path d="M48.8 59.5H52.2L51.3 63H49.7Z" fill="#c8523c"/></g><path d="${hn(51, 9, 3.6)}" fill="#ffffff"/><path d="${hn(8, 54, 2.4)}" fill="#fff6dc"/>`,
-    );
-  },
-  guardian_plate: (n) =>
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.8),
+      We('gw', 32, 32, 26) +
+        `<path d="M20.5 52.5L44 15.5" stroke="${xe}" stroke-width="13" stroke-linecap="round"/><path d="M20.5 52.5L44 15.5" stroke="url(#@bd)" stroke-width="10" stroke-linecap="round"/>` +
+        `<path d="M23.5 48.5L27 43M28.5 40.5L32 35" stroke="${Ln(n, 0.45)}" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>` +
+        `<circle cx="44.5" cy="14.5" r="7.4" fill="url(#@bd)" ${Pe(1.4)}/><circle cx="42.4" cy="12.4" r="2.2" fill="#ffffff" opacity=".55"/>` +
+        `<path d="M24 49L28.6 42" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
+    ),
+
+  // 瓶装：敌敌畏 / 杀虫喷雾 / 防狼喷雾 / 二锅头 / 藿香正气水 / 药酒罐 / 野生狗奶
+  bottle: (n) =>
     dn(
       Mi(n),
-      fn("pl", 10, 8, 54, 56, [
-        [0, Hn(n, 0.6)],
+      fn('bt', 22, 12, 44, 58, [
+        [0, Hn(n, 0.55)],
         [0.45, n],
         [1, Ln(n, 0.55)],
-      ]) + je("g", "#ffcf70", 1),
-      `<path d="M32 13L41 9Q48 7.5 54 12.5L57.5 25L48 30V44Q42 54 32 57.5Q22 54 16 44V30L6.5 25L10 12.5Q16 7.5 23 9Z" fill="url(#@pl)" ${Pe(1.5)}/><path d="M6.5 25L10 12.5Q16 7.5 23 9L20.5 22Q13.5 22 6.5 25Z" fill="${Hn(n, 0.5)}" ${Pe(1.1)}/><path d="M57.5 25L54 12.5Q48 7.5 41 9L43.5 22Q50.5 22 57.5 25Z" fill="${n}" ${Pe(1.1)}/><path d="M23 9L32 13L41 9L38.5 17.5Q32 20.5 25.5 17.5Z" fill="${Ln(n, 0.5)}" ${Pe(1.1)}/><path d="M32 20V57" stroke="#ffffff" stroke-width="1.2" opacity=".4"/><path d="M19.5 30.5Q26 36.5 32 33.5Q38 36.5 44.5 30.5M18 40Q32 46.5 46 40M21.5 47.5Q32 52.5 42.5 47.5" fill="none" stroke="${Ln(n, 0.6)}" stroke-width="1.3" stroke-linecap="round" opacity=".7"/><circle cx="13" cy="17" r="1.2" fill="${xe}"/><circle cx="51" cy="17" r="1.2" fill="${xe}"/>` +
-        We("g", 32, 27, 9) +
-        '<path d="M32 22L36.2 27L32 32L27.8 27Z" fill="#ffcf70" stroke="#fffdf2" stroke-width="1"/>',
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 33, 38, 24) +
+        `<path d="M28 8h10v6.5c0 3 4.5 5.5 4.5 10V53c0 2.6-2 4.5-4.5 4.5H28c-2.6 0-4.5-1.9-4.5-4.5V24.5c0-4.5 4.5-7 4.5-10Z" fill="url(#@bt)" ${Pe(1.4)}/>` +
+        `<path d="M25.5 6.5h15v4.5h-15z" fill="${Ln(n, 0.5)}" ${Pe(1.2)}/>` +
+        `<path d="M23.5 31h19v11h-19z" fill="#f4f7fb" opacity=".85"/>` +
+        `<path d="M27 36.5h12" stroke="${Ln(n, 0.55)}" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>` +
+        `<path d="M27.5 22.5v26" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`,
     ),
-  starweave_cloak: (n) => {
-    const t =
-        "M17.5 21Q13.5 16.5 18.5 13.5Q18.5 8.5 24.5 9.5Q27.5 5 32 8Q36.5 5 39.5 9.5Q45.5 8.5 45.5 13.5Q50.5 16.5 46.5 21Q48.5 26.5 42.5 26Q39.5 30 36 26.5Q32 30.5 28 26.5Q24.5 30 21.5 26Q15.5 26.5 17.5 21Z",
-      e = "M11 57Q21.5 50.5 32 57Q42.5 50.5 53 57";
-    return dn(
+
+  // 罐筒：红牛 / 奶粉罐 / 充电宝 / 保温壶 / 煤气罐 / 消防栓 / 红糖姜茶
+  can: (n) =>
+    dn(
       Mi(n),
-      fn("ck", 0, 10, 0, 58, [
-        [0, Hn(n, 0.35)],
-        [0.45, n],
-        [1, B0(n, "#0a1838", 0.72)],
-      ]) +
-        fn("fr", 0, 5, 0, 30, [
-          [0, "#ffffff"],
-          [1, "#e2d3b4"],
-        ]) +
-        je("g", n, 0.7),
-      We("g", 32, 36, 30) +
-        `<path d="M22 15L45 15.5Q56 34 54 58Q43 51.5 32 58Q21 51.5 10 58Q8 34 19 15.5Z" fill="url(#@ck)" ${Pe(1.4)}/><path d="M26 27Q24 41 21 53M38 27Q40 41 43 53M32 29V56" fill="none" stroke="${Ln(n, 0.6)}" stroke-width="1.2" stroke-linecap="round" opacity=".4"/><path d="M19 15.5Q11 30 10.5 50" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity=".35"/><path d="${e}" fill="none" stroke="${xe}" stroke-width="7" stroke-linecap="round"/><path d="${e}" fill="none" stroke="#efe3c8" stroke-width="4.8" stroke-linecap="round"/><path d="M15 53.5V57M20 51.5V55M25.5 52.5V56M32 55V58.5M38.5 52.5V56M44 51.5V55M49 53.5V57" stroke="#b9a57e" stroke-width=".9" stroke-linecap="round"/><path d="${t}" fill="url(#@fr)" ${Pe(1.3)}/><path d="M21 17.5L23 20.5M26 13L27.5 16M37 13L36 16M43 17.5L41 20.5M25 22.5L26.5 24.5M39 22.5L37.5 24.5M32 22.5V25.5" stroke="#b9a57e" stroke-width="1" stroke-linecap="round"/><ellipse cx="32" cy="14.5" rx="5.4" ry="2.7" fill="#061220"/><circle cx="32" cy="27.5" r="2.8" fill="#f3cf85" ${Pe(1)}/>`,
-    );
-  },
-  undying_heart: (n) => {
-    let t = "";
-    for (let s = 0; s < 8; s++) {
-      const [i, a] = Wo(32, 32, 20.2, s * 45 + 22.5);
-      t += `<circle cx="${i}" cy="${a}" r="1.3" fill="#fff4d6" stroke="#6b4614" stroke-width=".5"/>`;
-    }
-    const e = (s) =>
-      `<path d="${s}" stroke="${xe}" stroke-width="6" stroke-linecap="round"/><path d="${s}" stroke="${_4}" stroke-width="3.6" stroke-linecap="round"/>`;
-    return dn(
-      Mi(n),
-      fn("rm", 10, 10, 54, 54, [
-        [0, "#fff1c4"],
-        [0.45, "#d9a548"],
-        [1, "#6b4614"],
-      ]) +
-        Vo("ht", 27, 25, 26, [
-          [0, Hn(n, 0.62)],
-          [0.5, n],
-          [1, Ln(n, 0.55)],
-        ]) +
-        je("g", n, 0.85) +
-        je("gc", "#fff0f3", 0.9),
-      We("g", 32, 32, 31) +
-        e("M7 7L17 17") +
-        e("M57 7L47 17") +
-        e("M7 57L17 47") +
-        e("M57 57L47 47") +
-        `<circle cx="32" cy="32" r="23" fill="url(#@rm)" ${Pe(1.5)}/><circle cx="32" cy="32" r="17.2" fill="url(#@ht)" stroke="#6b4614" stroke-width="1.2"/>` +
-        t +
-        '<path d="M19.5 25A14.5 14.5 0 0 1 30 17.7" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity=".6"/>' +
-        We("gc", 32, 32, 12) +
-        `<path d="M32 42L23.3 33Q20 27.5 24.7 24.7Q29.2 22.8 32 27.4Q34.8 22.8 39.3 24.7Q44 27.5 40.7 33Z" fill="#fff3f5" stroke="${Ln(n, 0.5)}" stroke-width="1" stroke-linejoin="round"/><path d="M26 28.5Q27.2 26.3 29.3 26.6" fill="none" stroke="${n}" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>`,
-    );
-  },
-  thorn_mail: (n) => {
-    let t = "";
-    for (let e = 0; e < 8; e++) {
-      const [s, i] = Wo(32, 33, 14.5, e * 45 - 90);
-      t += `<circle cx="${s}" cy="${i}" r="1.3" fill="#f1f8d8" stroke="${Ln(n, 0.6)}" stroke-width=".5"/>`;
-    }
-    return dn(
-      Mi(n),
-      Vo("bd", 26, 26, 30, [
+      fn('cn', 20, 14, 46, 56, [
         [0, Hn(n, 0.5)],
         [0.5, n],
-        [1, Ln(n, 0.6)],
-      ]) +
-        fn("sp", 0, 4, 0, 62, [
-          [0, "#f8fbe6"],
-          [1, Ln(n, 0.15)],
-        ]),
-      `<path d="${Mr(32, 33, 8, 28.5, 15, -67.5)}" fill="url(#@sp)" ${Pe(1.2)}/><circle cx="32" cy="33" r="20" fill="url(#@bd)" ${Pe(1.5)}/><circle cx="32" cy="33" r="17.3" fill="none" stroke="${Ln(n, 0.55)}" stroke-width="1.2" opacity=".6"/><circle cx="32" cy="33" r="10.5" fill="none" stroke="${Ln(n, 0.6)}" stroke-width="1.3" opacity=".65"/><path d="M32 13V22.5M32 43.5V53M12 33H21.5M42.5 33H52" stroke="${Ln(n, 0.6)}" stroke-width="1.1" opacity=".5"/>` +
-        t +
-        `<path d="M17.5 25.5A16.5 16.5 0 0 1 28.5 16.8" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".5"/><circle cx="32" cy="33" r="7" fill="${Ln(n, 0.35)}" ${Pe(1.2)}/><path d="${Mr(32, 33, 4, 9, 3, -90)}" fill="url(#@sp)" ${Pe(1)}/><circle cx="32" cy="33" r="1.6" fill="#ffffff"/>`,
-    );
-  },
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 34, 24) +
+        `<path d="M22 17h20v30c0 3.4-2.2 5.6-5.6 5.6H27.6C24.2 52.6 22 50.4 22 47Z" fill="url(#@cn)" ${Pe(1.4)}/>` +
+        `<ellipse cx="32" cy="17" rx="10" ry="3.6" fill="${Hn(n, 0.55)}" ${Pe(1.3)}/>` +
+        `<ellipse cx="32" cy="17" rx="5.6" ry="1.9" fill="${Ln(n, 0.35)}"/>` +
+        `<path d="M22 27h20v13H22z" fill="#f4f7fb" opacity=".9"/>` +
+        `<path d="M26 33.5h12" stroke="${Ln(n, 0.5)}" stroke-width="1.7" stroke-linecap="round" opacity=".75"/>` +
+        `<path d="M25.5 22v22" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`,
+    ),
+
+  // 块状：板砖 / 水泥墩
+  brick: (n) =>
+    dn(
+      Mi(n),
+      fn('brk', 12, 20, 52, 50, [
+        [0, Hn(n, 0.45)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 34, 24) +
+        `<path d="M12 24l20-9 20 9v18l-20 9-20-9z" fill="url(#@brk)" ${Pe(1.5)}/>` +
+        `<path d="M12 24l20 9 20-9M32 33v18" stroke="${Ln(n, 0.5)}" stroke-width="1.4" opacity=".75"/>` +
+        `<path d="M17 26.5l11-5 11 5" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".45"/>` +
+        `<path d="M22 38l6 2.6M36 40.6l6-2.6" stroke="${Ln(n, 0.45)}" stroke-width="1.2" opacity=".6"/>`,
+    ),
+
+  // 布/被：棉袄 / 沙发垫 / 棉被 / 席梦思 / 雨衣 / 灭火毯 / 铁丝网 / 十斤大棉被
+  cloth: (n) =>
+    dn(
+      Mi(n),
+      fn('cl', 14, 18, 50, 54, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 34, 24) +
+        `<path d="M15 22c0-3 2-5 5-5h24c3 0 5 2 5 5v20c0 3-2 5-5 5H20c-3 0-5-2-5-5z" fill="url(#@cl)" ${Pe(1.5)}/>` +
+        `<path d="M15 27c6 3.5 11 3.5 17 0s11-3.5 17 0M15 33c6 3.5 11 3.5 17 0s11-3.5 17 0M15 39c6 3.5 11 3.5 17 0s11-3.5 17 0" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1.3" opacity=".7"/>` +
+        `<path d="M15 24.5c6 3.5 11 3.5 17 0s11-3.5 17 0" fill="none" stroke="#ffffff" stroke-width="1.2" opacity=".45"/>`,
+    ),
+
+  // 盾/门/盆：防暴盾牌 / 防盗门 / 不锈钢大盆
+  shield: (n) =>
+    dn(
+      Mi(n),
+      fn('sh', 14, 12, 50, 56, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.8),
+      We('gw', 32, 32, 26) +
+        `<path d="M32 9l17 6v16c0 11-7.5 18-17 22-9.5-4-17-11-17-22V15z" fill="url(#@sh)" ${Pe(1.6)}/>` +
+        `<path d="M32 14.5l11.5 4v12.5c0 7.5-5 12.5-11.5 15.5-6.5-3-11.5-8-11.5-15.5V18.5z" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".5"/>` +
+        `<path d="M26.5 24h11v8.5h-11z" fill="#cfe6ff" opacity=".55" ${Pe(1.1)}/>` +
+        `<path d="M22 40h20" stroke="${Ln(n, 0.5)}" stroke-width="1.5" opacity=".6"/>`,
+    ),
+
+  // 喇叭：大喇叭 / 广场舞音响 / 收音机 / 唢呐 / 弹弓
+  horn: (n) =>
+    dn(
+      Mi(n),
+      fn('hn', 10, 16, 54, 48, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.8),
+      We('gw', 30, 32, 26) +
+        `<path d="M14 27h8l20-13v36L22 37h-8z" fill="url(#@hn)" ${Pe(1.5)}/>` +
+        `<path d="M46 19c4 3 4 11 0 14" fill="none" stroke="${Hn(n, 0.5)}" stroke-width="2.4" stroke-linecap="round"/>` +
+        `<path d="M51 15c6.5 5 6.5 19 0 24" fill="none" stroke="${Hn(n, 0.4)}" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>` +
+        `<path d="M18 27v10" stroke="#ffffff" stroke-width="1.5" opacity=".5"/>`,
+    ),
+
+  // 盒子：饭盒 / 急救箱 / 闹钟 / 冷风机 / 大锅菜
+  box: (n) =>
+    dn(
+      Mi(n),
+      fn('bx', 12, 22, 52, 52, [
+        [0, Hn(n, 0.45)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 34, 24) +
+        `<path d="M14 26h36v22c0 2.5-1.5 4-4 4H18c-2.5 0-4-1.5-4-4z" fill="url(#@bx)" ${Pe(1.5)}/>` +
+        `<path d="M12 20h40v7H12z" fill="${Hn(n, 0.4)}" ${Pe(1.4)}/>` +
+        `<path d="M27 34h10v4h-10zM30 30h4v12h-4z" fill="#f4f7fb" opacity=".92"/>` +
+        `<path d="M18 29v17" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>`,
+    ),
+
+  // 头盔/面罩：安全帽 / 防毒面具 / 防弹衣 / 防暴服
+  mask: (n) =>
+    dn(
+      Mi(n),
+      fn('mk', 14, 14, 50, 54, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.8),
+      We('gw', 32, 32, 26) +
+        `<path d="M32 10c9.5 0 16 5 16 13v9c0 10-7 16-16 22-9-6-16-12-16-22v-9c0-8 6.5-13 16-13z" fill="url(#@mk)" ${Pe(1.6)}/>` +
+        `<path d="M20.5 27h23v9h-23z" fill="#0a1128" opacity=".85" ${Pe(1.2)}/>` +
+        `<path d="M24 31.5h6M34 31.5h6" stroke="${Hn(n, 0.6)}" stroke-width="2.4" stroke-linecap="round"/>` +
+        `<path d="M26 42h12" stroke="${Ln(n, 0.5)}" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>`,
+    ),
+
+  // 车：电动车
+  bike: (n) =>
+    dn(
+      Mi(n),
+      fn('bk', 12, 20, 52, 50, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 36, 24) +
+        `<circle cx="20" cy="44" r="8.5" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="3.4"/><circle cx="44" cy="44" r="8.5" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="3.4"/>` +
+        `<path d="M20 44l9-14h11l4 14" fill="none" stroke="url(#@bk)" stroke-width="4.2" stroke-linecap="round"/>` +
+        `<path d="M29 30h-6" stroke="${Ln(n, 0.45)}" stroke-width="3" stroke-linecap="round"/>` +
+        `<path d="M40 30l3-6" stroke="${Ln(n, 0.45)}" stroke-width="3" stroke-linecap="round"/>` +
+        `<circle cx="44" cy="44" r="2.4" fill="#f4f7fb"/>`,
+    ),
+  // ── 上面十族之外，再拆几个"看着不一样"的形制 ──
+  // 光靠十族的话，攻击页会排出一列一模一样的棍子。这十来个是把最常露面的几件
+  // （指虎、钢钉、弹弓、铁链、扳手、锤、哑铃、射钉枪、外套、铁丝网、安全帽、马甲）单独画出来。
+
+  // 指虎：一排四个指孔
+  knuckle: (n) =>
+    dn(
+      Mi(n),
+      fn('kn', 10, 24, 54, 48, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 34, 24) +
+        `<path d="M13 25h38c2.4 0 4 1.6 4 4v12c0 2.4-1.6 4-4 4H13c-2.4 0-4-1.6-4-4V29c0-2.4 1.6-4 4-4Z" fill="url(#@kn)" ${Pe(1.5)}/>` +
+        `<circle cx="17.5" cy="35" r="4.4" fill="${xe}"/><circle cx="28" cy="35" r="4.4" fill="${xe}"/><circle cx="38.5" cy="35" r="4.4" fill="${xe}"/><circle cx="49" cy="35" r="4.4" fill="${xe}"/>` +
+        `<path d="M12 28.5h40" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".45"/>`,
+    ),
+
+  // 钢钉：扁头 + 尖身
+  nail: (n) =>
+    dn(
+      Mi(n),
+      fn('nl', 24, 12, 40, 52, [
+        [0, Hn(n, 0.55)],
+        [0.5, n],
+        [1, Ln(n, 0.45)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 32, 22) +
+        `<path d="M22 10h20v7H22z" fill="${Hn(n, 0.5)}" ${Pe(1.4)}/>` +
+        `<path d="M28.5 17h7v25L32 54l-3.5-12z" fill="url(#@nl)" ${Pe(1.3)}/>` +
+        `<path d="M30 19v23" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".5"/>` +
+        `<path d="M22 12.5h20" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>`,
+    ),
+
+  // 弹弓：Y 形叉 + 皮筋
+  sling: (n) =>
+    dn(
+      Mi(n),
+      fn('sl', 18, 12, 46, 54, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 30, 24) +
+        `<path d="M32 55V33" stroke="${Ln(n, 0.4)}" stroke-width="7.5" stroke-linecap="round"/><path d="M32 55V33" stroke="url(#@sl)" stroke-width="5" stroke-linecap="round"/>` +
+        `<path d="M32 34C32 24 23 20 20.5 13" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="7" stroke-linecap="round"/><path d="M32 34C32 24 23 20 20.5 13" fill="none" stroke="url(#@sl)" stroke-width="4.4" stroke-linecap="round"/>` +
+        `<path d="M32 34C32 24 41 20 43.5 13" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="7" stroke-linecap="round"/><path d="M32 34C32 24 41 20 43.5 13" fill="none" stroke="url(#@sl)" stroke-width="4.4" stroke-linecap="round"/>` +
+        `<path d="M20.5 13Q32 8 43.5 13" fill="none" stroke="#e8eef7" stroke-width="2" stroke-linecap="round" opacity=".75"/>` +
+        `<path d="M30 44h4" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>`,
+    ),
+
+  // 铁链：一串斜挂的链环
+  chain: (n) =>
+    dn(
+      Mi(n),
+      fn('ch', 12, 12, 52, 52, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 32, 24) +
+        [0, 1, 2, 3, 4]
+          .map((i) => {
+            const x = 14 + i * 9,
+              y = 50 - i * 9,
+              c = i % 2 ? Hn(n, 0.45) : Ln(n, 0.15);
+            return `<ellipse cx="${x}" cy="${y}" rx="7.6" ry="4.8" transform="rotate(-45 ${x} ${y})" fill="none" stroke="${xe}" stroke-width="4.4"/><ellipse cx="${x}" cy="${y}" rx="7.6" ry="4.8" transform="rotate(-45 ${x} ${y})" fill="none" stroke="${c}" stroke-width="2.6"/>`;
+          })
+          .join('') +
+        `<ellipse cx="14" cy="50" rx="7.6" ry="4.8" transform="rotate(-45 14 50)" fill="none" stroke="#ffffff" stroke-width="1" opacity=".4"/>`,
+    ),
+
+  // 扳手：开口钳头 + 长柄
+  wrench: (n) =>
+    dn(
+      Mi(n),
+      fn('wr', 20, 8, 44, 56, [
+        [0, Hn(n, 0.55)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 30, 24) +
+        `<path d="M32 20v32" stroke="${Ln(n, 0.4)}" stroke-width="9" stroke-linecap="round"/><path d="M32 20v32" stroke="url(#@wr)" stroke-width="6.4" stroke-linecap="round"/>` +
+        `<path d="M24 8h16v5.5h-5.2v6.2H29.2V13.5H24Z" fill="url(#@wr)" ${Pe(1.4)}/>` +
+        `<path d="M24 8h16v5.5h-5.2v6.2H29.2V13.5H24Z" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1" opacity=".6"/>` +
+        `<circle cx="32" cy="42" r="2.6" fill="${xe}" opacity=".7"/>` +
+        `<path d="M28.5 24v18" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
+    ),
+
+  // 锤：横着的锤头 + 竖柄
+  hammer: (n) =>
+    dn(
+      Mi(n),
+      fn('hm', 12, 10, 52, 28, [
+        [0, Hn(n, 0.55)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.8),
+      We('gw', 32, 26, 26) +
+        `<path d="M31 24v31" stroke="${Ln(n, 0.45)}" stroke-width="8" stroke-linecap="round"/><path d="M31 24v31" stroke="url(#@hm)" stroke-width="5.6" stroke-linecap="round"/>` +
+        `<path d="M13 11h38c1.6 0 2.6 1 2.6 2.6v11c0 1.6-1 2.6-2.6 2.6H13c-1.6 0-2.6-1-2.6-2.6v-11C10.4 12 11.4 11 13 11Z" fill="url(#@hm)" ${Pe(1.6)}/>` +
+        `<path d="M16 14.5h32" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>` +
+        `<path d="M31 47h4" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>`,
+    ),
+
+  // 哑铃：一根横杆两端配重
+  dumbbell: (n) =>
+    dn(
+      Mi(n),
+      fn('db', 6, 18, 58, 46, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 32, 24) +
+        `<path d="M22 32h20" stroke="${Ln(n, 0.4)}" stroke-width="7" stroke-linecap="round"/>` +
+        `<path d="M22 32h20" stroke="${Hn(n, 0.35)}" stroke-width="4" stroke-linecap="round"/>` +
+        `<rect x="12" y="18" width="11" height="28" rx="3.4" fill="url(#@db)" ${Pe(1.5)}/>` +
+        `<rect x="41" y="18" width="11" height="28" rx="3.4" fill="url(#@db)" ${Pe(1.5)}/>` +
+        `<rect x="5" y="25" width="6" height="14" rx="2.2" fill="${Hn(n, 0.3)}" ${Pe(1.1)}/>` +
+        `<rect x="53" y="25" width="6" height="14" rx="2.2" fill="${Hn(n, 0.3)}" ${Pe(1.1)}/>` +
+        `<path d="M15 22v20M44 22v20" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
+    ),
+
+  // 射钉枪：枪身 + 枪管 + 握把
+  gun: (n) =>
+    dn(
+      Mi(n),
+      fn('gn', 14, 18, 56, 50, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.55)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 32, 24) +
+        `<path d="M14 22h26c2 0 3 1 3 3v9c0 2-1 3-3 3H14c-2 0-3-1-3-3v-9c0-2 1-3 3-3Z" fill="url(#@gn)" ${Pe(1.5)}/>` +
+        `<path d="M43 26h13v5H43z" fill="${Ln(n, 0.25)}" ${Pe(1.2)}/>` +
+        `<path d="M20 37l-4 16h10l4-16z" fill="${Hn(n, 0.35)}" ${Pe(1.3)}/>` +
+        `<path d="M29 37l2 9h7l-1-9z" fill="${Ln(n, 0.3)}" opacity=".8"/>` +
+        `<path d="M16 26h22" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>` +
+        `<circle cx="40" cy="30" r="1.6" fill="#ffffff" opacity=".6"/>`,
+    ),
+
+  // 外套：棉袄 / 雨衣
+  coat: (n) =>
+    dn(
+      Mi(n),
+      fn('ct', 10, 12, 54, 52, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 32, 24) +
+        `<path d="M23 13l9-4 9 4 11 7-5 12-5-3.5V53H22V28.5L17 32 12 20z" fill="url(#@ct)" ${Pe(1.5)}/>` +
+        `<path d="M27 14l5 9 5-9" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="1.6" stroke-linejoin="round"/>` +
+        `<path d="M32 23v29" stroke="${Ln(n, 0.45)}" stroke-width="1.4" opacity=".7"/>` +
+        `<path d="M22 34h20M22 42h20" stroke="${Ln(n, 0.4)}" stroke-width="1.1" opacity=".45"/>` +
+        `<path d="M23 15l-6 6" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
+    ),
+
+  // 铁丝网：菱形网格
+  mesh: (n) =>
+    dn(
+      Mi(n),
+      fn('ms', 12, 14, 52, 50, [
+        [0, Hn(n, 0.45)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.7),
+      We('gw', 32, 32, 24) +
+        [[22, 24], [42, 24], [32, 34], [22, 44], [42, 44]]
+          .map(([x, y]) => `<path d="${hn(x, y, 9.5, 0.1)}" fill="none" stroke="${xe}" stroke-width="3.4"/><path d="${hn(x, y, 9.5, 0.1)}" fill="none" stroke="${Hn(n, 0.3)}" stroke-width="1.7"/>`)
+          .join('') +
+        `<rect x="11" y="13" width="42" height="38" rx="2.5" fill="none" stroke="${Ln(n, 0.35)}" stroke-width="2.4"/>` +
+        `<path d="M13 17h38" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity=".35"/>`,
+    ),
+
+  // 安全帽：帽壳 + 帽檐
+  helmet: (n) =>
+    dn(
+      Mi(n),
+      fn('hl', 10, 14, 54, 42, [
+        [0, Hn(n, 0.55)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.8),
+      We('gw', 32, 30, 26) +
+        `<path d="M14 33a18 18 0 0 1 36 0Z" fill="url(#@hl)" ${Pe(1.5)}/>` +
+        `<path d="M8 33h48c1.4 0 2.4 1 2.4 2.4v2.2c0 1.4-1 2.4-2.4 2.4H8c-1.4 0-2.4-1-2.4-2.4v-2.2C5.6 34 6.6 33 8 33Z" fill="${Hn(n, 0.35)}" ${Pe(1.4)}/>` +
+        `<path d="M32 15v18" stroke="${Ln(n, 0.4)}" stroke-width="1.6" opacity=".6"/>` +
+        `<path d="M18 26c2-6 8-9 14-9" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".45"/>` +
+        `<path d="M24 41v6M40 41v6" stroke="${Ln(n, 0.3)}" stroke-width="1.4" opacity=".55"/>`,
+    ),
+
+  // 马甲：防弹衣 / 防暴服
+  vest: (n) =>
+    dn(
+      Mi(n),
+      fn('vs', 12, 12, 52, 52, [
+        [0, Hn(n, 0.5)],
+        [0.5, n],
+        [1, Ln(n, 0.5)],
+      ]) + je('gw', Hn(n, 0.4), 0.75),
+      We('gw', 32, 32, 24) +
+        `<path d="M23 11l9 6 9-6 9 6v38H14V17z" fill="url(#@vs)" ${Pe(1.5)}/>` +
+        `<path d="M32 17v38" stroke="${Ln(n, 0.45)}" stroke-width="1.5" opacity=".7"/>` +
+        `<path d="M17 30h12M35 30h12" stroke="${Ln(n, 0.4)}" stroke-width="1.6" opacity=".55"/>` +
+        `<path d="M18 40h11v9H18zM35 40h11v9H35z" fill="${Ln(n, 0.3)}" opacity=".55" ${Pe(1)}/>` +
+        `<path d="M23 13l4 5" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
+    ),
 };
 
-// 新增装备的图标：先复用同类现有装备的画法、只换成本装备的配色。
-// 一件手绘图标是 20~40 行 SVG，34 件新装备挨个画不现实；按类别挑一个形制接近的旧图标，
-// 颜色跟着装备自己的 color 走，视觉上仍然是"一套里的"。
+// 63 件装备 → 10 个形制族。装备的 id 不进 tH，统一在这里归类；
+// 想给某一件单独画，就在 tH 里加同名键，Po() 会优先用它。
+// 归类原则看"这件东西长什么样"，不看它的属性类别：
+// 一根铁棍就是棍，一瓶药水就是瓶，不管它加的是物攻还是法强。
 const tHx = {
-  iron_sword: 'starfall_blade',
-  iron_blade: 'starfall_blade',
-  azure_blade: 'starfall_blade',
-  heaven_splitter: 'blood_scythe',
-  war_halberd: 'piercing_spear',
-  armor_piercer: 'piercing_spear',
-  hunting_bow: 'sunchaser_bow',
-  horn_bow: 'sunchaser_bow',
-  wind_crossbow: 'sunchaser_bow',
-  short_dagger: 'phantom_edge',
-  blood_dagger: 'phantom_edge',
-  blood_jade: 'blood_scythe',
-  apprentice_staff: 'astral_staff',
-  hourglass: 'astral_staff',
-  mana_crystal: 'astral_staff',
-  void_staff: 'astral_staff',
-  jade_slip: 'sage_codex',
-  spell_codex: 'sage_codex',
-  spell_piercer: 'void_crown',
-  curse_charm: 'void_crown',
-  shaman_mask: 'void_crown',
-  star_robe: 'starweave_cloak',
-  cloth_armor: 'guardian_plate',
-  chain_mail: 'guardian_plate',
-  dragon_scale: 'guardian_plate',
-  iron_bracer: 'thorn_mail',
-  turtle_shield: 'thorn_mail',
-  wood_shield: 'undying_heart',
-  leather_vest: 'undying_heart',
-  heart_mirror: 'undying_heart',
-  giant_belt: 'undying_heart',
-  ward_cloak: 'starweave_cloak',
-  rune_cloak: 'starweave_cloak',
-  frost_amulet: 'starweave_cloak',
-  // 辅助件：法系/护甲/披风三类形制，颜色各走自己的 color
-  sage_stone: 'sage_codex',
-  golden_body: 'guardian_plate',
-  teleport_stone: 'astral_staff',
-  healing_bell: 'undying_heart',
-  purify_orb: 'starweave_cloak',
+  // ── 棍棒：有杆、有握把的东西 ──
+  baton: 'blunt',
+  steel_pipe: 'blunt',
+  police_baton: 'blunt',
+  wrench: 'wrench',
+  baseball_bat: 'blunt',
+  chain_whip: 'chain',
+  knuckle: 'knuckle',
+  slingshot: 'sling',
+  steel_nail: 'nail',
+  dumbbell: 'dumbbell',
+  nail_gun: 'gun',
+  sledgehammer: 'hammer',
+  pry_bar: 'blunt',
+  demolition_hammer: 'hammer',
+
+  // ── 瓶装液体：敌敌畏、喷雾、酒、药水 ──
+  ddvp: 'bottle',
+  ddvp_concentrate: 'bottle',
+  spray_can: 'bottle',
+  pepper_spray: 'bottle',
+  firecracker: 'bottle',
+  baijiu: 'bottle',
+  herb_jar: 'bottle',
+  huoxiang: 'bottle',
+  wild_dog_milk: 'bottle',
+
+  // ── 罐筒：饮料罐、奶粉罐、壶、钢瓶、消防栓 ──
+  red_bull: 'can',
+  red_bull_pack: 'can',
+  milk_powder: 'can',
+  power_bank: 'can',
+  thermos: 'can',
+  gas_tank: 'can',
+  fire_hydrant: 'can',
+  ginger_tea: 'can',
+
+  // ── 块状：板砖、水泥 ──
+  brick: 'brick',
+  concrete_block: 'brick',
+
+  // ── 布被：衣、垫、被、毯、网 ──
+  padded_coat: 'coat',
+  raincoat: 'coat',
+  cushion: 'cloth',
+  quilt: 'cloth',
+  mattress: 'cloth',
+  big_quilt: 'cloth',
+  fire_blanket: 'cloth',
+  barbed_fence: 'mesh',
+
+  // ── 盾门盆：挡在身前的一大片 ──
+  riot_shield: 'shield',
+  iron_door: 'shield',
+  steel_basin: 'shield',
+
+  // ── 喇叭音响：往外发声的 ──
+  megaphone: 'horn',
+  speaker: 'horn',
+  radio: 'horn',
+  suona: 'horn',
+
+  // ── 盒子：饭盒、箱子、机器、锅 ──
+  lunchbox: 'box',
+  first_aid_kit: 'box',
+  alarm_clock: 'box',
+  air_cooler: 'box',
+  big_pot: 'box',
+  red_bull_case: 'box',
+
+  // ── 头面护具：帽子、面罩、马甲 ──
+  hard_hat: 'helmet',
+  gas_mask: 'mask',
+  bulletproof_vest: 'vest',
+  riot_armor: 'vest',
+
+  // ── 车 ──
+  e_bike: 'bike',
 };
 
 function Po(n) {
-  const f = tH[n] ?? tH[tHx[n]] ?? tH.boots;
+  const f = tH[n] ?? tH[tHx[n]] ?? tH.box;
   return f(ln[n].color);
 }
 

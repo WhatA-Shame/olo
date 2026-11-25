@@ -79,11 +79,20 @@ export const PRICE = {
   cdr: 2600,
   apPct: 1800,
   moveSpeed: 500,
-  hpRegen: 3,
-  manaRegen: 8,
+  // 回血/回蓝按"每秒"给价。英雄基础值是 7~12 血/秒、3~4.2 蓝/秒，
+  // 所以 1 点就是可观的续航，不能再按 3 金/8 金这种白菜价算。
+  hpRegen: 8,
+  manaRegen: 6,
+  // 哑铃：把最大生命按比例换成物攻。1 点(100%) 在参考点上就是 REF.hp 点物攻
+  hpToAdPct: REF.hp * 15,
+  // 护盾效率 / 治疗加成：都是乘在别人的盾/奶上，按"一次典型 600 点"折算后打折
+  shieldPower: 900,
+  healPower: 700,
 };
 
-// 只给"属性"定价；被动按件单独估值（写进 item.passive.value，方便比较）
+// 只给"属性"定价。被动默认不计价（被动就是买大件的理由），
+// 但中件也开始带被动了（饭盒、哑铃），那种要写 `passive.gold` 显式折价，
+// 否则按模型算出来的效率会低得离谱、自检直接拦下来。
 export function statValue(stats) {
   let v = 0;
   for (const k in stats) {
@@ -92,6 +101,11 @@ export function statValue(stats) {
     v += stats[k] * p;
   }
   return v;
+}
+
+// 一件装备的"可定价价值"：属性 + 主动 + 显式折价的被动
+export function itemValue(item) {
+  return statValue(item.stats) + (item.active?.value ?? 0) + (item.passive?.gold ?? 0);
 }
 
 export const roundTo = (v, step = 50) => Math.max(step, Math.round(v / step) * step);
@@ -103,9 +117,9 @@ export const roundTo = (v, step = 50) => Math.max(step, Math.round(v / step) * s
 export const TIER_EFF = { 1: 1.0, 2: 1.02, 3: 1.08 };
 
 export function efficiency(item) {
-  // 被动不计价（被动就是买大件的理由）；主动要计价，否则主动件等于白送一次技能
-  const v = statValue(item.stats) + (item.active?.value ?? 0);
-  return v / item.cost;
+  // 被动默认不计价（被动就是买大件的理由）；主动要计价，否则主动件等于白送一次技能；
+  // 中件上的被动写了 passive.gold 才算钱
+  return itemValue(item) / item.cost;
 }
 
 // 从源码里把 ln 装备表读出来（ln 是多变量声明链的第一项，收尾是 `}`）

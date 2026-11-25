@@ -2480,6 +2480,11 @@ const uW = 2.5,
     manaRegen: 0,
     adPct: 0,
     hpPct: 0,
+    // 哑铃：最大生命的百分比换成物攻
+    hpToAdPct: 0,
+    // 护盾效率 / 治疗加成：给别人套盾、奶人时的乘数
+    shieldPower: 0,
+    healPower: 0,
   };
 
 function gW() {
@@ -2504,6 +2509,9 @@ function gW() {
     (pe.hpRegen = 0),
     (pe.manaRegen = 0),
     (pe.adPct = 0),
-    (pe.hpPct = 0));
+    (pe.hpPct = 0),
+    (pe.hpToAdPct = 0),
+    (pe.shieldPower = 0),
+    (pe.healPower = 0));
 }
 export { RV, Qh, Jh, ry, N3, h6, G0, F3, Ok, CV, LV, NV, Oi, ly, Wk, tu, BV, ql, HV, jk, em, x6, jV, eu, qV, Zo, Xk, XV, KV, ZV, QV, JV, tW, Ss, cy, Ui, fy, Bm, Hl, aW, oW, cW, dy, Kk, hy, uy, iu, py, hW, uW, pW, mW, M6, pe, gW };

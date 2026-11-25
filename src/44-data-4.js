@@ -1040,6 +1040,17 @@ ql("spell_shield", (n) => ({
   },
 }));
 
+// 饭盒 / 野生狗奶：挨打回蓝，耗蓝回血。两个方向都是"资源互换"，
+// 所以被动只跟法力挂钩，不需要额外状态。
+ql("mana_battery", (n) => ({
+  onDamageTaken(t, e, s, i) {
+    e.alive && i > 0 && (e.mana = Math.min(e.stats.maxMana, e.mana + i * Xl(n)));
+  },
+  onManaSpent(t, e, s) {
+    s > 0 && e.alive && e.hp < e.stats.maxHp && xS(t, e, e, s * jm(n));
+  },
+}));
+
 const Pc = 4,
   Dc = -60,
   La = 30,

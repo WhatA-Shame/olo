@@ -950,14 +950,14 @@ const main = async () => {
         return null;
       }
     };
-    const a1 = await buy('iron_sword');
-    const a2 = await buy('iron_blade');
-    ok('买两件小件（铁剑 300 + 玄铁重剑 630）', a1?.paid === 300 && a2?.paid === 630, `分别花 ${a1?.paid} / ${a2?.paid}`);
-    // 青锋剑 1000，组件已值 930 → 只该扣 70
-    const a3 = await buy('azure_blade');
-    const combined = a3 && a3.items.filter((x) => x === 'azure_blade').length === 1 && a3.items.filter((x) => x).length === 1;
+    const a1 = await buy('baton');
+    const a2 = await buy('steel_pipe');
+    ok('买两件小件（警棍 300 + 钢管 630）', a1?.paid === 300 && a2?.paid === 630, `分别花 ${a1?.paid} / ${a2?.paid}`);
+    // 伸缩警棍 1000，组件已值 930 → 只该扣 70
+    const a3 = await buy('police_baton');
+    const combined = a3 && a3.items.filter((x) => x === 'police_baton').length === 1 && a3.items.filter((x) => x).length === 1;
     ok(
-      '组件凑齐后合成青锋剑只付差价',
+      '组件凑齐后合成伸缩警棍只付差价',
       a3?.paid === 70 && combined,
       `这一步扣 ${a3?.paid}（应 70），装备栏 ${JSON.stringify(a3?.items)}`,
     );
@@ -974,16 +974,16 @@ const main = async () => {
       }
     })();
     ok('出售合成件返还 60% 全价', a4?.paid === 600, `这一步返 ${a4?.paid}（应 600）`);
-    // 鞋：草鞋 + 布甲 → 护甲铁靴，只付 710-400=310
-    const b1 = await buy('cloth_armor');
-    const b2 = await buy('boots');
-    const b3 = await buy('boots_guard');
+    // 鞋：拖鞋 + 棉袄 → 解放鞋，只付 710-400=310
+    const b1 = await buy('padded_coat');
+    const b2 = await buy('slippers');
+    const b3 = await buy('liberation_shoes');
     ok(
-      '鞋子也能走合成（草鞋+布甲→铁靴）',
-      b1 && b2 && b3?.paid === 310 && b3.items.includes('boots_guard'),
+      '鞋子也能走合成（拖鞋+棉袄→解放鞋）',
+      b1 && b2 && b3?.paid === 310 && b3.items.includes('liberation_shoes'),
       `这一步扣 ${b3?.paid}（应 310），装备栏 ${JSON.stringify(b3?.items)}`,
     );
-    // ── 装备主动：金身 / 传送 / 回春 ─────────────────────────────
+    // ── 装备主动：扣盆 / 骑走 / 开饭 ─────────────────────────────
     // 主动件是"多一个技能"，所以既要有冷却（挂在装备栏下标上），也要真的生效。
     // 这一段跑之前英雄已经挂了"不可选中 + 每 150ms 回满血"的保活，所以不会被塔打断。
     await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.gold=30000; u.autoBuy=false; return 1;})()`);
@@ -998,11 +998,11 @@ const main = async () => {
         hp:Math.round(u.hp),
         x:+u.pos.x.toFixed(1), y:+u.pos.y.toFixed(1)});})()`);
     };
-    const c1 = await buy('golden_body');
+    const c1 = await buy('steel_basin');
     const s1 = await useActive(0, 'null');
     ok(
-      '金身护符：按下去立刻金身（不可选中 + 免伤）并进冷却',
-      c1 && c1.items[0] === 'golden_body' && s1 && s1.cd > 0 && s1.buffs.includes('stasis') && s1.inv,
+      '不锈钢大盆：扣盆立刻无敌（不可选中 + 免伤）并进冷却',
+      c1 && c1.items[0] === 'steel_basin' && s1 && s1.cd > 0 && s1.buffs.includes('stasis') && s1.inv,
       `cd ${s1?.cd}s 状态 ${s1?.buffs.join(',')} 免伤 ${s1?.inv}`,
     );
     // 状态栏装备格上的扇形冷却 + 数字键角标
@@ -1015,7 +1015,7 @@ const main = async () => {
     await shot('active-cd', { x: 120, y: 415, width: 720, height: 110 }, 2.6);
     if (dbgCd?.box)
       await shot('active-cd-zoom', { x: Math.max(0, dbgCd.box.x - 4), y: Math.max(0, dbgCd.box.y - 4), width: dbgCd.box.w + 8, height: dbgCd.box.h + 8 }, 6);
-    const c2 = await buy('teleport_stone');
+    const c2 = await buy('e_bike');
     // 金身持续 2 秒、期间算"被控"，别的主动按不出来——等它结束再测传送
     await sleep(2300);
     // 传送要引导 2.5 秒，中途被控/下指令就断了。真打起来这事经常发生，
@@ -1036,23 +1036,23 @@ const main = async () => {
       if (from && to) moved = Math.hypot(to.x - from.x, to.y - from.y);
     }
     ok(
-      '传送符：引导开始（复用回城的引导）并进冷却',
-      c2 && c2.items[1] === 'teleport_stone' && chan && chan.cd > 0 && chan.buffs.includes('recall'),
+      '电动车：引导开始（复用回城的引导）并进冷却',
+      c2 && c2.items[1] === 'e_bike' && chan && chan.cd > 0 && chan.buffs.includes('recall'),
       `cd ${chan?.cd}s 状态 ${chan?.buffs.join(',')}`,
     );
-    ok('传送符：引导结束后真的落到落点附近', moved >= 6 && moved <= 13, `位移 ${moved.toFixed(1)} 米（应 ≈9）`);
-    const c3 = await buy('healing_bell');
+    ok('电动车：引导结束后真的落到落点附近', moved >= 6 && moved <= 13, `位移 ${moved.toFixed(1)} 米（应 ≈9）`);
+    const c3 = await buy('big_pot');
     const s3 = await snap(`(()=>{const u=${U};
       u.hp=Math.round(u.stats.maxHp*0.4); const before=u.hp;
       window.__moba.world.command(u.id,{type:"item",index:2,pos:null});
       return JSON.stringify({before, after:Math.round(u.hp), cd:+u.rt.itemCd[2].toFixed(1)});})()`);
     ok(
-      '回春铃：治疗自己并进冷却',
-      c3 && c3.items[2] === 'healing_bell' && s3 && s3.after > s3.before && s3.cd > 0,
+      '大锅菜：治疗自己并进冷却',
+      c3 && c3.items[2] === 'big_pot' && s3 && s3.after > s3.before && s3.cd > 0,
       `生命 ${s3?.before} → ${s3?.after}，cd ${s3?.cd}s`,
     );
     await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.gold=0; u.autoBuy=true; return 1;})()`);
-    // 商店面板本身：56 件装备、图标、合成路径都要能画出来
+    // 商店面板本身：63 件装备、图标、合成路径都要能画出来
     if (shots) {
       await ev(`(()=>{const u=${U}; u.gold=3000;
         const b=document.querySelector('.sf-hud__st-shop'); b&&b.click();
@@ -1060,17 +1060,28 @@ const main = async () => {
       await sleep(500);
       await shot('shop-all', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
       // 选中一件中件，看详情面板里的"合成"那一行
-      await ev(`(()=>{const c=document.querySelector('[data-item="azure_blade"]'); c&&c.click(); return 1;})()`);
+      await ev(`(()=>{const c=document.querySelector('[data-item="police_baton"]'); c&&c.click(); return 1;})()`);
       await sleep(350);
       await shot('shop-recipe', { x: 0, y: 0, width: 1088, height: 615 }, 2.0);
       // 攻击分类：新加的小件/中件图标能不能画出来
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='攻击'); t&&t.click(); return 1;})()`);
       await sleep(400);
       await shot('shop-attack', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      // 法术 / 防御：图标按"形制"分族，这两页最能看出同族有没有撞成一片
+      await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='法术'); t&&t.click(); return 1;})()`);
+      await sleep(400);
+      await shot('shop-magic', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='防御'); t&&t.click(); return 1;})()`);
+      await sleep(400);
+      await shot('shop-defense', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
       // 辅助分类 + 主动装备的详情面板（主动那一块和被动分开显示）
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='辅助'); t&&t.click(); return 1;})()`);
       await sleep(400);
-      await ev(`(()=>{const c=document.querySelector('[data-item="golden_body"]'); c&&c.click(); return 1;})()`);
+      // 先看急救箱：它的"护盾效率"是派生属性，得确认属性行真的画出来了
+      await ev(`(()=>{const c=document.querySelector('[data-item="first_aid_kit"]'); c&&c.click(); return 1;})()`);
+      await sleep(350);
+      await shot('shop-shieldpower-detail', { x: 700, y: 180, width: 220, height: 190 }, 5);
+      await ev(`(()=>{const c=document.querySelector('[data-item="steel_basin"]'); c&&c.click(); return 1;})()`);
       await sleep(350);
       await shot('shop-support', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
       await shot('shop-active-detail', { x: 700, y: 250, width: 220, height: 110 }, 5);

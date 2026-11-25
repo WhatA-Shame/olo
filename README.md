@@ -95,7 +95,7 @@ node split.mjs ../_recover/game.pretty.js ../src 70000
 | 内容 | 位置 |
 | --- | --- |
 | 英雄配置（属性/技能/文案/出装/配色） | `src/02-data.js` 的 `Se` 对象 |
-| 装备表（17 件） | `src/33-data-2.js` 的 `ln` 对象 |
+| 装备表（63 件，定义在 `tools/itemdesign.mjs`，生成物写回这里） | `src/33-data-2.js` 的 `ln` 对象 |
 | buff 表（28 种） | `src/34-ui-2.js` 的 `T3` 对象 |
 | 兵线/防御塔数值 | `src/01-audio.js` 开头的 `Y6` / `v0` / `K6` |
 | AI 画像（逃跑血量、开团倾向） | `src/41-ai.js` 的 `jG` 对象 |
