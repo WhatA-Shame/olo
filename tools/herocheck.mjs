@@ -23,6 +23,8 @@ const Q = (argv.find((a) => a.startsWith('--q=')) || '').slice(4);
 const debug = argv.includes('--debug');
 const ZOOM = argv.includes('--zoom');
 // --close=x,y,w,h：选将台额外截一块放大 6 倍的小图，看手/武器细节
+// --skin=frog：选将台点"占位皮"角色卡（技能包还是这个英雄的）
+const SKIN = (argv.find((a) => a.startsWith('--skin=')) || '').split('=')[1] || '';
 const CLOSE = (argv.find((a) => a.startsWith('--close=')) || '').split('=')[1] || '';
 const CROP = (argv.find((a) => a.startsWith('--crop=')) || '').split('=')[1] || '';
 // --open：放技能前先把英雄挪到一块空地。出生点在基地高台上，地面贴花类特效会被平台挡住
@@ -252,22 +254,27 @@ const main = async () => {
   // 复用 profile 时浏览器会缓存 dist/index.html，必须关掉缓存，否则截到的是旧版本
   await send('Network.enable');
   await send('Network.setCacheDisabled', { cacheDisabled: true });
-  const qs = [ANIM ? 'anim=' + ANIM : '', Q].filter(Boolean).join('&');
+  const qs = [ANIM ? 'anim=' + ANIM : '', Q, 'dbg=1'].filter(Boolean).join('&');
   await send('Page.navigate', { url: URL_ + (qs ? (URL_.includes('?') ? '&' : '?') + qs : '') });
   await sleep(6000);
   if (!(await waitFor(`[...document.querySelectorAll('button,div,a,span')].some(e=>(e.textContent||'').trim()==='开始对战')`, '标题页', 45000)))
     fail('标题页没出来，页面可能报错了');
   await clickText('开始对战');
-  if (!(await waitFor(`!!document.querySelector('[data-hero="${heroId}"]')`, '选将页', 30000)))
-    fail(`选将页没有 [data-hero="${heroId}"] 的卡片——英雄没进 kr 花名册？`);
+  const CARD = SKIN ? `[data-skin="${SKIN}"]` : `[data-hero="${heroId}"]`;
+  if (!(await waitFor(`!!document.querySelector('${CARD}')`, '选将页', 30000)))
+    fail(`选将页没有 ${CARD} 的卡片——英雄/占位皮没进花名册？ ` +
+      (await ev(`JSON.stringify({n:document.querySelectorAll('[data-hero]').length, skins:document.querySelectorAll('[data-skin]').length, sel:!!document.querySelector('.sf-select__roster'), body:(document.body.innerText||'').slice(0,120)})`)));
   await sleep(400);
 
-  const box = await ev(`(() => { const e=document.querySelector('[data-hero="${heroId}"]'); const b=e.getBoundingClientRect();
+  // 花名册现在二十多张卡、要滚动，先把目标卡滚到可视区再量坐标，否则点空
+  await ev(`(() => { const e=document.querySelector('${CARD}'); e && e.scrollIntoView({block:'center'}); })()`);
+  await sleep(300);
+  const box = await ev(`(() => { const e=document.querySelector('${CARD}'); const b=e.getBoundingClientRect();
     return JSON.stringify({x:Math.round(b.x+b.width/2),y:Math.round(b.y+b.height/2)}); })()`);
   const p = JSON.parse(box);
   await clickAt(p.x, p.y);
   await sleep(1000);
-  const cls = await ev(`document.querySelector('[data-hero="${heroId}"]').className`);
+  const cls = await ev(`document.querySelector('${CARD}').className`);
   ok('选将卡片可点选', typeof cls === 'string' && /active|selected|chosen/i.test(cls), cls);
   // 外部 GLB 英雄的头像/立绘是异步解码贴图后重画的，等一会儿再截，否则截到的是白模
   await sleep(2200);
@@ -275,7 +282,7 @@ const main = async () => {
   // 只要网格模块漏了「模块加载就预热解码」那一行，或漏了 __sfTextureReady 回调，
   // 头像就会永久停在 1×1 占位纯色上——截图上只是一块灰，肉眼很容易放过。这里直接数颜色。
   const port = await ev(`(() => {
-    const img = document.querySelector('img[data-sf-portrait="${heroId}"]');
+    const img = document.querySelector('img[data-sf-portrait="${SKIN || heroId}"]');
     if (!img) return JSON.stringify({ err: 'no-img' });
     const w = img.naturalWidth, h = img.naturalHeight;
     if (!w || !h) return JSON.stringify({ err: 'no-size', src: (img.src || '').slice(0, 24) });
@@ -436,6 +443,34 @@ const main = async () => {
             const d=${JSON.stringify(d)};
             w.command(u.id,{type:"cast",slot:"${slot}",dir:{x:d.x,y:d.y}}); return u.skills.${slot}.cd;})()`;
     const cd = await ev(expr);
+    // 杯杯菇的滚轮只持续 ~1.2 秒「模拟时间」，无头浏览器里模拟跑得比真机快好几倍：
+    // 两次 CDP 往返（几十毫秒真实时间）之间滚轮就可能已经收尾，外部轮询抓不到方向。
+    // 所以方向采样必须在页面内按帧记录。转向验证完再把滚轮掰回原方向，
+    // 让轨迹和以前一致（否则它会滚到别处，后面几十秒的动画检查全跟着遭殃）。
+    if (slot === 's1' && heroId === 'mushroom') {
+      await ev(`(()=>{const w=window.__moba.world,u=${U},D=${JSON.stringify(d)};
+        const R=window.__hcRoll={n:0,s:[],dev:0,issued:false,back:false,stop:false};
+        const tick=()=>{
+          const dd=u.rt.dash;
+          if(dd&&dd.anim==='roll'){
+            R.n++; R.s.push([+dd.dirX.toFixed(3),+dd.dirY.toFixed(3)]);
+            R.dev=Math.max(R.dev,Math.abs(dd.dirX-D.x),Math.abs(dd.dirY-D.y));
+            if(!R.issued&&R.n>=2){ R.issued=true;
+              // 取垂直方向里能走通的那一侧，发一个移动指令：滚轮应当跟着转向
+              const c=[[-dd.dirY,dd.dirX],[dd.dirY,-dd.dirX]];
+              let p=c[0];
+              for(const k of c){ if(w.nav.isFree(u.pos.x+k[0]*6,u.pos.y+k[1]*6,1)){ p=k; break; } }
+              w.command(u.id,{type:'moveTo',pos:{x:u.pos.x+p[0]*9,y:u.pos.y+p[1]*9}});
+            }
+            // 采样到偏转就够了，立刻把方向掰回原来那条走廊（偏转没出来就一直等，最多等 8 帧）
+            if(!R.back&&(R.dev>0.15||R.n>=8)){ R.back=true;
+              w.command(u.id,{type:'moveTo',pos:{x:u.pos.x+D.x*20,y:u.pos.y+D.y*20}});
+            }
+          }
+          if(R.n<120&&!R.stop) requestAnimationFrame(tick); else R.stop=true;
+        };
+        requestAnimationFrame(tick); return 1;})()`);
+    }
     if (argv.includes('--dump')) {
       await sleep(120);
       const dump = await ev(`(()=>{const k=window.__fxkit; if(!k) return 'no-kit';
@@ -462,11 +497,12 @@ const main = async () => {
     await sleep(260);
     // 长持续技能（滚轮/引导）会一直挂着，这里确认它真的进入了状态
     const state = await ev(`(()=>{const u=${U}; return JSON.stringify({
-      dash: u.rt.dash ? u.rt.dash.anim : null, s2: !!u.rt.mushS2, anim: u.anim, mana: Math.round(u.mana) });})()`);
+      dash: u.rt.dash ? u.rt.dash.anim : null, s2: !!u.rt.mushS2, anim: u.anim, mana: Math.round(u.mana),
+      roll: window.__hcRoll ? {n:window.__hcRoll.n, dev:window.__hcRoll.dev, s:window.__hcRoll.s} : null });})()`);
     const st = JSON.parse(state && !state.__err ? state : '{}');
     const channeling = st.s2 === true;
     // 杯杯菇的 Q 冷却从滚动结束才开始算，刚放出来 cd 一定是 0，用"进入滚轮"当成功信号
-    const rollStarted = heroId === 'mushroom' && slot === 's1' && st.dash === 'roll';
+    const rollStarted = heroId === 'mushroom' && slot === 's1' && (st.dash === 'roll' || (st.roll && st.roll.n > 0));
     const rej = await ev(`(window.__hcRej||[]).slice(-3).join(',')+(window.__moba.world.__hcTarget?' tgt='+window.__moba.world.__hcTarget:'')`);
     ok(
       `${slot} 释放成功`,
@@ -480,20 +516,15 @@ const main = async () => {
             : `cd ${cd}`,
     );
     // 滚轮/持续引导是杯杯菇特有的，别的英雄不做这两条断言
-    if (slot === 's1' && heroId === 'mushroom') ok('Q 进入滚轮状态', st.dash === 'roll', `dash=${st.dash} anim=${st.anim}`);
+    if (slot === 's1' && heroId === 'mushroom') ok('Q 进入滚轮状态', rollStarted, `dash=${st.dash} anim=${st.anim} 采样=${st.roll ? st.roll.n : 0} 帧`);
 
     if (slot === 's1' && heroId === 'mushroom') {
-      // 滚轮要能被移动指令改向：发一个垂直方向的移动指令，看冲刺方向是否跟着转
-      // （u.rt.dash 只有杯杯菇的滚轮才有，别的英雄不要断言这条）
-      const before = await ev(`(()=>{const u=${U}; const d=u.rt.dash; return d?JSON.stringify({x:+d.dirX.toFixed(2),y:+d.dirY.toFixed(2)}):null;})()`);
-      await ev(`(()=>{const w=window.__moba.world,u=${U};
-        w.command(u.id,{type:"moveTo",pos:{x:u.pos.x - 9, y:u.pos.y - 9}}); return 1;})()`);
-      await sleep(420);
-      const after = await ev(`(()=>{const u=${U}; const d=u.rt.dash; return d?JSON.stringify({x:+d.dirX.toFixed(2),y:+d.dirY.toFixed(2)}):null;})()`);
-      const b = before && !before.__err ? JSON.parse(before) : null;
-      const a = after && !after.__err ? JSON.parse(after) : null;
-      const turned = !!(b && a && (Math.abs(a.x - b.x) > 0.15 || Math.abs(a.y - b.y) > 0.15));
-      ok('Q 可以控制方向', turned, `dir ${b ? `${b.x},${b.y}` : '?'} → ${a ? `${a.x},${a.y}` : '?'}`);
+      // 方向数据来自页面内按帧采样（见 cast 里的 __hcRoll）：dev = 相对起手方向的最大偏转
+      const s = (st.roll && st.roll.s) || [];
+      const dev = (st.roll && st.roll.dev) || 0;
+      const b = s[0] || null,
+        a = s[s.length - 1] || null;
+      ok('Q 可以控制方向', dev > 0.15, `dir ${b ? b.join(',') : '?'} → 偏转 ${dev.toFixed(2)}（${s.length} 帧采样，收尾回正 ${a ? a.join(',') : '?'}）`);
       if (shots) {
         await sleep(380);
         await shot('roll', { x: 0, y: 0, width: 1088, height: 615 });
@@ -509,6 +540,22 @@ const main = async () => {
     await shotHero(slot);
     // 收尾：结束冲刺/引导，避免影响下一个技能
     await ev(`(()=>{const u=${U}; u.rt.dash && (u.rt.dash.left=0); u.rt.mushS2=null; return 1;})()`);
+    // 滚轮会把英雄带到走廊深处，玩家控制的英雄不会自己回防，
+    // 后面几十秒的动画检查里可能被塔打死 → 这里只补血（不挪位置，位置会影响后续移动检查）
+    // 滚轮会把英雄带到走廊深处（转向验证时更是滚到侧面），玩家控制的英雄不会自己回防，
+    // 后面几十秒的动画检查里会被塔打死。这里把它放回"原本应该滚到的位置"——出生点在高台上，
+    // 直接传回出生点反而会走不动路，所以沿原方向 12 米取一个可站立点。
+    if (slot === 's1' && heroId === 'mushroom') {
+      const back = await ev(`(()=>{const w=window.__moba.world,u=${U},D=${JSON.stringify(d)};
+        u.rt.dash=null;  // 结束滚轮，tick 里会补上冷却
+        const p={x:u.pos.x+D.x*12,y:u.pos.y+D.y*12};
+        w.nav.nearestFree(p.x,p.y,u.rt.navR,p);
+        u.pos.x=u.prevPos.x=p.x; u.pos.y=u.prevPos.y=p.y;
+        try { w.grid.remove(u); w.grid.insert(u); } catch {}
+        u.hp=u.stats.maxHp; u.mana=Math.max(u.mana,u.stats.maxMana*0.7);
+        return JSON.stringify({x:+p.x.toFixed(1),y:+p.y.toFixed(1)});})()`);
+      if (debug) console.log(`· 滚轮收尾，英雄放回 ${back}`);
+    }
     await sleep(tail ? 900 : 0);
     if (slot === 's1' && heroId === 'mushroom') {
       const cd2 = await ev(`(()=>{const u=${U}; return +u.skills.s1.cd.toFixed(1);})()`);
@@ -710,6 +757,172 @@ const main = async () => {
       bursts > 0 && (shieldSeen > 0 || sawShieldFx),
       `爆开 ${bursts} 次，护盾峰值 ${shieldSeen}${sawShieldFx ? '（有 shield 事件）' : ''}`,
     );
+  }
+
+  // 前面的技能检查会把英雄丢到地图深处（滚轮转向、大招全图跳），之后它就杵在那儿不动，
+  // 后面几十秒模拟时间里会被塔和小兵打死。这一段只验渲染侧的动作选择，跟生存无关，
+  // 所以先挂一个"不死"保活：无敌 + 每 150ms 回满血。
+  await ev(`(()=>{const u=${U};
+    u.rt.untargetable=true; u.hp=u.stats.maxHp;
+    if(window.__hcKeep) clearInterval(window.__hcKeep);
+    window.__hcKeep=setInterval(()=>{ if(u.alive) u.hp=u.stats.maxHp; },150);
+    return 1;})()`);
+  // 另外，后面的 walkFor / 档位探测一律往 +x 走，一走走十几米；大招落点经常在墙角，
+  // 原地顶墙就永远播不出"走"的动作。就近找一条 +x 方向够长的空地，每次检查前把英雄放回去，
+  // 这样连续几轮走下来也不会漂到墙上（放回去后速度估计只脏一帧，等一下就好）。
+  const spot = await ev(`(()=>{const w=window.__moba.world,u=${U},R=u.rt.navR;
+    // 顺着 +x 能连续走多远（最多 40），越长越好：后面的走位检查会一路往 +x 推十几米
+    const len=(x,y)=>{ let d=0; for(let k=2;k<=40;k+=2){ if(!w.nav.isFree(x+k,y,R)) break; d=k; } return d; };
+    let best={x:u.pos.x,y:u.pos.y,d:len(u.pos.x,u.pos.y)};
+    for(let r=4;r<=48&&best.d<40;r+=4) for(let i=0;i<16;i++){ const a=i*Math.PI/8;
+      const x=u.pos.x+Math.cos(a)*r, y=u.pos.y+Math.sin(a)*r;
+      if(!w.nav.isFree(x,y,R)) continue;
+      const d=len(x,y); if(d>best.d) best={x,y,d};
+      if(best.d>=40) break; }
+    if(best.d<6) return null;
+    u.pos.x=u.prevPos.x=best.x; u.pos.y=u.prevPos.y=best.y;
+    try { w.grid.remove(u); w.grid.insert(u); } catch {}
+    return JSON.stringify({x:+best.x.toFixed(1),y:+best.y.toFixed(1),run:best.d});})()`);
+  console.log(`· 动作检查站位 ${spot}`);
+  const SPOT = spot && spot !== 'null' ? spot : null;
+  // 把英雄放回站位（不挪位置就只是普通赋值，navigrid 要同步，否则寻路会算错）
+  const PLACE = `const w=window.__moba.world,u=${U},S=${SPOT || 'null'};
+    if(S){ u.pos.x=u.prevPos.x=S.x; u.pos.y=u.prevPos.y=S.y;
+      try { w.grid.remove(u); w.grid.insert(u); } catch {} }`;
+  if (SPOT) await sleep(300); // 让渲染侧的速度估计把"瞬移"那一帧衰减掉
+
+  // ── 动作档位与表情 ───────────────────────────────────────────
+  // 这些都是纯渲染逻辑：state 里只有 anim='move'，到底播"小加速"还是"行走"是渲染侧按
+  // 移速/减速算的，所以只能读 ?dbg=1 挂出来的 puppet.input（见 src/31-render-10.js 的 ANIM_DBG）。
+  const dbgIn = async () => {
+    // 注意只挑标量出来：puppet.input 里有循环引用，整个 JSON.stringify 会抛
+    const r = await ev(`(()=>{const d=globalThis.__animDbg; if(!d) return 'none';
+      const o=d.get(window.__moba.state.playerId); if(!o) return 'none';
+      return JSON.stringify({m:o.modelKey,anim:o.anim,clip:o.clip,slow:o.slow,tier:o.tier,turn:o.turn,stopT:o.stopT});})()`);
+    if (typeof r !== 'string' || r === 'none') return null;
+    try {
+      return JSON.parse(r);
+    } catch {
+      return { __raw: String(r).slice(0, 200) };
+    }
+  };
+  // 一直往 +x 走，等渲染侧算稳（每次都先回到站位，避免几轮下来顶到墙上）
+  const walkFor = async (ms) => {
+    await ev(`(()=>{${PLACE}
+      u.rt.lockUntil=0; w.command(u.id,{type:"move",dir:{x:1,y:0}});})()`);
+    await sleep(ms);
+    return dbgIn();
+  };
+
+  const idle = await dbgIn();
+  // clip 只有 GLB 模型（47-kart.js）才会写，原生程序化英雄没有这个概念，
+  // 涉及 clip 的断言对它们没有意义，跳过而不是判失败。
+  const hasClip = !!idle && idle.clip !== undefined;
+  const skip = (name, why) => console.log(`  · 跳过 ${name} — ${why}`);
+  const okc = (name, pass, detail) => (hasClip ? ok(name, pass, detail) : skip(name, '原生程序化模型，没有 clip'));
+  const dbgWhy = idle
+    ? `模型 ${idle.m ?? '?'}｜anim ${idle.anim} clip ${idle.clip}`
+    : await ev(`JSON.stringify({q:location.search,has:!!globalThis.__animDbg,
+        size:globalThis.__animDbg?globalThis.__animDbg.size:-1,
+        keys:globalThis.__animDbg?[...globalThis.__animDbg.keys()]:[],
+        pid:window.__moba.state.playerId})`);
+  ok('puppet 输入拿到了（?dbg=1）', !!idle, dbgWhy);
+  if (idle) {
+    const m1 = await walkFor(500);
+    okc('常规移动用小加速', m1?.clip === 'accelS', `anim ${m1?.anim} → clip ${m1?.clip}（tier ${m1?.tier}）`);
+
+    // 加速：直接把移速抬上去（渲染侧看的是"当前移速 / 基础移速"的比值，基础值在 rt.base 上）。
+    // 升级/买装备会调 _o 重算属性把移速写回去，所以每轮都重设一次再读，别指望一次设完就稳。
+    // 注意：档位是按「实际位移」算的，瞬移会让速度估计清零一帧，所以只在整轮开头落位一次，
+    // 循环里绝不能再瞬移，否则永远读成 tier 0。
+    await ev(`(()=>{const u=${U}; u.__hcSpd=u.stats.moveSpeed;})()`);
+    const probeTier = async (mult, want) => {
+      let last = null;
+      await ev(`(()=>{${PLACE}
+        const w=window.__moba.world,u=${U};
+        const b=(u.rt&&u.rt.base&&u.rt.base.moveSpeed)||u.stats.moveSpeed;
+        u.stats.moveSpeed=b*${mult};
+        w.command(u.id,{type:"move",dir:{x:1,y:0}});})()`);
+      await sleep(200); // 等速度估计把落位那一帧的 0 衰减掉
+      for (let i = 0; i < 12; i++) {
+        await ev(`(()=>{const w=window.__moba.world,u=${U};
+          const b=(u.rt&&u.rt.base&&u.rt.base.moveSpeed)||u.stats.moveSpeed;
+          u.stats.moveSpeed=b*${mult};
+          w.command(u.id,{type:"move",dir:{x:1,y:0}});})()`);
+        await sleep(80);
+        last = await dbgIn();
+        if (last && last.clip === want) break;
+      }
+      return last;
+    };
+    const m2 = await probeTier(1.7, 'accelL');
+    okc('大加速时换大加速动作', m2?.clip === 'accelL', `clip ${m2?.clip}（tier ${m2?.tier}）`);
+    const m3 = await probeTier(1.3, 'accelM');
+    okc('中加速时换中加速动作', m3?.clip === 'accelM', `clip ${m3?.clip}（tier ${m3?.tier}）`);
+    await ev(`(()=>{const u=${U}; u.stats.moveSpeed=u.__hcSpd;})()`);
+
+    // 减速：挂一个减速 buff。渲染侧只要看到 id==='slow' 且 value>0 就改播"行走"
+    await ev(`(()=>{const u=${U},t=window.__moba.state.time;
+      u.buffs.push({id:'slow',sourceId:-1,timeLeft:6,duration:6,stacks:1,value:0.5,key:'hcdbg',maxStacks:1,startTime:t,tickInterval:0});})()`);
+    const m4 = await walkFor(450);
+    okc('被减速时改用行走动作', m4?.clip === 'walk', `clip ${m4?.clip}（slow ${m4?.slow}）`);
+    // 原地删（别重新赋值，buffs 的引用别的地方还拿着）
+    await ev(`(()=>{const u=${U};
+      for(let i=u.buffs.length-1;i>=0;i--) if(u.buffs[i].key==='hcdbg') u.buffs.splice(i,1);})()`);
+
+    // 表情：嘲讽 / 笑话 / 跳舞 / 庆祝
+    await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"stop"});})()`);
+    await sleep(300);
+    await ev(`(()=>{const w=window.__moba.world,u=${U};
+      w.command(u.id,{type:"emote",name:"taunt",dur:2});})()`);
+    await sleep(400);
+    // 命令是下一 tick 才处理的，别在同一个 ev 里读 u.anim
+    const emoAnim = await ev(`(()=>{const u=${U}; return String(u.anim);})()`);
+    const e1 = await dbgIn();
+    okc(
+      '表情命令能让角色播嘲讽',
+      emoAnim === 'emote_taunt' && e1?.clip === 'emote_taunt',
+      `state.anim ${emoAnim} → clip ${e1?.clip}`,
+    );
+    // 一走动就得把表情打断（不然拖着表情走路很怪）
+    const e2 = await walkFor(400);
+    ok('移动会打断表情', e2 && e2.anim !== 'emote_taunt', `anim ${e2?.anim} clip ${e2?.clip}`);
+
+    // 右上角表情按钮：点一下要能弹出下拉
+    const menu = await ev(`(()=>{const b=document.querySelector('.sf-hud__emote .sf-iconbtn');
+      if(!b) return 'no-btn'; b.click();
+      const w=document.querySelector('.sf-hud__emote');
+      const items=[...document.querySelectorAll('.sf-hud__emote-item')].map(e=>e.textContent.trim());
+      return JSON.stringify({open:!!w&&w.classList.contains('is-open'), items});})()`);
+    let mo = null;
+    try {
+      mo = JSON.parse(menu);
+    } catch {}
+    ok('右上角有表情下拉（嘲讽/笑话/跳舞/庆祝）', mo?.open && mo.items?.length === 4, menu);
+    if (shots) {
+      await sleep(220);
+      await shot('emote-menu');
+    }
+    await ev(`(()=>{const b=document.querySelector('.sf-hud__emote .sf-iconbtn'); b&&b.click();})()`);
+
+    // Ctrl+1~4 快捷键。真浏览器里 Ctrl+1 会被拿去切标签页、页面收不到，所以只能合成事件验接线。
+    await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"stop"});})()`);
+    await sleep(250);
+    await ev(`window.dispatchEvent(new KeyboardEvent('keydown',{code:'Digit3',key:'3',ctrlKey:true,bubbles:true}))`);
+    await sleep(400);
+    const hotAnim = await ev(`String(${U}.anim)`);
+    ok('Ctrl+3 能放跳舞', hotAnim === 'emote_dance', `anim ${hotAnim}`);
+
+    // 急停：从"走"切到"不动"的那一下开始计时
+    await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"stop"});})()`);
+    let stopSeen = -1;
+    for (let i = 0; i < 12; i++) {
+      const d = await dbgIn();
+      if (d && d.stopT >= 0 && (stopSeen < 0 || d.stopT < stopSeen)) stopSeen = d.stopT;
+      if (stopSeen >= 0) break;
+      await sleep(60);
+    }
+    ok('停下来的瞬间播急停', stopSeen >= 0, `stopT 起点 ${stopSeen.toFixed(2)}s`);
   }
 
   const fx = await ev(`JSON.stringify(window.__hcFx)`);
