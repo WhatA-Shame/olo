@@ -1892,7 +1892,7 @@ var Se = {
     basicAttack: { windup: 0.38, damageType: "physical" },
     passive: {
       name: "\u8986\u76FE\u9707\u5730",
-      brief: "\u6BCF\u7B2C\u4E09\u4E0B\u666E\u653B\u66F4\u75BC\uFF0C\u8FD8\u5E26\u51CF\u901F",
+      brief: "\u7B2C 3 \u6B21\u666E\u653B\u9644\u52A0 4% \u6700\u5927\u751F\u547D\u6CD5\u672F\u4F24\u5BB3\uFF0C\u51CF\u901F 30% / 1 \u79D2",
       tags: ["slow"],
       desc: "\u6BCF\u7B2C\u4E09\u6B21\u666E\u653B\u6539\u7528\u5927\u76FE\u7838\u5730\uFF0C\u5BF9\u76EE\u6807\u989D\u5916\u9020\u6210\u81EA\u8EAB 4% \u6700\u5927\u751F\u547D\u7684\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F 30%\uFF0C\u6301\u7EED 1 \u79D2\u3002",
       values: { hits: 3, hpRatio: 0.04, slow: 0.3, slowDur: 1 }
@@ -1901,7 +1901,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u4FA7\u76FE\u95EF\u5E10",
-        brief: "\u4E3E\u76FE\u51B2\u8FC7\u53BB\uFF0C\u649E\u5230\u4EBA\u5C31\u51FB\u98DE",
+        brief: "\u5411\u6307\u5B9A\u65B9\u5411\u51B2\u649E\uFF1A\u7269\u7406\u4F24\u5BB3 + \u51FB\u98DE 0.75 \u79D2",
         tags: ["dash", "control"],
         desc: "\u4FA7\u8D77\u5927\u76FE\u5411\u6307\u5B9A\u65B9\u5411\u51B2\u649E\uFF0C\u649E\u5230\u7B2C\u4E00\u4E2A\u654C\u65B9\u82F1\u96C4\u6216\u51B2\u5230\u7EC8\u70B9\u65F6\u9707\u5F00\u5468\u56F4\uFF0C\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002",
         maxLevel: 6,
@@ -1920,7 +1920,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u62E5\u76FE\u6012\u76EE",
-        brief: "\u7ED9\u81EA\u5DF1\u52A0\u62A4\u76FE\uFF0C\u51CF\u901F\u8EAB\u8FB9\u654C\u4EBA",
+        brief: "\u62A4\u76FE\uFF08+9% \u6700\u5927\u751F\u547D\uFF0C4 \u79D2\uFF09+ \u8303\u56F4\u6CD5\u672F\u4F24\u5BB3 + \u51CF\u901F 35%",
         tags: ["shield", "slow"],
         desc: "\u62E5\u76FE\u7ACB\u5B9A\uFF0C\u83B7\u5F97 {shield}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u62A4\u76FE\uFF0C\u6301\u7EED {duration} \u79D2\uFF1B\u540C\u65F6\u6012\u76EE\u4E00\u559D\u9707\u6151\u5468\u56F4\u654C\u4EBA\uFF0C\u9020\u6210 {damage} \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
         maxLevel: 6,
@@ -1940,7 +1940,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u8DC3\u76FE\u7838\u9635",
-        brief: "\u8DF3\u8FDB\u4EBA\u5806\u7838\u5730\uFF0C\u51FB\u98DE\u4E00\u5927\u7247",
+        brief: "\u8DC3\u51FB\u843D\u70B9\uFF1A\u8303\u56F4\u6CD5\u672F\u4F24\u5BB3 + \u51FB\u98DE 1 \u79D2 + \u51CF\u901F 40%",
         tags: ["control", "slow"],
         desc: "\u5927\u559D\u4E00\u58F0\u300C\u6B7B\u4E14\u4E0D\u907F\u300D\uFF0C\u987B\u53D1\u621F\u5F20\uFF0C\u9AD8\u9AD8\u8DC3\u8D77\u8FDE\u4EBA\u5E26\u76FE\u7838\u5411\u76EE\u6807\u533A\u57DF\uFF0C\u843D\u5730\u9020\u6210 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\uFF0C\u968F\u540E\u7559\u4E0B\u6301\u7EED {zoneDur} \u79D2\u7684\u9707\u88C2\u5730\u9762\uFF0C\u4F7F\u5176\u4E2D\u654C\u4EBA\u51CF\u901F {slow%}\u3002\u8DC3\u8D77\u671F\u95F4\u514D\u75AB\u63A7\u5236\u3002",
         maxLevel: 3,
@@ -1998,7 +1998,7 @@ var Se = {
     basicAttack: { windup: 0.33, damageType: "physical" },
     passive: {
       name: "\u8840\u6012",
-      brief: "\u653E\u5B8C\u6280\u80FD\u7684\u4E0B\u4E00\u65A7\u66F4\u75BC\u8FD8\u56DE\u8840",
+      brief: "\u65BD\u6CD5\u540E 4 \u79D2\u5185\u4E0B\u6B21\u666E\u653B\uFF1A\u989D\u5916\u7269\u7406\u4F24\u5BB3 + \u56DE\u590D 5% \u6700\u5927\u751F\u547D",
       tags: ["heal"],
       desc: "\u65BD\u653E\u6280\u80FD\u540E\uFF0C4 \u79D2\u5185\u7684\u4E0B\u4E00\u6B21\u666E\u653B\u53D8\u4E3A\u91CD\u65A7\uFF1A\u989D\u5916\u9020\u6210 80(+50%\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\uFF0C\u5E76\u56DE\u590D\u81EA\u8EAB 5% \u6700\u5927\u751F\u547D\u3002",
       values: { damage: 80, adRatio: 0.5, healHpRatio: 0.05, window: 4 }
@@ -2007,7 +2007,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u88C2\u5730\u6A2A\u626B",
-        brief: "\u5411\u524D\u6A2A\u626B\u4E00\u5927\u7247\uFF0C\u780D\u4E2D\u51CF\u901F",
+        brief: "\u6247\u5F62\u6A2A\u626B\uFF1A\u7269\u7406\u4F24\u5BB3 + \u51CF\u901F 30% / 1.5 \u79D2",
         tags: ["burst", "slow"],
         desc: "\u4E09\u677F\u65A7\u7B2C\u4E00\u5F0F\uFF1A\u62A1\u65A7\u6A2A\u626B\u524D\u65B9\u6247\u5F62\u533A\u57DF\uFF0C\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
         maxLevel: 6,
@@ -2020,7 +2020,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u86EE\u725B\u51B2\u649E",
-        brief: "\u9876\u4E0A\u53BB\u780D\u4E00\u8DEF\uFF0C\u653B\u901F\u53D8\u5FEB",
+        brief: "\u5411\u6307\u5B9A\u65B9\u5411\u51B2\u649E\uFF1A\u7269\u7406\u4F24\u5BB3 + \u653B\u901F +40%~60%\uFF0C\u6301\u7EED 4 \u79D2",
         tags: ["dash", "buff"],
         desc: "\u4E09\u677F\u65A7\u7B2C\u4E8C\u5F0F\uFF1A\u4F4E\u5934\u63D0\u65A7\u5411\u6307\u5B9A\u65B9\u5411\u731B\u51B2\uFF0C\u5BF9\u8DEF\u5F84\u4E0A\u7684\u654C\u4EBA\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\uFF0C\u5E76\u83B7\u5F97 {asBonus%} \u653B\u901F\u52A0\u6210\uFF0C\u6301\u7EED {asDur} \u79D2\u3002",
         maxLevel: 6,
@@ -2039,7 +2039,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u72C2\u725B\u65CB\u98CE",
-        brief: "\u62A1\u65A7\u8F6C\u5708\u6301\u7EED\u780D\uFF0C\u53EF\u4EE5\u8FB9\u8F6C\u8FB9\u8D70",
+        brief: "3 \u79D2\u6301\u7EED\u65CB\u8F6C\uFF08\u6BCF 0.3 \u79D2\u4E00\u8DF3\uFF09\uFF0C\u671F\u95F4\u53EF\u79FB\u52A8",
         tags: ["dot", "buff"],
         desc: "\u4E09\u677F\u65A7\u7B2C\u4E09\u5F0F\uFF1A\u62A1\u5706\u5927\u65A7\u8F6C\u6210\u4E00\u56E2\u65A7\u5F71\uFF0C\u6301\u7EED {duration} \u79D2\uFF1A\u6BCF {tick} \u79D2\u5BF9\u5468\u56F4\u654C\u4EBA\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u3002\u671F\u95F4\u53EF\u4EE5\u79FB\u52A8\uFF0C\u514D\u75AB\u51CF\u901F\u5E76\u83B7\u5F97 {reduction%} \u51CF\u4F24\u3002",
         maxLevel: 3,
@@ -2090,7 +2090,7 @@ var Se = {
     basicAttack: { windup: 0.36, damageType: "physical" },
     passive: {
       name: "\u70BD\u7130\u4E4B\u8EAF",
-      brief: "\u653B\u901F\u964D\u4E09\u6210\uFF0C\u6362\u6765\u4E00\u5251 140%~250% \u4F24\u5BB3",
+      brief: "\u653B\u901F \u221230%\uFF1B\u666E\u653B\u4F24\u5BB3 140%~250%\uFF08\u968F\u6700\u5927\u751F\u547D\u63D0\u5347\uFF09",
       tags: ["buff"],
       desc: "\u725B\u9B54\u7684\u653B\u51FB\u901F\u5EA6\u964D\u4F4E {asPenalty%}\uFF0C\u4F46\u6BCF\u6B21\u666E\u901A\u653B\u51FB\u9020\u6210 {dmgMin%}~{dmgMax%} \u4F24\u5BB3\u3002\u6700\u5927\u751F\u547D\u503C\u8D8A\u9AD8\uFF0C\u8FD9\u4E2A\u6BD4\u4F8B\u8D8A\u63A5\u8FD1\u4E0A\u9650\u3002",
       values: { asPenalty: 0.3, dmgMin: 1.4, dmgMax: 2.5, hpBase: 3e3, hpSpan: 6e3 }
@@ -2099,7 +2099,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u70C8\u7130\u65A9",
-        brief: "\u76F4\u7EBF\u65A9\u51FB\uFF0C\u7559\u4E0B\u4E00\u9053\u70E7 5 \u79D2\u7684\u706B\u8DEF",
+        brief: "\u76F4\u7EBF\u65A9\u51FB\uFF1A\u7269\u7406\u4F24\u5BB3 + \u7559\u4E0B\u707C\u70E7\u5730\u9762 5 \u79D2",
         tags: ["burst", "dot"],
         desc: "\u725B\u9B54\u62A1\u8D77\u5341\u5B57\u5DE8\u5251\u5411\u524D\u65A9\u51FA\u4E00\u6761\u76F4\u7EBF\uFF0C\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\uFF0C\u5E76\u5728\u5730\u9762\u7559\u4E0B\u706B\u7130\u8F68\u8FF9\uFF0C\u6301\u7EED {trailDur} \u79D2\uFF1A\u6BCF {tick} \u79D2\u5BF9\u8F68\u8FF9\u4E0A\u7684\u654C\u4EBA\u9020\u6210 {burnDps} \u70B9\u9B54\u6CD5\u4F24\u5BB3\uFF0C\u5E76\u65BD\u52A0 1 \u5C42\u300C\u78E8\u7802\u706B\u7130\u300D\u3002",
         maxLevel: 6,
@@ -2118,7 +2118,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u70C8\u7130\u884C\u519B",
-        brief: "\u88AB\u52A8\u53E0\u706B\u7130\u5C42\u6570\uFF1B\u4E3B\u52A8\u514D\u63A7\u3001\u8FB9\u524D\u8FDB\u8FB9\u6301\u7EED\u55B7\u706B",
+        brief: "\u88AB\u52A8\uFF1A\u547D\u4E2D\u53E0\u706B\u7130\u5C42\u6570\uFF08\u4E0A\u9650 7\uFF09\uFF1B\u4E3B\u52A8\uFF1A\u5B9A\u8EAB\u55B7\u706B 2 \u79D2\u3001\u514D\u75AB\u63A7\u5236",
         tags: ["dot", "buff", "channel"],
         desc: "\u88AB\u52A8\u300C\u78E8\u7802\u706B\u7130\u300D\uFF1A\u654C\u4EBA\u8EAB\u4E0A\u7684\u6BCF\u4E00\u5C42\u706B\u7130\u6BCF\u79D2\u53D7\u5230 {flameDps} \u70B9\u9B54\u6CD5\u4F24\u5BB3\uFF0C\u6700\u591A\u53E0 {maxStacks} \u5C42\u3002\u4E3B\u52A8\u300C\u70C8\u7130\u884C\u519B\u300D\uFF1A\u9009\u5B9A\u4E00\u4E2A\u65B9\u5411\uFF0C{duration} \u79D2\u5185\u514D\u75AB\u63A7\u5236\u3001\u671F\u95F4\u65E0\u6CD5\u81EA\u5DF1\u8F6C\u5411\uFF0C\u4E00\u8FB9\u671D\u8BE5\u65B9\u5411\u524D\u8FDB\u4E00\u8FB9\u6301\u7EED\u55B7\u5C04\u70C8\u7130\uFF0C\u5BF9\u524D\u65B9\u654C\u4EBA\u9020\u6210 {sprayDmg}(+{sprayAd%}\u7269\u653B) \u70B9\u9B54\u6CD5\u4F24\u5BB3\u5E76\u65BD\u52A0\u706B\u7130\u5C42\u6570\uFF0C\u671F\u95F4\u4E0D\u4F1A\u88AB\u6253\u65AD\u3002",
         maxLevel: 6,
@@ -2140,7 +2140,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u70C8\u7130\u725B\u9B54",
-        brief: "\u53D8\u8EAB 10 \u79D2\u514D\u63A7\u7559\u706B\u8DEF\uFF0C\u666E\u653B\u5F15\u7206\u5168\u90E8\u706B\u7130\u5C42\u6570",
+        brief: "\u53D8\u8EAB 10 \u79D2\uFF1A\u514D\u75AB\u63A7\u5236 + \u8EAB\u4E0B\u706B\u8DEF\uFF1B\u666E\u653B\u5F15\u7206\u5168\u90E8\u706B\u7130\u5C42\u6570",
         tags: ["buff", "dot", "heal"],
         desc: "\u725B\u9B54\u5316\u8EAB\u70C8\u7130\u725B\u9B54\uFF0C\u6301\u7EED {duration} \u79D2\uFF1A\u514D\u75AB\u63A7\u5236\uFF0C\u79FB\u52A8\u65F6\u5728\u8EAB\u540E\u7559\u4E0B\u706B\u7130\u8F68\u8FF9\u3002\u671F\u95F4\u6BCF\u6B21\u666E\u901A\u653B\u51FB\u4F1A\u6D88\u8017\u76EE\u6807\u8EAB\u4E0A\u6240\u6709\u300C\u78E8\u7802\u706B\u7130\u300D\u5C42\u6570\uFF0C\u6BCF\u5C42\u989D\u5916\u9020\u6210 {perStack}(+{adRatio%}\u7269\u653B) \u70B9\u9B54\u6CD5\u4F24\u5BB3\uFF0C\u5E76\u56DE\u590D\u81EA\u8EAB {healPerStack%} \u6700\u5927\u751F\u547D\u3002",
         maxLevel: 3,
@@ -2199,7 +2199,7 @@ var Se = {
     basicAttack: { windup: 0.3, damageType: "magic", projectile: "xingli_basic", projectileSpeed: 24 },
     passive: {
       name: "\u4F59\u97F3\u4E09\u53E0",
-      brief: "\u6280\u80FD\u6253\u4E2D\u540C\u4E00\u4EBA\u4E09\u6B21\u5C31\u7729\u6655",
+      brief: "5 \u79D2\u5185\u547D\u4E2D\u540C\u4E00\u76EE\u6807 3 \u6B21\uFF1A\u989D\u5916\u6CD5\u672F\u4F24\u5BB3 + \u7729\u6655 0.75 \u79D2",
       tags: ["control"],
       desc: "\u6280\u80FD\u547D\u4E2D\u654C\u4EBA\u4F1A\u7559\u4E0B\u4E00\u5C42\u4F59\u97F3(\u6301\u7EED 5 \u79D2)\u3002\u53E0\u6EE1 3 \u5C42\u65F6\u5F26\u97F3\u5171\u632F\uFF1A\u9020\u6210\u76EE\u6807 6% \u6700\u5927\u751F\u547D\u7684\u6CD5\u672F\u4F24\u5BB3(\u5BF9\u975E\u82F1\u96C4\u4E0A\u9650 300)\u5E76\u7729\u6655 0.75 \u79D2\u3002",
       values: { stacks: 3, duration: 5, hpRatio: 0.06, cap: 300, stun: 0.75 }
@@ -2208,7 +2208,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u4E00\u5F26\u7A7F\u4E91",
-        brief: "\u5F39\u51FA\u4E00\u9053\u97F3\u6CE2\uFF0C\u7A7F\u900F\u4E00\u6574\u6761\u7EBF",
+        brief: "\u76F4\u7EBF\u97F3\u6CE2\uFF1A\u7A7F\u900F\u5168\u90E8\u76EE\u6807\uFF0C\u6CD5\u672F\u4F24\u5BB3",
         tags: ["burst"],
         desc: "\u62E8\u52A8\u4E00\u5F26\uFF0C\u5F39\u51FA\u4E00\u9053\u7A7F\u900F\u7684\u5F26\u97F3\uFF0C\u5BF9\u6CBF\u9014\u6240\u6709\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\u3002",
         maxLevel: 6,
@@ -2221,7 +2221,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u56DE\u73AF\u6536\u5F26",
-        brief: "\u5708\u4F4F\u4E00\u7247\uFF0C\u7A0D\u540E\u628A\u4EBA\u62C9\u5230\u4E2D\u95F4",
+        brief: "0.6 \u79D2\u540E\u62C9\u5411\u4E2D\u5FC3\uFF1A\u6CD5\u672F\u4F24\u5BB3 + \u51CF\u901F 45% / 2 \u79D2",
         tags: ["control", "slow"],
         desc: "\u5728\u76EE\u6807\u4F4D\u7F6E\u62E8\u51FA\u4E00\u5708\u56DE\u65CB\u7684\u66F2\u97F3\uFF0C{delay} \u79D2\u540E\u6536\u5F26\uFF1A\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\uFF0C\u5C06\u654C\u4EBA\u62C9\u5411\u4E2D\u5FC3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2\u3002",
         maxLevel: 6,
@@ -2241,7 +2241,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u96C1\u843D\u5E73\u6C99",
-        brief: "\u96C1\u7FA4\u4E00\u6CE2\u6CE2\u4FEF\u51B2\uFF0C\u8986\u76D6\u4E00\u5927\u7247",
+        brief: "5 \u6CE2\u8303\u56F4\u6CD5\u672F\u4F24\u5BB3\uFF08\u5171 2.5 \u79D2\uFF09\uFF0C\u6BCF\u6CE2\u51CF\u901F 30%",
         tags: ["dot", "slow"],
         desc: "\u4E00\u66F2\u5F15\u5F97\u7FA4\u96C1\u843D\u5411\u76EE\u6807\u533A\u57DF\uFF1A{duration} \u79D2\u5185\u4FEF\u51B2 {waves} \u6CE2\u96C1\u5F71\uFF0C\u6BCF\u6CE2\u5BF9\u533A\u57DF\u5185\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\u3002\u6BCF\u6CE2\u90FD\u4F1A\u9644\u52A0\u4E00\u5C42\u4F59\u97F3\u3002",
         maxLevel: 3,
@@ -2281,7 +2281,7 @@ var Se = {
     lane: "bot",
     difficulty: 2,
     lore: "\u897F\u6C49\u540D\u5C06\uFF0C\u300A\u53F2\u8BB0\xB7\u674E\u5C06\u519B\u5217\u4F20\u300B\u8BF4\u4ED6\u300C\u733F\u81C2\u5584\u5C04\u300D\u3002\u591C\u91CC\u628A\u8349\u4E2D\u5DE8\u77F3\u5F53\u6210\u731B\u864E\uFF0C\u4E00\u7BAD\u5C04\u53BB\uFF0C\u7BAD\u5934\u6CA1\u8FDB\u4E86\u77F3\u5934\uFF1B\u5308\u5974\u4EBA\u53EB\u4ED6\u300C\u6C49\u4E4B\u98DE\u5C06\u519B\u300D\uFF0C\u591A\u5E74\u4E0D\u6562\u6765\u72AF\u3002",
-    tips: "\u7AD9\u4F4F\u4E86\u4E0D\u505C\u5C04\u7BAD\uFF0C\u8D8A\u5C04\u8D8A\u5FEB\uFF0C\u53E0\u6EE1\u4E94\u5C42\u8FD8\u4F1A\u52A0\u79FB\u901F\u548C\u4F24\u5BB3\u3002\u88AB\u8FD1\u8EAB\u5C31\u7528\u300C\u98DE\u5C06\u817E\u8EAB\u300D\u7FFB\u5F00\uFF0C\u843D\u5730\u540E\u7684\u4E0B\u4E00\u7BAD\u5FC5\u5B9A\u66B4\u51FB\u3002\u5927\u62DB\u7BAD\u96E8\u80FD\u51CF\u901F\u4E00\u5927\u7247\uFF0C\u5F00\u56E2\u3001\u65AD\u540E\u90FD\u597D\u7528\u3002",
+    tips: "\u7AD9\u4F4F\u4E86\u4E0D\u505C\u5C04\u7BAD\uFF0C\u8D8A\u5C04\u8D8A\u5FEB\uFF0C\u53E0\u6EE1\u4E94\u5C42\u8FD8\u4F1A\u52A0\u79FB\u901F\u548C\u4F24\u5BB3\u3002\u88AB\u8FD1\u8EAB\u5C31\u7528\u300C\u98DE\u5C06\u817E\u8EAB\u300D\u7FFB\u5F00\uFF0C\u843D\u5730\u540E\u7684\u4E0B\u4E00\u7BAD\u5FC5\u5B9A\u66B4\u51FB\u3002\u5927\u62DB\u7BAD\u96E8\u51CF\u901F 35%\uFF0C\u5F00\u56E2\u3001\u65AD\u540E\u90FD\u597D\u7528\u3002",
     attackType: "ranged",
     radius: 0.58,
     base: {
@@ -2305,7 +2305,7 @@ var Se = {
     },
     passive: {
       name: "\u733F\u81C2\u8FDE\u5C04",
-      brief: "\u8FDE\u7EED\u666E\u653B\uFF0C\u8D8A\u5C04\u8D8A\u5FEB\u8D8A\u75BC",
+      brief: "\u666E\u653B\u547D\u4E2D\u53E0\u8FDE\u5C04\uFF08\u4E0A\u9650 5 \u5C42 / 3 \u79D2\uFF09\uFF1A\u6BCF\u5C42\u653B\u901F +6%\uFF0C\u6EE1\u5C42\u79FB\u901F +10% \u4E14\u666E\u653B\u9644\u5E26\u7269\u7406\u4F24\u5BB3",
       tags: ["buff"],
       desc: "\u666E\u653B\u547D\u4E2D\u83B7\u5F97\u4E00\u5C42\u8FDE\u5C04(\u6700\u591A 5 \u5C42\uFF0C\u6301\u7EED 3 \u79D2)\uFF0C\u6BCF\u5C42\u63D0\u9AD8 6% \u653B\u901F\u3002\u6EE1\u5C42\u65F6\u79FB\u901F\u63D0\u9AD8 10%\uFF0C\u4E14\u666E\u653B\u989D\u5916\u9020\u6210 20(+\u6BCF\u7EA7 4) \u70B9\u7269\u7406\u4F24\u5BB3\u3002",
       values: { maxStacks: 5, duration: 3, asPerStack: 0.06, haste: 0.1, bonus: 20, bonusPerLevel: 4 }
@@ -2314,7 +2314,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u767D\u7FBD\u6CA1\u77F3",
-        brief: "\u4E00\u652F\u80FD\u7A7F\u5175\u7684\u91CD\u7BAD\uFF0C\u5C04\u4E2D\u51CF\u901F",
+        brief: "\u7A7F\u900F\u7BAD\uFF1A\u5BF9\u82F1\u96C4\u5168\u989D\u4F24\u5BB3\u3001\u5BF9\u5C0F\u5175 60%\uFF0C\u51CF\u901F 30% / 1.5 \u79D2",
         tags: ["burst", "slow"],
         desc: "\u5F15\u6EE1\u957F\u5F13\u5C04\u51FA\u4E00\u652F\u80FD\u6CA1\u5165\u77F3\u68F1\u7684\u91CD\u7BAD\uFF0C\u8D2F\u7A7F\u6CBF\u9014\u5C0F\u5175\uFF0C\u547D\u4E2D\u7684\u7B2C\u4E00\u4E2A\u654C\u65B9\u82F1\u96C4\u53D7\u5230 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2(\u5BF9\u6CBF\u9014\u5C0F\u5175/\u91CE\u602A\u9020\u6210 60% \u4F24\u5BB3)\u3002",
         maxLevel: 6,
@@ -2334,7 +2334,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u98DE\u5C06\u817E\u8EAB",
-        brief: "\u7FFB\u8EAB\u62C9\u5F00\u8DDD\u79BB\uFF0C\u4E0B\u4E00\u7BAD\u5FC5\u66B4\u51FB",
+        brief: "\u540E\u8DC3\uFF1A\u79FB\u901F +20% / 2 \u79D2\uFF1B4 \u79D2\u5185\u4E0B\u6B21\u666E\u653B\u5FC5\u5B9A\u66B4\u51FB",
         tags: ["dash", "buff"],
         desc: "\u5411\u6307\u5B9A\u65B9\u5411\u817E\u8EAB\u7FFB\u8DC3\uFF0C\u843D\u5730\u540E\u83B7\u5F97 {haste%} \u79FB\u901F\u52A0\u6210\u6301\u7EED {hasteDur} \u79D2\uFF0C\u4E14\u4E0B\u4E00\u6B21\u666E\u653B\u5FC5\u5B9A\u66B4\u51FB\u3002",
         maxLevel: 6,
@@ -2347,7 +2347,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u7BAD\u9501\u9634\u5C71",
-        brief: "\u7BAD\u96E8\u76D6\u4F4F\u4E00\u5927\u7247\uFF0C\u6301\u7EED\u51CF\u901F",
+        brief: "3 \u79D2\u7BAD\u96E8\uFF08\u6BCF 0.5 \u79D2\u4E00\u8DF3\uFF09+ \u51CF\u901F 35%",
         tags: ["slow", "dot"],
         desc: "\u4EF0\u5C04\u4E00\u7C07\u7FBD\u7BAD\uFF0C\u4EE4\u7BAD\u96E8\u5C01\u9501\u76EE\u6807\u533A\u57DF {duration} \u79D2\uFF1A\u6BCF {tick} \u79D2\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\u3002",
         maxLevel: 3,
@@ -2387,7 +2387,7 @@ var Se = {
     lane: "jungle",
     difficulty: 3,
     lore: "\u6218\u56FD\u672B\u5E74\u7684\u5251\u5BA2\uFF0C\u53D7\u71D5\u592A\u5B50\u4E39\u4E4B\u6258\u5165\u79E6\u884C\u523A\u3002\u300A\u53F2\u8BB0\xB7\u523A\u5BA2\u5217\u4F20\u300B\u8BB0\u4ED6\u6613\u6C34\u8F9E\u522B\uFF0C\u732E\u4E0A\u7763\u4EA2\u5730\u56FE\uFF0C\u300C\u56FE\u7A77\u800C\u5315\u9996\u89C1\u300D\u3002",
-    tips: "\u5148\u5728\u91CE\u533A\u6253\u91CE\u6512\u7B49\u7EA7\uFF0C\u518D\u53BB\u5404\u6761\u8DEF\u6293\u6B8B\u8840\u7684\u4EBA\u3002\u654C\u4EBA\u8840\u91CF\u4F4E\u4E8E\u56DB\u6210\u65F6\u4F60\u6253\u5F97\u66F4\u75BC\uFF0C\u62FF\u5230\u51FB\u6740\u6216\u52A9\u653B\u4F1A\u5237\u65B0\u4E00\u3001\u4E8C\u6280\u80FD\uFF0C\u53EF\u4EE5\u63A5\u7740\u8FFD\u4E0B\u4E00\u4E2A\u3002\u522B\u7B2C\u4E00\u4E2A\u51B2\u8FDB\u4EBA\u5806\uFF1A\u7B49\u961F\u53CB\u5148\u4E0A\uFF0C\u518D\u7528\u5927\u62DB\u8D34\u4E0A\u53BB\u6536\u6389\u8106\u76AE\u3002",
+    tips: "\u5148\u5728\u91CE\u533A\u6253\u91CE\u6512\u7B49\u7EA7\uFF0C\u518D\u53BB\u5404\u6761\u8DEF\u6293\u6B8B\u8840\u7684\u4EBA\u3002\u654C\u4EBA\u751F\u547D\u4F4E\u4E8E 40% \u65F6\u4F60\u7684\u4F24\u5BB3 +18%\uFF0C\u62FF\u5230\u51FB\u6740\u6216\u52A9\u653B\u4F1A\u5237\u65B0\u4E00\u3001\u4E8C\u6280\u80FD\uFF0C\u53EF\u4EE5\u63A5\u7740\u8FFD\u4E0B\u4E00\u4E2A\u3002\u522B\u7B2C\u4E00\u4E2A\u51B2\u8FDB\u4EBA\u5806\uFF1A\u7B49\u961F\u53CB\u5148\u4E0A\uFF0C\u518D\u7528\u5927\u62DB\u8D34\u4E0A\u53BB\u6536\u6389\u8106\u76AE\u3002",
     attackType: "melee",
     radius: 0.58,
     base: {
@@ -2406,7 +2406,7 @@ var Se = {
     basicAttack: { windup: 0.3, damageType: "physical" },
     passive: {
       name: "\u4E00\u53BB\u4E0D\u8FD8",
-      brief: "\u6253\u6B8B\u8840\u66F4\u75BC\uFF0C\u6740\u4EBA\u540E\u5237\u65B0\u6280\u80FD",
+      brief: "\u5BF9\u751F\u547D\u4F4E\u4E8E 40% \u7684\u76EE\u6807\u4F24\u5BB3 +18%\uFF1B\u51FB\u6740\u56DE\u590D 8% \u6700\u5927\u751F\u547D\u5E76\u5237\u65B0",
       tags: ["burst"],
       desc: "\u62B1\u5B9A\u6B7B\u5FD7\uFF1A\u5BF9\u751F\u547D\u503C\u4F4E\u4E8E 40% \u7684\u654C\u4EBA\u9020\u6210\u7684\u4F24\u5BB3\u63D0\u9AD8 18%\u3002\u53C2\u4E0E\u51FB\u6740\u82F1\u96C4\u540E\uFF0C\u7ACB\u5373\u5237\u65B0\u4E00\u3001\u4E8C\u6280\u80FD\u51B7\u5374\u5E76\u56DE\u590D 8% \u6700\u5927\u751F\u547D\u3002\u5BF9\u91CE\u602A\u9020\u6210\u7684\u4F24\u5BB3\u63D0\u9AD8 25%\u3002",
       values: { threshold: 0.4, bonus: 0.18, healHpRatio: 0.08, monsterBonus: 0.25 }
@@ -2415,7 +2415,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u98CE\u8427\u6613\u6C34",
-        brief: "\u7A81\u523A\u7A7F\u8FC7\u654C\u4EBA\uFF0C\u523A\u4E2D\u82F1\u96C4\u8FD9\u62DB\u66F4\u5FEB\u8F6C\u597D",
+        brief: "\u7A81\u523A\u7A7F\u900F\uFF1A\u7269\u7406\u4F24\u5BB3\uFF1B\u547D\u4E2D\u82F1\u96C4\u8FD4\u8FD8 40% \u51B7\u5374",
         tags: ["dash"],
         desc: "\u50CF\u4E00\u9635\u5BD2\u98CE\u5411\u6307\u5B9A\u65B9\u5411\u75BE\u523A\u7A7F\u8FC7\uFF0C\u5BF9\u8DEF\u5F84\u4E0A\u7684\u654C\u4EBA\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u3002\u82E5\u547D\u4E2D\u654C\u65B9\u82F1\u96C4\uFF0C\u8FD9\u4E00\u62DB\u7684\u51B7\u5374\u7ACB\u5373\u8FD4\u8FD8 {refund%}\u3002",
         maxLevel: 6,
@@ -2428,7 +2428,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u5F15\u5315\u4E00\u63B7",
-        brief: "\u6247\u5F62\u4E22\u51FA\u4E09\u628A\u5315\u9996\uFF0C\u547D\u4E2D\u51CF\u901F",
+        brief: "\u6247\u5F62 3 \u628A\u5315\u9996\uFF1A\u7269\u7406\u4F24\u5BB3 + \u51CF\u901F 35% / 1.5 \u79D2",
         tags: ["slow"],
         desc: "\u6247\u5F62\u63B7\u51FA 3 \u628A\u5315\u9996\uFF0C\u6BCF\u628A\u5BF9\u547D\u4E2D\u7684\u7B2C\u4E00\u4E2A\u654C\u4EBA\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u70B9\u7269\u7406\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF0C\u6301\u7EED {slowDur} \u79D2(\u540C\u4E00\u76EE\u6807\u88AB\u591A\u628A\u547D\u4E2D\u65F6\uFF0C\u540E\u7EED\u5315\u9996\u53EA\u9020\u6210 50% \u4F24\u5BB3)\u3002",
         maxLevel: 6,
@@ -2450,7 +2450,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u5377\u5C3D\u5315\u73B0",
-        brief: "\u6296\u5F00\u56FE\u5377\u6B3A\u8FD1\u76EE\u6807\uFF0C\u5377\u5C3D\u4E00\u5315",
+        brief: "\u7A81\u8FDB\u81F3\u76EE\u6807\uFF1A\u7269\u7406\u4F24\u5BB3 + 20% \u5DF2\u635F\u5931\u751F\u547D\u6CD5\u672F\u4F24\u5BB3",
         tags: ["burst", "dash"],
         desc: "\u6296\u5F00\u7763\u4EA2\u56FE\u5377\u906E\u4F4F\u8EAB\u5F62(\u671F\u95F4\u4E0D\u53EF\u88AB\u9009\u4E2D)\uFF0C\u5377\u5C3D\u65F6\u4EBA\u5DF2\u6B3A\u5230\u76EE\u6807\u654C\u65B9\u82F1\u96C4\u8EAB\u8FB9\uFF0C\u4E00\u5315\u523A\u51FA\uFF1A\u9020\u6210 {damage}(+{adRatio%}\u7269\u653B) \u5916\u52A0\u76EE\u6807 {missingRatio%} \u5DF2\u635F\u751F\u547D\u7684\u7269\u7406\u4F24\u5BB3\u3002",
         maxLevel: 3,
@@ -2501,7 +2501,7 @@ var Se = {
     basicAttack: { windup: 0.42, damageType: "physical" },
     passive: {
       name: "\u83CC\u4E1D\u7F20\u7F1A",
-      brief: "\u666E\u653B\u4E0E\u6280\u80FD\u547D\u4E2D\u90FD\u79EF\u6512\u83CC\u4E1D\uFF0C7 \u5C42\u7206\u5F00\uFF1A\u989D\u5916\u4F24\u5BB3 + \u7B49\u91CF\u62A4\u76FE",
+      brief: "\u666E\u653B\u4E0E\u6280\u80FD\u547D\u4E2D\u53E0\u83CC\u4E1D\uFF1B7 \u5C42\u7206\u5F00\uFF1A5% \u6700\u5927\u751F\u547D\u6CD5\u672F\u4F24\u5BB3 + \u7B49\u91CF\u62A4\u76FE",
       tags: ["slow", "shield"],
       desc: "\u666E\u653B\u548C\u6280\u80FD\u547D\u4E2D\u90FD\u4F1A\u79EF\u6512 1 \u5C42\u83CC\u4E1D\uFF08\u4E8C\u6280\u80FD\u6BCF\u6BB5\u6700\u591A 1 \u5C42\uFF09\u3002\u53E0\u5230 {hits} \u5C42\u65F6\u70B8\u5F00\uFF1A\u5BF9\u76EE\u6807\u989D\u5916\u9020\u6210 {hpRatio%} \u6700\u5927\u751F\u547D\u7684\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF08{slowDur} \u79D2\uFF09\uFF0C\u540C\u65F6\u7ED9\u81EA\u5DF1\u5957\u4E0A\u4E00\u5C42\u7B49\u540C\u4E8E\u8BE5\u4F24\u5BB3\u7684\u62A4\u76FE\uFF0C\u6301\u7EED {shieldDur} \u79D2\u3002",
       values: { hits: 7, hpRatio: 0.05, slow: 0.3, slowDur: 1.2, shieldDur: 4 }
@@ -2510,7 +2510,7 @@ var Se = {
       s1: {
         slot: "s1",
         name: "\u6EDA\u83CC\u51B2\u950B",
-        brief: "\u4FA7\u5012\u6210\u83CC\u8F6E\u6301\u7EED\u6EDA\u52A8\uFF0C\u53EF\u8F6C\u5411\uFF0C\u78BE\u5230\u5C31\u75BC",
+        brief: "\u4FA7\u6EDA 10 \u79D2\uFF0C\u53EF\u8F6C\u5411\uFF1B\u78BE\u538B\u9020\u6210\u4F24\u5BB3 + \u51FB\u98DE 0.85 \u79D2",
         tags: ["dash", "control"],
         desc: "\u628A\u8EAB\u5B50\u4FA7\u8FC7\u6765\u7F29\u6210\u4E00\u53EA\u83CC\u8F6E\uFF0C\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u6EDA\u52A8 {rollTime} \u79D2\uFF0C\u671F\u95F4\u7528\u79FB\u52A8\u6307\u4EE4\u53EF\u4EE5\u4E0D\u65AD\u6539\u53D8\u65B9\u5411\uFF1A\u901F\u5EA6\u4ECE {dashSpeed} \u4E00\u8DEF\u63D0\u5230 {maxSpeed}\u3002\u88AB\u78BE\u8FC7\u7684\u654C\u4EBA\u6BCF {tickInterval} \u79D2\u53D7\u5230 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u7269\u7406\u4F24\u5BB3\u3002\u6BCF\u4E2A\u5355\u4F4D\u7B2C\u4E00\u6B21\u88AB\u649E\u5230\u4F1A\u88AB\u9876\u98DE {knockup} \u79D2\uFF0C\u4E4B\u540E\u518D\u649E\u53EA\u53D7 {followRatio%} \u7684\u4F24\u5BB3\u4E0E\u51FB\u98DE\u3002\u649E\u5899\u5373\u505C\uFF0C\u51B7\u5374\u4ECE\u6EDA\u52A8\u7ED3\u675F\u540E\u624D\u5F00\u59CB\u8BA1\u7B97\u3002",
         maxLevel: 6,
@@ -2534,7 +2534,7 @@ var Se = {
       s2: {
         slot: "s2",
         name: "\u5B62\u5B50\u55B7\u5410",
-        brief: "\u957F\u6309\u6301\u7EED\u55B7\u5410\u5B62\u5B50\u7C89\u96FE\uFF0C\u6301\u7EED\u8017\u84DD",
+        brief: "\u5F15\u5BFC 8 \u79D2\u6301\u7EED\u55B7\u5410\uFF1A\u6CD5\u672F\u4F24\u5BB3 + \u51CF\u901F 40%\uFF0C\u6BCF\u79D2\u6D88\u8017\u6CD5\u529B",
         tags: ["slow", "dot"],
         desc: "\u6309\u4F4F\u671D\u6307\u5B9A\u65B9\u5411\u6301\u7EED\u55B7\u51FA\u5B62\u5B50\u7C89\u96FE\uFF0C\u6BCF {tickInterval} \u79D2\u5BF9\u9525\u5F62\u5185\u654C\u4EBA\u9020\u6210 {damage}(+{apRatio%}\u6CD5\u5F3A) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51CF\u901F {slow%}\uFF08{slowDur} \u79D2\uFF09\u3002\u55B7\u5C04\u671F\u95F4\u6BCF\u79D2\u6D88\u8017 {manaPerSec} \u70B9\u6CD5\u529B\uFF1B\u6CD5\u529B\u8017\u5C3D\u3001\u88AB\u63A7\u6216\u518D\u6B21\u6309\u952E\u5373\u4E2D\u65AD\uFF0C\u4E2D\u65AD\u540E\u53EA\u9700\u5F88\u77ED\u51B7\u5374\u3002",
         maxLevel: 6,
@@ -2555,7 +2555,7 @@ var Se = {
       ult: {
         slot: "ult",
         name: "\u5929\u964D\u83CC\u76D6",
-        brief: "\u5168\u56FE\u84C4\u529B\u8DC3\u51FB\uFF0C\u98DE\u5F97\u8D8A\u8FDC\u7838\u5F97\u8D8A\u72E0",
+        brief: "\u84C4\u529B\u8DC3\u51FB\uFF1A\u8303\u56F4\u6CD5\u672F\u4F24\u5BB3 + \u51FB\u98DE 0.9 \u79D2\uFF1B\u8DDD\u79BB\u8D8A\u8FDC\u8303\u56F4\u8D8A\u5927",
         tags: ["control", "dash"],
         desc: "\u8E72\u4E0B\u628A\u83CC\u76D6\u538B\u5F97\u5431\u5431\u54CD\uFF0C\u84C4\u529B {warnTime} \u79D2\uFF08\u843D\u70B9\u4F1A\u63D0\u524D\u4EAE\u51FA\u8B66\u793A\uFF09\uFF0C\u53EF\u4EE5\u7838\u5411\u5730\u56FE\u4E0A\u4EFB\u610F\u4E00\u70B9\u3002\u98DE\u5F97\u8D8A\u8FDC\u7838\u5F97\u8D8A\u72E0\uFF1A\u843D\u5730\u534A\u5F84\u4ECE {radiusMin} \u4E00\u8DEF\u957F\u5230 {radiusMax}\uFF0C\u4F24\u5BB3\u6700\u591A\u518D\u7FFB\u4E00\u500D\uFF1B\u547D\u4E2D\u9020\u6210 {damage}(+{hpRatio%}\u6700\u5927\u751F\u547D) \u70B9\u6CD5\u672F\u4F24\u5BB3\u5E76\u51FB\u98DE {knockup} \u79D2\u3002\u84C4\u529B\u4E0E\u8DC3\u8D77\u671F\u95F4\u514D\u75AB\u63A7\u5236\u3002",
         maxLevel: 3,
@@ -2629,14 +2629,14 @@ function US(n, t) {
 var ea = {
   recall: {
     name: "\u56DE\u57CE",
-    brief: "\u539F\u5730\u7AD9 5 \u79D2\uFF0C\u56DE\u6CC9\u6C34\u8865\u6EE1",
+    brief: "\u5F15\u5BFC 5 \u79D2\u540E\u4F20\u9001\u56DE\u6CC9\u6C34\u5E76\u56DE\u6EE1\u751F\u547D\u4E0E\u6CD5\u529B",
     desc: "\u539F\u5730\u7AD9 5 \u79D2\u540E\u4F20\u9001\u56DE\u6CC9\u6C34\u3002\u79FB\u52A8\u3001\u653B\u51FB\u6216\u53D7\u5230\u4F24\u5BB3\u4F1A\u6253\u65AD\u3002",
     channel: 5,
     cooldown: 1
   },
   heal: {
     name: "\u7597\u4F24",
-    brief: "5 \u79D2\u5185\u56DE\u4E09\u6210\u8840\u548C\u84DD",
+    brief: "5 \u79D2\u5185\u56DE\u590D 30% \u6700\u5927\u751F\u547D\u4E0E 30% \u6700\u5927\u6CD5\u529B",
     desc: "5 \u79D2\u5185\u6301\u7EED\u56DE\u590D\u5171 30% \u6700\u5927\u751F\u547D\u4E0E 30% \u6700\u5927\u6CD5\u529B\u3002\u53D7\u5230\u82F1\u96C4\u6216\u9632\u5FA1\u5854\u4F24\u5BB3\u4F1A\u6253\u65AD\u3002",
     duration: 5,
     hpRatio: 0.3,
@@ -2645,8 +2645,8 @@ var ea = {
   },
   flash: {
     name: "\u95EA\u73B0",
-    brief: "\u671D\u4E00\u4E2A\u65B9\u5411\u77AC\u79FB\u4E00\u5C0F\u6BB5",
-    desc: "\u5411\u6307\u5B9A\u65B9\u5411\u77AC\u79FB\u4E00\u5C0F\u6BB5\u8DDD\u79BB\uFF0C\u53EF\u7A7F\u8D8A\u8584\u5899\u3002",
+    brief: "\u5411\u6307\u5B9A\u65B9\u5411\u77AC\u79FB 5 \u7C73\uFF0C\u53EF\u7A7F\u8D8A\u8584\u5899",
+    desc: "\u5411\u6307\u5B9A\u65B9\u5411\u77AC\u79FB 5 \u7C73\uFF0C\u53EF\u7A7F\u8D8A\u8584\u5899\u3002",
     range: 5,
     cooldown: 110
   }
@@ -50642,7 +50642,6 @@ var ln = {
   baton: {
     id: "baton",
     name: "\u8B66\u68CD",
-    brief: "\u6700\u57FA\u7840\u7684\u7269\u653B\u4EF6",
     category: "attack",
     tier: 1,
     cost: 300,
@@ -50654,7 +50653,6 @@ var ln = {
   steel_pipe: {
     id: "steel_pipe",
     name: "\u94A2\u7BA1",
-    brief: "\u7269\u653B\u66F4\u9AD8\u7684\u57FA\u7840\u4EF6",
     category: "attack",
     tier: 1,
     cost: 630,
@@ -50666,7 +50664,6 @@ var ln = {
   slingshot: {
     id: "slingshot",
     name: "\u5F39\u5F13",
-    brief: "\u4E00\u70B9\u70B9\u653B\u901F",
     category: "attack",
     tier: 1,
     cost: 190,
@@ -50678,7 +50675,6 @@ var ln = {
   chain_whip: {
     id: "chain_whip",
     name: "\u94C1\u94FE",
-    brief: "\u653B\u901F\u4EF6\uFF0C\u5408\u6210\u68D2\u7403\u68CD",
     category: "attack",
     tier: 1,
     cost: 350,
@@ -50690,7 +50686,6 @@ var ln = {
   knuckle: {
     id: "knuckle",
     name: "\u6307\u864E",
-    brief: "\u4E00\u70B9\u70B9\u66B4\u51FB\u7387",
     category: "attack",
     tier: 1,
     cost: 160,
@@ -50702,7 +50697,6 @@ var ln = {
   red_bull: {
     id: "red_bull",
     name: "\u7EA2\u725B",
-    brief: "\u666E\u653B\u56DE\u8840\u7684\u57FA\u7840\u4EF6",
     category: "attack",
     tier: 1,
     cost: 210,
@@ -50714,7 +50708,6 @@ var ln = {
   steel_nail: {
     id: "steel_nail",
     name: "\u94A2\u9489",
-    brief: "\u4E00\u70B9\u70B9\u62A4\u7532\u7A7F\u900F",
     category: "attack",
     tier: 1,
     cost: 160,
@@ -50726,7 +50719,6 @@ var ln = {
   spray_can: {
     id: "spray_can",
     name: "\u6740\u866B\u55B7\u96FE",
-    brief: "\u6700\u57FA\u7840\u7684\u6CD5\u5F3A\u4EF6",
     category: "magic",
     tier: 1,
     cost: 200,
@@ -50738,7 +50730,6 @@ var ln = {
   ddvp: {
     id: "ddvp",
     name: "\u654C\u654C\u754F",
-    brief: "\u6CD5\u5F3A\u66F4\u9AD8\u7684\u57FA\u7840\u4EF6",
     category: "magic",
     tier: 1,
     cost: 400,
@@ -50750,7 +50741,6 @@ var ln = {
   power_bank: {
     id: "power_bank",
     name: "\u5145\u7535\u5B9D",
-    brief: "\u6491\u84DD\u91CF",
     category: "magic",
     tier: 1,
     cost: 160,
@@ -50762,7 +50752,6 @@ var ln = {
   pepper_spray: {
     id: "pepper_spray",
     name: "\u9632\u72FC\u55B7\u96FE",
-    brief: "\u4E00\u70B9\u70B9\u6CD5\u672F\u7A7F\u900F",
     category: "magic",
     tier: 1,
     cost: 160,
@@ -50774,7 +50763,6 @@ var ln = {
   alarm_clock: {
     id: "alarm_clock",
     name: "\u95F9\u949F",
-    brief: "\u4E00\u70B9\u70B9\u51B7\u5374\u7F29\u51CF",
     category: "magic",
     tier: 1,
     cost: 160,
@@ -50786,7 +50774,6 @@ var ln = {
   padded_coat: {
     id: "padded_coat",
     name: "\u68C9\u8884",
-    brief: "\u6700\u57FA\u7840\u7684\u62A4\u7532",
     category: "defense",
     tier: 1,
     cost: 150,
@@ -50798,7 +50785,6 @@ var ln = {
   hard_hat: {
     id: "hard_hat",
     name: "\u5B89\u5168\u5E3D",
-    brief: "\u62A4\u7532\u4EF6\uFF0C\u5408\u6210\u9632\u66B4\u76FE\u724C",
     category: "defense",
     tier: 1,
     cost: 340,
@@ -50810,7 +50796,6 @@ var ln = {
   cushion: {
     id: "cushion",
     name: "\u6C99\u53D1\u57AB",
-    brief: "\u4E00\u70B9\u70B9\u751F\u547D",
     category: "defense",
     tier: 1,
     cost: 260,
@@ -50822,7 +50807,6 @@ var ln = {
   quilt: {
     id: "quilt",
     name: "\u68C9\u88AB",
-    brief: "\u751F\u547D\u4EF6\uFF0C\u5408\u6210\u5927\u68C9\u88AB",
     category: "defense",
     tier: 1,
     cost: 430,
@@ -50834,7 +50818,6 @@ var ln = {
   mattress: {
     id: "mattress",
     name: "\u5E2D\u68A6\u601D",
-    brief: "\u5927\u5757\u751F\u547D\uFF0C\u5408\u6210\u5927\u4EF6",
     category: "defense",
     tier: 1,
     cost: 720,
@@ -50846,7 +50829,6 @@ var ln = {
   raincoat: {
     id: "raincoat",
     name: "\u96E8\u8863",
-    brief: "\u6700\u57FA\u7840\u7684\u9B54\u6297",
     category: "defense",
     tier: 1,
     cost: 160,
@@ -50858,7 +50840,6 @@ var ln = {
   gas_mask: {
     id: "gas_mask",
     name: "\u9632\u6BD2\u9762\u5177",
-    brief: "\u9B54\u6297\u4EF6\uFF0C\u5408\u6210\u9632\u5F39\u8863",
     category: "defense",
     tier: 1,
     cost: 350,
@@ -50870,7 +50851,6 @@ var ln = {
   milk_powder: {
     id: "milk_powder",
     name: "\u5976\u7C89\u7F50",
-    brief: "\u6491\u84DD\u6491\u8840\uFF0C\u5408\u6210\u91CE\u751F\u72D7\u5976",
     category: "magic",
     tier: 1,
     cost: 330,
@@ -50883,7 +50863,6 @@ var ln = {
   slippers: {
     id: "slippers",
     name: "\u62D6\u978B",
-    brief: "\u8DD1\u5F97\u66F4\u5FEB\u7684\u57FA\u7840\u978B",
     category: "boots",
     tier: 1,
     cost: 250,
@@ -50895,7 +50874,6 @@ var ln = {
   liberation_shoes: {
     id: "liberation_shoes",
     name: "\u89E3\u653E\u978B",
-    brief: "\u8DD1\u5F97\u5FEB\uFF0C\u8FD8\u66F4\u6297\u7269\u7406\u4F24\u5BB3",
     category: "boots",
     tier: 2,
     cost: 710,
@@ -50909,7 +50887,6 @@ var ln = {
   canvas_shoes: {
     id: "canvas_shoes",
     name: "\u56DE\u529B\u978B",
-    brief: "\u8DD1\u5F97\u5FEB\uFF0C\u6280\u80FD\u51B7\u5374\u66F4\u77ED",
     category: "boots",
     tier: 2,
     cost: 710,
@@ -50923,7 +50900,6 @@ var ln = {
   running_shoes: {
     id: "running_shoes",
     name: "\u8DD1\u978B",
-    brief: "\u8DD1\u5F97\u5FEB\uFF0C\u666E\u653B\u51FA\u624B\u66F4\u5FEB",
     category: "boots",
     tier: 2,
     cost: 710,
@@ -50937,7 +50913,6 @@ var ln = {
   police_baton: {
     id: "police_baton",
     name: "\u4F38\u7F29\u8B66\u68CD",
-    brief: "\u7269\u653B\u4E2D\u4EF6\uFF0C\u5408\u6210\u5927\u94C1\u9524",
     category: "attack",
     tier: 2,
     cost: 1e3,
@@ -50950,7 +50925,6 @@ var ln = {
   wrench: {
     id: "wrench",
     name: "\u5927\u6273\u624B",
-    brief: "\u7269\u653B + \u62A4\u7532\u7A7F\u900F",
     category: "attack",
     tier: 2,
     cost: 940,
@@ -50964,7 +50938,6 @@ var ln = {
   baseball_bat: {
     id: "baseball_bat",
     name: "\u68D2\u7403\u68CD",
-    brief: "\u653B\u901F + \u66B4\u51FB",
     category: "attack",
     tier: 2,
     cost: 940,
@@ -50979,7 +50952,6 @@ var ln = {
   red_bull_pack: {
     id: "red_bull_pack",
     name: "\u516D\u7F50\u88C5\u7EA2\u725B",
-    brief: "\u7269\u653B + \u5438\u8840",
     category: "attack",
     tier: 2,
     cost: 880,
@@ -50993,7 +50965,6 @@ var ln = {
   megaphone: {
     id: "megaphone",
     name: "\u5927\u5587\u53ED",
-    brief: "\u6CD5\u5F3A + \u51B7\u5374\u7F29\u51CF",
     category: "magic",
     tier: 2,
     cost: 980,
@@ -51007,7 +50978,6 @@ var ln = {
   thermos: {
     id: "thermos",
     name: "\u4FDD\u6E29\u58F6",
-    brief: "\u6CD5\u5F3A + \u751F\u547D",
     category: "magic",
     tier: 2,
     cost: 990,
@@ -51021,7 +50991,6 @@ var ln = {
   firecracker: {
     id: "firecracker",
     name: "\u4E8C\u8E22\u811A",
-    brief: "\u6CD5\u5F3A + \u6CD5\u672F\u7A7F\u900F",
     category: "magic",
     tier: 2,
     cost: 910,
@@ -51035,7 +51004,6 @@ var ln = {
   speaker: {
     id: "speaker",
     name: "\u5E7F\u573A\u821E\u97F3\u54CD",
-    brief: "\u6CD5\u5F3A + \u84DD\u91CF + \u51B7\u5374",
     category: "magic",
     tier: 2,
     cost: 890,
@@ -51050,7 +51018,6 @@ var ln = {
   iron_door: {
     id: "iron_door",
     name: "\u9632\u76D7\u95E8",
-    brief: "\u751F\u547D + \u62A4\u7532",
     category: "defense",
     tier: 2,
     cost: 880,
@@ -51064,7 +51031,6 @@ var ln = {
   riot_shield: {
     id: "riot_shield",
     name: "\u9632\u66B4\u76FE\u724C",
-    brief: "\u5927\u5757\u751F\u547D + \u62A4\u7532",
     category: "defense",
     tier: 2,
     cost: 1120,
@@ -51078,7 +51044,6 @@ var ln = {
   bulletproof_vest: {
     id: "bulletproof_vest",
     name: "\u9632\u5F39\u8863",
-    brief: "\u751F\u547D + \u9B54\u6297",
     category: "defense",
     tier: 2,
     cost: 1e3,
@@ -51092,7 +51057,6 @@ var ln = {
   lunchbox: {
     id: "lunchbox",
     name: "\u996D\u76D2",
-    brief: "\u6328\u6253\u56DE\u84DD\uFF0C\u8017\u84DD\u56DE\u8840",
     category: "magic",
     tier: 2,
     cost: 980,
@@ -51114,7 +51078,6 @@ var ln = {
   dumbbell: {
     id: "dumbbell",
     name: "\u54D1\u94C3",
-    brief: "\u6309\u6700\u5927\u751F\u547D\u52A0\u7269\u653B",
     category: "defense",
     tier: 2,
     cost: 1350,
@@ -51128,7 +51091,6 @@ var ln = {
   first_aid_kit: {
     id: "first_aid_kit",
     name: "\u6025\u6551\u7BB1",
-    brief: "\u62A4\u76FE\u66F4\u539A\uFF0C\u51B7\u5374\u4E5F\u77ED",
     category: "support",
     tier: 2,
     cost: 1030,
@@ -51143,7 +51105,6 @@ var ln = {
   sledgehammer: {
     id: "sledgehammer",
     name: "\u5927\u94C1\u9524",
-    brief: "\u7269\u653B\u6700\u9AD8\uFF0C\u6253\u6B8B\u8840\u66F4\u75BC",
     category: "attack",
     tier: 3,
     cost: 2100,
@@ -51164,7 +51125,6 @@ var ln = {
   nail_gun: {
     id: "nail_gun",
     name: "\u5C04\u9489\u67AA",
-    brief: "\u653B\u901F\u5927\u6DA8\uFF0C\u666E\u653B\u9644\u5E26\u6CD5\u4F24",
     category: "attack",
     tier: 3,
     cost: 1900,
@@ -51186,7 +51146,6 @@ var ln = {
   red_bull_case: {
     id: "red_bull_case",
     name: "\u7EA2\u725B\u6574\u7BB1",
-    brief: "\u666E\u653B\u9020\u6210\u4F24\u5BB3\uFF0C\u81EA\u5DF1\u56DE\u8840",
     category: "attack",
     tier: 3,
     cost: 1900,
@@ -51200,7 +51159,6 @@ var ln = {
   pry_bar: {
     id: "pry_bar",
     name: "\u64AC\u68CD",
-    brief: "\u4E13\u514B\u9AD8\u62A4\u7532\uFF1A\u65E0\u89C6 40% \u62A4\u7532",
     category: "attack",
     tier: 3,
     cost: 1950,
@@ -51214,7 +51172,6 @@ var ln = {
   brick: {
     id: "brick",
     name: "\u677F\u7816",
-    brief: "\u66B4\u51FB\u7387\u9AD8\uFF0C\u66B4\u51FB\u6253\u5F97\u66F4\u75BC",
     category: "attack",
     tier: 3,
     cost: 2150,
@@ -51229,7 +51186,6 @@ var ln = {
   radio: {
     id: "radio",
     name: "\u6536\u97F3\u673A",
-    brief: "\u6CD5\u5F3A\u3001\u84DD\u91CF\u3001\u51B7\u5374\u90FD\u6CBE",
     category: "magic",
     tier: 3,
     cost: 2e3,
@@ -51244,7 +51200,6 @@ var ln = {
   ddvp_concentrate: {
     id: "ddvp_concentrate",
     name: "\u6D53\u654C\u654C\u754F",
-    brief: "\u4E13\u514B\u9AD8\u9B54\u6297\uFF1A\u65E0\u89C6 40% \u9B54\u6297",
     category: "magic",
     tier: 3,
     cost: 2100,
@@ -51258,7 +51213,6 @@ var ln = {
   air_cooler: {
     id: "air_cooler",
     name: "\u51B7\u98CE\u673A",
-    brief: "\u6CD5\u5F3A + \u751F\u547D\uFF0C\u6280\u80FD\u51CF\u901F",
     category: "magic",
     tier: 3,
     cost: 2e3,
@@ -51279,7 +51233,6 @@ var ln = {
   baijiu: {
     id: "baijiu",
     name: "\u4E8C\u9505\u5934",
-    brief: "\u6CD5\u5F3A\u6700\u9AD8\uFF0C\u8FD8\u6309\u6BD4\u4F8B\u52A0\u6CD5\u5F3A",
     category: "magic",
     tier: 3,
     cost: 2300,
@@ -51293,7 +51246,6 @@ var ln = {
   riot_armor: {
     id: "riot_armor",
     name: "\u9632\u66B4\u670D",
-    brief: "\u62A4\u7532\u6700\u9AD8\uFF0C\u6253\u4F60\u7684\u4EBA\u53D8\u6162",
     category: "defense",
     tier: 3,
     cost: 1900,
@@ -51314,7 +51266,6 @@ var ln = {
   fire_blanket: {
     id: "fire_blanket",
     name: "\u706D\u706B\u6BEF",
-    brief: "\u4F4E\u8840\u81EA\u52A8\u7ED9\u4E00\u5C42\u62A4\u76FE",
     category: "defense",
     tier: 3,
     cost: 1850,
@@ -51335,7 +51286,6 @@ var ln = {
   big_quilt: {
     id: "big_quilt",
     name: "\u5341\u65A4\u5927\u68C9\u88AB",
-    brief: "\u751F\u547D\u6700\u9AD8\uFF0C\u8131\u6218\u56DE\u8840",
     category: "defense",
     tier: 3,
     cost: 2e3,
@@ -51354,7 +51304,6 @@ var ln = {
   barbed_fence: {
     id: "barbed_fence",
     name: "\u94C1\u4E1D\u7F51",
-    brief: "\u88AB\u666E\u653B\u5C31\u53CD\u5F39\u4F24\u5BB3",
     category: "defense",
     tier: 3,
     cost: 1750,
@@ -51374,7 +51323,6 @@ var ln = {
   demolition_hammer: {
     id: "demolition_hammer",
     name: "\u62C6\u8FC1\u5927\u9524",
-    brief: "\u7EAF\u7269\u653B\u7684\u9876\u7EA7\u5927\u4EF6",
     category: "attack",
     tier: 3,
     cost: 3280,
@@ -51388,7 +51336,6 @@ var ln = {
   concrete_block: {
     id: "concrete_block",
     name: "\u6C34\u6CE5\u58A9",
-    brief: "\u53CC\u6297\u4E0E\u751F\u547D\u90FD\u6781\u9AD8",
     category: "defense",
     tier: 3,
     cost: 3240,
@@ -51403,7 +51350,6 @@ var ln = {
   suona: {
     id: "suona",
     name: "\u5522\u5450",
-    brief: "\u6CD5\u5F3A + \u6CD5\u7A7F + \u51B7\u5374",
     category: "magic",
     tier: 3,
     cost: 2900,
@@ -51418,7 +51364,6 @@ var ln = {
   gas_tank: {
     id: "gas_tank",
     name: "\u7164\u6C14\u7F50",
-    brief: "\u4E00\u4EF6\u9876\u4E09\u4EF6\u7684\u8840\u91CF",
     category: "defense",
     tier: 3,
     cost: 3430,
@@ -51431,7 +51376,6 @@ var ln = {
   wild_dog_milk: {
     id: "wild_dog_milk",
     name: "\u91CE\u751F\u72D7\u5976",
-    brief: "\u6328\u6253\u56DE\u84DD\u3001\u8017\u84DD\u56DE\u8840\uFF0C\u91CF\u90FD\u66F4\u5927",
     category: "magic",
     tier: 3,
     cost: 2510,
@@ -51454,7 +51398,6 @@ var ln = {
   herb_jar: {
     id: "herb_jar",
     name: "\u836F\u9152\u7F50",
-    brief: "\u6491\u8840\u6491\u9B54\u6297\uFF0C\u51B7\u5374\u4E5F\u77ED",
     category: "support",
     tier: 2,
     cost: 1150,
@@ -51469,7 +51412,6 @@ var ln = {
   steel_basin: {
     id: "steel_basin",
     name: "\u4E0D\u9508\u94A2\u5927\u76C6",
-    brief: "\u4E3B\u52A8\uFF1A\u6263\u76C6\u8E72\u4E0B\uFF0C2 \u79D2\u65E0\u654C",
     category: "support",
     tier: 3,
     cost: 1650,
@@ -51491,7 +51433,6 @@ var ln = {
   e_bike: {
     id: "e_bike",
     name: "\u7535\u52A8\u8F66",
-    brief: "\u4E3B\u52A8\uFF1A\u5F15\u5BFC\u540E\u9A91\u5230\u8FDC\u5904",
     category: "support",
     tier: 3,
     cost: 1630,
@@ -51514,7 +51455,6 @@ var ln = {
   big_pot: {
     id: "big_pot",
     name: "\u5927\u9505\u83DC",
-    brief: "\u4E3B\u52A8\uFF1A\u7ED9\u5468\u56F4\u53CB\u519B\u76DB\u4E00\u7897",
     category: "support",
     tier: 3,
     cost: 1910,
@@ -51539,7 +51479,6 @@ var ln = {
   huoxiang: {
     id: "huoxiang",
     name: "\u85FF\u9999\u6B63\u6C14\u6C34",
-    brief: "\u4E3B\u52A8\uFF1A\u89E3\u63A7\u5E76\u77ED\u6682\u514D\u63A7",
     category: "support",
     tier: 3,
     cost: 1800,
@@ -51562,7 +51501,6 @@ var ln = {
   fire_hydrant: {
     id: "fire_hydrant",
     name: "\u6D88\u9632\u6813",
-    brief: "\u62A4\u76FE\u539A\u4E00\u5927\u622A\uFF0C\u62A4\u7532\u4E5F\u9AD8",
     category: "support",
     tier: 3,
     cost: 2310,
@@ -51577,7 +51515,6 @@ var ln = {
   ginger_tea: {
     id: "ginger_tea",
     name: "\u7EA2\u7CD6\u59DC\u8336",
-    brief: "\u5976\u4EBA\u66F4\u8DB3\uFF0C\u6CD5\u5F3A\u751F\u547D\u90FD\u6CBE",
     category: "support",
     tier: 3,
     cost: 2270,
@@ -51709,7 +51646,7 @@ function ek(n) {
   const t = [];
   for (const [e, s, i] of tk) {
     const a = n[e];
-    a !== void 0 && t.push({ label: s, value: i(a) });
+    a !== void 0 && t.push({ key: e, label: s, value: i(a) });
   }
   return t;
 }
@@ -58624,13 +58561,11 @@ var K4 = `
   .sf-hud__card-tag { position: static; grid-column: 3; grid-row: 2; justify-self: end; }
   .sf-hud__card.is-done .sf-hud__card-tag { grid-column: 2 / span 2; justify-self: start; }
   .sf-hud__card-tag-more { display: none; }
-  .sf-hud__dt-brief { font-size: var(--sf-fs-sm); }
-  .sf-hud__dt-stats { flex-direction: row; flex-wrap: wrap; gap: 2u 14u; margin-top: 5u; padding-top: 5u; }
+  .sf-hud__dt-stats { grid-template-columns: 1fr; gap: 2u 10u; }
   .sf-hud__dt-stat { justify-content: flex-start; gap: 5u; }
-  .sf-hud__dt-nopassive { display: none; }
-  .sf-hud__dt-passive { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
-  .sf-hud__dt-active { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
-  .sf-hud__dt-active small { display: none; }
+  .sf-hud__dt-sec { padding: 5u 8u 6u; }
+  .sf-hud__dt-p { font-size: var(--sf-fs-xs); line-height: 1.45; }
+  .sf-hud__dt-tip { display: none; }
 `;
 var _G = Jn(`
 /* \u2500\u2500 \u5546\u5E97\u6309\u94AE + \u5FEB\u6377\u8D2D\u4E70\u6C14\u6CE1 / \u81EA\u52A8\u51FA\u88C5\u63D0\u793A\u6761\uFF08\u5C0F\u5730\u56FE\u4E0B\u65B9\uFF09 \u2500\u2500 */
@@ -58701,7 +58636,7 @@ var _G = Jn(`
 .sf-hud__shop { position: absolute; inset: 0; z-index: 7; display: none; place-items: center; pointer-events: auto;
   padding: max(10u, var(--sf-safe-t)) max(12u, var(--sf-safe-r)) max(10u, var(--sf-safe-b)) max(12u, var(--sf-safe-l)); background: rgba(3, 6, 16, 0.5); }
 .sf-hud__shop.is-open { display: grid; animation: sf-fade-in 0.16s linear both; }
-.sf-hud__shop-panel { display: flex; flex-direction: column; width: min(100%, 960u); height: min(100%, 540u); min-height: 0; animation: sf-pop-in 0.26s var(--sf-ease-out) both; }
+.sf-hud__shop-panel { display: flex; flex-direction: column; width: min(100%, 960u); height: min(100%, 600u); min-height: 0; animation: sf-pop-in 0.26s var(--sf-ease-out) both; }
 .sf-hud__shop-head { display: flex; align-items: center; gap: 10u; flex: none; padding: 5u 8u 0 20u; box-shadow: inset 0 -1px 0 var(--sf-c-line-strong); }
 .sf-hud__shop-title { margin: 0; font-size: var(--sf-fs-xl); font-weight: 800; letter-spacing: 0.2em; line-height: 1.2; white-space: nowrap; }
 .sf-hud__shop-head .sf-tabs { flex: 1; box-shadow: none; min-width: 0; }
@@ -58717,7 +58652,7 @@ var _G = Jn(`
 .sf-hud__shop-auto.is-flash { animation: sf-hud-auto-flash 0.9s ease-out; }
 @keyframes sf-hud-auto-flash { 0% { background: rgba(255, 214, 130, 0.4); } 100% { background: rgba(255, 214, 130, 0); } }
 
-.sf-hud__shop-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) max(232px, 268u); }
+.sf-hud__shop-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) max(248px, 292u); }
 .sf-hud__shop-list { display: flex; flex-direction: column; min-height: 0; padding: 10u 12u 12u 16u; }
 .sf-hud__shop-prog { flex: none; display: flex; align-items: center; gap: 10u; min-width: 0; margin-bottom: 8u; font-size: var(--sf-fs-sm); color: var(--sf-c-text-2); white-space: nowrap; }
 .sf-hud__shop-prog-who { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -58742,8 +58677,8 @@ var _G = Jn(`
 }
 @media (hover: hover) { .sf-hud__card:hover { background: linear-gradient(180deg, rgba(48, 74, 146, 0.6), rgba(14, 24, 54, 0.7)); } }
 .sf-hud__card:active { transform: scale(0.98); }
-.sf-hud__card-top { display: flex; align-items: center; gap: 9u; margin-bottom: 5u; }
-.sf-hud__card .sf-slot { --sf-slot: max(44px, 60u); }
+.sf-hud__card-top { display: flex; align-items: center; gap: 9u; margin-top: auto; margin-bottom: 5u; }
+.sf-hud__card .sf-slot { --sf-slot: max(48px, 76u); }
 .sf-hud__card-no { display: grid; place-items: center; flex: none; width: max(18px, 20u); height: max(18px, 20u); border-radius: 50%; font-size: max(10px, 11.5u); font-weight: 800; line-height: 1; color: var(--sf-c-text-2); background: rgba(4, 8, 22, 0.75); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
 .sf-hud__card-dots { display: inline-flex; gap: 3u; }
 .sf-hud__card-dots > i { width: max(6px, 8u); height: max(6px, 8u); border-radius: 50%; background: rgba(4, 8, 22, 0.8); box-shadow: inset 0 0 0 1px rgba(232, 199, 122, 0.6); }
@@ -58789,26 +58724,41 @@ var _G = Jn(`
 .sf-hud__dt-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 5u; margin-top: 3u; }
 .sf-hud__dt-price { display: none; align-items: center; gap: 3u; flex: none; align-self: flex-start; font-size: var(--sf-fs-md); font-weight: 800; color: var(--sf-c-gold-200); }
 .sf-hud__dt-price .sf-i { width: 1.1em; height: 1.1em; vertical-align: 0; }
-.sf-hud__dt-body { flex: 1; min-height: 0; margin: 8u -6u 6u 0; padding-right: 6u; }
-.sf-hud__dt-brief { font-size: var(--sf-fs-md); font-weight: 600; line-height: 1.45; color: var(--sf-c-text); }
-.sf-hud__dt-stats { display: flex; flex-direction: column; gap: 3u; margin-top: 8u; padding-top: 8u; box-shadow: inset 0 1px 0 var(--sf-c-line); font-size: var(--sf-fs-sm); line-height: 1.35; }
-.sf-hud__dt-stat { display: flex; justify-content: space-between; gap: 10u; }
-.sf-hud__dt-stat > span { color: var(--sf-c-text-2); }
-.sf-hud__dt-stat > b { color: var(--sf-c-cyan-300); font-weight: 700; text-align: right; white-space: nowrap; }
-.sf-hud__dt-passive { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(255, 184, 77, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.28); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
-/* \u5408\u6210\u8DEF\u5F84\uFF1A\u4E00\u884C\u7EC4\u4EF6\u540D\uFF0C\u5DF2\u6709\u7684\u9AD8\u4EAE */
-.sf-hud__dt-build { margin-top: 8u; display: flex; flex-wrap: wrap; align-items: center; gap: 4u 6u; padding: 7u 9u; border-radius: 6u; background: rgba(120, 190, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 190, 255, 0.22); font-size: var(--sf-fs-sm); }
-.sf-hud__dt-build b { flex: none; color: var(--sf-c-text-3); font-weight: 700; letter-spacing: 0.12em; }
-.sf-hud__dt-part { display: inline-flex; align-items: center; gap: 2u; padding: 1u 5u; border-radius: 4u; color: var(--sf-c-text-2); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+.sf-hud__dt-body { flex: 1; min-height: 0; margin: 8u -6u 6u 0; padding-right: 6u; display: flex; flex-direction: column; gap: 6u; }
+/* \u5206\u533A\u5C0F\u9762\u677F\uFF1A\u6BCF\u5757\u81EA\u5E26\u5706\u89D2\u8FB9\u6846 + \u4E00\u884C\u6781\u5C0F\u7684\u5206\u533A\u6807\u7B7E\uFF0C\u548C BaBao \u7684\u4FE1\u606F\u5361\u540C\u4E00\u5957\u8BFB\u6CD5\u3002
+   \u989C\u8272\u53EA\u7528\u6765\u533A\u5206\u533A\u5757\u7C7B\u578B\uFF08\u5C5E\u6027=\u4E2D\u6027/\u5408\u6210=\u84DD/\u88AB\u52A8=\u7425\u73C0/\u4E3B\u52A8=\u9752\uFF09\uFF0C\u4E0D\u53E0\u52A0\u591A\u4F59\u88C5\u9970\u3002 */
+.sf-hud__dt-sec { flex: none; padding: 5u 8u 6u; border-radius: 7u; background: rgba(8, 14, 30, 0.42); box-shadow: inset 0 0 0 1px var(--sf-c-line); }
+.sf-dt-label { display: flex; align-items: center; gap: 4u; margin-bottom: 5u; font-size: calc(var(--sf-fs-xs) * 0.92); font-weight: 800; letter-spacing: 0.08em; line-height: 1; color: var(--sf-c-text-3); }
+.sf-dt-label::before { content: ""; width: 3u; height: 3u; border-radius: 50%; background: currentColor; opacity: 0.85; }
+.sf-hud__dt-sec.is-stats { box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+.sf-hud__dt-sec.is-build { background: rgba(120, 190, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 190, 255, 0.24); }
+.sf-hud__dt-sec.is-build .sf-dt-label { color: #8fc4ff; }
+.sf-hud__dt-sec.is-passive { background: rgba(255, 184, 77, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.3); }
+.sf-hud__dt-sec.is-passive .sf-dt-label { color: var(--sf-c-amber); }
+.sf-hud__dt-sec.is-active { background: rgba(92, 214, 247, 0.08); box-shadow: inset 0 0 0 1px rgba(92, 214, 247, 0.34); }
+.sf-hud__dt-sec.is-active .sf-dt-label { color: var(--sf-c-cyan-300); }
+.sf-hud__dt-sec.is-none { box-shadow: inset 0 0 0 1px var(--sf-c-line); }
+.sf-hud__dt-h { display: flex; align-items: baseline; gap: 8u; margin-bottom: 3u; font-size: var(--sf-fs-sm); font-weight: 800; letter-spacing: 0.02em; color: var(--sf-c-text); }
+.sf-hud__dt-sec.is-passive .sf-hud__dt-h { color: var(--sf-c-amber); }
+.sf-hud__dt-sec.is-active .sf-hud__dt-h { color: var(--sf-c-cyan-300); }
+.sf-hud__dt-p { margin: 0; font-size: var(--sf-fs-sm); line-height: 1.55; color: var(--sf-c-text-2); }
+.sf-hud__dt-stats { display: grid; grid-template-columns: 1fr; gap: 2u 10u; font-size: var(--sf-fs-sm); line-height: 1.25; }
+.sf-hud__dt-stat { display: flex; align-items: center; gap: 5u; min-width: 0; }
+.sf-dt-ico { display: inline-flex; width: 15u; height: 15u; flex: 0 0 15u; filter: drop-shadow(0 1u 1u rgba(0, 0, 0, 0.45)); }
+.sf-dt-ico svg { display: block; width: 100%; height: 100%; }
+.sf-dt-k { color: var(--sf-c-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sf-dt-v { margin-left: auto; color: var(--sf-c-cyan-300); font-weight: 700; text-align: right; white-space: nowrap; }
+/* \u5408\u6210\u8DEF\u5F84\uFF1A\u7EC4\u4EF6\u540D + \u5B83\u81EA\u5DF1\u5E26\u7684\u5C5E\u6027\uFF0C\u4E00\u773C\u770B\u51FA\u8FD9\u4E00\u4EF6\u80FD\u7701\u591A\u5C11 */
+.sf-hud__dt-parts { display: flex; flex-direction: column; gap: 2u; }
+.sf-hud__dt-part { display: flex; align-items: baseline; gap: 6u; min-width: 0; padding: 1u 6u; border-radius: 4u; font-size: var(--sf-fs-sm); color: var(--sf-c-text-2); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
 .sf-hud__dt-part.is-own { color: var(--sf-c-green-300); box-shadow: inset 0 0 0 1px rgba(86, 199, 160, 0.5); background: rgba(86, 199, 160, 0.1); }
-.sf-hud__dt-part .sf-i { width: 1em; height: 1em; }
-.sf-hud__dt-passive b { display: block; color: var(--sf-c-amber); font-weight: 700; }
+.sf-hud__dt-part .sf-i { width: 1em; height: 1em; flex: none; align-self: center; }
+.sf-hud__dt-partname { flex: none; font-weight: 700; }
+.sf-hud__dt-partstat { margin-left: auto; font-size: calc(var(--sf-fs-sm) * 0.92); color: var(--sf-c-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sf-hud__dt-part.is-own .sf-hud__dt-partstat { color: rgba(86, 199, 160, 0.8); }
 /* \u4E3B\u52A8\uFF1A\u51B7\u8272\u5757\uFF0C\u548C\u88AB\u52A8(\u7425\u73C0)\u5206\u5F00\uFF1B\u51B7\u5374\u6302\u5728\u6807\u9898\u53F3\u4FA7 */
-.sf-hud__dt-active { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(92, 214, 247, 0.08); box-shadow: inset 0 0 0 1px rgba(92, 214, 247, 0.32); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
-.sf-hud__dt-active b { display: flex; align-items: baseline; gap: 8u; margin-bottom: 2u; color: var(--sf-c-cyan-300); font-weight: 700; }
-.sf-hud__dt-active-cd { margin-left: auto; font-weight: 700; color: var(--sf-c-text-3); }
-.sf-hud__dt-active small { display: block; margin-top: 4u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
-.sf-hud__dt-nopassive { margin-top: 8u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
+.sf-hud__dt-active-cd { margin-left: auto; font-size: var(--sf-fs-xs); font-weight: 700; letter-spacing: 0.06em; color: var(--sf-c-text-3); }
+.sf-hud__dt-tip { display: block; margin-top: 5u; font-size: var(--sf-fs-xs); line-height: 1.4; color: var(--sf-c-text-3); }
 .sf-hud__dt-note { flex: none; margin-bottom: 5u; font-size: var(--sf-fs-sm); line-height: 1.4; color: var(--sf-c-text-3); }
 .sf-hud__dt-note:empty { display: none; }
 .sf-hud__dt-note.is-warn { color: #ff9c9c; }
@@ -58898,8 +58848,36 @@ var Y2 = 2.6;
 var SG = 1.2;
 var TG = 0.3;
 var EG = 320;
-var Z4 = (n) => n.brief ?? BB(n.stats, 2);
+var Z4 = (n) => BB(n.stats, 2);
 var K2 = (n) => ln[n].name.slice(-2);
+
+// src/48-item-icons.js
+var TI2 = {
+  ad: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 1.5 L9.5 4 L9.5 11 L8 12.5 L6.5 11 L6.5 4 Z" fill="#fb923c" stroke="#c2410c" stroke-width="0.9" /> <path d="M5 12 H11 M8 12 V15" stroke="#9a3412" stroke-width="1.2" stroke-linecap="round" /> </svg>`,
+  ap: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 1 L9.8 6.2 L15 8 L9.8 9.8 L8 15 L6.2 9.8 L1 8 L6.2 6.2 Z" fill="#60a5fa" stroke="#1d4ed8" stroke-width="0.9" /> <circle cx="8" cy="8" r="1.5" fill="#eff6ff" /> </svg>`,
+  hp: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 13.8 C8 13.8 2.5 10 2.5 6 C2.5 3.8 4.2 2.2 6 2.2 C7.2 2.2 8 3 8 3 C8 3 8.8 2.2 10 2.2 C11.8 2.2 13.5 3.8 13.5 6 C13.5 10 8 13.8 8 13.8 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="0.9" /> <path d="M4.5 5 C4.5 4.2 5.2 3.5 6 3.5" stroke="#fecaca" stroke-width="0.8" stroke-linecap="round" fill="none" /> </svg>`,
+  mana: `<svg viewBox="0 0 16 16" fill="none"> <path d="M6.5 2 H9.5 M8 2 V4.5 L11.5 11 C12.2 12.2 11.4 13.8 10 13.8 H6 C4.6 13.8 3.8 12.2 4.5 11 L8 4.5" stroke="#3b82f6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none" /> <path d="M5.5 11.5 C6.5 11 9.5 11 10.5 11.5 C11 12.5 10.5 13.2 9.5 13.2 H6.5 C5.5 13.2 5 12.5 5.5 11.5 Z" fill="#60a5fa" /> <circle cx="7.5" cy="8.5" r="0.8" fill="#93c5fd" /> <circle cx="8.5" cy="11.5" r="0.6" fill="#ffffff" /> </svg>`,
+  armor: `<svg viewBox="0 0 16 16" fill="none"> <rect x="2.5" y="3.5" width="11" height="9" rx="1" fill="#94a3b8" stroke="#475569" stroke-width="0.9" /> <line x1="2.5" y1="8" x2="13.5" y2="8" stroke="#334155" stroke-width="0.8" /> <line x1="8" y1="3.5" x2="8" y2="8" stroke="#334155" stroke-width="0.8" /> <line x1="5.5" y1="8" x2="5.5" y2="12.5" stroke="#334155" stroke-width="0.8" /> <line x1="10.5" y1="8" x2="10.5" y2="12.5" stroke="#334155" stroke-width="0.8" /> </svg>`,
+  mr: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 1.8 L13 4 V8.2 C13 11.5 10.8 13.8 8 14.5 C5.2 13.8 3 11.5 3 8.2 V4 L8 1.8 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="0.9" /> <path d="M8 3.2 L11.5 4.8 V8.2 C11.5 10.5 10 12.2 8 12.8 C6 12.2 4.5 10.5 4.5 8.2 V4.8 L8 3.2 Z" fill="#bae6fd" /> <path d="M8 3.2 V12.8" stroke="#0284c7" stroke-width="0.8" /> </svg>`,
+  attackSpeedPct: `<svg viewBox="0 0 16 16" fill="none"> <path d="M2.5 13.5 L7.5 9.5 M7.5 9.5 L14 3 L10 13 L8 10 L4.5 10.5 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="0.9" stroke-linejoin="round" /> <path d="M14 3 L9 7" stroke="#0369a1" stroke-width="0.8" /> </svg>`,
+  moveSpeed: `<svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="6" fill="#f8fafc" stroke="#dc2626" stroke-width="1" /> <polygon points="8,3.5 10,8 8,7 6,8" fill="#ef4444" /> <polygon points="8,12.5 10,8 8,9 6,8" fill="#64748b" /> <circle cx="8" cy="8" r="1.2" fill="#b91c1c" /> </svg>`,
+  critChance: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 1.5 L9.5 6 L14 7.5 L9.5 9 L8 13.5 L6.5 9 L2 7.5 L6.5 6 Z" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" /> <circle cx="8" cy="7.5" r="1.2" fill="#fffbeb" /> </svg>`,
+  critDamage: `<svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="5.5" stroke="#ea580c" stroke-width="1" fill="none" /> <circle cx="8" cy="8" r="3.2" stroke="#ea580c" stroke-width="0.8" fill="none" /> <circle cx="8" cy="8" r="1.5" fill="#f97316" /> <path d="M8 1.5 V4 M8 12 V14.5 M1.5 8 H4 M12 8 H14.5" stroke="#c2410c" stroke-width="1" stroke-linecap="round" /> </svg>`,
+  lifesteal: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 13.5 C8 13.5 2.5 9.8 2.5 6 C2.5 3.8 4.2 2.5 6 2.5 C7.2 2.5 8 3.2 8 3.2 C8 3.2 8.8 2.5 10 2.5 C11.8 2.5 13.5 3.8 13.5 6 C13.5 9.8 8 13.5 8 13.5 Z" fill="#22c55e" stroke="#15803d" stroke-width="0.9" /> <path d="M8 5 V9 M6 7 H10" stroke="#f0fdf4" stroke-width="1.2" stroke-linecap="round" /> </svg>`,
+  armorPen: `<svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="2" fill="#818cf8" stroke="#4338ca" stroke-width="0.8" /> <path d="M8 2.5 V4.5 M8 11.5 V13.5 M2.5 8 H4.5 M11.5 8 H13.5 M4 4 L5.5 5.5 M10.5 10.5 L12 12 M4 12 L5.5 10.5 M10.5 5.5 L12 4" stroke="#6366f1" stroke-width="1" stroke-linecap="round" /> </svg>`,
+  magicPen: `<svg viewBox="0 0 16 16" fill="none"> <path d="M9 1.5 L3.5 8.5 H8 L7 14.5 L12.5 7.5 H8 Z" fill="#f59e0b" stroke="#b45309" stroke-width="0.8" stroke-linejoin="round" /> </svg>`,
+  cdr: `<svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="5.5" fill="#f8fafc" stroke="#475569" stroke-width="1.2" /> <path d="M8 5 V8.5 H10.5" stroke="#0f172a" stroke-width="1.2" stroke-linecap="round" /> </svg>`,
+  hpRegen: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 13.5 C8 13.5 2.5 9.8 2.5 6 C2.5 3.8 4.2 2.5 6 2.5 C7.2 2.5 8 3.2 8 3.2 C8 3.2 8.8 2.5 10 2.5 C11.8 2.5 13.5 3.8 13.5 6 C13.5 9.8 8 13.5 8 13.5 Z" fill="#22c55e" stroke="#15803d" stroke-width="0.9" /> <path d="M8 5 V9 M6 7 H10" stroke="#f0fdf4" stroke-width="1.2" stroke-linecap="round" /> </svg>`,
+  manaRegen: `<svg viewBox="0 0 16 16" fill="none"> <path d="M6.5 2 H9.5 M8 2 V4.5 L11.5 11 C12.2 12.2 11.4 13.8 10 13.8 H6 C4.6 13.8 3.8 12.2 4.5 11 L8 4.5" stroke="#3b82f6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none" /> <path d="M5.5 11.5 C6.5 11 9.5 11 10.5 11.5 C11 12.5 10.5 13.2 9.5 13.2 H6.5 C5.5 13.2 5 12.5 5.5 11.5 Z" fill="#60a5fa" /> <circle cx="7.5" cy="8.5" r="0.8" fill="#93c5fd" /> <circle cx="8.5" cy="11.5" r="0.6" fill="#ffffff" /> </svg>`,
+  shieldPower: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 2 L12.5 4.2 V7.8 C12.5 10.8 10.4 12.8 8 13.5 C5.6 12.8 3.5 10.8 3.5 7.8 V4.2 L8 2 Z" fill="#6366f1" stroke="#3730a3" stroke-width="0.9" /> <rect x="6" y="7" width="4" height="3" rx="0.5" fill="#fef08a" stroke="#854d0e" stroke-width="0.6" /> <path d="M6.8 7 V5.8 C6.8 5.2 7.3 4.8 8 4.8 C8.7 4.8 9.2 5.2 9.2 5.8 V7" stroke="#854d0e" stroke-width="0.6" fill="none" /> </svg>`,
+  healPower: `<svg viewBox="0 0 16 16" fill="none"> <path d="M8 13.5 C8 13.5 2.5 9.8 2.5 6 C2.5 3.8 4.2 2.5 6 2.5 C7.2 2.5 8 3.2 8 3.2 C8 3.2 8.8 2.5 10 2.5 C11.8 2.5 13.5 3.8 13.5 6 C13.5 9.8 8 13.5 8 13.5 Z" fill="#22c55e" stroke="#15803d" stroke-width="0.9" /> <path d="M8 5 V9 M6 7 H10" stroke="#f0fdf4" stroke-width="1.2" stroke-linecap="round" /> </svg>`,
+  hpToAdPct: `<svg viewBox="0 0 16 16" fill="none"> <polygon points="9,1.5 4,8.5 8,8.5 7,14.5 12,7.5 8,7.5" fill="#f59e0b" stroke="#b45309" stroke-width="0.8" stroke-linejoin="round" /> <polygon points="8.5,3 5,8 7.5,8 6.8,13 10.5,7.5 7.8,7.5" fill="#fde68a" /> </svg>`,
+  gold: `<svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="5.5" fill="#facc15" stroke="#ca8a04" stroke-width="1" /> <circle cx="8" cy="8" r="3.8" stroke="#eab308" stroke-width="0.6" stroke-dasharray="1 1" fill="none" /> <text x="8" y="10.2" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#854d0e" fontFamily="sans-serif">G</text> </svg>`
+};
+var TI_FALLBACK = `<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="currentColor" opacity=".55"/></svg>`;
+function traitIcon(k) {
+  return TI2[k] ?? TI_FALLBACK;
+}
 
 // src/40-ui-8.js
 function AG(n) {
@@ -59119,41 +59097,47 @@ function AG(n) {
       z("div", "sf-hud__dt-headtext", z("div", "sf-hud__dt-name", Zt.name), Ze),
       Tt.kind === "buy" ? z("span", "sf-hud__dt-price", _e(Vt("gold")), hs) : null
     ), js = z("div", "sf-hud__dt-stats");
-    for (const Re of ek(Zt.stats))
-      js.appendChild(z("span", "sf-hud__dt-stat", z("span", null, Re.label), z("b", "sf-num", Re.value)));
-    const qs = z(
-      "div",
-      "sf-hud__dt-body sf-scroll",
-      Zt.brief ? z("div", "sf-hud__dt-brief", Zt.brief) : null,
-      js
-    );
-    if (Zt.from && Zt.from.length) {
-      const parts = Zt.from.map((c10) => {
-        const own = n.me.items.includes(c10);
-        return z("span", `sf-hud__dt-part${own ? " is-own" : ""}`, own ? _e(Vt("check")) : null, ln[c10].name);
-      });
-      qs.appendChild(z("div", "sf-hud__dt-build", z("b", null, "\u5408\u6210"), ...parts));
+    for (const Re of ek(Zt.stats)) {
+      const gi2 = z("i", "sf-dt-ico");
+      gi2.innerHTML = traitIcon(Re.key);
+      js.appendChild(
+        z("span", "sf-hud__dt-stat", gi2, z("span", "sf-dt-k", Re.label), z("b", "sf-num sf-dt-v", Re.value))
+      );
     }
+    const sec = (cls, label, ...kids) => z("div", `sf-hud__dt-sec ${cls}`, z("div", "sf-dt-label", label), ...kids);
+    const qs = z("div", "sf-hud__dt-body sf-scroll", sec("is-stats", "\u5C5E\u6027", js));
     if (Zt.passive)
       qs.appendChild(
-        z("div", "sf-hud__dt-passive", z("b", null, `\u88AB\u52A8 \xB7 ${Zt.passive.name}`), Zt.passive.desc)
+        sec("is-passive", "\u88AB\u52A8", z("b", "sf-hud__dt-h", Zt.passive.name), z("p", "sf-hud__dt-p", Zt.passive.desc))
       );
     if (Zt.active)
       qs.appendChild(
-        z(
-          "div",
-          "sf-hud__dt-active",
+        sec(
+          "is-active",
+          "\u4E3B\u52A8",
           z(
             "b",
-            null,
-            `\u4E3B\u52A8 \xB7 ${Zt.active.name}`,
-            z("span", "sf-hud__dt-active-cd sf-num", `${Zt.active.cd} \u79D2`)
+            "sf-hud__dt-h",
+            Zt.active.name,
+            z("span", "sf-hud__dt-active-cd sf-num", `\u51B7\u5374 ${Zt.active.cd} \u79D2`)
           ),
-          Zt.active.desc,
-          z("small", null, "\u88C5\u5907\u680F\u91CC\u6309\u6570\u5B57\u952E 1~6\uFF0C\u6216\u76F4\u63A5\u70B9\u90A3\u4E00\u683C")
+          z("p", "sf-hud__dt-p", Zt.active.desc),
+          z("small", "sf-hud__dt-tip", "\u88C5\u5907\u680F\u91CC\u6309\u6570\u5B57\u952E 1~6\uFF0C\u6216\u76F4\u63A5\u70B9\u90A3\u4E00\u683C")
         )
       );
-    if (!Zt.passive && !Zt.active) qs.appendChild(z("div", "sf-hud__dt-nopassive", "(\u65E0\u88AB\u52A8)"));
+    if (Zt.from && Zt.from.length) {
+      const parts = Zt.from.map((c10) => {
+        const own = n.me.items.includes(c10);
+        return z(
+          "span",
+          `sf-hud__dt-part${own ? " is-own" : ""}`,
+          own ? _e(Vt("check")) : null,
+          z("span", "sf-hud__dt-partname", ln[c10].name),
+          z("span", "sf-hud__dt-partstat sf-num", BB(ln[c10].stats, 2))
+        );
+      });
+      qs.appendChild(sec("is-build", "\u5408\u6210\u8DEF\u5F84", z("div", "sf-hud__dt-parts", ...parts)));
+    }
     if (Ot = z("div", "sf-hud__dt-note"), at.append(ce, gi, qs, Ot), Tt.kind === "own") {
       at.appendChild(z("div", "sf-hud__dt-owned", _e(Vt("check")), "\u5DF2\u7ECF\u5728\u88C5\u5907\u680F\u91CC\u4E86"));
       return;

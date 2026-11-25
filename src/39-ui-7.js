@@ -1034,13 +1034,11 @@ const K4 = `
   .sf-hud__card-tag { position: static; grid-column: 3; grid-row: 2; justify-self: end; }
   .sf-hud__card.is-done .sf-hud__card-tag { grid-column: 2 / span 2; justify-self: start; }
   .sf-hud__card-tag-more { display: none; }
-  .sf-hud__dt-brief { font-size: var(--sf-fs-sm); }
-  .sf-hud__dt-stats { flex-direction: row; flex-wrap: wrap; gap: 2u 14u; margin-top: 5u; padding-top: 5u; }
+  .sf-hud__dt-stats { grid-template-columns: 1fr; gap: 2u 10u; }
   .sf-hud__dt-stat { justify-content: flex-start; gap: 5u; }
-  .sf-hud__dt-nopassive { display: none; }
-  .sf-hud__dt-passive { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
-  .sf-hud__dt-active { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
-  .sf-hud__dt-active small { display: none; }
+  .sf-hud__dt-sec { padding: 5u 8u 6u; }
+  .sf-hud__dt-p { font-size: var(--sf-fs-xs); line-height: 1.45; }
+  .sf-hud__dt-tip { display: none; }
 `,
   _G = Jn(`
 /* ── 商店按钮 + 快捷购买气泡 / 自动出装提示条（小地图下方） ── */
@@ -1111,7 +1109,7 @@ const K4 = `
 .sf-hud__shop { position: absolute; inset: 0; z-index: 7; display: none; place-items: center; pointer-events: auto;
   padding: max(10u, var(--sf-safe-t)) max(12u, var(--sf-safe-r)) max(10u, var(--sf-safe-b)) max(12u, var(--sf-safe-l)); background: rgba(3, 6, 16, 0.5); }
 .sf-hud__shop.is-open { display: grid; animation: sf-fade-in 0.16s linear both; }
-.sf-hud__shop-panel { display: flex; flex-direction: column; width: min(100%, 960u); height: min(100%, 540u); min-height: 0; animation: sf-pop-in 0.26s var(--sf-ease-out) both; }
+.sf-hud__shop-panel { display: flex; flex-direction: column; width: min(100%, 960u); height: min(100%, 600u); min-height: 0; animation: sf-pop-in 0.26s var(--sf-ease-out) both; }
 .sf-hud__shop-head { display: flex; align-items: center; gap: 10u; flex: none; padding: 5u 8u 0 20u; box-shadow: inset 0 -1px 0 var(--sf-c-line-strong); }
 .sf-hud__shop-title { margin: 0; font-size: var(--sf-fs-xl); font-weight: 800; letter-spacing: 0.2em; line-height: 1.2; white-space: nowrap; }
 .sf-hud__shop-head .sf-tabs { flex: 1; box-shadow: none; min-width: 0; }
@@ -1127,7 +1125,7 @@ const K4 = `
 .sf-hud__shop-auto.is-flash { animation: sf-hud-auto-flash 0.9s ease-out; }
 @keyframes sf-hud-auto-flash { 0% { background: rgba(255, 214, 130, 0.4); } 100% { background: rgba(255, 214, 130, 0); } }
 
-.sf-hud__shop-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) max(232px, 268u); }
+.sf-hud__shop-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) max(248px, 292u); }
 .sf-hud__shop-list { display: flex; flex-direction: column; min-height: 0; padding: 10u 12u 12u 16u; }
 .sf-hud__shop-prog { flex: none; display: flex; align-items: center; gap: 10u; min-width: 0; margin-bottom: 8u; font-size: var(--sf-fs-sm); color: var(--sf-c-text-2); white-space: nowrap; }
 .sf-hud__shop-prog-who { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -1152,8 +1150,8 @@ const K4 = `
 }
 @media (hover: hover) { .sf-hud__card:hover { background: linear-gradient(180deg, rgba(48, 74, 146, 0.6), rgba(14, 24, 54, 0.7)); } }
 .sf-hud__card:active { transform: scale(0.98); }
-.sf-hud__card-top { display: flex; align-items: center; gap: 9u; margin-bottom: 5u; }
-.sf-hud__card .sf-slot { --sf-slot: max(44px, 60u); }
+.sf-hud__card-top { display: flex; align-items: center; gap: 9u; margin-top: auto; margin-bottom: 5u; }
+.sf-hud__card .sf-slot { --sf-slot: max(48px, 76u); }
 .sf-hud__card-no { display: grid; place-items: center; flex: none; width: max(18px, 20u); height: max(18px, 20u); border-radius: 50%; font-size: max(10px, 11.5u); font-weight: 800; line-height: 1; color: var(--sf-c-text-2); background: rgba(4, 8, 22, 0.75); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
 .sf-hud__card-dots { display: inline-flex; gap: 3u; }
 .sf-hud__card-dots > i { width: max(6px, 8u); height: max(6px, 8u); border-radius: 50%; background: rgba(4, 8, 22, 0.8); box-shadow: inset 0 0 0 1px rgba(232, 199, 122, 0.6); }
@@ -1199,26 +1197,41 @@ const K4 = `
 .sf-hud__dt-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 5u; margin-top: 3u; }
 .sf-hud__dt-price { display: none; align-items: center; gap: 3u; flex: none; align-self: flex-start; font-size: var(--sf-fs-md); font-weight: 800; color: var(--sf-c-gold-200); }
 .sf-hud__dt-price .sf-i { width: 1.1em; height: 1.1em; vertical-align: 0; }
-.sf-hud__dt-body { flex: 1; min-height: 0; margin: 8u -6u 6u 0; padding-right: 6u; }
-.sf-hud__dt-brief { font-size: var(--sf-fs-md); font-weight: 600; line-height: 1.45; color: var(--sf-c-text); }
-.sf-hud__dt-stats { display: flex; flex-direction: column; gap: 3u; margin-top: 8u; padding-top: 8u; box-shadow: inset 0 1px 0 var(--sf-c-line); font-size: var(--sf-fs-sm); line-height: 1.35; }
-.sf-hud__dt-stat { display: flex; justify-content: space-between; gap: 10u; }
-.sf-hud__dt-stat > span { color: var(--sf-c-text-2); }
-.sf-hud__dt-stat > b { color: var(--sf-c-cyan-300); font-weight: 700; text-align: right; white-space: nowrap; }
-.sf-hud__dt-passive { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(255, 184, 77, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.28); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
-/* 合成路径：一行组件名，已有的高亮 */
-.sf-hud__dt-build { margin-top: 8u; display: flex; flex-wrap: wrap; align-items: center; gap: 4u 6u; padding: 7u 9u; border-radius: 6u; background: rgba(120, 190, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 190, 255, 0.22); font-size: var(--sf-fs-sm); }
-.sf-hud__dt-build b { flex: none; color: var(--sf-c-text-3); font-weight: 700; letter-spacing: 0.12em; }
-.sf-hud__dt-part { display: inline-flex; align-items: center; gap: 2u; padding: 1u 5u; border-radius: 4u; color: var(--sf-c-text-2); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+.sf-hud__dt-body { flex: 1; min-height: 0; margin: 8u -6u 6u 0; padding-right: 6u; display: flex; flex-direction: column; gap: 6u; }
+/* 分区小面板：每块自带圆角边框 + 一行极小的分区标签，和 BaBao 的信息卡同一套读法。
+   颜色只用来区分区块类型（属性=中性/合成=蓝/被动=琥珀/主动=青），不叠加多余装饰。 */
+.sf-hud__dt-sec { flex: none; padding: 5u 8u 6u; border-radius: 7u; background: rgba(8, 14, 30, 0.42); box-shadow: inset 0 0 0 1px var(--sf-c-line); }
+.sf-dt-label { display: flex; align-items: center; gap: 4u; margin-bottom: 5u; font-size: calc(var(--sf-fs-xs) * 0.92); font-weight: 800; letter-spacing: 0.08em; line-height: 1; color: var(--sf-c-text-3); }
+.sf-dt-label::before { content: ""; width: 3u; height: 3u; border-radius: 50%; background: currentColor; opacity: 0.85; }
+.sf-hud__dt-sec.is-stats { box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+.sf-hud__dt-sec.is-build { background: rgba(120, 190, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 190, 255, 0.24); }
+.sf-hud__dt-sec.is-build .sf-dt-label { color: #8fc4ff; }
+.sf-hud__dt-sec.is-passive { background: rgba(255, 184, 77, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.3); }
+.sf-hud__dt-sec.is-passive .sf-dt-label { color: var(--sf-c-amber); }
+.sf-hud__dt-sec.is-active { background: rgba(92, 214, 247, 0.08); box-shadow: inset 0 0 0 1px rgba(92, 214, 247, 0.34); }
+.sf-hud__dt-sec.is-active .sf-dt-label { color: var(--sf-c-cyan-300); }
+.sf-hud__dt-sec.is-none { box-shadow: inset 0 0 0 1px var(--sf-c-line); }
+.sf-hud__dt-h { display: flex; align-items: baseline; gap: 8u; margin-bottom: 3u; font-size: var(--sf-fs-sm); font-weight: 800; letter-spacing: 0.02em; color: var(--sf-c-text); }
+.sf-hud__dt-sec.is-passive .sf-hud__dt-h { color: var(--sf-c-amber); }
+.sf-hud__dt-sec.is-active .sf-hud__dt-h { color: var(--sf-c-cyan-300); }
+.sf-hud__dt-p { margin: 0; font-size: var(--sf-fs-sm); line-height: 1.55; color: var(--sf-c-text-2); }
+.sf-hud__dt-stats { display: grid; grid-template-columns: 1fr; gap: 2u 10u; font-size: var(--sf-fs-sm); line-height: 1.25; }
+.sf-hud__dt-stat { display: flex; align-items: center; gap: 5u; min-width: 0; }
+.sf-dt-ico { display: inline-flex; width: 15u; height: 15u; flex: 0 0 15u; filter: drop-shadow(0 1u 1u rgba(0, 0, 0, 0.45)); }
+.sf-dt-ico svg { display: block; width: 100%; height: 100%; }
+.sf-dt-k { color: var(--sf-c-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sf-dt-v { margin-left: auto; color: var(--sf-c-cyan-300); font-weight: 700; text-align: right; white-space: nowrap; }
+/* 合成路径：组件名 + 它自己带的属性，一眼看出这一件能省多少 */
+.sf-hud__dt-parts { display: flex; flex-direction: column; gap: 2u; }
+.sf-hud__dt-part { display: flex; align-items: baseline; gap: 6u; min-width: 0; padding: 1u 6u; border-radius: 4u; font-size: var(--sf-fs-sm); color: var(--sf-c-text-2); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
 .sf-hud__dt-part.is-own { color: var(--sf-c-green-300); box-shadow: inset 0 0 0 1px rgba(86, 199, 160, 0.5); background: rgba(86, 199, 160, 0.1); }
-.sf-hud__dt-part .sf-i { width: 1em; height: 1em; }
-.sf-hud__dt-passive b { display: block; color: var(--sf-c-amber); font-weight: 700; }
+.sf-hud__dt-part .sf-i { width: 1em; height: 1em; flex: none; align-self: center; }
+.sf-hud__dt-partname { flex: none; font-weight: 700; }
+.sf-hud__dt-partstat { margin-left: auto; font-size: calc(var(--sf-fs-sm) * 0.92); color: var(--sf-c-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sf-hud__dt-part.is-own .sf-hud__dt-partstat { color: rgba(86, 199, 160, 0.8); }
 /* 主动：冷色块，和被动(琥珀)分开；冷却挂在标题右侧 */
-.sf-hud__dt-active { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(92, 214, 247, 0.08); box-shadow: inset 0 0 0 1px rgba(92, 214, 247, 0.32); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
-.sf-hud__dt-active b { display: flex; align-items: baseline; gap: 8u; margin-bottom: 2u; color: var(--sf-c-cyan-300); font-weight: 700; }
-.sf-hud__dt-active-cd { margin-left: auto; font-weight: 700; color: var(--sf-c-text-3); }
-.sf-hud__dt-active small { display: block; margin-top: 4u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
-.sf-hud__dt-nopassive { margin-top: 8u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
+.sf-hud__dt-active-cd { margin-left: auto; font-size: var(--sf-fs-xs); font-weight: 700; letter-spacing: 0.06em; color: var(--sf-c-text-3); }
+.sf-hud__dt-tip { display: block; margin-top: 5u; font-size: var(--sf-fs-xs); line-height: 1.4; color: var(--sf-c-text-3); }
 .sf-hud__dt-note { flex: none; margin-bottom: 5u; font-size: var(--sf-fs-sm); line-height: 1.4; color: var(--sf-c-text-3); }
 .sf-hud__dt-note:empty { display: none; }
 .sf-hud__dt-note.is-warn { color: #ff9c9c; }
@@ -1308,6 +1321,6 @@ const K4 = `
   SG = 1.2,
   TG = 0.3,
   EG = 320,
-  Z4 = (n) => n.brief ?? BB(n.stats, 2),
+  Z4 = (n) => BB(n.stats, 2),
   K2 = (n) => ln[n].name.slice(-2);
 export { mG, $f, Gf, zm, Sk, Tk, Yd, q2, xG, Ek, Ak, M1, Rk, X2, yG, bG, _G, wG, MG, kG, Y2, SG, TG, EG, Z4, K2 };

@@ -89,105 +89,105 @@ const P = {
 // from = 合成路径；不写 cost 的按模型自动定价
 const ITEMS = [
   // ══ 小件 · 物理 ══
-  { id: 'baton', name: '警棍', brief: '最基础的物攻件', category: 'attack', tier: 1, color: '#c8ccd4', stats: S.ad(20) },
-  { id: 'steel_pipe', name: '钢管', brief: '物攻更高的基础件', category: 'attack', tier: 1, color: '#9aa4b2', stats: S.ad(42) },
-  { id: 'slingshot', name: '弹弓', brief: '一点点攻速', category: 'attack', tier: 1, color: '#c9a86a', stats: S.as(0.12) },
-  { id: 'chain_whip', name: '铁链', brief: '攻速件，合成棒球棍', category: 'attack', tier: 1, color: '#b08d52', stats: S.as(0.22) },
-  { id: 'knuckle', name: '指虎', brief: '一点点暴击率', category: 'attack', tier: 1, color: '#b8bcc4', stats: S.crit(0.1) },
-  { id: 'red_bull', name: '红牛', brief: '普攻回血的基础件', category: 'attack', tier: 1, color: '#d8433f', stats: S.ls(0.07) },
-  { id: 'steel_nail', name: '钢钉', brief: '一点点护甲穿透', category: 'attack', tier: 1, color: '#8fa6bb', stats: S.apen(0.1) },
+  { id: 'baton', name: '警棍', category: 'attack', tier: 1, color: '#c8ccd4', stats: S.ad(20) },
+  { id: 'steel_pipe', name: '钢管', category: 'attack', tier: 1, color: '#9aa4b2', stats: S.ad(42) },
+  { id: 'slingshot', name: '弹弓', category: 'attack', tier: 1, color: '#c9a86a', stats: S.as(0.12) },
+  { id: 'chain_whip', name: '铁链', category: 'attack', tier: 1, color: '#b08d52', stats: S.as(0.22) },
+  { id: 'knuckle', name: '指虎', category: 'attack', tier: 1, color: '#b8bcc4', stats: S.crit(0.1) },
+  { id: 'red_bull', name: '红牛', category: 'attack', tier: 1, color: '#d8433f', stats: S.ls(0.07) },
+  { id: 'steel_nail', name: '钢钉', category: 'attack', tier: 1, color: '#8fa6bb', stats: S.apen(0.1) },
 
   // ══ 小件 · 法术 ══
-  { id: 'spray_can', name: '杀虫喷雾', brief: '最基础的法强件', category: 'magic', tier: 1, color: '#7f8cff', stats: S.ap(22) },
-  { id: 'ddvp', name: '敌敌畏', brief: '法强更高的基础件', category: 'magic', tier: 1, color: '#9ad0c8', stats: S.ap(44) },
-  { id: 'power_bank', name: '充电宝', brief: '撑蓝量', category: 'magic', tier: 1, color: '#5b9bff', stats: S.mana(320) },
-  { id: 'pepper_spray', name: '防狼喷雾', brief: '一点点法术穿透', category: 'magic', tier: 1, color: '#a86bd8', stats: S.mpen(0.1) },
-  { id: 'alarm_clock', name: '闹钟', brief: '一点点冷却缩减', category: 'magic', tier: 1, color: '#7ec8e3', stats: S.cdr(0.06) },
+  { id: 'spray_can', name: '杀虫喷雾', category: 'magic', tier: 1, color: '#7f8cff', stats: S.ap(22) },
+  { id: 'ddvp', name: '敌敌畏', category: 'magic', tier: 1, color: '#9ad0c8', stats: S.ap(44) },
+  { id: 'power_bank', name: '充电宝', category: 'magic', tier: 1, color: '#5b9bff', stats: S.mana(320) },
+  { id: 'pepper_spray', name: '防狼喷雾', category: 'magic', tier: 1, color: '#a86bd8', stats: S.mpen(0.1) },
+  { id: 'alarm_clock', name: '闹钟', category: 'magic', tier: 1, color: '#7ec8e3', stats: S.cdr(0.06) },
 
   // ══ 小件 · 防御 ══
-  { id: 'padded_coat', name: '棉袄', brief: '最基础的护甲', category: 'defense', tier: 1, color: '#b9a07a', stats: S.armor(36) },
-  { id: 'hard_hat', name: '安全帽', brief: '护甲件，合成防暴盾牌', category: 'defense', tier: 1, color: '#8d99a8', stats: S.armor(80) },
-  { id: 'cushion', name: '沙发垫', brief: '一点点生命', category: 'defense', tier: 1, color: '#a8794f', stats: S.hp(260) },
-  { id: 'quilt', name: '棉被', brief: '生命件，合成大棉被', category: 'defense', tier: 1, color: '#a06a44', stats: S.hp(430) },
-  { id: 'mattress', name: '席梦思', brief: '大块生命，合成大件', category: 'defense', tier: 1, color: '#d9a441', stats: S.hp(720) },
-  { id: 'raincoat', name: '雨衣', brief: '最基础的魔抗', category: 'defense', tier: 1, color: '#7f9ad8', stats: S.mr(40) },
-  { id: 'gas_mask', name: '防毒面具', brief: '魔抗件，合成防弹衣', category: 'defense', tier: 1, color: '#6f8fd0', stats: S.mr(90) },
+  { id: 'padded_coat', name: '棉袄', category: 'defense', tier: 1, color: '#b9a07a', stats: S.armor(36) },
+  { id: 'hard_hat', name: '安全帽', category: 'defense', tier: 1, color: '#8d99a8', stats: S.armor(80) },
+  { id: 'cushion', name: '沙发垫', category: 'defense', tier: 1, color: '#a8794f', stats: S.hp(260) },
+  { id: 'quilt', name: '棉被', category: 'defense', tier: 1, color: '#a06a44', stats: S.hp(430) },
+  { id: 'mattress', name: '席梦思', category: 'defense', tier: 1, color: '#d9a441', stats: S.hp(720) },
+  { id: 'raincoat', name: '雨衣', category: 'defense', tier: 1, color: '#7f9ad8', stats: S.mr(40) },
+  { id: 'gas_mask', name: '防毒面具', category: 'defense', tier: 1, color: '#6f8fd0', stats: S.mr(90) },
 
   // ══ 小件 · 蓝量（饭盒那条线的组件）══
-  { id: 'milk_powder', name: '奶粉罐', brief: '撑蓝撑血，合成野生狗奶', category: 'magic', tier: 1, color: '#f0d7a0', stats: mix(S.mana(260), S.hp(200)) },
+  { id: 'milk_powder', name: '奶粉罐', category: 'magic', tier: 1, color: '#f0d7a0', stats: mix(S.mana(260), S.hp(200)) },
 
   // ══ 鞋 ══
-  { id: 'slippers', name: '拖鞋', brief: '跑得更快的基础鞋', category: 'boots', tier: 1, color: '#a8794f', stats: S.ms(0.5) },
-  { id: 'liberation_shoes', name: '解放鞋', brief: '跑得快，还更抗物理伤害', category: 'boots', tier: 2, cost: 710, color: '#8d99a8', stats: mix(S.ms(0.6), S.armor(110)), from: ['slippers', 'padded_coat'] },
-  { id: 'canvas_shoes', name: '回力鞋', brief: '跑得快，技能冷却更短', category: 'boots', tier: 2, cost: 710, color: '#7f8cff', stats: mix(S.ms(0.6), S.cdr(0.15)), from: ['slippers', 'alarm_clock'] },
-  { id: 'running_shoes', name: '跑鞋', brief: '跑得快，普攻出手更快', category: 'boots', tier: 2, cost: 710, color: '#56c7a0', stats: mix(S.ms(0.6), S.as(0.25)), from: ['slippers', 'slingshot'] },
+  { id: 'slippers', name: '拖鞋', category: 'boots', tier: 1, color: '#a8794f', stats: S.ms(0.5) },
+  { id: 'liberation_shoes', name: '解放鞋', category: 'boots', tier: 2, cost: 710, color: '#8d99a8', stats: mix(S.ms(0.6), S.armor(110)), from: ['slippers', 'padded_coat'] },
+  { id: 'canvas_shoes', name: '回力鞋', category: 'boots', tier: 2, cost: 710, color: '#7f8cff', stats: mix(S.ms(0.6), S.cdr(0.15)), from: ['slippers', 'alarm_clock'] },
+  { id: 'running_shoes', name: '跑鞋', category: 'boots', tier: 2, cost: 710, color: '#56c7a0', stats: mix(S.ms(0.6), S.as(0.25)), from: ['slippers', 'slingshot'] },
 
   // ══ 中件 · 物理 ══
-  { id: 'police_baton', name: '伸缩警棍', brief: '物攻中件，合成大铁锤', category: 'attack', tier: 2, color: '#6fa8d8', stats: S.ad(68), from: ['baton', 'steel_pipe'] },
-  { id: 'wrench', name: '大扳手', brief: '物攻 + 护甲穿透', category: 'attack', tier: 2, color: '#9fb4c9', stats: mix(S.ad(45), S.apen(0.18)), from: ['steel_pipe', 'steel_nail'] },
-  { id: 'baseball_bat', name: '棒球棍', brief: '攻速 + 暴击', category: 'attack', tier: 2, color: '#56c7a0', stats: mix(S.ad(15), S.as(0.3), S.crit(0.16)), from: ['chain_whip', 'knuckle'] },
-  { id: 'red_bull_pack', name: '六罐装红牛', brief: '物攻 + 吸血', category: 'attack', tier: 2, color: '#d8433f', stats: mix(S.ad(30), S.ls(0.15)), from: ['red_bull', 'baton'] },
+  { id: 'police_baton', name: '伸缩警棍', category: 'attack', tier: 2, color: '#6fa8d8', stats: S.ad(68), from: ['baton', 'steel_pipe'] },
+  { id: 'wrench', name: '大扳手', category: 'attack', tier: 2, color: '#9fb4c9', stats: mix(S.ad(45), S.apen(0.18)), from: ['steel_pipe', 'steel_nail'] },
+  { id: 'baseball_bat', name: '棒球棍', category: 'attack', tier: 2, color: '#56c7a0', stats: mix(S.ad(15), S.as(0.3), S.crit(0.16)), from: ['chain_whip', 'knuckle'] },
+  { id: 'red_bull_pack', name: '六罐装红牛', category: 'attack', tier: 2, color: '#d8433f', stats: mix(S.ad(30), S.ls(0.15)), from: ['red_bull', 'baton'] },
 
   // ══ 中件 · 法术 ══
-  { id: 'megaphone', name: '大喇叭', brief: '法强 + 冷却缩减', category: 'magic', tier: 2, color: '#8b7bff', stats: mix(S.ap(85), S.cdr(0.09)), from: ['ddvp', 'alarm_clock'] },
-  { id: 'thermos', name: '保温壶', brief: '法强 + 生命', category: 'magic', tier: 2, color: '#c07ad8', stats: mix(S.ap(70), S.hp(380)), from: ['ddvp', 'cushion'] },
-  { id: 'firecracker', name: '二踢脚', brief: '法强 + 法术穿透', category: 'magic', tier: 2, color: '#9a6bd8', stats: mix(S.ap(75), S.mpen(0.16)), from: ['pepper_spray', 'ddvp'] },
-  { id: 'speaker', name: '广场舞音响', brief: '法强 + 蓝量 + 冷却', category: 'magic', tier: 2, color: '#6a86e8', stats: mix(S.ap(60), S.mana(420), S.cdr(0.06)), from: ['power_bank', 'padded_coat'] },
+  { id: 'megaphone', name: '大喇叭', category: 'magic', tier: 2, color: '#8b7bff', stats: mix(S.ap(85), S.cdr(0.09)), from: ['ddvp', 'alarm_clock'] },
+  { id: 'thermos', name: '保温壶', category: 'magic', tier: 2, color: '#c07ad8', stats: mix(S.ap(70), S.hp(380)), from: ['ddvp', 'cushion'] },
+  { id: 'firecracker', name: '二踢脚', category: 'magic', tier: 2, color: '#9a6bd8', stats: mix(S.ap(75), S.mpen(0.16)), from: ['pepper_spray', 'ddvp'] },
+  { id: 'speaker', name: '广场舞音响', category: 'magic', tier: 2, color: '#6a86e8', stats: mix(S.ap(60), S.mana(420), S.cdr(0.06)), from: ['power_bank', 'padded_coat'] },
 
   // ══ 中件 · 防御 ══
-  { id: 'iron_door', name: '防盗门', brief: '生命 + 护甲', category: 'defense', tier: 2, color: '#98a4b4', stats: mix(S.hp(600), S.armor(70)), from: ['hard_hat', 'cushion'] },
-  { id: 'riot_shield', name: '防暴盾牌', brief: '大块生命 + 护甲', category: 'defense', tier: 2, color: '#7fa07a', cost: 1120, stats: mix(S.hp(700), S.armor(90)), from: ['hard_hat', 'mattress'] },
-  { id: 'bulletproof_vest', name: '防弹衣', brief: '生命 + 魔抗', category: 'defense', tier: 2, color: '#7fb8d8', stats: mix(S.hp(650), S.mr(95)), from: ['gas_mask', 'cushion'] },
+  { id: 'iron_door', name: '防盗门', category: 'defense', tier: 2, color: '#98a4b4', stats: mix(S.hp(600), S.armor(70)), from: ['hard_hat', 'cushion'] },
+  { id: 'riot_shield', name: '防暴盾牌', category: 'defense', tier: 2, color: '#7fa07a', cost: 1120, stats: mix(S.hp(700), S.armor(90)), from: ['hard_hat', 'mattress'] },
+  { id: 'bulletproof_vest', name: '防弹衣', category: 'defense', tier: 2, color: '#7fb8d8', stats: mix(S.hp(650), S.mr(95)), from: ['gas_mask', 'cushion'] },
 
   // ══ 中件 · 蓝量 / 生命联动 / 辅助 ══
   // 饭盒：挨打回蓝、耗蓝回血。中件带被动，passive.gold 折 500 金进定价。
-  { id: 'lunchbox', name: '饭盒', brief: '挨打回蓝，耗蓝回血', category: 'magic', tier: 2, color: '#f2b455', stats: mix(S.mana(400), S.hp(300)), passive: P.battery, from: ['power_bank', 'cushion'] },
+  { id: 'lunchbox', name: '饭盒', category: 'magic', tier: 2, color: '#f2b455', stats: mix(S.mana(400), S.hp(300)), passive: P.battery, from: ['power_bank', 'cushion'] },
   // 哑铃：把最大生命按比例换成物攻，血越厚打得越疼
-  { id: 'dumbbell', name: '哑铃', brief: '按最大生命加物攻', category: 'defense', tier: 2, color: '#8c93a3', stats: mix(S.hp(300), S.hpToAd(0.012)), from: ['cushion', 'steel_pipe'] },
-  { id: 'first_aid_kit', name: '急救箱', brief: '护盾更厚，冷却也短', category: 'support', tier: 2, color: '#7fd8b8', stats: mix(S.hp(700), S.shield(0.25), S.cdr(0.05)), from: ['hard_hat', 'cushion'] },
+  { id: 'dumbbell', name: '哑铃', category: 'defense', tier: 2, color: '#8c93a3', stats: mix(S.hp(300), S.hpToAd(0.012)), from: ['cushion', 'steel_pipe'] },
+  { id: 'first_aid_kit', name: '急救箱', category: 'support', tier: 2, color: '#7fd8b8', stats: mix(S.hp(700), S.shield(0.25), S.cdr(0.05)), from: ['hard_hat', 'cushion'] },
 
   // ══ 大件 · 物理 ══
-  { id: 'sledgehammer', name: '大铁锤', brief: '物攻最高，打残血更疼', category: 'attack', tier: 3, cost: 2100, color: '#ffb44d', stats: mix(S.ad(134), S.cdr(0.1)), passive: P.execute, from: ['police_baton', 'steel_pipe'] },
-  { id: 'nail_gun', name: '射钉枪', brief: '攻速大涨，普攻附带法伤', category: 'attack', tier: 3, cost: 1900, color: '#ffd76a', stats: mix(S.ad(35), S.as(0.5), S.crit(0.3), S.ms(0.5)), passive: P.onhit, from: ['baseball_bat', 'chain_whip'] },
-  { id: 'red_bull_case', name: '红牛整箱', brief: '普攻造成伤害，自己回血', category: 'attack', tier: 3, cost: 1900, color: '#d8433f', stats: mix(S.ad(86), S.ls(0.25)), from: ['red_bull_pack', 'police_baton'] },
-  { id: 'pry_bar', name: '撬棍', brief: '专克高护甲：无视 40% 护甲', category: 'attack', tier: 3, cost: 1950, color: '#9fb4c9', stats: mix(S.ad(98), S.apen(0.4)), from: ['wrench', 'police_baton'] },
-  { id: 'brick', name: '板砖', brief: '暴击率高，暴击打得更疼', category: 'attack', tier: 3, cost: 2150, color: '#b48cff', stats: mix(S.ad(80), S.crit(0.4), S.critDmg(0.4)), from: ['baseball_bat', 'knuckle'] },
+  { id: 'sledgehammer', name: '大铁锤', category: 'attack', tier: 3, cost: 2100, color: '#ffb44d', stats: mix(S.ad(134), S.cdr(0.1)), passive: P.execute, from: ['police_baton', 'steel_pipe'] },
+  { id: 'nail_gun', name: '射钉枪', category: 'attack', tier: 3, cost: 1900, color: '#ffd76a', stats: mix(S.ad(35), S.as(0.5), S.crit(0.3), S.ms(0.5)), passive: P.onhit, from: ['baseball_bat', 'chain_whip'] },
+  { id: 'red_bull_case', name: '红牛整箱', category: 'attack', tier: 3, cost: 1900, color: '#d8433f', stats: mix(S.ad(86), S.ls(0.25)), from: ['red_bull_pack', 'police_baton'] },
+  { id: 'pry_bar', name: '撬棍', category: 'attack', tier: 3, cost: 1950, color: '#9fb4c9', stats: mix(S.ad(98), S.apen(0.4)), from: ['wrench', 'police_baton'] },
+  { id: 'brick', name: '板砖', category: 'attack', tier: 3, cost: 2150, color: '#b48cff', stats: mix(S.ad(80), S.crit(0.4), S.critDmg(0.4)), from: ['baseball_bat', 'knuckle'] },
 
   // ══ 大件 · 法术 ══
-  { id: 'radio', name: '收音机', brief: '法强、蓝量、冷却都沾', category: 'magic', tier: 3, cost: 2000, color: '#7f8cff', stats: mix(S.ap(170), S.mana(400), S.cdr(0.15)), from: ['megaphone', 'power_bank'] },
-  { id: 'ddvp_concentrate', name: '浓敌敌畏', brief: '专克高魔抗：无视 40% 魔抗', category: 'magic', tier: 3, cost: 2100, color: '#a86bd8', stats: mix(S.ap(180), S.mpen(0.4)), from: ['firecracker', 'ddvp'] },
-  { id: 'air_cooler', name: '冷风机', brief: '法强 + 生命，技能减速', category: 'magic', tier: 3, cost: 2000, color: '#8fd8ff', stats: mix(S.ap(140), S.hp(900)), passive: P.slow, from: ['thermos', 'mattress'] },
-  { id: 'baijiu', name: '二锅头', brief: '法强最高，还按比例加法强', category: 'magic', tier: 3, cost: 2300, color: '#c9f6ff', stats: mix(S.ap(220), S.apPct(0.3)), from: ['ddvp', 'spray_can'] },
+  { id: 'radio', name: '收音机', category: 'magic', tier: 3, cost: 2000, color: '#7f8cff', stats: mix(S.ap(170), S.mana(400), S.cdr(0.15)), from: ['megaphone', 'power_bank'] },
+  { id: 'ddvp_concentrate', name: '浓敌敌畏', category: 'magic', tier: 3, cost: 2100, color: '#a86bd8', stats: mix(S.ap(180), S.mpen(0.4)), from: ['firecracker', 'ddvp'] },
+  { id: 'air_cooler', name: '冷风机', category: 'magic', tier: 3, cost: 2000, color: '#8fd8ff', stats: mix(S.ap(140), S.hp(900)), passive: P.slow, from: ['thermos', 'mattress'] },
+  { id: 'baijiu', name: '二锅头', category: 'magic', tier: 3, cost: 2300, color: '#c9f6ff', stats: mix(S.ap(220), S.apPct(0.3)), from: ['ddvp', 'spray_can'] },
 
   // ══ 大件 · 防御 ══
-  { id: 'riot_armor', name: '防暴服', brief: '护甲最高，打你的人变慢', category: 'defense', tier: 3, cost: 1900, color: '#8d99a8', stats: mix(S.hp(1000), S.armor(250)), passive: P.cripple, from: ['riot_shield', 'hard_hat'] },
-  { id: 'fire_blanket', name: '灭火毯', brief: '低血自动给一层护盾', category: 'defense', tier: 3, cost: 1850, color: '#7f9ad8', stats: mix(S.hp(1000), S.mr(255)), passive: P.shield, from: ['bulletproof_vest', 'gas_mask'] },
-  { id: 'big_quilt', name: '十斤大棉被', brief: '生命最高，脱战回血', category: 'defense', tier: 3, cost: 2000, color: '#ff9a9a', stats: S.hp(2100), passive: P.regen, from: ['mattress', 'quilt'] },
-  { id: 'barbed_fence', name: '铁丝网', brief: '被普攻就反弹伤害', category: 'defense', tier: 3, cost: 1750, color: '#c07a5a', stats: mix(S.hp(900), S.armor(235)), passive: P.thorns, from: ['hard_hat', 'mattress'] },
+  { id: 'riot_armor', name: '防暴服', category: 'defense', tier: 3, cost: 1900, color: '#8d99a8', stats: mix(S.hp(1000), S.armor(250)), passive: P.cripple, from: ['riot_shield', 'hard_hat'] },
+  { id: 'fire_blanket', name: '灭火毯', category: 'defense', tier: 3, cost: 1850, color: '#7f9ad8', stats: mix(S.hp(1000), S.mr(255)), passive: P.shield, from: ['bulletproof_vest', 'gas_mask'] },
+  { id: 'big_quilt', name: '十斤大棉被', category: 'defense', tier: 3, cost: 2000, color: '#ff9a9a', stats: S.hp(2100), passive: P.regen, from: ['mattress', 'quilt'] },
+  { id: 'barbed_fence', name: '铁丝网', category: 'defense', tier: 3, cost: 1750, color: '#c07a5a', stats: mix(S.hp(900), S.armor(235)), passive: P.thorns, from: ['hard_hat', 'mattress'] },
 
   // ══ 大件 · 顶级（纯属性，没有被动）══
-  { id: 'demolition_hammer', name: '拆迁大锤', brief: '纯物攻的顶级大件', category: 'attack', tier: 3, color: '#ff8a3c', stats: mix(S.ad(215), S.cdr(0.12)), from: ['police_baton', 'wrench'] },
-  { id: 'concrete_block', name: '水泥墩', brief: '双抗与生命都极高', category: 'defense', tier: 3, color: '#5fa88f', stats: mix(S.hp(1800), S.armor(220), S.mr(200)), from: ['riot_shield', 'bulletproof_vest'] },
-  { id: 'suona', name: '唢呐', brief: '法强 + 法穿 + 冷却', category: 'magic', tier: 3, color: '#b48cff', stats: mix(S.ap(260), S.mpen(0.3), S.cdr(0.12)), from: ['megaphone', 'firecracker'] },
-  { id: 'gas_tank', name: '煤气罐', brief: '一件顶三件的血量', category: 'defense', tier: 3, color: '#d9a441', stats: S.hp(3700), from: ['quilt', 'mattress'] },
+  { id: 'demolition_hammer', name: '拆迁大锤', category: 'attack', tier: 3, color: '#ff8a3c', stats: mix(S.ad(215), S.cdr(0.12)), from: ['police_baton', 'wrench'] },
+  { id: 'concrete_block', name: '水泥墩', category: 'defense', tier: 3, color: '#5fa88f', stats: mix(S.hp(1800), S.armor(220), S.mr(200)), from: ['riot_shield', 'bulletproof_vest'] },
+  { id: 'suona', name: '唢呐', category: 'magic', tier: 3, color: '#b48cff', stats: mix(S.ap(260), S.mpen(0.3), S.cdr(0.12)), from: ['megaphone', 'firecracker'] },
+  { id: 'gas_tank', name: '煤气罐', category: 'defense', tier: 3, color: '#d9a441', stats: S.hp(3700), from: ['quilt', 'mattress'] },
   // 野生狗奶：饭盒 + 奶粉罐。同一个被动 id，数值更大（换装流不会同时吃到两份）
-  { id: 'wild_dog_milk', name: '野生狗奶', brief: '挨打回蓝、耗蓝回血，量都更大', category: 'magic', tier: 3, color: '#f7e3b0', stats: mix(S.mana(900), S.hp(900), S.cdr(0.1)), passive: P.batteryBig, from: ['lunchbox', 'milk_powder'] },
+  { id: 'wild_dog_milk', name: '野生狗奶', category: 'magic', tier: 3, color: '#f7e3b0', stats: mix(S.mana(900), S.hp(900), S.cdr(0.1)), passive: P.batteryBig, from: ['lunchbox', 'milk_powder'] },
 
   // ══ 辅助 ══
   // 主动装备的 active.value 是"这个主动值多少金币"，和属性一样进定价模型，
   // 否则主动等于白送，主动件会全面压过同价位的纯属性件。
-  { id: 'herb_jar', name: '药酒罐', brief: '撑血撑魔抗，冷却也短', category: 'support', tier: 2, color: '#7fd8b8', stats: mix(S.hp(600), S.mr(80), S.cdr(0.1)), from: ['gas_mask', 'alarm_clock'] },
-  { id: 'steel_basin', name: '不锈钢大盆', brief: '主动：扣盆蹲下，2 秒无敌', category: 'support', tier: 3, color: '#ffd76a', stats: mix(S.hp(700), S.armor(90)), from: ['iron_door', 'cushion'],
+  { id: 'herb_jar', name: '药酒罐', category: 'support', tier: 2, color: '#7fd8b8', stats: mix(S.hp(600), S.mr(80), S.cdr(0.1)), from: ['gas_mask', 'alarm_clock'] },
+  { id: 'steel_basin', name: '不锈钢大盆', category: 'support', tier: 3, color: '#ffd76a', stats: mix(S.hp(700), S.armor(90)), from: ['iron_door', 'cushion'],
     active: { name: '扣盆', desc: '把盆扣在头上一蹲：2 秒内无法被选中、免疫伤害，也不能行动。', cd: 75, kind: 'stasis', duration: 2, value: 700 } },
-  { id: 'e_bike', name: '电动车', brief: '主动：引导后骑到远处', category: 'support', tier: 3, color: '#8fd8ff', stats: mix(S.hp(800), S.cdr(0.12)), from: ['cushion', 'alarm_clock'],
+  { id: 'e_bike', name: '电动车', category: 'support', tier: 3, color: '#8fd8ff', stats: mix(S.hp(800), S.cdr(0.12)), from: ['cushion', 'alarm_clock'],
     active: { name: '骑走', desc: '引导 2.5 秒后骑到 30 米内的指定位置。受到控制或主动行动会中断。', cd: 90, kind: 'teleport', channel: 2.5, range: 30, value: 650 } },
-  { id: 'big_pot', name: '大锅菜', brief: '主动：给周围友军盛一碗', category: 'support', tier: 3, color: '#9df5d2', stats: mix(S.ap(100), S.cdr(0.12), S.hp(300)), from: ['megaphone', 'cushion'],
+  { id: 'big_pot', name: '大锅菜', category: 'support', tier: 3, color: '#9df5d2', stats: mix(S.ap(100), S.cdr(0.12), S.hp(300)), from: ['megaphone', 'cushion'],
     active: { name: '开饭', desc: '治疗周围 8 米内的友军 220(+施法者 6% 最大生命)。', cd: 60, kind: 'heal', radius: 8, amount: 220, hpRatio: 0.06, value: 550 } },
-  { id: 'huoxiang', name: '藿香正气水', brief: '主动：解控并短暂免控', category: 'support', tier: 3, color: '#c9f6ff', stats: mix(S.hp(900), S.mr(100), S.cdr(0.08)), from: ['bulletproof_vest', 'padded_coat'],
+  { id: 'huoxiang', name: '藿香正气水', category: 'support', tier: 3, color: '#c9f6ff', stats: mix(S.hp(900), S.mr(100), S.cdr(0.08)), from: ['bulletproof_vest', 'padded_coat'],
     active: { name: '灌一瓶', desc: '解除自身所有控制，并在 1.5 秒内免疫控制。', cd: 70, kind: 'cleanse', duration: 1.5, value: 450 } },
   // 护盾效率 / 治疗加成
-  { id: 'fire_hydrant', name: '消防栓', brief: '护盾厚一大截，护甲也高', category: 'support', tier: 3, color: '#ff8a3c', stats: mix(S.hp(1200), S.armor(200), S.shield(0.5)), from: ['riot_shield', 'iron_door'] },
-  { id: 'ginger_tea', name: '红糖姜茶', brief: '奶人更足，法强生命都沾', category: 'support', tier: 3, color: '#e0a86a', stats: mix(S.ap(130), S.hp(1000), S.heal(0.4)), from: ['thermos', 'cushion'] },
+  { id: 'fire_hydrant', name: '消防栓', category: 'support', tier: 3, color: '#ff8a3c', stats: mix(S.hp(1200), S.armor(200), S.shield(0.5)), from: ['riot_shield', 'iron_door'] },
+  { id: 'ginger_tea', name: '红糖姜茶', category: 'support', tier: 3, color: '#e0a86a', stats: mix(S.ap(130), S.hp(1000), S.heal(0.4)), from: ['thermos', 'cushion'] },
 ];
 
 // ── 定价 ──
@@ -255,7 +255,7 @@ if (!emit) {
   };
   let out = 'const ln = {\n';
   for (const it of ITEMS) {
-    const o = { id: it.id, name: it.name, brief: it.brief, category: it.category, tier: it.tier, cost: it.cost };
+    const o = { id: it.id, name: it.name, category: it.category, tier: it.tier, cost: it.cost };
     if (it.from) o.from = it.from;
     o.stats = it.stats;
     if (it.passive) o.passive = it.passive;

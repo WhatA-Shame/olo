@@ -16,7 +16,6 @@ const ln = {
   baton: {
     id: "baton",
     name: "警棍",
-    brief: "最基础的物攻件",
     category: "attack",
     tier: 1,
     cost: 300,
@@ -28,7 +27,6 @@ const ln = {
   steel_pipe: {
     id: "steel_pipe",
     name: "钢管",
-    brief: "物攻更高的基础件",
     category: "attack",
     tier: 1,
     cost: 630,
@@ -40,7 +38,6 @@ const ln = {
   slingshot: {
     id: "slingshot",
     name: "弹弓",
-    brief: "一点点攻速",
     category: "attack",
     tier: 1,
     cost: 190,
@@ -52,7 +49,6 @@ const ln = {
   chain_whip: {
     id: "chain_whip",
     name: "铁链",
-    brief: "攻速件，合成棒球棍",
     category: "attack",
     tier: 1,
     cost: 350,
@@ -64,7 +60,6 @@ const ln = {
   knuckle: {
     id: "knuckle",
     name: "指虎",
-    brief: "一点点暴击率",
     category: "attack",
     tier: 1,
     cost: 160,
@@ -76,7 +71,6 @@ const ln = {
   red_bull: {
     id: "red_bull",
     name: "红牛",
-    brief: "普攻回血的基础件",
     category: "attack",
     tier: 1,
     cost: 210,
@@ -88,7 +82,6 @@ const ln = {
   steel_nail: {
     id: "steel_nail",
     name: "钢钉",
-    brief: "一点点护甲穿透",
     category: "attack",
     tier: 1,
     cost: 160,
@@ -100,7 +93,6 @@ const ln = {
   spray_can: {
     id: "spray_can",
     name: "杀虫喷雾",
-    brief: "最基础的法强件",
     category: "magic",
     tier: 1,
     cost: 200,
@@ -112,7 +104,6 @@ const ln = {
   ddvp: {
     id: "ddvp",
     name: "敌敌畏",
-    brief: "法强更高的基础件",
     category: "magic",
     tier: 1,
     cost: 400,
@@ -124,7 +115,6 @@ const ln = {
   power_bank: {
     id: "power_bank",
     name: "充电宝",
-    brief: "撑蓝量",
     category: "magic",
     tier: 1,
     cost: 160,
@@ -136,7 +126,6 @@ const ln = {
   pepper_spray: {
     id: "pepper_spray",
     name: "防狼喷雾",
-    brief: "一点点法术穿透",
     category: "magic",
     tier: 1,
     cost: 160,
@@ -148,7 +137,6 @@ const ln = {
   alarm_clock: {
     id: "alarm_clock",
     name: "闹钟",
-    brief: "一点点冷却缩减",
     category: "magic",
     tier: 1,
     cost: 160,
@@ -160,7 +148,6 @@ const ln = {
   padded_coat: {
     id: "padded_coat",
     name: "棉袄",
-    brief: "最基础的护甲",
     category: "defense",
     tier: 1,
     cost: 150,
@@ -172,7 +159,6 @@ const ln = {
   hard_hat: {
     id: "hard_hat",
     name: "安全帽",
-    brief: "护甲件，合成防暴盾牌",
     category: "defense",
     tier: 1,
     cost: 340,
@@ -184,7 +170,6 @@ const ln = {
   cushion: {
     id: "cushion",
     name: "沙发垫",
-    brief: "一点点生命",
     category: "defense",
     tier: 1,
     cost: 260,
@@ -196,7 +181,6 @@ const ln = {
   quilt: {
     id: "quilt",
     name: "棉被",
-    brief: "生命件，合成大棉被",
     category: "defense",
     tier: 1,
     cost: 430,
@@ -208,7 +192,6 @@ const ln = {
   mattress: {
     id: "mattress",
     name: "席梦思",
-    brief: "大块生命，合成大件",
     category: "defense",
     tier: 1,
     cost: 720,
@@ -220,7 +203,6 @@ const ln = {
   raincoat: {
     id: "raincoat",
     name: "雨衣",
-    brief: "最基础的魔抗",
     category: "defense",
     tier: 1,
     cost: 160,
@@ -232,7 +214,6 @@ const ln = {
   gas_mask: {
     id: "gas_mask",
     name: "防毒面具",
-    brief: "魔抗件，合成防弹衣",
     category: "defense",
     tier: 1,
     cost: 350,
@@ -244,7 +225,6 @@ const ln = {
   milk_powder: {
     id: "milk_powder",
     name: "奶粉罐",
-    brief: "撑蓝撑血，合成野生狗奶",
     category: "magic",
     tier: 1,
     cost: 330,
@@ -257,7 +237,6 @@ const ln = {
   slippers: {
     id: "slippers",
     name: "拖鞋",
-    brief: "跑得更快的基础鞋",
     category: "boots",
     tier: 1,
     cost: 250,
@@ -269,7 +248,6 @@ const ln = {
   liberation_shoes: {
     id: "liberation_shoes",
     name: "解放鞋",
-    brief: "跑得快，还更抗物理伤害",
     category: "boots",
     tier: 2,
     cost: 710,
@@ -283,7 +261,6 @@ const ln = {
   canvas_shoes: {
     id: "canvas_shoes",
     name: "回力鞋",
-    brief: "跑得快，技能冷却更短",
     category: "boots",
     tier: 2,
     cost: 710,
@@ -297,7 +274,6 @@ const ln = {
   running_shoes: {
     id: "running_shoes",
     name: "跑鞋",
-    brief: "跑得快，普攻出手更快",
     category: "boots",
     tier: 2,
     cost: 710,
@@ -311,7 +287,6 @@ const ln = {
   police_baton: {
     id: "police_baton",
     name: "伸缩警棍",
-    brief: "物攻中件，合成大铁锤",
     category: "attack",
     tier: 2,
     cost: 1000,
@@ -324,7 +299,6 @@ const ln = {
   wrench: {
     id: "wrench",
     name: "大扳手",
-    brief: "物攻 + 护甲穿透",
     category: "attack",
     tier: 2,
     cost: 940,
@@ -338,7 +312,6 @@ const ln = {
   baseball_bat: {
     id: "baseball_bat",
     name: "棒球棍",
-    brief: "攻速 + 暴击",
     category: "attack",
     tier: 2,
     cost: 940,
@@ -353,7 +326,6 @@ const ln = {
   red_bull_pack: {
     id: "red_bull_pack",
     name: "六罐装红牛",
-    brief: "物攻 + 吸血",
     category: "attack",
     tier: 2,
     cost: 880,
@@ -367,7 +339,6 @@ const ln = {
   megaphone: {
     id: "megaphone",
     name: "大喇叭",
-    brief: "法强 + 冷却缩减",
     category: "magic",
     tier: 2,
     cost: 980,
@@ -381,7 +352,6 @@ const ln = {
   thermos: {
     id: "thermos",
     name: "保温壶",
-    brief: "法强 + 生命",
     category: "magic",
     tier: 2,
     cost: 990,
@@ -395,7 +365,6 @@ const ln = {
   firecracker: {
     id: "firecracker",
     name: "二踢脚",
-    brief: "法强 + 法术穿透",
     category: "magic",
     tier: 2,
     cost: 910,
@@ -409,7 +378,6 @@ const ln = {
   speaker: {
     id: "speaker",
     name: "广场舞音响",
-    brief: "法强 + 蓝量 + 冷却",
     category: "magic",
     tier: 2,
     cost: 890,
@@ -424,7 +392,6 @@ const ln = {
   iron_door: {
     id: "iron_door",
     name: "防盗门",
-    brief: "生命 + 护甲",
     category: "defense",
     tier: 2,
     cost: 880,
@@ -438,7 +405,6 @@ const ln = {
   riot_shield: {
     id: "riot_shield",
     name: "防暴盾牌",
-    brief: "大块生命 + 护甲",
     category: "defense",
     tier: 2,
     cost: 1120,
@@ -452,7 +418,6 @@ const ln = {
   bulletproof_vest: {
     id: "bulletproof_vest",
     name: "防弹衣",
-    brief: "生命 + 魔抗",
     category: "defense",
     tier: 2,
     cost: 1000,
@@ -466,7 +431,6 @@ const ln = {
   lunchbox: {
     id: "lunchbox",
     name: "饭盒",
-    brief: "挨打回蓝，耗蓝回血",
     category: "magic",
     tier: 2,
     cost: 980,
@@ -488,7 +452,6 @@ const ln = {
   dumbbell: {
     id: "dumbbell",
     name: "哑铃",
-    brief: "按最大生命加物攻",
     category: "defense",
     tier: 2,
     cost: 1350,
@@ -502,7 +465,6 @@ const ln = {
   first_aid_kit: {
     id: "first_aid_kit",
     name: "急救箱",
-    brief: "护盾更厚，冷却也短",
     category: "support",
     tier: 2,
     cost: 1030,
@@ -517,7 +479,6 @@ const ln = {
   sledgehammer: {
     id: "sledgehammer",
     name: "大铁锤",
-    brief: "物攻最高，打残血更疼",
     category: "attack",
     tier: 3,
     cost: 2100,
@@ -538,7 +499,6 @@ const ln = {
   nail_gun: {
     id: "nail_gun",
     name: "射钉枪",
-    brief: "攻速大涨，普攻附带法伤",
     category: "attack",
     tier: 3,
     cost: 1900,
@@ -560,7 +520,6 @@ const ln = {
   red_bull_case: {
     id: "red_bull_case",
     name: "红牛整箱",
-    brief: "普攻造成伤害，自己回血",
     category: "attack",
     tier: 3,
     cost: 1900,
@@ -574,7 +533,6 @@ const ln = {
   pry_bar: {
     id: "pry_bar",
     name: "撬棍",
-    brief: "专克高护甲：无视 40% 护甲",
     category: "attack",
     tier: 3,
     cost: 1950,
@@ -588,7 +546,6 @@ const ln = {
   brick: {
     id: "brick",
     name: "板砖",
-    brief: "暴击率高，暴击打得更疼",
     category: "attack",
     tier: 3,
     cost: 2150,
@@ -603,7 +560,6 @@ const ln = {
   radio: {
     id: "radio",
     name: "收音机",
-    brief: "法强、蓝量、冷却都沾",
     category: "magic",
     tier: 3,
     cost: 2000,
@@ -618,7 +574,6 @@ const ln = {
   ddvp_concentrate: {
     id: "ddvp_concentrate",
     name: "浓敌敌畏",
-    brief: "专克高魔抗：无视 40% 魔抗",
     category: "magic",
     tier: 3,
     cost: 2100,
@@ -632,7 +587,6 @@ const ln = {
   air_cooler: {
     id: "air_cooler",
     name: "冷风机",
-    brief: "法强 + 生命，技能减速",
     category: "magic",
     tier: 3,
     cost: 2000,
@@ -653,7 +607,6 @@ const ln = {
   baijiu: {
     id: "baijiu",
     name: "二锅头",
-    brief: "法强最高，还按比例加法强",
     category: "magic",
     tier: 3,
     cost: 2300,
@@ -667,7 +620,6 @@ const ln = {
   riot_armor: {
     id: "riot_armor",
     name: "防暴服",
-    brief: "护甲最高，打你的人变慢",
     category: "defense",
     tier: 3,
     cost: 1900,
@@ -688,7 +640,6 @@ const ln = {
   fire_blanket: {
     id: "fire_blanket",
     name: "灭火毯",
-    brief: "低血自动给一层护盾",
     category: "defense",
     tier: 3,
     cost: 1850,
@@ -709,7 +660,6 @@ const ln = {
   big_quilt: {
     id: "big_quilt",
     name: "十斤大棉被",
-    brief: "生命最高，脱战回血",
     category: "defense",
     tier: 3,
     cost: 2000,
@@ -728,7 +678,6 @@ const ln = {
   barbed_fence: {
     id: "barbed_fence",
     name: "铁丝网",
-    brief: "被普攻就反弹伤害",
     category: "defense",
     tier: 3,
     cost: 1750,
@@ -748,7 +697,6 @@ const ln = {
   demolition_hammer: {
     id: "demolition_hammer",
     name: "拆迁大锤",
-    brief: "纯物攻的顶级大件",
     category: "attack",
     tier: 3,
     cost: 3280,
@@ -762,7 +710,6 @@ const ln = {
   concrete_block: {
     id: "concrete_block",
     name: "水泥墩",
-    brief: "双抗与生命都极高",
     category: "defense",
     tier: 3,
     cost: 3240,
@@ -777,7 +724,6 @@ const ln = {
   suona: {
     id: "suona",
     name: "唢呐",
-    brief: "法强 + 法穿 + 冷却",
     category: "magic",
     tier: 3,
     cost: 2900,
@@ -792,7 +738,6 @@ const ln = {
   gas_tank: {
     id: "gas_tank",
     name: "煤气罐",
-    brief: "一件顶三件的血量",
     category: "defense",
     tier: 3,
     cost: 3430,
@@ -805,7 +750,6 @@ const ln = {
   wild_dog_milk: {
     id: "wild_dog_milk",
     name: "野生狗奶",
-    brief: "挨打回蓝、耗蓝回血，量都更大",
     category: "magic",
     tier: 3,
     cost: 2510,
@@ -828,7 +772,6 @@ const ln = {
   herb_jar: {
     id: "herb_jar",
     name: "药酒罐",
-    brief: "撑血撑魔抗，冷却也短",
     category: "support",
     tier: 2,
     cost: 1150,
@@ -843,7 +786,6 @@ const ln = {
   steel_basin: {
     id: "steel_basin",
     name: "不锈钢大盆",
-    brief: "主动：扣盆蹲下，2 秒无敌",
     category: "support",
     tier: 3,
     cost: 1650,
@@ -865,7 +807,6 @@ const ln = {
   e_bike: {
     id: "e_bike",
     name: "电动车",
-    brief: "主动：引导后骑到远处",
     category: "support",
     tier: 3,
     cost: 1630,
@@ -888,7 +829,6 @@ const ln = {
   big_pot: {
     id: "big_pot",
     name: "大锅菜",
-    brief: "主动：给周围友军盛一碗",
     category: "support",
     tier: 3,
     cost: 1910,
@@ -913,7 +853,6 @@ const ln = {
   huoxiang: {
     id: "huoxiang",
     name: "藿香正气水",
-    brief: "主动：解控并短暂免控",
     category: "support",
     tier: 3,
     cost: 1800,
@@ -936,7 +875,6 @@ const ln = {
   fire_hydrant: {
     id: "fire_hydrant",
     name: "消防栓",
-    brief: "护盾厚一大截，护甲也高",
     category: "support",
     tier: 3,
     cost: 2310,
@@ -951,7 +889,6 @@ const ln = {
   ginger_tea: {
     id: "ginger_tea",
     name: "红糖姜茶",
-    brief: "奶人更足，法强生命都沾",
     category: "support",
     tier: 3,
     cost: 2270,
@@ -1111,7 +1048,8 @@ function ek(n) {
   const t = [];
   for (const [e, s, i] of tk) {
     const a = n[e];
-    a !== void 0 && t.push({ label: s, value: i(a) });
+    // key 要带出去：详情面板按 key 取属性小图标（48-item-icons.js 的 traitIcon）
+    a !== void 0 && t.push({ key: e, label: s, value: i(a) });
   }
   return t;
 }

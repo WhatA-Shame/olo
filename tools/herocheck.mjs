@@ -211,6 +211,15 @@ const main = async () => {
     const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale } } : {}) });
     fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-${name}.jpg`), Buffer.from(r.result.data, 'base64'));
   };
+  // 商店详情面板特写：裁切框按运行时包围盒算。写死坐标一旦改面板结构就框偏，
+  // 而这类"看起来对不对"的问题只能靠截图判断，框偏了等于没截。
+  const shotPanel = async (name, sel = '.sf-hud__shop-detail', scale = 3) => {
+    if (!shots) return;
+    const r = await ev(`(()=>{const e=document.querySelector('${sel}'); if(!e) return null;
+      const b=e.getBoundingClientRect(); return {x:b.x,y:b.y,width:b.width,height:b.height};})()`);
+    if (!r) return console.log(`  · 找不到 ${sel}，跳过 ${name}`);
+    return shot(name, r, scale);
+  };
   // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节（裁得比英雄大一圈，技能特效才不会被切掉）。
   // --crop=x,y,w,h,s：自己指定裁切框和放大倍数（战场相机是固定俯视，英雄基本钉在屏幕同一处，
   // 想把手/武器看清楚就用这个）。
@@ -1115,17 +1124,22 @@ const main = async () => {
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='防御'); t&&t.click(); return 1;})()`);
       await sleep(400);
       await shot('shop-defense', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      // 带被动的装备：被动块是独立小面板（琥珀色），确认它真的渲染出来了
+      await ev(`(()=>{const c=document.querySelector('[data-item="big_quilt"]'); c&&c.click(); return 1;})()`);
+      await sleep(350);
+      await shotPanel('shop-passive-detail');
       // 辅助分类 + 主动装备的详情面板（主动那一块和被动分开显示）
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='辅助'); t&&t.click(); return 1;})()`);
       await sleep(400);
       // 先看急救箱：它的"护盾效率"是派生属性，得确认属性行真的画出来了
       await ev(`(()=>{const c=document.querySelector('[data-item="first_aid_kit"]'); c&&c.click(); return 1;})()`);
       await sleep(350);
-      await shot('shop-shieldpower-detail', { x: 700, y: 180, width: 220, height: 190 }, 5);
+      // 详情面板的裁切框按运行时实际包围盒算，别写死坐标——面板一改结构就框偏
+      await shotPanel('shop-shieldpower-detail');
       await ev(`(()=>{const c=document.querySelector('[data-item="steel_basin"]'); c&&c.click(); return 1;})()`);
       await sleep(350);
       await shot('shop-support', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
-      await shot('shop-active-detail', { x: 700, y: 250, width: 220, height: 110 }, 5);
+      await shotPanel('shop-active-detail');
       await ev(`(()=>{const b=document.querySelector('.sf-hud__st-shop'); b&&b.click(); return 1;})()`);
     }
   }

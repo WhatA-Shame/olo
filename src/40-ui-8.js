@@ -11,12 +11,13 @@
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Nh, Se, kr, z0 } from './02-data.js';
 import { Hf, Jn, M0, Sf, T0, W8, Zn, _e, j8, po, qx, ro, z, zi } from './32-ui.js';
-import { IB, Ia, UB, Yh, ek, ln, u4 } from './33-data-2.js';
+import { BB, IB, Ia, UB, Yh, ek, ln, u4 } from './33-data-2.js';
 import { Ar, Po, T3, Tf, Vt, Zh, fk, ks, lH, ny } from './34-ui-2.js';
 import { Ef, Vn, a$, br, c$, e$, gk, i$, is, l$, o$, u$, uo, vo } from './36-ui-4.js';
 import { A$, D$, E$, N$, p$ } from './37-ui-5.js';
 import { fG, oG } from './38-ui-6.js';
 import { kartAnimDur, kartSpec, lookId } from './47-kart.js';
+import { traitIcon } from './48-item-icons.js';
 import { Ak, EG, Ek, K2, M1, MG, Rk, SG, TG, Tk, X2, Y2, Yd, Z4, _G, bG, kG, mG, q2, wG, yG } from './39-ui-7.js';
 
 function AG(n) {
@@ -331,43 +332,55 @@ function AG(n) {
         Tt.kind === "buy" ? z("span", "sf-hud__dt-price", _e(Vt("gold")), hs) : null,
       ),
       js = z("div", "sf-hud__dt-stats");
-    for (const Re of ek(Zt.stats))
-      js.appendChild(z("span", "sf-hud__dt-stat", z("span", null, Re.label), z("b", "sf-num", Re.value)));
-    const qs = z(
-      "div",
-      "sf-hud__dt-body sf-scroll",
-      Zt.brief ? z("div", "sf-hud__dt-brief", Zt.brief) : null,
-      js,
-    );
-    // 合成路径：列出组件，已有的打勾。凑齐全部组件时买成品只付差价。
-    if (Zt.from && Zt.from.length) {
-      const parts = Zt.from.map((c) => {
-        const own = n.me.items.includes(c);
-        return z("span", `sf-hud__dt-part${own ? " is-own" : ""}`, own ? _e(Vt("check")) : null, ln[c].name);
-      });
-      qs.appendChild(z("div", "sf-hud__dt-build", z("b", null, "合成"), ...parts));
+    // 属性行：小图标 + 术语 + 数值。术语一律用属性表的原词（物攻/护甲/冷却缩减），
+    // 不写"一点点暴击率"这种话——玩家要的是能算的数字。
+    for (const Re of ek(Zt.stats)) {
+      const gi2 = z("i", "sf-dt-ico");
+      gi2.innerHTML = traitIcon(Re.key);
+      js.appendChild(
+        z("span", "sf-hud__dt-stat", gi2, z("span", "sf-dt-k", Re.label), z("b", "sf-num sf-dt-v", Re.value)),
+      );
     }
+    // 每一块都是独立小面板 + 一行极小的分区标签，和 BaBao 的信息卡一个读法：
+    // 先看标签知道这是什么，再看内容。空块不渲染，不留空白。
+    const sec = (cls, label, ...kids) =>
+      z("div", `sf-hud__dt-sec ${cls}`, z("div", "sf-dt-label", label), ...kids);
+    const qs = z("div", "sf-hud__dt-body sf-scroll", sec("is-stats", "属性", js));
     if (Zt.passive)
       qs.appendChild(
-        z("div", "sf-hud__dt-passive", z("b", null, `被动 · ${Zt.passive.name}`), Zt.passive.desc),
+        sec("is-passive", "被动", z("b", "sf-hud__dt-h", Zt.passive.name), z("p", "sf-hud__dt-p", Zt.passive.desc)),
       );
     // 主动装备是"多一个技能"，所以冷却也要写清楚——它是计价的一部分。
     if (Zt.active)
       qs.appendChild(
-        z(
-          "div",
-          "sf-hud__dt-active",
+        sec(
+          "is-active",
+          "主动",
           z(
             "b",
-            null,
-            `主动 · ${Zt.active.name}`,
-            z("span", "sf-hud__dt-active-cd sf-num", `${Zt.active.cd} 秒`),
+            "sf-hud__dt-h",
+            Zt.active.name,
+            z("span", "sf-hud__dt-active-cd sf-num", `冷却 ${Zt.active.cd} 秒`),
           ),
-          Zt.active.desc,
-          z("small", null, "装备栏里按数字键 1~6，或直接点那一格"),
+          z("p", "sf-hud__dt-p", Zt.active.desc),
+          z("small", "sf-hud__dt-tip", "装备栏里按数字键 1~6，或直接点那一格"),
         ),
       );
-    if (!Zt.passive && !Zt.active) qs.appendChild(z("div", "sf-hud__dt-nopassive", "(无被动)"));
+    // 没有被动/主动的装备不写"无"——缺席就是默认，多一行字只会把面板撑高
+    // 合成路径排在效果之后：买这件东西前先要知道它干什么，再看它由什么拼出来。
+    if (Zt.from && Zt.from.length) {
+      const parts = Zt.from.map((c) => {
+        const own = n.me.items.includes(c);
+        return z(
+          "span",
+          `sf-hud__dt-part${own ? " is-own" : ""}`,
+          own ? _e(Vt("check")) : null,
+          z("span", "sf-hud__dt-partname", ln[c].name),
+          z("span", "sf-hud__dt-partstat sf-num", BB(ln[c].stats, 2)),
+        );
+      });
+      qs.appendChild(sec("is-build", "合成路径", z("div", "sf-hud__dt-parts", ...parts)));
+    }
     if (
       ((Ot = z("div", "sf-hud__dt-note")),
       at.append(ce, gi, qs, Ot),
