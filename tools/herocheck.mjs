@@ -1051,6 +1051,45 @@ const main = async () => {
       c3 && c3.items[2] === 'big_pot' && s3 && s3.after > s3.before && s3.cd > 0,
       `生命 ${s3?.before} → ${s3?.after}，cd ${s3?.cd}s`,
     );
+    // ── 派生属性与新被动：哑铃 / 饭盒 ───────────────────────────
+    // 哑铃按"最大生命 1.2%"加物攻。顺序敏感：_o() 里必须先算 maxHp 再算 ad，
+    // 先算 ad 的话拿到的是上一帧的血量，换装/升级那一帧会少一截，所以这里量的是
+    // "买完之后 ad 增量 == 买完之后 maxHp × 1.2%"。
+    const dm = await snap(`(()=>{const w=window.__moba.world,u=${U};
+      u.items.fill(null); u.rt.itemCd.fill(0); u.gold=30000; u.autoBuy=false;
+      const ad0=u.stats.ad;
+      w.command(u.id,{type:'buy',itemId:'dumbbell'});
+      return JSON.stringify({ad0, has:u.items.includes('dumbbell')});})()`);
+    await sleep(160);
+    const dm2 = await snap(`(()=>{const u=${U};
+      return JSON.stringify({ad:u.stats.ad, hp:u.stats.maxHp});})()`);
+    const dAd = dm2 && dm ? dm2.ad - dm.ad0 : NaN,
+      dWant = dm2 ? dm2.hp * 0.012 : NaN;
+    ok(
+      '哑铃：按最大生命 1.2% 加物攻',
+      dm?.has && Math.abs(dAd - dWant) <= 2,
+      `物攻 +${Number.isFinite(dAd) ? dAd.toFixed(1) : dAd}（血 ${dm2?.hp} × 1.2% = ${Number.isFinite(dWant) ? dWant.toFixed(1) : dWant}）`,
+    );
+    // 饭盒：挨打回蓝 15%、耗蓝回血 20%。直接喂钩子（伤害分发本身由铁丝网等被动覆盖），
+    // 验的是数值接线：passive.value / value2 有没有真的读到。
+    const lb = await snap(`(()=>{const w=window.__moba.world,u=${U};
+      u.items.fill(null); u.rt.itemCd.fill(0);
+      w.command(u.id,{type:'buy',itemId:'lunchbox'});
+      return JSON.stringify({has:u.items.includes('lunchbox')});})()`);
+    await sleep(160);
+    const lb2 = await snap(`(()=>{const u=${U};
+      const h=u.h.hooks.filter(x=>x.onManaSpent);
+      u.mana=Math.round(u.stats.maxMana*0.4); const m0=u.mana;
+      for(const x of h) x.onDamageTaken&&x.onDamageTaken(window.__moba.world,u,null,1000);
+      const m1=u.mana;
+      u.hp=Math.round(u.stats.maxHp*0.4); const h0=u.hp;
+      for(const x of h) x.onManaSpent&&x.onManaSpent(window.__moba.world,u,1000);
+      return JSON.stringify({hooks:h.length, dMana:m1-m0, dHp:u.hp-h0});})()`);
+    ok(
+      '饭盒：受伤 15% 回蓝、耗蓝 20% 回血',
+      lb?.has && lb2?.hooks >= 1 && lb2.dMana === 150 && lb2.dHp >= 190 && lb2.dHp <= 210,
+      `钩子 ${lb2?.hooks} 个，受伤 1000 → 蓝 +${lb2?.dMana}（应 150），耗蓝 1000 → 血 +${lb2?.dHp}（应 200）`,
+    );
     await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.gold=0; u.autoBuy=true; return 1;})()`);
     // 商店面板本身：63 件装备、图标、合成路径都要能画出来
     if (shots) {
