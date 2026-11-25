@@ -347,13 +347,29 @@ function AG(n) {
       });
       qs.appendChild(z("div", "sf-hud__dt-build", z("b", null, "合成"), ...parts));
     }
+    if (Zt.passive)
+      qs.appendChild(
+        z("div", "sf-hud__dt-passive", z("b", null, `被动 · ${Zt.passive.name}`), Zt.passive.desc),
+      );
+    // 主动装备是"多一个技能"，所以冷却也要写清楚——它是计价的一部分。
+    if (Zt.active)
+      qs.appendChild(
+        z(
+          "div",
+          "sf-hud__dt-active",
+          z(
+            "b",
+            null,
+            `主动 · ${Zt.active.name}`,
+            z("span", "sf-hud__dt-active-cd sf-num", `${Zt.active.cd} 秒`),
+          ),
+          Zt.active.desc,
+          z("small", null, "装备栏里按数字键 1~6，或直接点那一格"),
+        ),
+      );
+    if (!Zt.passive && !Zt.active) qs.appendChild(z("div", "sf-hud__dt-nopassive", "(无被动)"));
     if (
-      (Zt.passive
-        ? qs.appendChild(
-            z("div", "sf-hud__dt-passive", z("b", null, `被动 · ${Zt.passive.name}`), Zt.passive.desc),
-          )
-        : qs.appendChild(z("div", "sf-hud__dt-nopassive", "(无被动)")),
-      (Ot = z("div", "sf-hud__dt-note")),
+      ((Ot = z("div", "sf-hud__dt-note")),
       at.append(ce, gi, qs, Ot),
       Tt.kind === "own")
     ) {
@@ -740,6 +756,13 @@ const RG = Jn(`
 .sf-hud__st-items { flex: none; display: grid; grid-template-columns: repeat(3, auto); gap: 3u; }
 .sf-hud__st-items .sf-slot { --sf-slot: 27u; border-radius: 5u; box-shadow: 0 0 0 1px rgba(8, 13, 31, 0.95), 0 0 0 max(1.5px, 2u) rgba(224, 177, 96, 0.5); }
 .sf-hud__st-items .sf-slot--empty { box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+/* 主动装备：这一格能按（数字键 1~6 / 点一下），冷却时盖扇形 + 读秒 */
+.sf-hud__st-items .sf-slot.is-act { cursor: pointer; box-shadow: 0 0 0 1px rgba(8, 13, 31, 0.95), 0 0 0 max(1.5px, 2u) rgba(143, 233, 255, 0.82), 0 0 10u rgba(92, 214, 247, 0.3); }
+.sf-hud__st-cd { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: conic-gradient(rgba(3, 6, 16, 0.66) calc((1 - var(--t, 0)) * 360deg), rgba(3, 6, 16, 0) 0); }
+.sf-hud__st-sec { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; font-size: max(9px, 9.5u); font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 1px 2px rgba(2, 4, 12, 0.95), 0 0 4u rgba(2, 4, 12, 0.9); pointer-events: none; }
+.sf-hud__st-sec:empty { display: none; }
+.sf-hud__st-num { position: absolute; right: 0; bottom: 0; z-index: 3; padding: 0 1.5u; border-radius: 3u 0 3u 0; font-style: normal; font-size: max(8px, 8u); font-weight: 800; line-height: 1.35; color: var(--sf-c-gold-100); background: rgba(3, 6, 16, 0.72); pointer-events: none; }
+.sf-hud__st-items .sf-slot.is-cd > svg { filter: grayscale(0.5) brightness(0.72); }
 /* 新到手的装备(手动买的、自动出装买的都算)：那一格亮一下再落定 */
 .sf-hud__st-items .sf-slot.is-new { animation: sf-hud-item-new 1.1s var(--sf-ease-out); }
 @keyframes sf-hud-item-new {
@@ -888,7 +911,17 @@ function IG(n) {
     S = [];
   for (let N = 0; N < n.me.items.length; N++) {
     const J = ro(null);
-    (J.setAttribute("data-hud-hit", ""), M.appendChild(J), S.push({ el: J, id: null, off: null }));
+    (J.setAttribute("data-hud-hit", ""),
+      // 触摸端没有数字键：带主动的格子直接点一下就放（落点交给引擎按朝向兜底）
+      J.addEventListener("click", () => {
+        const Z = n.me.items[N];
+        Z &&
+          ln[Z].active &&
+          !n.inputBlocked() &&
+          (n.host.audio.ui("click"), n.host.command({ type: "item", index: N, pos: null }));
+      }),
+      M.appendChild(J),
+      S.push({ el: J, id: null, off: null, cdEl: null, secEl: null, last: -1 }));
   }
   const b = z("span", "sf-hud__st-shop-gold sf-num", "0"),
     w = z("button", "sf-hud__st-shop", z("span", "sf-hud__st-shop-ico", _e(Vt("shop"))), b);
@@ -924,17 +957,38 @@ function IG(n) {
     for (let J = 0; J < S.length; J++) {
       const Z = S[J],
         ot = N.items[J] ?? null;
-      ot !== Z.id &&
+      if (ot !== Z.id) {
         ((Z.id = ot),
-        Z.off?.(),
-        (Z.off = null),
-        Z.el.classList.toggle("sf-slot--empty", ot === null),
-        (Z.el.innerHTML = ot ? Po(ot) : ""),
-        ot
-          ? (Z.el.setAttribute("aria-label", ln[ot].name),
-            (Z.off = M0(Z.el, () => fk(ln[ot]))),
-            D && uo(Z.el, "is-new"))
-          : (Z.el.removeAttribute("aria-label"), Z.el.classList.remove("is-new")));
+          Z.off?.(),
+          (Z.off = null),
+          (Z.cdEl = Z.secEl = null),
+          (Z.last = -1),
+          Z.el.classList.toggle("sf-slot--empty", ot === null),
+          Z.el.classList.toggle("is-act", !!ot && !!ln[ot].active),
+          (Z.el.innerHTML = ot ? Po(ot) : ""));
+        if (ot) {
+          const act = ln[ot].active;
+          (Z.el.setAttribute("aria-label", act ? `${ln[ot].name}（主动 · 数字键 ${J + 1}）` : ln[ot].name),
+            (Z.off = M0(Z.el, () => fk(ln[ot]))));
+          act &&
+            ((Z.cdEl = z("i", "sf-hud__st-cd")),
+            (Z.secEl = z("b", "sf-hud__st-sec sf-num")),
+            Z.el.append(Z.cdEl, Z.secEl, z("i", "sf-hud__st-num sf-num", String(J + 1))));
+          D && uo(Z.el, "is-new");
+        } else (Z.el.removeAttribute("aria-label"), Z.el.classList.remove("is-new", "is-cd"));
+      }
+      // 主动冷却：扇形遮罩 + 剩余秒数。--t = 剩余比例，1 全黑、0 消失。
+      if (Z.cdEl && Z.secEl) {
+        const cd = N.rt?.itemCd?.[J] ?? 0,
+          max = ln[Z.id].active.cd,
+          t = max > 0 ? Math.min(1, Math.max(0, cd / max)) : 0,
+          txt = cd > 0.05 ? (cd >= 9.95 ? String(Math.ceil(cd)) : cd.toFixed(1)) : "";
+        (Math.abs(t - Z.last) > 0.004 &&
+          ((Z.last = t),
+          Z.cdEl.style.setProperty("--t", t.toFixed(3)),
+          Z.el.classList.toggle("is-cd", t > 0.002)),
+          Z.secEl.textContent !== txt && (Z.secEl.textContent = txt));
+      }
     }
     D = !0;
   }

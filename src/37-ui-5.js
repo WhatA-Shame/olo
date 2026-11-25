@@ -500,6 +500,13 @@ function A$(n, t) {
       Y.targetId !== void 0 && (gt.targetId = Y.targetId)),
       f(gt));
   }
+  // 装备主动：数字键 1~6 对应装备栏的六格。
+  // 传送要落点，所以把鼠标在场景里的地面投影一起带过去（拿不到就由引擎退化成朝正前方）。
+  function itemActive(ix) {
+    if (n.inputBlocked()) return;
+    const gp = it.known ? e.screenToGround(it.x, it.y) : null;
+    f({ type: "item", index: ix, pos: gp ? { x: gp.x, y: gp.y } : null });
+  }
   const B = new Set();
   let G = -1;
   function q() {
@@ -826,6 +833,15 @@ function A$(n, t) {
         break;
       case "KeyB":
         O.repeat || L("recall", null);
+        break;
+      // 装备主动：1~6 对应装备栏六格（带 Ctrl 的那几个数字键是表情，上面已经 return 掉了）
+      case "Digit1":
+      case "Digit2":
+      case "Digit3":
+      case "Digit4":
+      case "Digit5":
+      case "Digit6":
+        O.repeat || itemActive(+Y.slice(5) - 1);
         break;
       case "Tab":
         (O.preventDefault(), !O.repeat && !n.actions.isScoreboardPinned() && n.actions.setScoreboard(!0, !1));

@@ -333,6 +333,12 @@ const tHx = {
   ward_cloak: 'starweave_cloak',
   rune_cloak: 'starweave_cloak',
   frost_amulet: 'starweave_cloak',
+  // 辅助件：法系/护甲/披风三类形制，颜色各走自己的 color
+  sage_stone: 'sage_codex',
+  golden_body: 'guardian_plate',
+  teleport_stone: 'astral_staff',
+  healing_bell: 'undying_heart',
+  purify_orb: 'starweave_cloak',
 };
 
 function Po(n) {
@@ -480,6 +486,7 @@ const S3 = { top: "上路", mid: "中路", bot: "下路", jungle: "打野" },
     dmg_reduction: { name: "减伤", kind: "buff" },
     untargetable: { name: "不可选中", kind: "buff" },
     unstoppable: { name: "免疫控制", kind: "buff" },
+    stasis: { name: "金身", kind: "buff" },
     burn: { name: "灼烧", kind: "debuff" },
     recall: { name: "回城中", kind: "neutral" },
     restore: { name: "疗伤中", kind: "buff" },
@@ -606,10 +613,14 @@ const k4 =
     fengling_crit: () => Ia("fengling", "s2"),
     yeque_shadow: () => Ia("yeque", "passive"),
     tower_focus: () => Hs("#c8303a", M4("target")),
+    // 装备主动带来的状态（金身护符）
+    stasis: () => Hs("#ffd76a", M4("shield")),
   };
 
 function lH(n) {
-  return rH[n]();
+  // 漏登记一个 id 不该把整个状态行炸掉（stasis 就漏过一次）
+  const t = rH[n];
+  return t ? t() : Hs("#8fb8e8", M4("shield"));
 }
 
 function cH(n, t) {
@@ -800,8 +811,11 @@ function fk(n, t) {
     i = s ? `<div class="sf-tip__statgrid">${s}</div>` : "",
     a = n.passive
       ? `<div class="sf-tip__passive"><b>被动 · ${ks(n.passive.name)}</b>　${ks(n.passive.desc)}</div>`
+      : "",
+    o = n.active
+      ? `<div class="sf-tip__active"><b>主动 · ${ks(n.active.name)}<i class="sf-num">${n.active.cd} 秒</i></b>　${ks(n.active.desc)}</div>`
       : "";
-  return `<div class="sf-tip__title"><span>${ks(n.name)}</span><span class="sf-tip__meta sf-num">${n.cost} 金币</span></div>${e}${i}${a}`;
+  return `<div class="sf-tip__title"><span>${ks(n.name)}</span><span class="sf-tip__meta sf-num">${n.cost} 金币</span></div>${e}${i}${a}${o}`;
 }
 
 function ey() {

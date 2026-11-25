@@ -103,7 +103,8 @@ export const roundTo = (v, step = 50) => Math.max(step, Math.round(v / step) * s
 export const TIER_EFF = { 1: 1.0, 2: 1.02, 3: 1.08 };
 
 export function efficiency(item) {
-  const v = statValue(item.stats) + (item.passive?.value ?? 0);
+  // 被动不计价（被动就是买大件的理由）；主动要计价，否则主动件等于白送一次技能
+  const v = statValue(item.stats) + (item.active?.value ?? 0);
   return v / item.cost;
 }
 

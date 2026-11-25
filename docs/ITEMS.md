@@ -105,6 +105,61 @@ node tools/build.mjs                 # 打包
 回归测试挂在 herocheck 上：
 
 ```bash
-node tools/herocheck.mjs panyue --shop        # 买小件 → 合成中件 → 出售 → 鞋子合成
-node tools/herocheck.mjs panyue --shop --shots  # 顺带截商店界面
+node tools/herocheck.mjs panyue --shop        # 买小件 → 合成中件 → 出售 → 鞋子合成 → 三件主动
+node tools/herocheck.mjs panyue --shop --shots  # 顺带截商店界面 / 装备格冷却
 ```
+
+## 四、主动装备
+
+**主动要计价，被动不计价。** 被动只是属性之外的赠品；主动等于白送一个技能，
+所以 `active.value` 会加进 `statValue()`，否则主动件会比同价装备强一大截。
+
+现有 4 件带主动，都在辅助分类（`category: "support"`）：
+
+| 装备 | 主动 | 效果 | CD |
+| --- | --- | --- | --- |
+| 金身护符 | 金身 | 2 秒不可选中 + 免疫伤害，也不能行动（`stasis` 状态） | 75s |
+| 传送符 | 传送 | 引导 2.5 秒后传到 30 米内的指定落点 | 90s |
+| 回春铃 | 回春 | 治疗周围 8 米友军 220 + 施法者 6% 最大生命 | 60s |
+| 净心珠 | 净化 | 解除自身所有控制，1.5 秒内免疫控制 | 70s |
+
+### 冷却挂在"格子"上，不挂在装备 id 上
+
+`unit.rt.itemCd[6]` 是装备栏六个下标各自的冷却。卖掉再买回来是新的一格，
+冷却跟着格子走（换装流不能靠卖-买刷新主动）。买/卖装备时对应格清 0。
+
+### 触发链路
+
+```
+数字键 1~6 ──┐
+             ├→ { type: "item", index, pos } → Aj() → useItemActive()
+点装备格 ────┘
+```
+
+- `src/37-ui-5.js` 的 `itemActive(ix)`：把鼠标在场景里的地面投影一起带上（传送要用），
+  拿不到就传 `null`，由引擎退化成"朝正前方飞满射程"。
+  **Ctrl+1~4 是表情，必须先于数字键分支 return 掉。**
+- `src/43-data-3.js` 的 `useItemActive()` 按 `ln[id].active.kind` 分派：
+  `stasis` / `teleport` / `heal` / `cleanse`。
+  - 金身**被控也能按**（那正是它的用途）；别的主动被控按不出来。
+  - 传送复用 `recall` buff 的引导，同一套"一行动就中断"的逻辑，只换 `onExpire`。
+- 视觉不另造美术：金身/净化用 `buff_gain`（脚下金色法阵），传送用 `recall_start`
+  （落点蓝色光环）+ 到达时的 `recall_done`，回春用 `heal`。
+
+### HUD 上要看得到
+
+- **状态栏装备格**（`src/40-ui-8.js` 的 `Q()`）：带主动的格子加 `is-act`（青色描边）、
+  右下角标数字键、冷却时盖一层 `conic-gradient` 扇形 + 中间读秒。
+  `--t` = 剩余比例，1 全黑、0 消失。
+- **商店详情面板**（同文件 `qt()`）：被动是琥珀块，主动是青色块，标题右侧挂冷却秒数。
+- 触摸端点装备格就能放（落点交给引擎兜底）。
+
+### 加一件带主动的装备
+
+1. `tools/itemdesign.mjs` 里写 `active: { name, desc, cd, kind, ...参数, value }`，
+   `value` 是这件主动折算的金币（会加进总价值）。
+2. `kind` 必须是 `useItemActive()` 里已有的四种之一，否则会走到 `default` 报"没有主动"。
+3. 新 `kind` 要自己补 `switch` 分支 + 状态（`src/43-data-3.js` 的 `Vf()`）、
+   状态名（`src/34-ui-2.js` 的 `T3`）、状态图标（同文件 `rH`，漏了会 `rH[id] is not a function`——
+   `lH()` 现在有兜底，但还是要登记）。
+4. 冷却 / 数值改完记得重跑 `node tools/itemdesign.mjs` 看效率有没有越界。

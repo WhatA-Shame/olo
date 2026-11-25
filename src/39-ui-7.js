@@ -1039,6 +1039,8 @@ const K4 = `
   .sf-hud__dt-stat { justify-content: flex-start; gap: 5u; }
   .sf-hud__dt-nopassive { display: none; }
   .sf-hud__dt-passive { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
+  .sf-hud__dt-active { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
+  .sf-hud__dt-active small { display: none; }
 `,
   _G = Jn(`
 /* ── 商店按钮 + 快捷购买气泡 / 自动出装提示条（小地图下方） ── */
@@ -1211,6 +1213,11 @@ const K4 = `
 .sf-hud__dt-part.is-own { color: var(--sf-c-green-300); box-shadow: inset 0 0 0 1px rgba(86, 199, 160, 0.5); background: rgba(86, 199, 160, 0.1); }
 .sf-hud__dt-part .sf-i { width: 1em; height: 1em; }
 .sf-hud__dt-passive b { display: block; color: var(--sf-c-amber); font-weight: 700; }
+/* 主动：冷色块，和被动(琥珀)分开；冷却挂在标题右侧 */
+.sf-hud__dt-active { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(92, 214, 247, 0.08); box-shadow: inset 0 0 0 1px rgba(92, 214, 247, 0.32); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
+.sf-hud__dt-active b { display: flex; align-items: baseline; gap: 8u; margin-bottom: 2u; color: var(--sf-c-cyan-300); font-weight: 700; }
+.sf-hud__dt-active-cd { margin-left: auto; font-weight: 700; color: var(--sf-c-text-3); }
+.sf-hud__dt-active small { display: block; margin-top: 4u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
 .sf-hud__dt-nopassive { margin-top: 8u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
 .sf-hud__dt-note { flex: none; margin-bottom: 5u; font-size: var(--sf-fs-sm); line-height: 1.4; color: var(--sf-c-text-3); }
 .sf-hud__dt-note:empty { display: none; }
@@ -1294,9 +1301,9 @@ const K4 = `
   ${K4}
 }
 `),
-  wG = ["recommend", "attack", "magic", "defense", "boots"],
+  wG = ["recommend", "attack", "magic", "defense", "support", "boots"],
   MG = { 1: "基础鞋", 2: "进阶鞋" },
-  kG = { attack: "攻击装备", magic: "法术装备", defense: "防御装备", boots: "鞋" },
+  kG = { attack: "攻击装备", magic: "法术装备", defense: "防御装备", support: "辅助装备", boots: "鞋" },
   Y2 = 2.6,
   SG = 1.2,
   TG = 0.3,

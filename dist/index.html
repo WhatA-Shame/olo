@@ -49916,6 +49916,9 @@ button.sf-slot:active { transform: scale(0.94); }
 .sf-tip__stats { margin-top: 4u; color: var(--sf-c-cyan-300); }
 .sf-tip__passive { margin-top: 6u; padding-top: 6u; box-shadow: inset 0 1px 0 var(--sf-c-line); }
 .sf-tip__passive b { color: var(--sf-c-amber); font-weight: 700; }
+.sf-tip__active { margin-top: 6u; padding-top: 6u; box-shadow: inset 0 1px 0 var(--sf-c-line); }
+.sf-tip__active b { color: var(--sf-c-cyan-300); font-weight: 700; }
+.sf-tip__active b > i { margin-left: 5u; font-style: normal; font-weight: 700; color: var(--sf-c-text-3); }
 
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 \u8868\u5355\u884C\uFF08\u8BBE\u7F6E\u9762\u677F\u7B49\uFF09 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 .sf-field { display: grid; grid-template-columns: minmax(84u, auto) 1fr; align-items: center; column-gap: 16u; min-height: var(--sf-hit); }
@@ -51357,6 +51360,114 @@ var ln = {
       hp: 3700
     },
     color: "#d9a441"
+  },
+  sage_stone: {
+    id: "sage_stone",
+    name: "\u8D24\u8005\u4E4B\u77F3",
+    brief: "\u6491\u8840\u6491\u9B54\u6297\uFF0C\u51B7\u5374\u4E5F\u77ED",
+    category: "support",
+    tier: 2,
+    cost: 1150,
+    from: ["rune_cloak", "hourglass"],
+    stats: {
+      hp: 600,
+      mr: 80,
+      cdr: 0.1
+    },
+    color: "#7fd8b8"
+  },
+  golden_body: {
+    id: "golden_body",
+    name: "\u91D1\u8EAB\u62A4\u7B26",
+    brief: "\u4E3B\u52A8\uFF1A2 \u79D2\u91D1\u8EAB\uFF0C\u514D\u75AB\u4E00\u5207",
+    category: "support",
+    tier: 3,
+    cost: 1650,
+    from: ["iron_bracer", "cloth_armor"],
+    stats: {
+      hp: 700,
+      armor: 90
+    },
+    active: {
+      name: "\u91D1\u8EAB",
+      desc: "2 \u79D2\u5185\u65E0\u6CD5\u88AB\u9009\u4E2D\u3001\u514D\u75AB\u4F24\u5BB3\uFF0C\u4E5F\u4E0D\u80FD\u884C\u52A8\u3002",
+      cd: 75,
+      kind: "stasis",
+      duration: 2,
+      value: 700
+    },
+    color: "#ffd76a"
+  },
+  teleport_stone: {
+    id: "teleport_stone",
+    name: "\u4F20\u9001\u7B26",
+    brief: "\u4E3B\u52A8\uFF1A\u5F15\u5BFC\u540E\u4F20\u9001\u5230\u8FDC\u5904",
+    category: "support",
+    tier: 3,
+    cost: 1630,
+    from: ["wood_shield", "hourglass"],
+    stats: {
+      hp: 800,
+      cdr: 0.12
+    },
+    active: {
+      name: "\u4F20\u9001",
+      desc: "\u5F15\u5BFC 2.5 \u79D2\u540E\u4F20\u9001\u5230\u6307\u5B9A\u4F4D\u7F6E\uFF0C\u6700\u591A 30 \u7C73\u3002\u53D7\u5230\u63A7\u5236\u6216\u4E3B\u52A8\u884C\u52A8\u4F1A\u4E2D\u65AD\u3002",
+      cd: 90,
+      kind: "teleport",
+      channel: 2.5,
+      range: 30,
+      value: 650
+    },
+    color: "#8fd8ff"
+  },
+  healing_bell: {
+    id: "healing_bell",
+    name: "\u56DE\u6625\u94C3",
+    brief: "\u4E3B\u52A8\uFF1A\u6CBB\u7597\u5468\u56F4\u53CB\u519B",
+    category: "support",
+    tier: 3,
+    cost: 1910,
+    from: ["spell_codex", "wood_shield"],
+    stats: {
+      ap: 100,
+      cdr: 0.12,
+      hp: 300
+    },
+    active: {
+      name: "\u56DE\u6625",
+      desc: "\u6CBB\u7597\u5468\u56F4 8 \u7C73\u5185\u7684\u53CB\u519B 220(+\u65BD\u6CD5\u8005 6% \u6700\u5927\u751F\u547D)\u3002",
+      cd: 60,
+      kind: "heal",
+      radius: 8,
+      amount: 220,
+      hpRatio: 0.06,
+      value: 550
+    },
+    color: "#9df5d2"
+  },
+  purify_orb: {
+    id: "purify_orb",
+    name: "\u51C0\u5FC3\u73E0",
+    brief: "\u4E3B\u52A8\uFF1A\u89E3\u63A7\u5E76\u77ED\u6682\u514D\u63A7",
+    category: "support",
+    tier: 3,
+    cost: 1800,
+    from: ["frost_amulet", "cloth_armor"],
+    stats: {
+      hp: 900,
+      mr: 100,
+      cdr: 0.08
+    },
+    active: {
+      name: "\u51C0\u5316",
+      desc: "\u89E3\u9664\u81EA\u8EAB\u6240\u6709\u63A7\u5236\uFF0C\u5E76\u5728 1.5 \u79D2\u5185\u514D\u75AB\u63A7\u5236\u3002",
+      cd: 70,
+      kind: "cleanse",
+      duration: 1.5,
+      value: 450
+    },
+    color: "#c9f6ff"
   }
 };
 var IB = Object.values(ln);
@@ -51366,6 +51477,7 @@ var PB = {
   mana: "\u6CD5\u529B\u4E0D\u8DB3",
   disabled: "\u5F53\u524D\u65E0\u6CD5\u884C\u52A8",
   no_target: "\u6CA1\u6709\u53EF\u7528\u76EE\u6807",
+  no_active: "\u8FD9\u4EF6\u88C5\u5907\u6CA1\u6709\u4E3B\u52A8",
   gold: "\u91D1\u5E01\u4E0D\u8DB3",
   full: "\u88C5\u5907\u680F\u5DF2\u6EE1"
 };
@@ -51495,7 +51607,7 @@ var w3 = {
   heal: { name: Br.heal, short: "\u56DE\u590D", color: "#6fe3a1" },
   buff: { name: Br.buff, short: "\u589E\u76CA", color: "#f3cf85" }
 };
-var u4 = { recommend: "\u63A8\u8350", attack: "\u653B\u51FB", magic: "\u6CD5\u672F", defense: "\u9632\u5FA1", boots: "\u978B" };
+var u4 = { recommend: "\u63A8\u8350", attack: "\u653B\u51FB", magic: "\u6CD5\u672F", defense: "\u9632\u5FA1", support: "\u8F85\u52A9", boots: "\u978B" };
 var p4 = {
   match_start: 1,
   minions_spawn: 1,
@@ -52312,7 +52424,13 @@ var tHx = {
   giant_belt: "undying_heart",
   ward_cloak: "starweave_cloak",
   rune_cloak: "starweave_cloak",
-  frost_amulet: "starweave_cloak"
+  frost_amulet: "starweave_cloak",
+  // 辅助件：法系/护甲/披风三类形制，颜色各走自己的 color
+  sage_stone: "sage_codex",
+  golden_body: "guardian_plate",
+  teleport_stone: "astral_staff",
+  healing_bell: "undying_heart",
+  purify_orb: "starweave_cloak"
 };
 function Po(n) {
   const f = tH[n] ?? tH[tHx[n]] ?? tH.boots;
@@ -52445,6 +52563,7 @@ var T3 = {
   dmg_reduction: { name: "\u51CF\u4F24", kind: "buff" },
   untargetable: { name: "\u4E0D\u53EF\u9009\u4E2D", kind: "buff" },
   unstoppable: { name: "\u514D\u75AB\u63A7\u5236", kind: "buff" },
+  stasis: { name: "\u91D1\u8EAB", kind: "buff" },
   burn: { name: "\u707C\u70E7", kind: "debuff" },
   recall: { name: "\u56DE\u57CE\u4E2D", kind: "neutral" },
   restore: { name: "\u7597\u4F24\u4E2D", kind: "buff" },
@@ -52552,10 +52671,13 @@ var rH = {
   fengling_gale: () => Ia("fengling", "passive"),
   fengling_crit: () => Ia("fengling", "s2"),
   yeque_shadow: () => Ia("yeque", "passive"),
-  tower_focus: () => Hs("#c8303a", M4("target"))
+  tower_focus: () => Hs("#c8303a", M4("target")),
+  // 装备主动带来的状态（金身护符）
+  stasis: () => Hs("#ffd76a", M4("shield"))
 };
 function lH(n) {
-  return rH[n]();
+  const t = rH[n];
+  return t ? t() : Hs("#8fb8e8", M4("shield"));
 }
 function cH(n, t) {
   return t === "s1" || t === "s2" || t === "ult" ? Ia(n, t) : K1(t);
@@ -52696,8 +52818,8 @@ var gH = Jn(`
 `);
 function fk(n, t) {
   Zn("sf-hud-itemtip", gH);
-  const e = n.brief ? `<div class="sf-tip__brief">${ks(n.brief)}</div>` : "", s = ek(n.stats).map((r) => `<span>${ks(r.label)}</span><b class="sf-num">${ks(r.value)}</b>`).join(""), i = s ? `<div class="sf-tip__statgrid">${s}</div>` : "", a = n.passive ? `<div class="sf-tip__passive"><b>\u88AB\u52A8 \xB7 ${ks(n.passive.name)}</b>\u3000${ks(n.passive.desc)}</div>` : "";
-  return `<div class="sf-tip__title"><span>${ks(n.name)}</span><span class="sf-tip__meta sf-num">${n.cost} \u91D1\u5E01</span></div>${e}${i}${a}`;
+  const e = n.brief ? `<div class="sf-tip__brief">${ks(n.brief)}</div>` : "", s = ek(n.stats).map((r) => `<span>${ks(r.label)}</span><b class="sf-num">${ks(r.value)}</b>`).join(""), i = s ? `<div class="sf-tip__statgrid">${s}</div>` : "", a = n.passive ? `<div class="sf-tip__passive"><b>\u88AB\u52A8 \xB7 ${ks(n.passive.name)}</b>\u3000${ks(n.passive.desc)}</div>` : "", o = n.active ? `<div class="sf-tip__active"><b>\u4E3B\u52A8 \xB7 ${ks(n.active.name)}<i class="sf-num">${n.active.cd} \u79D2</i></b>\u3000${ks(n.active.desc)}</div>` : "";
+  return `<div class="sf-tip__title"><span>${ks(n.name)}</span><span class="sf-tip__meta sf-num">${n.cost} \u91D1\u5E01</span></div>${e}${i}${a}${o}`;
 }
 function ey() {
   if (typeof window > "u") return "kbm";
@@ -55380,6 +55502,11 @@ function A$(n, t) {
     const gt = { type: "cast", slot: O };
     Y && (Y.dir && (gt.dir = Y.dir), Y.pos && (gt.pos = Y.pos), Y.targetId !== void 0 && (gt.targetId = Y.targetId)), f(gt);
   }
+  function itemActive(ix2) {
+    if (n.inputBlocked()) return;
+    const gp2 = it.known ? e.screenToGround(it.x, it.y) : null;
+    f({ type: "item", index: ix2, pos: gp2 ? { x: gp2.x, y: gp2.y } : null });
+  }
   const B = /* @__PURE__ */ new Set();
   let G = -1;
   function q() {
@@ -55638,6 +55765,15 @@ function A$(n, t) {
         break;
       case "KeyB":
         O.repeat || L("recall", null);
+        break;
+      // 装备主动：1~6 对应装备栏六格（带 Ctrl 的那几个数字键是表情，上面已经 return 掉了）
+      case "Digit1":
+      case "Digit2":
+      case "Digit3":
+      case "Digit4":
+      case "Digit5":
+      case "Digit6":
+        O.repeat || itemActive(+Y.slice(5) - 1);
         break;
       case "Tab":
         O.preventDefault(), !O.repeat && !n.actions.isScoreboardPinned() && n.actions.setScoreboard(true, false);
@@ -58199,6 +58335,8 @@ var K4 = `
   .sf-hud__dt-stat { justify-content: flex-start; gap: 5u; }
   .sf-hud__dt-nopassive { display: none; }
   .sf-hud__dt-passive { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
+  .sf-hud__dt-active { margin-top: 5u; padding: 5u 8u; font-size: var(--sf-fs-xs); line-height: 1.45; }
+  .sf-hud__dt-active small { display: none; }
 `;
 var _G = Jn(`
 /* \u2500\u2500 \u5546\u5E97\u6309\u94AE + \u5FEB\u6377\u8D2D\u4E70\u6C14\u6CE1 / \u81EA\u52A8\u51FA\u88C5\u63D0\u793A\u6761\uFF08\u5C0F\u5730\u56FE\u4E0B\u65B9\uFF09 \u2500\u2500 */
@@ -58371,6 +58509,11 @@ var _G = Jn(`
 .sf-hud__dt-part.is-own { color: var(--sf-c-green-300); box-shadow: inset 0 0 0 1px rgba(86, 199, 160, 0.5); background: rgba(86, 199, 160, 0.1); }
 .sf-hud__dt-part .sf-i { width: 1em; height: 1em; }
 .sf-hud__dt-passive b { display: block; color: var(--sf-c-amber); font-weight: 700; }
+/* \u4E3B\u52A8\uFF1A\u51B7\u8272\u5757\uFF0C\u548C\u88AB\u52A8(\u7425\u73C0)\u5206\u5F00\uFF1B\u51B7\u5374\u6302\u5728\u6807\u9898\u53F3\u4FA7 */
+.sf-hud__dt-active { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(92, 214, 247, 0.08); box-shadow: inset 0 0 0 1px rgba(92, 214, 247, 0.32); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
+.sf-hud__dt-active b { display: flex; align-items: baseline; gap: 8u; margin-bottom: 2u; color: var(--sf-c-cyan-300); font-weight: 700; }
+.sf-hud__dt-active-cd { margin-left: auto; font-weight: 700; color: var(--sf-c-text-3); }
+.sf-hud__dt-active small { display: block; margin-top: 4u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
 .sf-hud__dt-nopassive { margin-top: 8u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
 .sf-hud__dt-note { flex: none; margin-bottom: 5u; font-size: var(--sf-fs-sm); line-height: 1.4; color: var(--sf-c-text-3); }
 .sf-hud__dt-note:empty { display: none; }
@@ -58454,9 +58597,9 @@ var _G = Jn(`
   ${K4}
 }
 `);
-var wG = ["recommend", "attack", "magic", "defense", "boots"];
+var wG = ["recommend", "attack", "magic", "defense", "support", "boots"];
 var MG = { 1: "\u57FA\u7840\u978B", 2: "\u8FDB\u9636\u978B" };
-var kG = { attack: "\u653B\u51FB\u88C5\u5907", magic: "\u6CD5\u672F\u88C5\u5907", defense: "\u9632\u5FA1\u88C5\u5907", boots: "\u978B" };
+var kG = { attack: "\u653B\u51FB\u88C5\u5907", magic: "\u6CD5\u672F\u88C5\u5907", defense: "\u9632\u5FA1\u88C5\u5907", support: "\u8F85\u52A9\u88C5\u5907", boots: "\u978B" };
 var Y2 = 2.6;
 var SG = 1.2;
 var TG = 0.3;
@@ -58697,9 +58840,27 @@ function AG(n) {
       });
       qs.appendChild(z("div", "sf-hud__dt-build", z("b", null, "\u5408\u6210"), ...parts));
     }
-    if (Zt.passive ? qs.appendChild(
-      z("div", "sf-hud__dt-passive", z("b", null, `\u88AB\u52A8 \xB7 ${Zt.passive.name}`), Zt.passive.desc)
-    ) : qs.appendChild(z("div", "sf-hud__dt-nopassive", "(\u65E0\u88AB\u52A8)")), Ot = z("div", "sf-hud__dt-note"), at.append(ce, gi, qs, Ot), Tt.kind === "own") {
+    if (Zt.passive)
+      qs.appendChild(
+        z("div", "sf-hud__dt-passive", z("b", null, `\u88AB\u52A8 \xB7 ${Zt.passive.name}`), Zt.passive.desc)
+      );
+    if (Zt.active)
+      qs.appendChild(
+        z(
+          "div",
+          "sf-hud__dt-active",
+          z(
+            "b",
+            null,
+            `\u4E3B\u52A8 \xB7 ${Zt.active.name}`,
+            z("span", "sf-hud__dt-active-cd sf-num", `${Zt.active.cd} \u79D2`)
+          ),
+          Zt.active.desc,
+          z("small", null, "\u88C5\u5907\u680F\u91CC\u6309\u6570\u5B57\u952E 1~6\uFF0C\u6216\u76F4\u63A5\u70B9\u90A3\u4E00\u683C")
+        )
+      );
+    if (!Zt.passive && !Zt.active) qs.appendChild(z("div", "sf-hud__dt-nopassive", "(\u65E0\u88AB\u52A8)"));
+    if (Ot = z("div", "sf-hud__dt-note"), at.append(ce, gi, qs, Ot), Tt.kind === "own") {
       at.appendChild(z("div", "sf-hud__dt-owned", _e(Vt("check")), "\u5DF2\u7ECF\u5728\u88C5\u5907\u680F\u91CC\u4E86"));
       return;
     }
@@ -58937,6 +59098,13 @@ var RG = Jn(`
 .sf-hud__st-items { flex: none; display: grid; grid-template-columns: repeat(3, auto); gap: 3u; }
 .sf-hud__st-items .sf-slot { --sf-slot: 27u; border-radius: 5u; box-shadow: 0 0 0 1px rgba(8, 13, 31, 0.95), 0 0 0 max(1.5px, 2u) rgba(224, 177, 96, 0.5); }
 .sf-hud__st-items .sf-slot--empty { box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+/* \u4E3B\u52A8\u88C5\u5907\uFF1A\u8FD9\u4E00\u683C\u80FD\u6309\uFF08\u6570\u5B57\u952E 1~6 / \u70B9\u4E00\u4E0B\uFF09\uFF0C\u51B7\u5374\u65F6\u76D6\u6247\u5F62 + \u8BFB\u79D2 */
+.sf-hud__st-items .sf-slot.is-act { cursor: pointer; box-shadow: 0 0 0 1px rgba(8, 13, 31, 0.95), 0 0 0 max(1.5px, 2u) rgba(143, 233, 255, 0.82), 0 0 10u rgba(92, 214, 247, 0.3); }
+.sf-hud__st-cd { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: conic-gradient(rgba(3, 6, 16, 0.66) calc((1 - var(--t, 0)) * 360deg), rgba(3, 6, 16, 0) 0); }
+.sf-hud__st-sec { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; font-size: max(9px, 9.5u); font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 1px 2px rgba(2, 4, 12, 0.95), 0 0 4u rgba(2, 4, 12, 0.9); pointer-events: none; }
+.sf-hud__st-sec:empty { display: none; }
+.sf-hud__st-num { position: absolute; right: 0; bottom: 0; z-index: 3; padding: 0 1.5u; border-radius: 3u 0 3u 0; font-style: normal; font-size: max(8px, 8u); font-weight: 800; line-height: 1.35; color: var(--sf-c-gold-100); background: rgba(3, 6, 16, 0.72); pointer-events: none; }
+.sf-hud__st-items .sf-slot.is-cd > svg { filter: grayscale(0.5) brightness(0.72); }
 /* \u65B0\u5230\u624B\u7684\u88C5\u5907(\u624B\u52A8\u4E70\u7684\u3001\u81EA\u52A8\u51FA\u88C5\u4E70\u7684\u90FD\u7B97)\uFF1A\u90A3\u4E00\u683C\u4EAE\u4E00\u4E0B\u518D\u843D\u5B9A */
 .sf-hud__st-items .sf-slot.is-new { animation: sf-hud-item-new 1.1s var(--sf-ease-out); }
 @keyframes sf-hud-item-new {
@@ -59058,7 +59226,11 @@ function IG(n) {
   const k = z("div", "sf-hud__st-bars", v, u, x, p), M = z("div", "sf-hud__st-items"), S = [];
   for (let N = 0; N < n.me.items.length; N++) {
     const J = ro(null);
-    J.setAttribute("data-hud-hit", ""), M.appendChild(J), S.push({ el: J, id: null, off: null });
+    J.setAttribute("data-hud-hit", ""), // 触摸端没有数字键：带主动的格子直接点一下就放（落点交给引擎按朝向兜底）
+    J.addEventListener("click", () => {
+      const Z = n.me.items[N];
+      Z && ln[Z].active && !n.inputBlocked() && (n.host.audio.ui("click"), n.host.command({ type: "item", index: N, pos: null }));
+    }), M.appendChild(J), S.push({ el: J, id: null, off: null, cdEl: null, secEl: null, last: -1 });
   }
   const b = z("span", "sf-hud__st-shop-gold sf-num", "0"), w = z("button", "sf-hud__st-shop", z("span", "sf-hud__st-shop-ico", _e(Vt("shop"))), b);
   w.type = "button", w.tabIndex = -1, w.dataset.sfSnd = "click", w.setAttribute("aria-label", "\u91D1\u5E01 / \u6253\u5F00\u5546\u5E97"), w.addEventListener("click", () => n.actions.toggleShop());
@@ -59069,7 +59241,19 @@ function IG(n) {
   function Q(N) {
     for (let J = 0; J < S.length; J++) {
       const Z = S[J], ot = N.items[J] ?? null;
-      ot !== Z.id && (Z.id = ot, Z.off?.(), Z.off = null, Z.el.classList.toggle("sf-slot--empty", ot === null), Z.el.innerHTML = ot ? Po(ot) : "", ot ? (Z.el.setAttribute("aria-label", ln[ot].name), Z.off = M0(Z.el, () => fk(ln[ot])), D && uo(Z.el, "is-new")) : (Z.el.removeAttribute("aria-label"), Z.el.classList.remove("is-new")));
+      if (ot !== Z.id) {
+        Z.id = ot, Z.off?.(), Z.off = null, Z.cdEl = Z.secEl = null, Z.last = -1, Z.el.classList.toggle("sf-slot--empty", ot === null), Z.el.classList.toggle("is-act", !!ot && !!ln[ot].active), Z.el.innerHTML = ot ? Po(ot) : "";
+        if (ot) {
+          const act = ln[ot].active;
+          Z.el.setAttribute("aria-label", act ? `${ln[ot].name}\uFF08\u4E3B\u52A8 \xB7 \u6570\u5B57\u952E ${J + 1}\uFF09` : ln[ot].name), Z.off = M0(Z.el, () => fk(ln[ot]));
+          act && (Z.cdEl = z("i", "sf-hud__st-cd"), Z.secEl = z("b", "sf-hud__st-sec sf-num"), Z.el.append(Z.cdEl, Z.secEl, z("i", "sf-hud__st-num sf-num", String(J + 1))));
+          D && uo(Z.el, "is-new");
+        } else Z.el.removeAttribute("aria-label"), Z.el.classList.remove("is-new", "is-cd");
+      }
+      if (Z.cdEl && Z.secEl) {
+        const cd2 = N.rt?.itemCd?.[J] ?? 0, max = ln[Z.id].active.cd, t10 = max > 0 ? Math.min(1, Math.max(0, cd2 / max)) : 0, txt = cd2 > 0.05 ? cd2 >= 9.95 ? String(Math.ceil(cd2)) : cd2.toFixed(1) : "";
+        Math.abs(t10 - Z.last) > 4e-3 && (Z.last = t10, Z.cdEl.style.setProperty("--t", t10.toFixed(3)), Z.el.classList.toggle("is-cd", t10 > 2e-3)), Z.secEl.textContent !== txt && (Z.secEl.textContent = txt);
+      }
     }
     D = true;
   }
@@ -62565,6 +62749,8 @@ function nu(n, t, e, s, i) {
     slowImmune: false,
     airborne: null,
     moveMode: Qh,
+    // 装备主动的冷却，按装备栏下标存（6 格）。买/卖装备时对应格会清 0。
+    itemCd: [0, 0, 0, 0, 0, 0],
     dirX: 0,
     dirY: 0,
     path: null,
@@ -63871,6 +64057,13 @@ function Vf(n) {
       case "untargetable":
         a = true;
         break;
+      // 金身：不能动不能打（当成眩晕），同时不可选中 + 免疫伤害。
+      // Bo() 开头就会因为 invulnerable/untargetable 直接返回 0，所以不用另写免伤分支。
+      case "stasis":
+        e = true;
+        a = true;
+        r = true;
+        break;
       case "unstoppable":
         o = true;
         break;
@@ -63919,7 +64112,7 @@ function Wn(n, t, e, s) {
       onRemove: s.onRemove ?? null
     }, G0(d, "onTick", "onExpire", "onRemove"), t.buffs.push(d);
   }
-  return Vf(t), e === "stun" || e === "airborne" ? A6(n, t, true) : e === "root" && A6(n, t, false), (t.kind === "hero" || Vm.has(e)) && _o(n, t), d;
+  return Vf(t), e === "stun" || e === "airborne" || e === "stasis" ? A6(n, t, true) : e === "root" && A6(n, t, false), (t.kind === "hero" || Vm.has(e)) && _o(n, t), d;
 }
 function au(n, t, e) {
   e.id === "recall" && t.rt.act === "channel" && (t.rt.act = null), e.onRemove && e.onRemove(n, t, e);
@@ -64036,6 +64229,7 @@ function cS(n, t, e, s = false) {
     for (const k of comb.slots) a[k] = null;
     const slot = comb.slots[0] ?? a.indexOf(null);
     a[slot] = e;
+    t.rt.itemCd[slot] = 0;
     lS(n, t);
     return n.emit(
       s ? { type: "itemBought", unitId: t.id, itemId: e, auto: true, combined: comb.slots.map((k) => k) } : { type: "itemBought", unitId: t.id, itemId: e, combined: comb.slots.map((k) => k) }
@@ -64050,12 +64244,62 @@ function cS(n, t, e, s = false) {
       r = l, o -= Math.floor(c.cost * Yh);
     }
   }
-  return r < 0 && (r = a.indexOf(null)), r < 0 ? Do(n, t, "full", s) : t.gold < o ? Do(n, t, "gold", s) : (t.gold -= o, a[r] = e, lS(n, t), s ? n.emit({ type: "itemBought", unitId: t.id, itemId: e, auto: true }) : n.emit({ type: "itemBought", unitId: t.id, itemId: e }), true);
+  return r < 0 && (r = a.indexOf(null)), r < 0 ? Do(n, t, "full", s) : t.gold < o ? Do(n, t, "gold", s) : (t.gold -= o, a[r] = e, t.rt.itemCd[r] = 0, lS(n, t), s ? n.emit({ type: "itemBought", unitId: t.id, itemId: e, auto: true }) : n.emit({ type: "itemBought", unitId: t.id, itemId: e }), true);
 }
 function bj(n, t, e) {
   if (!Number.isInteger(e) || e < 0 || e >= t.items.length) return false;
   const s = t.items[e];
-  return s ? (t.gold += Math.floor(ln[s].cost * Yh), t.items[e] = null, t.autoBuy && Tk(t.heroId, s) && (t.autoBuy = false), lS(n, t), true) : false;
+  return s ? (t.gold += Math.floor(ln[s].cost * Yh), t.items[e] = null, t.rt.itemCd[e] = 0, t.autoBuy && Tk(t.heroId, s) && (t.autoBuy = false), lS(n, t), true) : false;
+}
+function useItemActive(n, t, e) {
+  const s = e.index;
+  if (!t.alive || !Number.isInteger(s) || s < 0 || s >= t.items.length) return false;
+  const id2 = t.items[s], act = id2 && ln[id2] ? ln[id2].active : null;
+  if (!act) return Do(n, t, "no_active", false);
+  const o = t.rt, here = { x: t.pos.x, y: t.pos.y };
+  if (o.itemCd[s] > 0) return Do(n, t, "cooldown", false);
+  if (act.kind !== "stasis" && (o.stunned || o.silenced)) return Do(n, t, "disabled", false);
+  if (o.dash !== null) return Do(n, t, "disabled", false);
+  o.itemCd[s] = act.cd;
+  switch (act.kind) {
+    case "stasis":
+      Wn(n, t, "stasis", { duration: act.duration, sourceId: t.id, key: "item_stasis", merge: "replace" }), n.fx("buff_gain", here, t.team, { unitId: t.id });
+      break;
+    case "teleport": {
+      const p = { x: here.x, y: here.y }, want = e.pos && Number.isFinite(e.pos.x) && Number.isFinite(e.pos.y) ? e.pos : (
+        // 没给落点（鼠标不在场景里）就朝正前方飞满射程，总比原地不动强
+        { x: here.x + Math.cos(t.facing) * act.range, y: here.y + Math.sin(t.facing) * act.range }
+      );
+      n.nav.nearestFree(want.x, want.y, o.navR, p, fy);
+      const dx2 = p.x - here.x, dy2 = p.y - here.y, len = Math.hypot(dx2, dy2);
+      if (len > act.range) {
+        p.x = here.x + dx2 / len * act.range;
+        p.y = here.y + dy2 / len * act.range;
+        n.nav.nearestFree(p.x, p.y, o.navR, p, fy);
+      }
+      Wn(n, t, "recall", {
+        duration: act.channel,
+        sourceId: t.id,
+        merge: "replace",
+        onExpire() {
+          t.alive && (hy(n, t, p.x, p.y), n.fx("recall_done", p, t.team, { unitId: t.id }));
+        }
+      }), n.fx("recall_start", p, t.team, { unitId: t.id });
+      break;
+    }
+    case "heal": {
+      const amt = act.amount + t.stats.maxHp * act.hpRatio;
+      for (const u of Pr(n, here, act.radius, (v) => v.team === t.team && v.alive && (v.kind === "hero" || v.kind === "minion")))
+        gy(n, u, u, amt) > 0 && n.fx("heal", u.pos, u.team, { unitId: u.id });
+      break;
+    }
+    case "cleanse":
+      qj(n, t, ["stun", "root", "silence", "slow", "airborne"]), Wn(n, t, "unstoppable", { duration: act.duration, sourceId: t.id, key: "item_cleanse", merge: "replace" }), n.fx("buff_gain", here, t.team, { unitId: t.id });
+      break;
+    default:
+      return o.itemCd[s] = 0, Do(n, t, "no_active", false);
+  }
+  return n.emit({ type: "itemActive", unitId: t.id, itemId: id2, slot: s, kind: act.kind, pos: here }), true;
 }
 function _j(n, t) {
   const e = $f(t);
@@ -64288,6 +64532,10 @@ function Aj(n, t, e) {
     cS(n, t, e.itemId);
     return;
   }
+  if (e.type === "item") {
+    useItemActive(n, t, e);
+    return;
+  }
   if (e.type === "sell") {
     bj(n, t, e.index);
     return;
@@ -64340,6 +64588,8 @@ function Cj(n, t, e) {
     const d = t.skills[R6[f]];
     d.cd > 0 && (d.cd = d.cd > e ? d.cd - e : 0);
   }
+  const icd = t.rt.itemCd;
+  for (let f = 0; f < icd.length; f++) icd[f] > 0 && (icd[f] = icd[f] > e ? icd[f] - e : 0);
   if (t.inCombat = i - a.lastCombatTime < CV, t.autoBuy && (s.tick + a.index) % vj === 0 && _j(n, t), !t.alive) {
     t.respawnIn -= e, t.respawnIn <= 1e-9 && Rj(n, t);
     return;

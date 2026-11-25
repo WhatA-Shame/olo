@@ -130,12 +130,26 @@ const ITEMS = [
   { id: 'dragon_scale', name: '龙鳞甲', brief: '双抗与生命都极高', category: 'defense', tier: 3, color: '#5fa88f', stats: mix(S.hp(1800), S.armor(220), S.mr(200)), from: ['turtle_shield', 'frost_amulet'] },
   { id: 'void_staff', name: '太虚法杖', brief: '法强 + 法穿 + 冷却', category: 'magic', tier: 3, color: '#b48cff', stats: mix(S.ap(260), S.mpen(0.3), S.cdr(0.12)), from: ['spell_codex', 'spell_piercer'] },
   { id: 'giant_belt', name: '巨人之力', brief: '一件顶三件的血量', category: 'defense', tier: 3, color: '#d9a441', stats: S.hp(3700), from: ['leather_vest', 'heart_mirror'] },
+
+  // ══ 辅助 ══
+  // 主动装备的 active.value 是"这个主动值多少金币"，和属性一样进定价模型，
+  // 否则主动等于白送，主动件会全面压过同价位的纯属性件。
+  { id: 'sage_stone', name: '贤者之石', brief: '撑血撑魔抗，冷却也短', category: 'support', tier: 2, color: '#7fd8b8', stats: mix(S.hp(600), S.mr(80), S.cdr(0.1)), from: ['rune_cloak', 'hourglass'] },
+  { id: 'golden_body', name: '金身护符', brief: '主动：2 秒金身，免疫一切', category: 'support', tier: 3, color: '#ffd76a', stats: mix(S.hp(700), S.armor(90)), from: ['iron_bracer', 'cloth_armor'],
+    active: { name: '金身', desc: '2 秒内无法被选中、免疫伤害，也不能行动。', cd: 75, kind: 'stasis', duration: 2, value: 700 } },
+  { id: 'teleport_stone', name: '传送符', brief: '主动：引导后传送到远处', category: 'support', tier: 3, color: '#8fd8ff', stats: mix(S.hp(800), S.cdr(0.12)), from: ['wood_shield', 'hourglass'],
+    active: { name: '传送', desc: '引导 2.5 秒后传送到指定位置，最多 30 米。受到控制或主动行动会中断。', cd: 90, kind: 'teleport', channel: 2.5, range: 30, value: 650 } },
+  { id: 'healing_bell', name: '回春铃', brief: '主动：治疗周围友军', category: 'support', tier: 3, color: '#9df5d2', stats: mix(S.ap(100), S.cdr(0.12), S.hp(300)), from: ['spell_codex', 'wood_shield'],
+    active: { name: '回春', desc: '治疗周围 8 米内的友军 220(+施法者 6% 最大生命)。', cd: 60, kind: 'heal', radius: 8, amount: 220, hpRatio: 0.06, value: 550 } },
+  { id: 'purify_orb', name: '净心珠', brief: '主动：解控并短暂免控', category: 'support', tier: 3, color: '#c9f6ff', stats: mix(S.hp(900), S.mr(100), S.cdr(0.08)), from: ['frost_amulet', 'cloth_armor'],
+    active: { name: '净化', desc: '解除自身所有控制，并在 1.5 秒内免疫控制。', cd: 70, kind: 'cleanse', duration: 1.5, value: 450 } },
 ];
 
 // ── 定价 ──
 const byId = Object.fromEntries(ITEMS.map((it) => [it.id, it]));
 for (const it of ITEMS) {
-  const v = statValue(it.stats);
+  // 主动也算钱：active.value 是这件主动"值多少金币"，和属性一起进模型
+  const v = statValue(it.stats) + (it.active?.value ?? 0);
   if (it.cost === undefined) it.cost = roundTo(v / TIER_EFF[it.tier], 10);
   it.value = v;
   it.eff = v / it.cost;
@@ -169,7 +183,7 @@ if (!emit) {
     console.log('  id'.padEnd(22), '名称'.padEnd(10), '售价'.padStart(6), '价值'.padStart(6), '效率'.padStart(6), ' 合成');
     for (const it of rows.sort((a, b) => a.cost - b.cost)) {
       console.log(
-        `  ${it.id.padEnd(20)} ${it.name.padEnd(8)} ${String(it.cost).padStart(6)} ${String(Math.round(it.value)).padStart(6)} ${(it.eff * 100).toFixed(0).padStart(5)}%  ${(it.from ?? []).join('+') || '—'}`,
+        `  ${it.id.padEnd(20)} ${it.name.padEnd(8)} ${String(it.cost).padStart(6)} ${String(Math.round(it.value)).padStart(6)} ${(it.eff * 100).toFixed(0).padStart(5)}%  ${(it.from ?? []).join('+') || '—'}${it.active ? `  [主动 ${it.active.name}]` : ''}`,
       );
     }
   }
@@ -200,6 +214,7 @@ if (!emit) {
     if (it.from) o.from = it.from;
     o.stats = it.stats;
     if (it.passive) o.passive = it.passive;
+    if (it.active) o.active = it.active;
     o.color = it.color;
     out += `  ${it.id}: ${lit(o, 2)},\n`;
   }

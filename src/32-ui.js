@@ -942,6 +942,9 @@ button.sf-slot:active { transform: scale(0.94); }
 .sf-tip__stats { margin-top: 4u; color: var(--sf-c-cyan-300); }
 .sf-tip__passive { margin-top: 6u; padding-top: 6u; box-shadow: inset 0 1px 0 var(--sf-c-line); }
 .sf-tip__passive b { color: var(--sf-c-amber); font-weight: 700; }
+.sf-tip__active { margin-top: 6u; padding-top: 6u; box-shadow: inset 0 1px 0 var(--sf-c-line); }
+.sf-tip__active b { color: var(--sf-c-cyan-300); font-weight: 700; }
+.sf-tip__active b > i { margin-left: 5u; font-style: normal; font-weight: 700; color: var(--sf-c-text-3); }
 
 /* ───────────── 表单行（设置面板等） ───────────── */
 .sf-field { display: grid; grid-template-columns: minmax(84u, auto) 1fr; align-items: center; column-gap: 16u; min-height: var(--sf-hit); }

@@ -937,40 +937,122 @@ const main = async () => {
       }
     };
     await ev(`(()=>{const u=${U}; u.items.fill(null); u.gold=5000; u.autoBuy=false; return 1;})()`);
+    // 金币有被动收入（补兵、时间收益），跨 eval 取差值会把收入算进来。
+    // 所以"这一步花了多少"必须在同一次 eval 里前后夹住：command 是同步的，中间没有收入窗口。
     const buy = async (id) => {
-      await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"buy",itemId:${JSON.stringify(id)}}); return 1;})()`);
+      const r = await ev(`(()=>{const w=window.__moba.world,u=${U},g0=u.gold;
+        w.command(u.id,{type:"buy",itemId:${JSON.stringify(id)}});
+        return JSON.stringify({paid:Math.round(g0-u.gold), gold:Math.round(u.gold), items:u.items.slice()});})()`);
       await sleep(140);
-      return snap(`(()=>{const u=${U}; return JSON.stringify({gold:Math.round(u.gold),items:u.items.slice()});})()`);
+      try {
+        return JSON.parse(r);
+      } catch {
+        return null;
+      }
     };
     const a1 = await buy('iron_sword');
     const a2 = await buy('iron_blade');
-    // 金币有被动收入，所以只看"这一步扣了多少"，并留一点容差
-    const near = (v, want, tol = 15) => Math.abs(v - want) <= tol;
-    ok('买两件小件（铁剑 300 + 玄铁重剑 630）', a1 && near(a1.gold - 5000, -300) && a2 && near(a2.gold - a1.gold, -630), `金币 ${a1?.gold} → ${a2?.gold}`);
+    ok('买两件小件（铁剑 300 + 玄铁重剑 630）', a1?.paid === 300 && a2?.paid === 630, `分别花 ${a1?.paid} / ${a2?.paid}`);
     // 青锋剑 1000，组件已值 930 → 只该扣 70
     const a3 = await buy('azure_blade');
     const combined = a3 && a3.items.filter((x) => x === 'azure_blade').length === 1 && a3.items.filter((x) => x).length === 1;
     ok(
       '组件凑齐后合成青锋剑只付差价',
-      a3 && near(a3.gold - a2.gold, -70) && combined,
-      `这一步扣 ${a2 && a3 ? a2.gold - a3.gold : '?'}（应 70），装备栏 ${JSON.stringify(a3?.items)}`,
+      a3?.paid === 70 && combined,
+      `这一步扣 ${a3?.paid}（应 70），装备栏 ${JSON.stringify(a3?.items)}`,
     );
     // 出售返还 60%
-    await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"sell",index:0}); return 1;})()`);
-    await sleep(140);
-    const a4 = await snap(`(()=>{const u=${U}; return JSON.stringify({gold:Math.round(u.gold),items:u.items.slice()});})()`);
-    ok('出售合成件返还 60% 全价', a4 && near(a4.gold - a3.gold, 600), `这一步返 ${a3 && a4 ? a4.gold - a3.gold : '?'}（应 600）`);
+    const a4 = await (async () => {
+      const r = await ev(`(()=>{const w=window.__moba.world,u=${U},g0=u.gold;
+        w.command(u.id,{type:"sell",index:0});
+        return JSON.stringify({paid:Math.round(u.gold-g0), gold:Math.round(u.gold), items:u.items.slice()});})()`);
+      await sleep(140);
+      try {
+        return JSON.parse(r);
+      } catch {
+        return null;
+      }
+    })();
+    ok('出售合成件返还 60% 全价', a4?.paid === 600, `这一步返 ${a4?.paid}（应 600）`);
     // 鞋：草鞋 + 布甲 → 护甲铁靴，只付 710-400=310
     const b1 = await buy('cloth_armor');
     const b2 = await buy('boots');
     const b3 = await buy('boots_guard');
     ok(
       '鞋子也能走合成（草鞋+布甲→铁靴）',
-      b1 && b2 && b3 && near(b3.gold - b2.gold, -310) && b3.items.includes('boots_guard'),
-      `这一步扣 ${b2 && b3 ? b2.gold - b3.gold : '?'}（应 310），装备栏 ${JSON.stringify(b3?.items)}`,
+      b1 && b2 && b3?.paid === 310 && b3.items.includes('boots_guard'),
+      `这一步扣 ${b3?.paid}（应 310），装备栏 ${JSON.stringify(b3?.items)}`,
     );
-    await ev(`(()=>{const u=${U}; u.items.fill(null); u.gold=0; u.autoBuy=true; return 1;})()`);
-    // 商店面板本身：51 件装备、图标、合成路径都要能画出来
+    // ── 装备主动：金身 / 传送 / 回春 ─────────────────────────────
+    // 主动件是"多一个技能"，所以既要有冷却（挂在装备栏下标上），也要真的生效。
+    // 这一段跑之前英雄已经挂了"不可选中 + 每 150ms 回满血"的保活，所以不会被塔打断。
+    await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.gold=30000; u.autoBuy=false; return 1;})()`);
+    const useActive = async (index, posExpr) => {
+      await ev(`(()=>{const w=window.__moba.world,u=${U};
+        w.command(u.id,{type:"item",index:${index},pos:${posExpr}}); return 1;})()`);
+      await sleep(200);
+      return snap(`(()=>{const u=${U}; return JSON.stringify({
+        cd:+u.rt.itemCd[${index}].toFixed(1),
+        buffs:u.buffs.map(b=>b.id),
+        inv:u.invulnerable===true,
+        hp:Math.round(u.hp),
+        x:+u.pos.x.toFixed(1), y:+u.pos.y.toFixed(1)});})()`);
+    };
+    const c1 = await buy('golden_body');
+    const s1 = await useActive(0, 'null');
+    ok(
+      '金身护符：按下去立刻金身（不可选中 + 免伤）并进冷却',
+      c1 && c1.items[0] === 'golden_body' && s1 && s1.cd > 0 && s1.buffs.includes('stasis') && s1.inv,
+      `cd ${s1?.cd}s 状态 ${s1?.buffs.join(',')} 免伤 ${s1?.inv}`,
+    );
+    // 状态栏装备格上的扇形冷却 + 数字键角标
+    const dbgCd = await snap(`(()=>{const el=document.querySelectorAll('.sf-hud__st-items .sf-slot')[0];
+      const i=el&&el.querySelector('.sf-hud__st-cd'), s=el&&el.querySelector('.sf-hud__st-sec');
+      const u=${U}, box=document.querySelector('.sf-hud__st-items').getBoundingClientRect();
+      return JSON.stringify({cls:el&&el.className, t:i?i.style.getPropertyValue('--t'):null, sec:s?s.textContent:null, cd:+u.rt.itemCd[0].toFixed(1),
+        box:{x:Math.round(box.left),y:Math.round(box.top),w:Math.round(box.width),h:Math.round(box.height)}});})()`);
+    console.log('  · 装备格冷却 DOM', JSON.stringify(dbgCd));
+    await shot('active-cd', { x: 120, y: 415, width: 720, height: 110 }, 2.6);
+    if (dbgCd?.box)
+      await shot('active-cd-zoom', { x: Math.max(0, dbgCd.box.x - 4), y: Math.max(0, dbgCd.box.y - 4), width: dbgCd.box.w + 8, height: dbgCd.box.h + 8 }, 6);
+    const c2 = await buy('teleport_stone');
+    // 金身持续 2 秒、期间算"被控"，别的主动按不出来——等它结束再测传送
+    await sleep(2300);
+    // 传送要引导 2.5 秒，中途被控/下指令就断了。真打起来这事经常发生，
+    // 所以给三次机会：只要有一次引导到底就算通过，三次全断才说明机制有问题。
+    let chan = null,
+      moved = -1;
+    for (let k = 0; k < 3 && moved < 6; k++) {
+      await ev(`(()=>{const u=${U}; u.rt.itemCd[1]=0; return 1;})()`);
+      const from = await snap(`(()=>{const u=${U}; return JSON.stringify({x:u.pos.x,y:u.pos.y});})()`);
+      const s2 = await useActive(1, '{x:u.pos.x+9,y:u.pos.y}');
+      if (!chan) chan = s2;
+      if (!s2 || !s2.buffs.includes('recall')) {
+        await sleep(700);
+        continue;
+      }
+      await sleep(3200);
+      const to = await snap(`(()=>{const u=${U}; return JSON.stringify({x:u.pos.x,y:u.pos.y});})()`);
+      if (from && to) moved = Math.hypot(to.x - from.x, to.y - from.y);
+    }
+    ok(
+      '传送符：引导开始（复用回城的引导）并进冷却',
+      c2 && c2.items[1] === 'teleport_stone' && chan && chan.cd > 0 && chan.buffs.includes('recall'),
+      `cd ${chan?.cd}s 状态 ${chan?.buffs.join(',')}`,
+    );
+    ok('传送符：引导结束后真的落到落点附近', moved >= 6 && moved <= 13, `位移 ${moved.toFixed(1)} 米（应 ≈9）`);
+    const c3 = await buy('healing_bell');
+    const s3 = await snap(`(()=>{const u=${U};
+      u.hp=Math.round(u.stats.maxHp*0.4); const before=u.hp;
+      window.__moba.world.command(u.id,{type:"item",index:2,pos:null});
+      return JSON.stringify({before, after:Math.round(u.hp), cd:+u.rt.itemCd[2].toFixed(1)});})()`);
+    ok(
+      '回春铃：治疗自己并进冷却',
+      c3 && c3.items[2] === 'healing_bell' && s3 && s3.after > s3.before && s3.cd > 0,
+      `生命 ${s3?.before} → ${s3?.after}，cd ${s3?.cd}s`,
+    );
+    await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.gold=0; u.autoBuy=true; return 1;})()`);
+    // 商店面板本身：56 件装备、图标、合成路径都要能画出来
     if (shots) {
       await ev(`(()=>{const u=${U}; u.gold=3000;
         const b=document.querySelector('.sf-hud__st-shop'); b&&b.click();
@@ -985,6 +1067,13 @@ const main = async () => {
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='攻击'); t&&t.click(); return 1;})()`);
       await sleep(400);
       await shot('shop-attack', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      // 辅助分类 + 主动装备的详情面板（主动那一块和被动分开显示）
+      await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='辅助'); t&&t.click(); return 1;})()`);
+      await sleep(400);
+      await ev(`(()=>{const c=document.querySelector('[data-item="golden_body"]'); c&&c.click(); return 1;})()`);
+      await sleep(350);
+      await shot('shop-support', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      await shot('shop-active-detail', { x: 700, y: 250, width: 220, height: 110 }, 5);
       await ev(`(()=>{const b=document.querySelector('.sf-hud__st-shop'); b&&b.click(); return 1;})()`);
     }
   }

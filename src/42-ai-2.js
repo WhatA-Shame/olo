@@ -1872,6 +1872,8 @@ function nu(n, t, e, s, i) {
     slowImmune: !1,
     airborne: null,
     moveMode: Qh,
+    // 装备主动的冷却，按装备栏下标存（6 格）。买/卖装备时对应格会清 0。
+    itemCd: [0, 0, 0, 0, 0, 0],
     dirX: 0,
     dirY: 0,
     path: null,

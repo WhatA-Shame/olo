@@ -1331,6 +1331,13 @@ function Vf(n) {
       case "untargetable":
         a = !0;
         break;
+      // 金身：不能动不能打（当成眩晕），同时不可选中 + 免疫伤害。
+      // Bo() 开头就会因为 invulnerable/untargetable 直接返回 0，所以不用另写免伤分支。
+      case "stasis":
+        e = !0;
+        a = !0;
+        r = !0;
+        break;
       case "unstoppable":
         o = !0;
         break;
@@ -1416,7 +1423,7 @@ function Wn(n, t, e, s) {
   }
   return (
     Vf(t),
-    e === "stun" || e === "airborne" ? A6(n, t, !0) : e === "root" && A6(n, t, !1),
+    e === "stun" || e === "airborne" || e === "stasis" ? A6(n, t, !0) : e === "root" && A6(n, t, !1),
     (t.kind === "hero" || Vm.has(e)) && _o(n, t),
     d
   );
@@ -1568,6 +1575,7 @@ function cS(n, t, e, s = !1) {
     for (const k of comb.slots) a[k] = null;
     const slot = comb.slots[0] ?? a.indexOf(null);
     a[slot] = e;
+    t.rt.itemCd[slot] = 0;
     lS(n, t);
     return (
       n.emit(
@@ -1596,6 +1604,7 @@ function cS(n, t, e, s = !1) {
         ? Do(n, t, "gold", s)
         : ((t.gold -= o),
           (a[r] = e),
+          (t.rt.itemCd[r] = 0),
           lS(n, t),
           s
             ? n.emit({ type: "itemBought", unitId: t.id, itemId: e, auto: !0 })
@@ -1610,10 +1619,79 @@ function bj(n, t, e) {
   return s
     ? ((t.gold += Math.floor(ln[s].cost * Yh)),
       (t.items[e] = null),
+      (t.rt.itemCd[e] = 0),
       t.autoBuy && Tk(t.heroId, s) && (t.autoBuy = !1),
       lS(n, t),
       !0)
     : !1;
+}
+
+// 装备主动：每格独立冷却，效果按 ln[id].active.kind 分派。
+// 主动件是"多一个技能"，所以冷却挂在装备栏下标上而不是装备 id 上：
+// 卖掉再买回来是新的一格，冷却跟着格子走（标准做法）。
+function useItemActive(n, t, e) {
+  const s = e.index;
+  if (!t.alive || !Number.isInteger(s) || s < 0 || s >= t.items.length) return !1;
+  const id = t.items[s],
+    act = id && ln[id] ? ln[id].active : null;
+  if (!act) return Do(n, t, "no_active", !1);
+  const o = t.rt,
+    here = { x: t.pos.x, y: t.pos.y };
+  if (o.itemCd[s] > 0) return Do(n, t, "cooldown", !1);
+  // 金身可以在被控时按出来（那正是它的用途），别的主动被控就按不了
+  if (act.kind !== "stasis" && (o.stunned || o.silenced)) return Do(n, t, "disabled", !1);
+  if (o.dash !== null) return Do(n, t, "disabled", !1);
+  o.itemCd[s] = act.cd;
+  switch (act.kind) {
+    case "stasis":
+      // 视觉复用"获得增益"的金色法阵（画在脚下），不另造一套美术
+      (Wn(n, t, "stasis", { duration: act.duration, sourceId: t.id, key: "item_stasis", merge: "replace" }),
+        n.fx("buff_gain", here, t.team, { unitId: t.id }));
+      break;
+    case "teleport": {
+      // 复用回城的引导：同一套"一行动就中断"的逻辑（Ba(t,'recall') 那几个检查点），
+      // 只把 onExpire 换成传到指定位置。
+      const p = { x: here.x, y: here.y },
+        want =
+          e.pos && Number.isFinite(e.pos.x) && Number.isFinite(e.pos.y)
+            ? e.pos
+            : // 没给落点（鼠标不在场景里）就朝正前方飞满射程，总比原地不动强
+              { x: here.x + Math.cos(t.facing) * act.range, y: here.y + Math.sin(t.facing) * act.range };
+      n.nav.nearestFree(want.x, want.y, o.navR, p, fy);
+      const dx = p.x - here.x,
+        dy = p.y - here.y,
+        len = Math.hypot(dx, dy);
+      if (len > act.range) {
+        p.x = here.x + (dx / len) * act.range;
+        p.y = here.y + (dy / len) * act.range;
+        n.nav.nearestFree(p.x, p.y, o.navR, p, fy);
+      }
+      (Wn(n, t, "recall", {
+        duration: act.channel,
+        sourceId: t.id,
+        merge: "replace",
+        onExpire() {
+          t.alive && (hy(n, t, p.x, p.y), n.fx("recall_done", p, t.team, { unitId: t.id }));
+        },
+      }),
+        n.fx("recall_start", p, t.team, { unitId: t.id }));
+      break;
+    }
+    case "heal": {
+      const amt = act.amount + t.stats.maxHp * act.hpRatio;
+      for (const u of Pr(n, here, act.radius, (v) => v.team === t.team && v.alive && (v.kind === "hero" || v.kind === "minion")))
+        gy(n, u, u, amt) > 0 && n.fx("heal", u.pos, u.team, { unitId: u.id });
+      break;
+    }
+    case "cleanse":
+      (qj(n, t, ["stun", "root", "silence", "slow", "airborne"]),
+        Wn(n, t, "unstoppable", { duration: act.duration, sourceId: t.id, key: "item_cleanse", merge: "replace" }),
+        n.fx("buff_gain", here, t.team, { unitId: t.id }));
+      break;
+    default:
+      return ((o.itemCd[s] = 0), Do(n, t, "no_active", !1));
+  }
+  return (n.emit({ type: "itemActive", unitId: t.id, itemId: id, slot: s, kind: act.kind, pos: here }), !0);
 }
 
 function _j(n, t) {
@@ -1919,6 +1997,10 @@ function Aj(n, t, e) {
     cS(n, t, e.itemId);
     return;
   }
+  if (e.type === "item") {
+    useItemActive(n, t, e);
+    return;
+  }
   if (e.type === "sell") {
     bj(n, t, e.index);
     return;
@@ -2006,6 +2088,9 @@ function Cj(n, t, e) {
     const d = t.skills[R6[f]];
     d.cd > 0 && (d.cd = d.cd > e ? d.cd - e : 0);
   }
+  // 装备主动的冷却
+  const icd = t.rt.itemCd;
+  for (let f = 0; f < icd.length; f++) icd[f] > 0 && (icd[f] = icd[f] > e ? icd[f] - e : 0);
   if (
     ((t.inCombat = i - a.lastCombatTime < CV),
     t.autoBuy && (s.tick + a.index) % vj === 0 && _j(n, t),
