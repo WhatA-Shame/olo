@@ -266,3 +266,68 @@ key 由 `ek()` 带出（`{ key, label, value }`），所以新增属性只要在
 `40-ui-8.js` 的 `qt()`：属性 → 被动 → 主动 → 合成路径，每块是一个独立圆角小面板
 （`.sf-hud__dt-sec`）配一行极小的分区标签（`.sf-dt-label`）。空块不渲染，
 不写「无被动」——缺席就是默认。合成路径排在效果之后：先知道它干什么，再看它由什么拼成。
+
+## 消耗品
+
+一次性道具，`category: 'consumable'`。和普通装备的差别只有三点，引擎侧没有为任何一件单独写分支：
+
+| 差异 | 普通装备 | 消耗品 |
+| --- | --- | --- |
+| 数量 | 一格一件 | 一格叠到 `stack` 个，数量存 `rt.itemN[格]` |
+| 使用 | 有冷却 | 用掉一个少一个；格子空了自动腾空 |
+| 定价 | 走属性效率模型 | 不进效率带，`cost` 手写 |
+
+### 数据形态
+
+```js
+{ id: 'trenbolone', name: '群勃龙', category: 'consumable', tier: 1, cost: 150, stack: 3,
+  stats: {},                    // 消耗品没有常驻属性，属性块会自动隐藏
+  active: {
+    name: '注射', cd: 1, kind: 'consume',
+    desc: '8 秒内物攻 +25、攻速 +15%；立刻损失 10% 当前生命（不会致死）。',
+    healPct: 0, manaPct: 0,     // 立刻回复（heal/mana 定值，healPct/manaPct 按最大值比例）
+    costHpPct: 0.1,             // 立刻付出的代价，永远不会扣死（留 1 点）
+    buffs: [{ id: 'ad_up', value: 25, duration: 8 }],
+  } }
+```
+
+`cd` 是**使用间隔**不是装备冷却——消耗品真正的资源是数量。
+
+### 三个原子操作
+
+`useItemActive()` 的 `case 'consume'` 只做三件事，新消耗品不需要改引擎：
+
+1. **立刻回复**：`heal` / `mana` 定值，`healPct` / `manaPct` 按最大生命/法力比例
+2. **立刻代价**：`costHpPct` 扣当前生命，`Math.max(1, ...)` 保底不会自杀
+3. **持续增益**：`buffs` 数组逐条走 `Wn()`，`id` 交给 `_o()` 的属性开关
+
+### 新 buff id 必须登记两处
+
+`_o()` 里加 case **不够**，还要同时登记：
+
+- `34-ui-2.js` 的 `T3`（状态名 + `kind`）—— 漏了会让 HUD 状态行读 `T3[id].kind` 直接抛
+  `Cannot read properties of undefined (reading 'kind')`，整个状态行不渲染
+- `34-ui-2.js` 的 `rH`（图标）—— 漏了图标错位
+
+现有 6 个：`ad_up` / `ap_up` / `armor_up` / `mr_up` / `hp_regen` / `mana_regen`。
+`rH` 的图标只能用 `M4()` 认的 24×24 符号键（`damage`/`shield`/`heart`/`mana`），
+**别塞完整 `<svg>`** —— `Hs()` 是把它嵌进 `<g transform>` 里的。
+
+`hp_regen` / `mana_regen` 的 value 是**每秒百分比**，走 `pe.hpRegenPct` / `pe.manaRegenPct`，
+在 `_o()` 出口按 `maxHp * pct` 折成每秒回复量，和定值回复分开累加。
+
+### 卡片文案
+
+消耗品没有 `stats`，`BB(stats, 2)` 会是空串，所以 `Z4()` 对消耗品改走 `hS(active)`：
+从 `healPct` / `manaPct` / `buffs` 现场算出「回血20% 移速+12%」这种摘要。
+同样是**从数据生成**，不手写，改数值不会和文案脱节。
+
+### 两处装备格渲染都要画数量角标
+
+装备栏有**两套渲染**，改一处不够：
+
+- `40-ui-8.js` 商店面板的 6 格（`X.innerHTML`）
+- `40-ui-8.js` HUD 状态栏的 6 格（`Z.el.innerHTML`，在 `Q()` 里）
+
+两处的判重条件都要从「id 变了」扩成「id 或数量变了」，否则用掉一个不会重绘。
+角标 `.sf-slot__n` 在 `32-ui.js`，跟着 `--sf-slot` 缩放，只有 `cnt > 1` 才画。

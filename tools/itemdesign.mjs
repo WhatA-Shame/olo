@@ -188,11 +188,54 @@ const ITEMS = [
   // 护盾效率 / 治疗加成
   { id: 'fire_hydrant', name: '消防栓', category: 'support', tier: 3, color: '#ff8a3c', stats: mix(S.hp(1200), S.armor(200), S.shield(0.5)), from: ['riot_shield', 'iron_door'] },
   { id: 'ginger_tea', name: '红糖姜茶', category: 'support', tier: 3, color: '#e0a86a', stats: mix(S.ap(130), S.hp(1000), S.heal(0.4)), from: ['thermos', 'cushion'] },
+
+  // ── 消耗品 ────────────────────────────────────────────────────
+  // 一次性道具：买进来占一格、可以叠加，用掉一个少一个，用完格子自动空出来。
+  // 没有常驻属性，所以不进效率带，价格按"一次使用的战术价值"手写。
+  // 效果只有三种原子操作，引擎侧不需要为每件单独写分支：
+  //   ① 立刻回复（heal / mana 定值，healPct / manaPct 按最大值的比例）
+  //   ② 持续属性增益（buffs: [{ id, value, duration }]，id 走 _o() 的属性开关）
+  //   ③ 立刻付出代价（costHpPct 扣当前生命，不会致死）
+  // cd 是"使用间隔"，不是装备冷却——消耗品的真正资源是数量。
+  { id: 'trenbolone', name: '群勃龙', category: 'consumable', tier: 1, cost: 150, color: '#ff6b5a',
+    stack: 3,
+    active: { name: '注射', cd: 1, kind: 'consume',
+      desc: '8 秒内物攻 +25、攻速 +15%；立刻损失 10% 当前生命（不会致死）。',
+      costHpPct: 0.1,
+      buffs: [{ id: 'ad_up', value: 25, duration: 8 }, { id: 'attack_speed', value: 0.15, duration: 8 }] } },
+  { id: 'stanozolol', name: '康力龙', category: 'consumable', tier: 1, cost: 140, color: '#ffb44d',
+    stack: 3,
+    active: { name: '注射', cd: 1, kind: 'consume',
+      desc: '10 秒内护甲 +45，且每秒回复 1% 最大生命。',
+      buffs: [{ id: 'armor_up', value: 45, duration: 10 }, { id: 'hp_regen', value: 0.01, duration: 10 }] } },
+  { id: 'cigarette', name: '香烟', category: 'consumable', tier: 1, cost: 90, color: '#d8d2c4',
+    stack: 5,
+    active: { name: '点一根', cd: 1, kind: 'consume',
+      desc: '立刻回复 30% 最大法力；6 秒内法强 +25、移速 −8%。',
+      manaPct: 0.3,
+      buffs: [{ id: 'ap_up', value: 25, duration: 6 }, { id: 'slow', value: 0.08, duration: 6 }] } },
+  { id: 'betel_nut', name: '槟榔干', category: 'consumable', tier: 1, cost: 100, color: '#c94f3d',
+    stack: 5,
+    active: { name: '嚼一颗', cd: 1, kind: 'consume',
+      desc: '立刻回复 20% 最大生命；8 秒内移速 +12%。',
+      healPct: 0.2,
+      buffs: [{ id: 'haste', value: 0.12, duration: 8 }] } },
+  { id: 'fermented_juice', name: '发酵果汁', category: 'consumable', tier: 1, cost: 110, color: '#e2a33c',
+    stack: 5,
+    active: { name: '喝一口', cd: 1, kind: 'consume',
+      desc: '8 秒内每秒回复 2% 最大生命与 1.2% 最大法力。',
+      buffs: [{ id: 'hp_regen', value: 0.02, duration: 8 }, { id: 'mana_regen', value: 0.012, duration: 8 }] } },
 ];
 
 // ── 定价 ──
 const byId = Object.fromEntries(ITEMS.map((it) => [it.id, it]));
 for (const it of ITEMS) {
+  // 消耗品没有常驻属性，价格按"一次使用的战术价值"手写，不走效率模型
+  if (it.category === 'consumable') {
+    it.value = it.cost;
+    it.eff = 1;
+    continue;
+  }
   // 主动算钱；中件被动写了 passive.gold 也算钱；大件被动不计价（买大件的理由）
   const v = itemValue(it);
   if (it.cost === undefined) it.cost = roundTo(v / TIER_EFF[it.tier], 10);
@@ -203,6 +246,13 @@ for (const it of ITEMS) {
 // ── 自检 ──
 const problems = [];
 for (const it of ITEMS) {
+  // 消耗品不进效率带（它们没有常驻属性），只要求写了 cost 和 stack
+  if (it.category === 'consumable') {
+    if (!it.cost) problems.push(`${it.id} 消耗品必须手写 cost`);
+    if (!(it.stack > 1)) problems.push(`${it.id} 消耗品必须写 stack > 1`);
+    if (!it.active) problems.push(`${it.id} 消耗品必须写 active`);
+    continue;
+  }
   const lo = it.tier === 1 ? 0.95 : it.tier === 2 ? 0.95 : 1.0;
   const hi = it.tier === 1 ? 1.05 : it.tier === 2 ? 1.08 : 1.14;
   if (it.eff < lo || it.eff > hi) problems.push(`${it.id} 效率 ${(it.eff * 100).toFixed(0)}%（目标 ${lo * 100}-${hi * 100}%）`);
@@ -244,20 +294,23 @@ if (!emit) {
   }
   const lit = (o, ind) => {
     const pad = ' '.repeat(ind);
-    if (Array.isArray(o)) return `[${o.map((v) => JSON.stringify(v)).join(', ')}]`;
+    if (Array.isArray(o)) return `[${o.map((v) => (v && typeof v === 'object' ? lit(v, ind + 2) : JSON.stringify(v))).join(', ')}]`;
     const parts = Object.entries(o).map(([k, v]) => {
       if (Array.isArray(v)) return `${pad}  ${k}: ${lit(v, ind + 2)}`;
       if (v && typeof v === 'object') return `${pad}  ${k}: ${lit(v, ind + 2)}`;
       if (typeof v === 'string') return `${pad}  ${k}: ${JSON.stringify(v)}`;
       return `${pad}  ${k}: ${v}`;
     });
-    return `{\n${parts.join(',\n')},\n${pad}}`;
+    // 空对象必须直接给 {}，否则 `{\n,\n}` 是语法错误
+    return parts.length ? `{\n${parts.join(',\n')},\n${pad}}` : '{}';
   };
   let out = 'const ln = {\n';
   for (const it of ITEMS) {
     const o = { id: it.id, name: it.name, category: it.category, tier: it.tier, cost: it.cost };
     if (it.from) o.from = it.from;
-    o.stats = it.stats;
+    // 消耗品可叠加，stack 是这一格最多放几个；普通装备不写这个字段
+    if (it.stack) o.stack = it.stack;
+    o.stats = it.stats ?? {};
     if (it.passive) o.passive = it.passive;
     if (it.active) o.active = it.active;
     o.color = it.color;

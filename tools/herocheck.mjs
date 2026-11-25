@@ -140,7 +140,7 @@ async function connect() {
     if (!debug) return;
     if (m.method === 'Runtime.exceptionThrown') {
       const d = m.params.exceptionDetails;
-      console.log('  ! 异常:', d.text, d.exception?.description?.split('\n').slice(0, 3).join(' / ') || '');
+      console.log('  ! 异常:', d.text, d.exception?.description?.split('\n').slice(0, 10).join(' >> ') || '');
     } else if (m.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(m.params.type)) {
       console.log('  ! 控制台:', (m.params.args || []).map((a) => a.value ?? a.description).join(' ').slice(0, 240));
     } else if (m.method === 'Log.entryAdded' && m.params.entry.level === 'error') {
@@ -209,15 +209,22 @@ const main = async () => {
     if (!shots) return;
     fs.mkdirSync(SHOT_DIR, { recursive: true });
     const r = await send('Page.captureScreenshot', { format: 'jpeg', quality: 62, ...(clip ? { clip: { ...clip, scale } } : {}) });
-    fs.writeFileSync(path.join(SHOT_DIR, `${heroId}-${name}.jpg`), Buffer.from(r.result.data, 'base64'));
+    if (!r.result?.data) return console.log(`  · 截图失败：${name}`);
+    // 截图常被预览面板以共享读方式打开，覆盖写会 EPERM —— 先删后写
+    const f = path.join(SHOT_DIR, `${heroId}-${name}.jpg`);
+    try {
+      fs.unlinkSync(f);
+    } catch {}
+    fs.writeFileSync(f, Buffer.from(r.result.data, 'base64'));
   };
   // 商店详情面板特写：裁切框按运行时包围盒算。写死坐标一旦改面板结构就框偏，
   // 而这类"看起来对不对"的问题只能靠截图判断，框偏了等于没截。
   const shotPanel = async (name, sel = '.sf-hud__shop-detail', scale = 3) => {
     if (!shots) return;
     const r = await ev(`(()=>{const e=document.querySelector('${sel}'); if(!e) return null;
-      const b=e.getBoundingClientRect(); return {x:b.x,y:b.y,width:b.width,height:b.height};})()`);
-    if (!r) return console.log(`  · 找不到 ${sel}，跳过 ${name}`);
+      const b=e.getBoundingClientRect();
+      return b.width>1&&b.height>1 ? {x:b.x,y:b.y,width:b.width,height:b.height} : null;})()`);
+    if (!r) return console.log(`  · 找不到或尺寸为 0：${sel}，跳过 ${name}`);
     return shot(name, r, scale);
   };
   // --zoom：战场截图裁到英雄附近再放大，方便看清模型细节（裁得比英雄大一圈，技能特效才不会被切掉）。
@@ -1099,7 +1106,47 @@ const main = async () => {
       lb?.has && lb2?.hooks >= 1 && lb2.dMana === 150 && lb2.dHp >= 190 && lb2.dHp <= 210,
       `钩子 ${lb2?.hooks} 个，受伤 1000 → 蓝 +${lb2?.dMana}（应 150），耗蓝 1000 → 血 +${lb2?.dHp}（应 200）`,
     );
-    await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.gold=0; u.autoBuy=true; return 1;})()`);
+    // ── 消耗品：叠加 / 用掉一个 / 用完清格 ──────────────────────
+    // 三步连着验，任何一步错都会让"买进来能不能真的用"这个闭环断掉。
+    const cq = await snap(`(()=>{const w=window.__moba.world,u=${U};
+      u.items.fill(null); u.rt.itemCd.fill(0); u.rt.itemN.fill(0);
+      u.gold=5000; u.autoBuy=false;
+      w.command(u.id,{type:'buy',itemId:'trenbolone'});
+      w.command(u.id,{type:'buy',itemId:'trenbolone'});
+      const slot=u.items.indexOf('trenbolone');
+      return JSON.stringify({slot, n:u.rt.itemN[slot], gold:u.gold, stack:3});})()`);
+    ok(
+      '消耗品：连买两次叠在同一格',
+      cq?.slot >= 0 && cq.n === 2 && cq.gold === 5000 - 300,
+      `格 ${cq?.slot}，个数 ${cq?.n}（应 2），花 ${5000 - (cq?.gold ?? 5000)}（应 300）`,
+    );
+    // 顺带看一眼格子上的数量角标（只有 ≥2 才画）
+    // 用掉一个：个数减一、格子还在、buff 真的挂上了
+    const cu = await snap(`(()=>{const w=window.__moba.world,u=${U};
+      const slot=u.items.indexOf('trenbolone');
+      u.rt.itemCd.fill(0); u.hp=Math.round(u.stats.maxHp*0.6);
+      const hp0=u.hp, ad0=u.stats.ad;
+      w.command(u.id,{type:'item',index:slot});
+      return JSON.stringify({n:u.rt.itemN[slot], still:u.items[slot], ad:u.stats.ad, ad0, hp0, hp:u.hp,
+        buff:u.buffs.some(b=>b.id==='ad_up')});})()`);
+    await sleep(120);
+    ok(
+      '消耗品：用掉一个，个数 −1 且 buff 生效',
+      cu?.n === 1 && cu.still === 'trenbolone' && cu.buff && cu.ad > cu.ad0,
+      `个数 ${cu?.n}（应 1），物攻 ${cu?.ad0} → ${cu?.ad}，ad_up ${cu?.buff}`,
+    );
+    // 用完最后一个：格子必须腾空，不然装备栏会被"空消耗品"永久占住
+    const ce2 = await snap(`(()=>{const w=window.__moba.world,u=${U};
+      const slot=u.items.indexOf('trenbolone');
+      u.rt.itemCd.fill(0);
+      w.command(u.id,{type:'item',index:slot});
+      return JSON.stringify({n:u.rt.itemN[slot], item:u.items[slot]});})()`);
+    ok(
+      '消耗品：用完了格子自动腾空',
+      ce2?.item === null && ce2.n === 0,
+      `格内容 ${ce2?.item}，个数 ${ce2?.n}（都应为空/0）`,
+    );
+    await ev(`(()=>{const u=${U}; u.items.fill(null); u.rt.itemCd.fill(0); u.rt.itemN.fill(0); u.gold=0; u.autoBuy=true; return 1;})()`);
     // 商店面板本身：63 件装备、图标、合成路径都要能画出来
     if (shots) {
       await ev(`(()=>{const u=${U}; u.gold=3000;
@@ -1128,6 +1175,22 @@ const main = async () => {
       await ev(`(()=>{const c=document.querySelector('[data-item="big_quilt"]'); c&&c.click(); return 1;})()`);
       await sleep(350);
       await shotPanel('shop-passive-detail');
+      // 消耗品：5 件各一个样子，不能撞形制
+      await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='消耗品'); t&&t.click(); return 1;})()`);
+      await sleep(400);
+      await shot('shop-consumable', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      await ev(`(()=>{const c=document.querySelector('[data-item="trenbolone"]'); c&&c.click(); return 1;})()`);
+      await sleep(350);
+      await shotPanel('shop-consumable-detail');
+      // 买 2 个群勃龙 + 1 个槟榔干，看装备栏格子上的数量角标（≥2 才画）
+      await ev(`(()=>{const w=window.__moba.world,u=${U};
+        u.items.fill(null); u.rt.itemN.fill(0); u.rt.itemCd.fill(0); u.gold=3000;
+        w.command(u.id,{type:'buy',itemId:'trenbolone'});
+        w.command(u.id,{type:'buy',itemId:'trenbolone'});
+        w.command(u.id,{type:'buy',itemId:'betel_nut'});
+        return 1;})()`);
+      await sleep(250);
+      await shotPanel('shop-consume-badge', '.sf-hud__shop-slots', 4);
       // 辅助分类 + 主动装备的详情面板（主动那一块和被动分开显示）
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='辅助'); t&&t.click(); return 1;})()`);
       await sleep(400);

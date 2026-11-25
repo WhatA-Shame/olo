@@ -106,6 +106,26 @@ function _o(n, t) {
       case "attack_speed":
         pe.asPct += d.value;
         break;
+      // 消耗品的持续增益：都是"加多少"的绝对值，和装备属性同一个出口累加
+      case "ad_up":
+        pe.ad += d.value;
+        break;
+      case "ap_up":
+        pe.ap += d.value;
+        break;
+      case "armor_up":
+        pe.armor += d.value;
+        break;
+      case "mr_up":
+        pe.mr += d.value;
+        break;
+      // 每秒回复按最大值的比例算，不是定值
+      case "hp_regen":
+        pe.hpRegenPct += d.value;
+        break;
+      case "mana_regen":
+        pe.manaRegenPct += d.value;
+        break;
       case "frost_insight":
         s = !0;
         break;
@@ -177,8 +197,8 @@ function _o(n, t) {
     (r.critDamage = o.critDamage + pe.critDmg),
     (r.armorPen = Math.min(M6, o.armorPen + pe.armorPen)),
     (r.magicPen = Math.min(M6, o.magicPen + pe.magicPen)),
-    (r.hpRegen = o.hpRegen + pe.hpRegen + (i ? r.maxHp * yn.blessingRegen : 0)),
-    (r.manaRegen = o.manaRegen + pe.manaRegen + (s ? r.maxMana * yn.frostManaRegen : 0)),
+    (r.hpRegen = o.hpRegen + pe.hpRegen + r.maxHp * (pe.hpRegenPct + (i ? yn.blessingRegen : 0))),
+    (r.manaRegen = o.manaRegen + pe.manaRegen + r.maxMana * (pe.manaRegenPct + (s ? yn.frostManaRegen : 0))),
     // 护盾效率 / 治疗加成：裸装是 0，装备叠上来（小兵/塔的 base 里没有这两个字段）
     (r.shieldPower = (o.shieldPower ?? 0) + pe.shieldPower),
     (r.healPower = (o.healPower ?? 0) + pe.healPower),
@@ -1580,6 +1600,25 @@ function cS(n, t, e, s = !1) {
   const i = ln[e];
   if (!i) return !1;
   const a = t.items;
+  // 消耗品走独立分支：优先往已有同 id 的格子里叠，叠满或没有同 id 格才占新格。
+  // 它们不参与合成，所以必须放在合成判断之前。
+  if (i.stack > 1) {
+    if (t.gold < i.cost) return Do(n, t, "gold", s);
+    let slot = -1;
+    for (let k = 0; k < a.length; k++) if (a[k] === e && (t.rt.itemN[k] ?? 0) < i.stack) { slot = k; break; }
+    const fresh = slot < 0;
+    if (fresh) slot = a.indexOf(null);
+    if (slot < 0) return Do(n, t, "full", s);
+    return (
+      (t.gold -= i.cost),
+      (a[slot] = e),
+      (t.rt.itemN[slot] = fresh ? 1 : t.rt.itemN[slot] + 1),
+      (t.rt.itemCd[slot] = 0),
+      lS(n, t),
+      n.emit(s ? { type: "itemBought", unitId: t.id, itemId: e, auto: !0 } : { type: "itemBought", unitId: t.id, itemId: e }),
+      !0
+    );
+  }
   // 合成优先：组件凑齐就吃掉组件、只付差价（成品比组件总价贵一点点，那部分才是这次要付的）
   const comb = Sk(t, e);
   if (comb) {
@@ -1630,10 +1669,13 @@ function cS(n, t, e, s = !1) {
 function bj(n, t, e) {
   if (!Number.isInteger(e) || e < 0 || e >= t.items.length) return !1;
   const s = t.items[e];
+  // 消耗品一次卖光这一格里的全部个数，按个数退款
+  const cnt = Math.max(1, t.rt.itemN[e] ?? 0);
   return s
-    ? ((t.gold += Math.floor(ln[s].cost * Yh)),
+    ? ((t.gold += Math.floor(ln[s].cost * Yh) * cnt),
       (t.items[e] = null),
       (t.rt.itemCd[e] = 0),
+      (t.rt.itemN[e] = 0),
       t.autoBuy && Tk(t.heroId, s) && (t.autoBuy = !1),
       lS(n, t),
       !0)
@@ -1702,6 +1744,26 @@ function useItemActive(n, t, e) {
         Wn(n, t, "unstoppable", { duration: act.duration, sourceId: t.id, key: "item_cleanse", merge: "replace" }),
         n.fx("buff_gain", here, t.team, { unitId: t.id }));
       break;
+    case "consume": {
+      // 消耗品：三个原子操作按需组合，引擎不需要为每一件单独写分支。
+      // ① 立刻回复（定值 + 按最大值比例）
+      const hp = (act.heal ?? 0) + t.stats.maxHp * (act.healPct ?? 0),
+        mana = (act.mana ?? 0) + t.stats.maxMana * (act.manaPct ?? 0);
+      if (hp > 0 && gy(n, t, t, hp * (1 + (t.stats.healPower ?? 0))) > 0) n.fx("heal", here, t.team, { unitId: t.id });
+      if (mana > 0) t.mana = Math.min(t.stats.maxMana, t.mana + mana);
+      // ② 立刻付出的代价：扣当前生命，永远不会把自己扣死（留 1 点）
+      if (act.costHpPct > 0) t.hp = Math.max(1, t.hp - t.hp * act.costHpPct);
+      // ③ 持续增益：id 交给 _o() 的属性开关，value 是增量、duration 是秒
+      for (const b of act.buffs ?? [])
+        Wn(n, t, b.id, { duration: b.duration, value: b.value, sourceId: t.id, key: `item_${id}` });
+      n.fx("buff_gain", here, t.team, { unitId: t.id });
+      // 用掉一个；这一格空了就把装备栏腾出来
+      const left = (t.rt.itemN[s] ?? 1) - 1;
+      if (left > 0) t.rt.itemN[s] = left;
+      else ((t.items[s] = null), (t.rt.itemN[s] = 0), (t.rt.itemCd[s] = 0));
+      lS(n, t);
+      break;
+    }
     default:
       return ((o.itemCd[s] = 0), Do(n, t, "no_active", !1));
   }

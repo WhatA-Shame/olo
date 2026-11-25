@@ -8,6 +8,10 @@
 - **后台任务要静音且尽量少占用**：需要看渲染结果时用一次性 `chrome --headless --screenshot`，不要开长驻 CDP 会话；浏览器实例一律加 `--mute-audio`；本地服务器只在验证期间起，用完立刻停，不挂着；长时间任务先说明耗时和资源占用再跑。
 - 中文交流。
 - **别为了验证一个已经能看到的结论反复跑离线分析**：直接出截图看，比推导数值快得多也省额度。用户对额度消耗敏感，长循环先停手问一句。
+- **Windows 上"覆盖写"会被预览面板锁死（EPERM）**：`dist/index.html` 和 `.herocheck/*.jpg`
+  一旦被 WorkBuddy 预览面板以共享读方式打开，`writeFileSync` / `copyFileSync` 直接
+  `EPERM: operation not permitted`，但 `unlinkSync` 是允许的。`tools/build.mjs` 和
+  `herocheck` 的 `shot()` 都已改成**先删后写**。以后再遇到 EPERM 先想到这个，别去查磁盘/杀软。
 
 ## 关键经验：外部骨架蒙皮
 - 杯杯菇的 GLB 是 **70 个互不相连的碎片**，撕裂只发生在同一碎片内部 —— 同一碎块的顶点被分到不同骨骼就会裂。
@@ -174,6 +178,27 @@
 - 属性名只能取自 `33-data-2.js` 的 `tk` 表，数值走 `ek()`，不手写。
 - 属性小图标 `src/48-item-icons.js` 搬自 BaBao 的 `ItemTraitIcons.tsx`（20 个 key），
   `traitIcon(key)` 取图；`ek()` 带出 key。
+
+## 关键经验：消耗品（叠加 / 用完清格 / 两处装备格渲染）
+- `category:'consumable'` + `stack:N`。数量存 `rt.itemN[格]`（和 `itemCd` 同构）。
+- 定价**不进效率带**（没有常驻属性），`cost` 手写；`itemdesign.mjs` 的自检里对
+  consumable 单独校验"有 cost、stack>1、有 active"。
+- 购买走 `cS()` 最前面的独立分支（必须在合成分支**之前**，消耗品没有 from）。
+  出售 `bj()` 按 `cnt` 倍退款并清 `itemN`。
+- `useItemActive()` 的 `case 'consume'` 只有三个原子操作：立刻回复（heal/mana/healPct/manaPct）、
+  立刻代价（costHpPct，`Math.max(1,...)` 保底）、持续增益（buffs 逐条走 `Wn()`）。
+  **新消耗品不需要改引擎**。
+- **新 buff id 必须同时登记 `T3` 和 `rH`**（都在 `34-ui-2.js`）。漏 `T3` 会抛
+  `Cannot read properties of undefined (reading 'kind')`，整个 HUD 状态行不渲染 —— 我踩过。
+  `rH` 的图标只能用 `M4()` 认的 24×24 键（damage/shield/heart/mana），**别塞完整 `<svg>`**，
+  `Hs()` 是嵌进 `<g transform>` 里的。
+- `hp_regen`/`mana_regen` 的 value 是**每秒百分比**，走 `pe.hpRegenPct`/`pe.manaRegenPct`，
+  在 `_o()` 出口按 `maxHp*pct` 折成每秒量（和定值回复分开累加）。
+- **装备栏有两套渲染，改一处不够**：`40-ui-8.js` 商店面板（`X.innerHTML`）和 HUD 状态栏
+  `Q()`（`Z.el.innerHTML`）。两处判重都要从「id 变了」扩成「id 或数量变了」，否则用掉一个不重绘。
+- 卡片副标题：消耗品没有 stats，`BB(stats,2)` 是空串，所以 `Z4()` 对消耗品走 `hS(active)`
+  现场算「回血20% 移速+12%」——同样是数据生成，不手写。
+- 消耗品没有"冷却"概念，详情卡不写 `冷却 N 秒`；上限写在 badge（`可叠加 3`）上。
 
 ## 关键经验：商店详情卡（`40-ui-8.js` 的 `qt()`）
 - 结构：属性 → 被动 → 主动 → 合成路径，每块 `.sf-hud__dt-sec` 独立圆角小面板 +

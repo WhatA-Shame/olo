@@ -885,6 +885,14 @@ button.sf-slot { cursor: pointer; transition: transform var(--sf-t-fast) var(--s
 @media (hover: hover) { button.sf-slot:hover { filter: brightness(1.15); } }
 button.sf-slot:active { transform: scale(0.94); }
 .sf-slot.is-active { box-shadow: 0 0 0 1px rgba(8, 13, 31, 0.95), 0 0 0 max(2px, 2.5u) var(--sf-c-gold-100), 0 0 16u rgba(255, 214, 130, 0.75); }
+/* 消耗品的剩余个数：右下角一枚小金币色角标，跟着格子尺寸缩放 */
+.sf-slot__n {
+  position: absolute; right: 4%; bottom: 3%; z-index: 2;
+  min-width: 34%; padding: 0 5%; border-radius: 99px;
+  font-size: calc(var(--sf-slot) * 0.26); font-weight: 800; line-height: 1.35; text-align: center;
+  color: #2a1a04; background: var(--sf-grad-gold);
+  box-shadow: 0 1u 3u rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
 
 /* ───────────── 英雄头像 / 星级 ───────────── */
 .sf-portrait {

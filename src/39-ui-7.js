@@ -623,6 +623,31 @@ function $f(n) {
   return null;
 }
 
+// 消耗品的卡片副标题：没有常驻属性，就从 active 里的回复量和 buff 列表算出来。
+// 和 BB() 一样是"从数据生成"，不手写，所以改数值不会和文案脱节。
+const XS = {
+  ad_up: ["物攻", (v) => `+${v}`],
+  ap_up: ["法强", (v) => `+${v}`],
+  armor_up: ["护甲", (v) => `+${v}`],
+  mr_up: ["魔抗", (v) => `+${v}`],
+  attack_speed: ["攻速", (v) => `+${Math.round(v * 100)}%`],
+  haste: ["移速", (v) => `+${Math.round(v * 100)}%`],
+  slow: ["移速", (v) => `-${Math.round(v * 100)}%`],
+  hp_regen: ["回血", (v) => `${+(v * 100).toFixed(1)}%/秒`],
+  mana_regen: ["回蓝", (v) => `${+(v * 100).toFixed(1)}%/秒`],
+};
+function hS(n) {
+  if (!n) return "";
+  const e = [];
+  if (n.healPct) e.push(`回血${Math.round(n.healPct * 100)}%`);
+  if (n.manaPct) e.push(`回蓝${Math.round(n.manaPct * 100)}%`);
+  for (const b of n.buffs ?? []) {
+    const f = XS[b.id];
+    f && e.push(f[0] + f[1](b.value));
+  }
+  return e.slice(0, 2).join("  ");
+}
+
 // 合成：背包里凑齐 from 列出的组件时，买成品只需付差价。
 // 返回 { slots, value }（slots = 要消耗的装备栏下标，value = 这些组件的总价），凑不齐返回 null。
 function Sk(n, t) {
@@ -1314,13 +1339,13 @@ const K4 = `
   ${K4}
 }
 `),
-  wG = ["recommend", "attack", "magic", "defense", "support", "boots"],
+  wG = ["recommend", "attack", "magic", "defense", "support", "boots", "consumable"],
   MG = { 1: "基础鞋", 2: "进阶鞋" },
-  kG = { attack: "攻击装备", magic: "法术装备", defense: "防御装备", support: "辅助装备", boots: "鞋" },
+  kG = { attack: "攻击装备", magic: "法术装备", defense: "防御装备", support: "辅助装备", boots: "鞋", consumable: "消耗品" },
   Y2 = 2.6,
   SG = 1.2,
   TG = 0.3,
   EG = 320,
-  Z4 = (n) => BB(n.stats, 2),
+  Z4 = (n) => (n.category === "consumable" ? hS(n.active) : BB(n.stats, 2)),
   K2 = (n) => ln[n].name.slice(-2);
 export { mG, $f, Gf, zm, Sk, Tk, Yd, q2, xG, Ek, Ak, M1, Rk, X2, yG, bG, _G, wG, MG, kG, Y2, SG, TG, EG, Z4, K2 };

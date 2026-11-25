@@ -28,10 +28,19 @@ html = html.replace('src="../images/beian-gongan.png"', 'src="images/beian-gonga
 
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
 fs.mkdirSync(path.join(root, 'dist', 'images'), { recursive: true });
-fs.writeFileSync(path.join(root, 'dist', 'index.html'), html);
-fs.copyFileSync(
-  path.join(root, 'images', 'beian-gongan.png'),
-  path.join(root, 'dist', 'images', 'beian-gongan.png'),
-);
+// dist 里的产物经常被预览面板/本地服务器以共享读方式打开：这种句柄在 Windows 上
+// 允许删除、但拒绝覆盖写（open-for-write 直接 EPERM）。所以一律"先删后写"，
+// 别指望 writeFileSync 能覆盖一个被外部打开的文件。
+const drop = (p) => {
+  try {
+    fs.unlinkSync(p);
+  } catch {}
+};
+const out = path.join(root, 'dist', 'index.html');
+drop(out);
+fs.writeFileSync(out, html);
+const png = path.join(root, 'dist', 'images', 'beian-gongan.png');
+drop(png);
+fs.copyFileSync(path.join(root, 'images', 'beian-gongan.png'), png);
 
 console.log(`完成: dist/index.html (${(html.length / 1024 / 1024).toFixed(2)} MB)`);

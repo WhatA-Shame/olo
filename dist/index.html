@@ -49862,6 +49862,14 @@ button.sf-slot { cursor: pointer; transition: transform var(--sf-t-fast) var(--s
 @media (hover: hover) { button.sf-slot:hover { filter: brightness(1.15); } }
 button.sf-slot:active { transform: scale(0.94); }
 .sf-slot.is-active { box-shadow: 0 0 0 1px rgba(8, 13, 31, 0.95), 0 0 0 max(2px, 2.5u) var(--sf-c-gold-100), 0 0 16u rgba(255, 214, 130, 0.75); }
+/* \u6D88\u8017\u54C1\u7684\u5269\u4F59\u4E2A\u6570\uFF1A\u53F3\u4E0B\u89D2\u4E00\u679A\u5C0F\u91D1\u5E01\u8272\u89D2\u6807\uFF0C\u8DDF\u7740\u683C\u5B50\u5C3A\u5BF8\u7F29\u653E */
+.sf-slot__n {
+  position: absolute; right: 4%; bottom: 3%; z-index: 2;
+  min-width: 34%; padding: 0 5%; border-radius: 99px;
+  font-size: calc(var(--sf-slot) * 0.26); font-weight: 800; line-height: 1.35; text-align: center;
+  color: #2a1a04; background: var(--sf-grad-gold);
+  box-shadow: 0 1u 3u rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
 
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 \u82F1\u96C4\u5934\u50CF / \u661F\u7EA7 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 .sf-portrait {
@@ -51525,6 +51533,130 @@ var ln = {
       healPower: 0.4
     },
     color: "#e0a86a"
+  },
+  trenbolone: {
+    id: "trenbolone",
+    name: "\u7FA4\u52C3\u9F99",
+    category: "consumable",
+    tier: 1,
+    cost: 150,
+    stack: 3,
+    stats: {},
+    active: {
+      name: "\u6CE8\u5C04",
+      cd: 1,
+      kind: "consume",
+      desc: "8 \u79D2\u5185\u7269\u653B +25\u3001\u653B\u901F +15%\uFF1B\u7ACB\u523B\u635F\u5931 10% \u5F53\u524D\u751F\u547D\uFF08\u4E0D\u4F1A\u81F4\u6B7B\uFF09\u3002",
+      costHpPct: 0.1,
+      buffs: [{
+        id: "ad_up",
+        value: 25,
+        duration: 8
+      }, {
+        id: "attack_speed",
+        value: 0.15,
+        duration: 8
+      }]
+    },
+    color: "#ff6b5a"
+  },
+  stanozolol: {
+    id: "stanozolol",
+    name: "\u5EB7\u529B\u9F99",
+    category: "consumable",
+    tier: 1,
+    cost: 140,
+    stack: 3,
+    stats: {},
+    active: {
+      name: "\u6CE8\u5C04",
+      cd: 1,
+      kind: "consume",
+      desc: "10 \u79D2\u5185\u62A4\u7532 +45\uFF0C\u4E14\u6BCF\u79D2\u56DE\u590D 1% \u6700\u5927\u751F\u547D\u3002",
+      buffs: [{
+        id: "armor_up",
+        value: 45,
+        duration: 10
+      }, {
+        id: "hp_regen",
+        value: 0.01,
+        duration: 10
+      }]
+    },
+    color: "#ffb44d"
+  },
+  cigarette: {
+    id: "cigarette",
+    name: "\u9999\u70DF",
+    category: "consumable",
+    tier: 1,
+    cost: 90,
+    stack: 5,
+    stats: {},
+    active: {
+      name: "\u70B9\u4E00\u6839",
+      cd: 1,
+      kind: "consume",
+      desc: "\u7ACB\u523B\u56DE\u590D 30% \u6700\u5927\u6CD5\u529B\uFF1B6 \u79D2\u5185\u6CD5\u5F3A +25\u3001\u79FB\u901F \u22128%\u3002",
+      manaPct: 0.3,
+      buffs: [{
+        id: "ap_up",
+        value: 25,
+        duration: 6
+      }, {
+        id: "slow",
+        value: 0.08,
+        duration: 6
+      }]
+    },
+    color: "#d8d2c4"
+  },
+  betel_nut: {
+    id: "betel_nut",
+    name: "\u69DF\u6994\u5E72",
+    category: "consumable",
+    tier: 1,
+    cost: 100,
+    stack: 5,
+    stats: {},
+    active: {
+      name: "\u56BC\u4E00\u9897",
+      cd: 1,
+      kind: "consume",
+      desc: "\u7ACB\u523B\u56DE\u590D 20% \u6700\u5927\u751F\u547D\uFF1B8 \u79D2\u5185\u79FB\u901F +12%\u3002",
+      healPct: 0.2,
+      buffs: [{
+        id: "haste",
+        value: 0.12,
+        duration: 8
+      }]
+    },
+    color: "#c94f3d"
+  },
+  fermented_juice: {
+    id: "fermented_juice",
+    name: "\u53D1\u9175\u679C\u6C41",
+    category: "consumable",
+    tier: 1,
+    cost: 110,
+    stack: 5,
+    stats: {},
+    active: {
+      name: "\u559D\u4E00\u53E3",
+      cd: 1,
+      kind: "consume",
+      desc: "8 \u79D2\u5185\u6BCF\u79D2\u56DE\u590D 2% \u6700\u5927\u751F\u547D\u4E0E 1.2% \u6700\u5927\u6CD5\u529B\u3002",
+      buffs: [{
+        id: "hp_regen",
+        value: 0.02,
+        duration: 8
+      }, {
+        id: "mana_regen",
+        value: 0.012,
+        duration: 8
+      }]
+    },
+    color: "#e2a33c"
   }
 };
 var IB = Object.values(ln);
@@ -51668,7 +51800,7 @@ var w3 = {
   heal: { name: Br.heal, short: "\u56DE\u590D", color: "#6fe3a1" },
   buff: { name: Br.buff, short: "\u589E\u76CA", color: "#f3cf85" }
 };
-var u4 = { recommend: "\u63A8\u8350", attack: "\u653B\u51FB", magic: "\u6CD5\u672F", defense: "\u9632\u5FA1", support: "\u8F85\u52A9", boots: "\u978B" };
+var u4 = { recommend: "\u63A8\u8350", attack: "\u653B\u51FB", magic: "\u6CD5\u672F", defense: "\u9632\u5FA1", support: "\u8F85\u52A9", boots: "\u978B", consumable: "\u6D88\u8017\u54C1" };
 var p4 = {
   match_start: 1,
   minions_spawn: 1,
@@ -52588,7 +52720,51 @@ var tH = {
     Mi(n),
     fn("vs", 12, 32, 52, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je("gw", Hn(n, 0.5), 0.34),
     We("gw", 32, 32, 24) + `<path d="M23 11l9 6 9-6 9 6v38H14V17z" fill="url(#@vs)" ${eP2(n, 1.5)}/><path d="M32 17v38" stroke="${Ln(n, 0.45)}" stroke-width="1.5" opacity=".7"/><path d="M17 30h12M35 30h12" stroke="${Ln(n, 0.4)}" stroke-width="1.6" opacity=".55"/><path d="M18 40h11v9H18zM35 40h11v9H35z" fill="${Ln(n, 0.3)}" opacity=".55" ${eP2(n, 1)}/><path d="M23 13l4 5" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`
-  )
+  ),
+  // ── 消耗品专用形制 ──────────────────────────────────────────
+  // 针剂：群勃龙(0) 康力龙(1)。安瓿瓶 + 针头，靠瓶身颜色和标签区分。
+  syringe: (n, v = 0) => {
+    const g = "url(#@sy)";
+    const body = v === 0 ? (
+      // 群勃龙：粗安瓿 + 长针，刻度明显
+      `<path d="M26 26h12v20c0 3.4-2.4 5.8-6 5.8s-6-2.4-6-5.8Z" fill="${g}" ${eP2(n, 1.3)}/><path d="M27.5 20h9v6.5h-9z" fill="${Ln(n, 0.4)}" ${eP2(n, 1.1)}/><path d="M32 20V9" stroke="${Ln(n, 0.5)}" stroke-width="2.6" stroke-linecap="round"/><path d="M32 9l-1.8-4.4h3.6z" fill="${Hn(n, 0.55)}"/><path d="M25.5 33h13v9h-13z" fill="#f4f7fb" opacity=".85"/><path d="M28 35.5v4M31 35.5v4M34 35.5v4" stroke="${Ln(n, 0.55)}" stroke-width="1.1" opacity=".75"/><path d="M27.5 28v18" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" opacity=".4"/>`
+    ) : (
+      // 康力龙：小药瓶 + 短针 + 药片
+      `<path d="M25 30h14v16c0 3.2-2.4 5.4-5.6 5.4H30.6C27.4 51.4 25 49.2 25 46Z" fill="${g}" ${eP2(n, 1.3)}/><path d="M27 24h10v6.4H27z" fill="${Ln(n, 0.38)}" ${eP2(n, 1.1)}/><path d="M32 24V13" stroke="${Ln(n, 0.5)}" stroke-width="2.2" stroke-linecap="round"/><circle cx="32" cy="11.6" r="1.8" fill="${Hn(n, 0.5)}"/><ellipse cx="32" cy="39" rx="4.6" ry="2.8" fill="#f4f7fb" opacity=".8"/><path d="M27.6 39h8.8" stroke="${Ln(n, 0.5)}" stroke-width="1.2" opacity=".7"/><path d="M26.8 32v15" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".38"/>`
+    );
+    return dn(
+      Mi(n),
+      fn("sy", 22, 30, 42, 30, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je("gw", Hn(n, 0.5), 0.34),
+      We("gw", 32, 36, 24) + body
+    );
+  },
+  // 香烟：硬盒 + 露出的一支 + 盒面标签
+  cigpack: (n) => {
+    const g = "url(#@cg)";
+    return dn(
+      Mi(n),
+      fn("cg", 16, 24, 48, 24, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je("gw", Hn(n, 0.5), 0.34),
+      We("gw", 32, 34, 24) + `<path d="M22 22h20v32c0 2.4-1.8 4.2-4.2 4.2H26.2C23.8 58.2 22 56.4 22 54Z" fill="${g}" ${eP2(n, 1.4)}/><path d="M22 22h20v7H22z" fill="${Ln(n, 0.3)}" opacity=".8"/><path d="M26 15h3.4v8H26z" fill="#fbf7ef" ${eP2(n, 1)}/><path d="M26 15h3.4v2.6H26z" fill="${Hn(n, 0.5)}" opacity=".9"/><path d="M31.5 16h3.4v7h-3.4z" fill="#f2ece0" ${eP2(n, 1)}/><path d="M22.5 36h19v12h-19z" fill="#f4f7fb" opacity=".85"/><path d="M26 42h12" stroke="${Ln(n, 0.55)}" stroke-width="1.6" stroke-linecap="round" opacity=".75"/><path d="M25.5 39h9" stroke="${Ln(n, 0.4)}" stroke-width="1.2" stroke-linecap="round" opacity=".6"/><path d="M24 26v26" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".34"/>`
+    );
+  },
+  // 槟榔干：牛皮纸袋 + 袋口卷边 + 三颗槟榔
+  betel: (n) => {
+    const g = "url(#@bt2)";
+    return dn(
+      Mi(n),
+      fn("bt2", 18, 26, 46, 26, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je("gw", Hn(n, 0.5), 0.34),
+      We("gw", 32, 34, 24) + `<path d="M20 24h24l-2.4 30c-.2 2.6-2.2 4.4-4.8 4.4H27.2c-2.6 0-4.6-1.8-4.8-4.4Z" fill="${g}" ${eP2(n, 1.4)}/><path d="M20 24h24l-.8 6H20.8z" fill="${Ln(n, 0.28)}" opacity=".85"/><path d="M22 30.5h20" stroke="${Ln(n, 0.5)}" stroke-width="1.2" opacity=".6"/><ellipse cx="27" cy="41" rx="4.2" ry="3.2" fill="${Ln(n, 0.42)}" ${eP2(n, 1)}/><ellipse cx="36" cy="44.5" rx="3.6" ry="2.8" fill="${Ln(n, 0.55)}" ${eP2(n, 1)}/><ellipse cx="32" cy="35.5" rx="3" ry="2.4" fill="${Hn(n, 0.25)}" ${eP2(n, 1)}/><path d="M22.5 33v20" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".32"/>`
+    );
+  },
+  // 发酵果汁：玻璃瓶 + 吸管 + 果肉沉淀
+  juice: (n) => {
+    const g = "url(#@ju)";
+    return dn(
+      Mi(n),
+      fn("ju", 22, 30, 42, 30, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je("gw", Hn(n, 0.5), 0.34),
+      We("gw", 32, 36, 24) + `<path d="M24 22h16v8c0 2.4 3 4.4 3 9v15c0 2.6-2 4.4-4.6 4.4H25.6C23 58.4 21 56.6 21 54V39c0-4.6 3-6.6 3-9Z" fill="${g}" ${eP2(n, 1.4)}/><path d="M26.5 17h11v5.4h-11z" fill="${Ln(n, 0.38)}" ${eP2(n, 1.1)}/><path d="M38 15l5-7" stroke="#f4f7fb" stroke-width="2.6" stroke-linecap="round" opacity=".9"/><path d="M21.5 38h21v16h-21z" fill="#f4f7fb" opacity=".28"/><circle cx="27" cy="48" r="2.2" fill="${Hn(n, 0.4)}" opacity=".8"/><circle cx="34" cy="50" r="1.6" fill="${Hn(n, 0.4)}" opacity=".7"/><circle cx="31" cy="44" r="1.4" fill="${Hn(n, 0.4)}" opacity=".6"/><path d="M23 30v24" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".4"/>`
+    );
+  }
 };
 var tHx = {
   // 值是 '形制' 或 ['形制', 变体号]。变体号让同一个形制画出不同的东西，
@@ -52661,7 +52837,13 @@ var tHx = {
   wrench: "wrench",
   nail_gun: "gun",
   dumbbell: "dumbbell",
-  e_bike: "bike"
+  e_bike: "bike",
+  // 消耗品：一件一个样子，不共用形制
+  trenbolone: ["syringe", 0],
+  stanozolol: ["syringe", 1],
+  cigarette: "cigpack",
+  betel_nut: "betel",
+  fermented_juice: "juice"
 };
 function Po(n) {
   const e = tHx[n], k = Array.isArray(e) ? e[0] : e, v = Array.isArray(e) ? e[1] : 0, f = tH[n] ?? tH[k] ?? tH.box;
@@ -52815,7 +52997,15 @@ var T3 = {
   fengling_gale: { name: "\u8FDE\u5C04", kind: "buff" },
   fengling_crit: { name: "\u4E0B\u4E00\u7BAD\u5FC5\u66B4", kind: "buff" },
   yeque_shadow: { name: "\u5F97\u624B", kind: "buff" },
-  tower_focus: { name: "\u9632\u5FA1\u5854\u9501\u5B9A", kind: "debuff" }
+  tower_focus: { name: "\u9632\u5FA1\u5854\u9501\u5B9A", kind: "debuff" },
+  // 消耗品带来的持续增益。id 必须和 _o() 里的 case 完全一致，
+  // 漏登记一个就会让 HUD 状态行读 T3[id].kind 时炸掉（lH 有兜底但不解决图标错）。
+  ad_up: { name: "\u7269\u653B\u63D0\u5347", kind: "buff" },
+  ap_up: { name: "\u6CD5\u5F3A\u63D0\u5347", kind: "buff" },
+  armor_up: { name: "\u62A4\u7532\u63D0\u5347", kind: "buff" },
+  mr_up: { name: "\u9B54\u6297\u63D0\u5347", kind: "buff" },
+  hp_regen: { name: "\u6301\u7EED\u56DE\u8840", kind: "buff" },
+  mana_regen: { name: "\u6301\u7EED\u56DE\u84DD", kind: "buff" }
 };
 var Ys = nH;
 var Eo = sH;
@@ -52904,7 +53094,15 @@ var rH = {
   yeque_shadow: () => Ia("yeque", "passive"),
   tower_focus: () => Hs("#c8303a", M4("target")),
   // 装备主动带来的状态（金身护符）
-  stasis: () => Hs("#ffd76a", M4("shield"))
+  stasis: () => Hs("#ffd76a", M4("shield")),
+  // 消耗品的持续增益：和 T3 一一对应。图标复用状态行的 24×24 符号集
+  // （M4 只认这些键；别塞完整 <svg>，Hs 是把它嵌进 <g transform> 里的）
+  ad_up: () => Hs("#ff8a5a", M4("damage")),
+  ap_up: () => Hs("#9cb4ff", M4("damage")),
+  armor_up: () => Hs("#9fb4c9", M4("shield")),
+  mr_up: () => Hs("#8fc7ff", M4("shield")),
+  hp_regen: () => Hs("#56c7a0", M4("heart")),
+  mana_regen: () => Hs("#5b9bff", M4("mana"))
 };
 function lH(n) {
   const t = rH[n];
@@ -58224,6 +58422,28 @@ function $f(n) {
   }
   return null;
 }
+var XS2 = {
+  ad_up: ["\u7269\u653B", (v) => `+${v}`],
+  ap_up: ["\u6CD5\u5F3A", (v) => `+${v}`],
+  armor_up: ["\u62A4\u7532", (v) => `+${v}`],
+  mr_up: ["\u9B54\u6297", (v) => `+${v}`],
+  attack_speed: ["\u653B\u901F", (v) => `+${Math.round(v * 100)}%`],
+  haste: ["\u79FB\u901F", (v) => `+${Math.round(v * 100)}%`],
+  slow: ["\u79FB\u901F", (v) => `-${Math.round(v * 100)}%`],
+  hp_regen: ["\u56DE\u8840", (v) => `${+(v * 100).toFixed(1)}%/\u79D2`],
+  mana_regen: ["\u56DE\u84DD", (v) => `${+(v * 100).toFixed(1)}%/\u79D2`]
+};
+function hS(n) {
+  if (!n) return "";
+  const e = [];
+  if (n.healPct) e.push(`\u56DE\u8840${Math.round(n.healPct * 100)}%`);
+  if (n.manaPct) e.push(`\u56DE\u84DD${Math.round(n.manaPct * 100)}%`);
+  for (const b of n.buffs ?? []) {
+    const f = XS2[b.id];
+    f && e.push(f[0] + f[1](b.value));
+  }
+  return e.slice(0, 2).join("  ");
+}
 function Sk2(n, t) {
   const e = ln[t];
   if (!e || !e.from || !e.from.length) return null;
@@ -58841,14 +59061,14 @@ var _G = Jn(`
   ${K4}
 }
 `);
-var wG = ["recommend", "attack", "magic", "defense", "support", "boots"];
+var wG = ["recommend", "attack", "magic", "defense", "support", "boots", "consumable"];
 var MG = { 1: "\u57FA\u7840\u978B", 2: "\u8FDB\u9636\u978B" };
-var kG = { attack: "\u653B\u51FB\u88C5\u5907", magic: "\u6CD5\u672F\u88C5\u5907", defense: "\u9632\u5FA1\u88C5\u5907", support: "\u8F85\u52A9\u88C5\u5907", boots: "\u978B" };
+var kG = { attack: "\u653B\u51FB\u88C5\u5907", magic: "\u6CD5\u672F\u88C5\u5907", defense: "\u9632\u5FA1\u88C5\u5907", support: "\u8F85\u52A9\u88C5\u5907", boots: "\u978B", consumable: "\u6D88\u8017\u54C1" };
 var Y2 = 2.6;
 var SG = 1.2;
 var TG = 0.3;
 var EG = 320;
-var Z4 = (n) => BB(n.stats, 2);
+var Z4 = (n) => n.category === "consumable" ? hS(n.active) : BB(n.stats, 2);
 var K2 = (n) => ln[n].name.slice(-2);
 
 // src/48-item-icons.js
@@ -59086,7 +59306,8 @@ function AG(n) {
     ), Ze = z(
       "div",
       "sf-hud__dt-meta",
-      z("span", "sf-badge sf-badge--mute", u4[Zt.category]),
+      // 消耗品的顶部小标题已经写了"消耗品"，badge 再写一遍是废话，改成写可叠加数
+      Zt.category === "consumable" ? z("span", "sf-badge sf-badge--mute", `\u53EF\u53E0\u52A0 ${Zt.stack}`) : z("span", "sf-badge sf-badge--mute", u4[Zt.category]),
       Zt.category === "boots" ? z("span", `sf-badge${Zt.tier === 2 ? "" : " sf-badge--mute"}`, MG[Zt.tier]) : null
     ), hs = z("b", "sf-num");
     Kt = hs;
@@ -59105,7 +59326,11 @@ function AG(n) {
       );
     }
     const sec = (cls, label, ...kids) => z("div", `sf-hud__dt-sec ${cls}`, z("div", "sf-dt-label", label), ...kids);
-    const qs = z("div", "sf-hud__dt-body sf-scroll", sec("is-stats", "\u5C5E\u6027", js));
+    const qs = z(
+      "div",
+      "sf-hud__dt-body sf-scroll",
+      ...js.childElementCount ? [sec("is-stats", "\u5C5E\u6027", js)] : []
+    );
     if (Zt.passive)
       qs.appendChild(
         sec("is-passive", "\u88AB\u52A8", z("b", "sf-hud__dt-h", Zt.passive.name), z("p", "sf-hud__dt-p", Zt.passive.desc))
@@ -59119,7 +59344,8 @@ function AG(n) {
             "b",
             "sf-hud__dt-h",
             Zt.active.name,
-            z("span", "sf-hud__dt-active-cd sf-num", `\u51B7\u5374 ${Zt.active.cd} \u79D2`)
+            // 消耗品没有"冷却"这个概念（上限已经写在 badge 上了），这里留空
+            Zt.stack > 1 ? null : z("span", "sf-hud__dt-active-cd sf-num", `\u51B7\u5374 ${Zt.active.cd} \u79D2`)
           ),
           z("p", "sf-hud__dt-p", Zt.active.desc),
           z("small", "sf-hud__dt-tip", "\u88C5\u5907\u680F\u91CC\u6309\u6570\u5B57\u952E 1~6\uFF0C\u6216\u76F4\u63A5\u70B9\u90A3\u4E00\u683C")
@@ -59250,7 +59476,8 @@ function AG(n) {
     }
     for (let Re = 0; Re < Rt.length; Re++) {
       const Oe = Tt.items[Re], X = Rt[Re];
-      X.dataset.item !== (Oe ?? "") && (X.dataset.item = Oe ?? "", X.innerHTML = Oe ? Po(Oe) : "", X.classList.toggle("sf-slot--empty", !Oe), X.setAttribute("aria-label", Oe ? `${ln[Oe].name}\uFF08\u70B9\u9009\u53EF\u51FA\u552E\uFF09` : "\u7A7A\u88C5\u5907\u680F")), X.classList.toggle("is-active", a?.kind === "inv" && a.index === Re);
+      const cnt = Oe && ln[Oe].stack > 1 ? Tt.rt.itemN[Re] ?? 0 : 0;
+      (X.dataset.item !== (Oe ?? "") || X.dataset.n !== String(cnt)) && (X.dataset.item = Oe ?? "", X.dataset.n = String(cnt), X.innerHTML = Oe ? Po(Oe) : "", cnt > 1 && X.appendChild(z("b", "sf-slot__n sf-num", String(cnt))), X.classList.toggle("sf-slot--empty", !Oe), X.setAttribute("aria-label", Oe ? `${ln[Oe].name}\uFF08\u70B9\u9009\u53EF\u51FA\u552E\uFF09` : "\u7A7A\u88C5\u5907\u680F")), X.classList.toggle("is-active", a?.kind === "inv" && a.index === Re);
     }
     o = a?.kind === "card" ? ce?.[a.order - 1]?.buyId ?? null : null;
     const js = Dt(Tt, ce), qs = js ? `${js.kind}|${js.id}|${js.title}|${js.invIndex}` : "";
@@ -59519,12 +59746,14 @@ function IG(n) {
   function Q(N) {
     for (let J = 0; J < S.length; J++) {
       const Z = S[J], ot = N.items[J] ?? null;
-      if (ot !== Z.id) {
-        Z.id = ot, Z.off?.(), Z.off = null, Z.cdEl = Z.secEl = null, Z.last = -1, Z.el.classList.toggle("sf-slot--empty", ot === null), Z.el.classList.toggle("is-act", !!ot && !!ln[ot].active), Z.el.innerHTML = ot ? Po(ot) : "";
+      const cnt = ot && ln[ot].stack > 1 ? N.rt.itemN?.[J] ?? 0 : 0;
+      if (ot !== Z.id || Z.n !== cnt) {
+        Z.id = ot, Z.n = cnt, Z.off?.(), Z.off = null, Z.cdEl = Z.secEl = null, Z.last = -1, Z.el.classList.toggle("sf-slot--empty", ot === null), Z.el.classList.toggle("is-act", !!ot && !!ln[ot].active), Z.el.innerHTML = ot ? Po(ot) : "";
         if (ot) {
           const act = ln[ot].active;
           Z.el.setAttribute("aria-label", act ? `${ln[ot].name}\uFF08\u4E3B\u52A8 \xB7 \u6570\u5B57\u952E ${J + 1}\uFF09` : ln[ot].name), Z.off = M0(Z.el, () => fk(ln[ot]));
           act && (Z.cdEl = z("i", "sf-hud__st-cd"), Z.secEl = z("b", "sf-hud__st-sec sf-num"), Z.el.append(Z.cdEl, Z.secEl, z("i", "sf-hud__st-num sf-num", String(J + 1))));
+          cnt > 1 && Z.el.appendChild(z("b", "sf-slot__n sf-num", String(cnt)));
           D && uo(Z.el, "is-new");
         } else Z.el.removeAttribute("aria-label"), Z.el.classList.remove("is-new", "is-cd");
       }
@@ -63029,6 +63258,8 @@ function nu(n, t, e, s, i) {
     moveMode: Qh,
     // 装备主动的冷却，按装备栏下标存（6 格）。买/卖装备时对应格会清 0。
     itemCd: [0, 0, 0, 0, 0, 0],
+    // 消耗品的剩余个数，同样按格存。普通装备这一格恒为 0。
+    itemN: [0, 0, 0, 0, 0, 0],
     dirX: 0,
     dirY: 0,
     path: null,
@@ -63493,7 +63724,8 @@ var pe = {
   healPower: 0
 };
 function gW() {
-  pe.hp = 0, pe.mana = 0, pe.ad = 0, pe.ap = 0, pe.apPct = 0, pe.armor = 0, pe.mr = 0, pe.asPct = 0, pe.moveFlat = 0, pe.movePct = 0, pe.slow = 0, pe.slowResist = 0, pe.cdr = 0, pe.lifesteal = 0, pe.crit = 0, pe.critDmg = 0, pe.armorPen = 0, pe.magicPen = 0, pe.hpRegen = 0, pe.manaRegen = 0, pe.adPct = 0, pe.hpPct = 0, pe.hpToAdPct = 0, pe.shieldPower = 0, pe.healPower = 0;
+  pe.hp = 0, pe.mana = 0, pe.ad = 0, pe.ap = 0, pe.apPct = 0, pe.armor = 0, pe.mr = 0, pe.asPct = 0, pe.moveFlat = 0, pe.movePct = 0, pe.slow = 0, pe.slowResist = 0, pe.cdr = 0, pe.lifesteal = 0, pe.crit = 0, pe.critDmg = 0, pe.armorPen = 0, pe.magicPen = 0, pe.hpRegen = 0, pe.manaRegen = 0, // 按最大生命/法力的百分比回复（消耗品的"每秒回 X%"走这里，和定值回复分开累加）
+  pe.hpRegenPct = 0, pe.manaRegenPct = 0, pe.adPct = 0, pe.hpPct = 0, pe.hpToAdPct = 0, pe.shieldPower = 0, pe.healPower = 0;
 }
 
 // src/43-data-3.js
@@ -63542,6 +63774,26 @@ function _o(n, t) {
       case "attack_speed":
         pe.asPct += d.value;
         break;
+      // 消耗品的持续增益：都是"加多少"的绝对值，和装备属性同一个出口累加
+      case "ad_up":
+        pe.ad += d.value;
+        break;
+      case "ap_up":
+        pe.ap += d.value;
+        break;
+      case "armor_up":
+        pe.armor += d.value;
+        break;
+      case "mr_up":
+        pe.mr += d.value;
+        break;
+      // 每秒回复按最大值的比例算，不是定值
+      case "hp_regen":
+        pe.hpRegenPct += d.value;
+        break;
+      case "mana_regen":
+        pe.manaRegenPct += d.value;
+        break;
       case "frost_insight":
         s = true;
         break;
@@ -63572,7 +63824,7 @@ function _o(n, t) {
     const f = pe.slowResist < 0 ? 0 : pe.slowResist > 1 ? 1 : pe.slowResist, d = Math.min(0.9, pe.slow * (1 - f));
     r.moveSpeed = Math.max(pW, (o.moveSpeed + pe.moveFlat) * Math.max(0.1, 1 + pe.movePct) * (1 - d));
   } else r.moveSpeed = 0;
-  r.attackRange = o.attackRange, r.cdr = Math.min(mW, o.cdr + pe.cdr), r.lifesteal = o.lifesteal + pe.lifesteal, r.critChance = Math.min(1, o.critChance + pe.crit), r.critDamage = o.critDamage + pe.critDmg, r.armorPen = Math.min(M6, o.armorPen + pe.armorPen), r.magicPen = Math.min(M6, o.magicPen + pe.magicPen), r.hpRegen = o.hpRegen + pe.hpRegen + (i ? r.maxHp * yn.blessingRegen : 0), r.manaRegen = o.manaRegen + pe.manaRegen + (s ? r.maxMana * yn.frostManaRegen : 0), // 护盾效率 / 治疗加成：裸装是 0，装备叠上来（小兵/塔的 base 里没有这两个字段）
+  r.attackRange = o.attackRange, r.cdr = Math.min(mW, o.cdr + pe.cdr), r.lifesteal = o.lifesteal + pe.lifesteal, r.critChance = Math.min(1, o.critChance + pe.crit), r.critDamage = o.critDamage + pe.critDmg, r.armorPen = Math.min(M6, o.armorPen + pe.armorPen), r.magicPen = Math.min(M6, o.magicPen + pe.magicPen), r.hpRegen = o.hpRegen + pe.hpRegen + r.maxHp * (pe.hpRegenPct + (i ? yn.blessingRegen : 0)), r.manaRegen = o.manaRegen + pe.manaRegen + r.maxMana * (pe.manaRegenPct + (s ? yn.frostManaRegen : 0)), // 护盾效率 / 治疗加成：裸装是 0，装备叠上来（小兵/塔的 base 里没有这两个字段）
   r.shieldPower = (o.shieldPower ?? 0) + pe.shieldPower, r.healPower = (o.healPower ?? 0) + pe.healPower, t.alive && (r.maxHp > l && (t.hp += r.maxHp - l), r.maxMana > c && (t.mana += r.maxMana - c)), t.hp > r.maxHp && (t.hp = r.maxHp), t.mana > r.maxMana && (t.mana = r.maxMana);
 }
 var k6 = 0.2;
@@ -64510,6 +64762,18 @@ function cS(n, t, e, s = false) {
   const i = ln[e];
   if (!i) return false;
   const a = t.items;
+  if (i.stack > 1) {
+    if (t.gold < i.cost) return Do(n, t, "gold", s);
+    let slot = -1;
+    for (let k = 0; k < a.length; k++) if (a[k] === e && (t.rt.itemN[k] ?? 0) < i.stack) {
+      slot = k;
+      break;
+    }
+    const fresh = slot < 0;
+    if (fresh) slot = a.indexOf(null);
+    if (slot < 0) return Do(n, t, "full", s);
+    return t.gold -= i.cost, a[slot] = e, t.rt.itemN[slot] = fresh ? 1 : t.rt.itemN[slot] + 1, t.rt.itemCd[slot] = 0, lS(n, t), n.emit(s ? { type: "itemBought", unitId: t.id, itemId: e, auto: true } : { type: "itemBought", unitId: t.id, itemId: e }), true;
+  }
   const comb = Sk2(t, e);
   if (comb) {
     const price = Math.max(0, i.cost - comb.value);
@@ -64538,7 +64802,8 @@ function cS(n, t, e, s = false) {
 function bj(n, t, e) {
   if (!Number.isInteger(e) || e < 0 || e >= t.items.length) return false;
   const s = t.items[e];
-  return s ? (t.gold += Math.floor(ln[s].cost * Yh), t.items[e] = null, t.rt.itemCd[e] = 0, t.autoBuy && Tk(t.heroId, s) && (t.autoBuy = false), lS(n, t), true) : false;
+  const cnt = Math.max(1, t.rt.itemN[e] ?? 0);
+  return s ? (t.gold += Math.floor(ln[s].cost * Yh) * cnt, t.items[e] = null, t.rt.itemCd[e] = 0, t.rt.itemN[e] = 0, t.autoBuy && Tk(t.heroId, s) && (t.autoBuy = false), lS(n, t), true) : false;
 }
 function useItemActive(n, t, e) {
   const s = e.index;
@@ -64585,6 +64850,20 @@ function useItemActive(n, t, e) {
     case "cleanse":
       qj(n, t, ["stun", "root", "silence", "slow", "airborne"]), Wn(n, t, "unstoppable", { duration: act.duration, sourceId: t.id, key: "item_cleanse", merge: "replace" }), n.fx("buff_gain", here, t.team, { unitId: t.id });
       break;
+    case "consume": {
+      const hp2 = (act.heal ?? 0) + t.stats.maxHp * (act.healPct ?? 0), mana = (act.mana ?? 0) + t.stats.maxMana * (act.manaPct ?? 0);
+      if (hp2 > 0 && gy(n, t, t, hp2 * (1 + (t.stats.healPower ?? 0))) > 0) n.fx("heal", here, t.team, { unitId: t.id });
+      if (mana > 0) t.mana = Math.min(t.stats.maxMana, t.mana + mana);
+      if (act.costHpPct > 0) t.hp = Math.max(1, t.hp - t.hp * act.costHpPct);
+      for (const b of act.buffs ?? [])
+        Wn(n, t, b.id, { duration: b.duration, value: b.value, sourceId: t.id, key: `item_${id2}` });
+      n.fx("buff_gain", here, t.team, { unitId: t.id });
+      const left = (t.rt.itemN[s] ?? 1) - 1;
+      if (left > 0) t.rt.itemN[s] = left;
+      else t.items[s] = null, t.rt.itemN[s] = 0, t.rt.itemCd[s] = 0;
+      lS(n, t);
+      break;
+    }
     default:
       return o.itemCd[s] = 0, Do(n, t, "no_active", false);
   }
@@ -64748,7 +65027,7 @@ function Ej(n, t, e, s, i) {
     }
   }
 }
-function hS(n, t, e, s = false) {
+function hS2(n, t, e, s = false) {
   const i = e.slot, a = t.skills[i];
   if (!a || !t.alive) return false;
   const o = t.rt, r = n.state.time;
@@ -64862,7 +65141,7 @@ function Aj(n, t, e) {
       Mj(n, t, e.targetId);
       return;
     case "cast":
-      hS(n, t, e);
+      hS2(n, t, e);
       return;
   }
 }
@@ -64905,7 +65184,7 @@ function Cj(n, t, e) {
     if (!(o.stunned || i < o.lockUntil)) {
       if (a.pendingCast) {
         const f = a.pendingCast;
-        if (a.pendingCast = null, i <= a.pendingUntil && (hS(n, t, f, true), i < o.lockUntil || o.dash !== null))
+        if (a.pendingCast = null, i <= a.pendingUntil && (hS2(n, t, f, true), i < o.lockUntil || o.dash !== null))
           return;
       }
       if (a.atkOrder) {

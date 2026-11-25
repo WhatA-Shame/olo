@@ -317,7 +317,10 @@ function AG(n) {
       Ze = z(
         "div",
         "sf-hud__dt-meta",
-        z("span", "sf-badge sf-badge--mute", u4[Zt.category]),
+        // 消耗品的顶部小标题已经写了"消耗品"，badge 再写一遍是废话，改成写可叠加数
+        Zt.category === "consumable"
+          ? z("span", "sf-badge sf-badge--mute", `可叠加 ${Zt.stack}`)
+          : z("span", "sf-badge sf-badge--mute", u4[Zt.category]),
         Zt.category === "boots"
           ? z("span", `sf-badge${Zt.tier === 2 ? "" : " sf-badge--mute"}`, MG[Zt.tier])
           : null,
@@ -345,7 +348,12 @@ function AG(n) {
     // 先看标签知道这是什么，再看内容。空块不渲染，不留空白。
     const sec = (cls, label, ...kids) =>
       z("div", `sf-hud__dt-sec ${cls}`, z("div", "sf-dt-label", label), ...kids);
-    const qs = z("div", "sf-hud__dt-body sf-scroll", sec("is-stats", "属性", js));
+    // 消耗品没有常驻属性，属性块会空着——空块不渲染
+    const qs = z(
+      "div",
+      "sf-hud__dt-body sf-scroll",
+      ...(js.childElementCount ? [sec("is-stats", "属性", js)] : []),
+    );
     if (Zt.passive)
       qs.appendChild(
         sec("is-passive", "被动", z("b", "sf-hud__dt-h", Zt.passive.name), z("p", "sf-hud__dt-p", Zt.passive.desc)),
@@ -360,7 +368,8 @@ function AG(n) {
             "b",
             "sf-hud__dt-h",
             Zt.active.name,
-            z("span", "sf-hud__dt-active-cd sf-num", `冷却 ${Zt.active.cd} 秒`),
+            // 消耗品没有"冷却"这个概念（上限已经写在 badge 上了），这里留空
+            Zt.stack > 1 ? null : z("span", "sf-hud__dt-active-cd sf-num", `冷却 ${Zt.active.cd} 秒`),
           ),
           z("p", "sf-hud__dt-p", Zt.active.desc),
           z("small", "sf-hud__dt-tip", "装备栏里按数字键 1~6，或直接点那一格"),
@@ -573,12 +582,16 @@ function AG(n) {
     for (let Re = 0; Re < Rt.length; Re++) {
       const Oe = Tt.items[Re],
         X = Rt[Re];
-      (X.dataset.item !== (Oe ?? "") &&
+      // 消耗品要在格子上显示剩余个数，所以判重条件要带上数量，不然用掉一个不会重绘
+      const cnt = Oe && ln[Oe].stack > 1 ? (Tt.rt.itemN[Re] ?? 0) : 0;
+      (X.dataset.item !== (Oe ?? "") || X.dataset.n !== String(cnt)) &&
         ((X.dataset.item = Oe ?? ""),
+        (X.dataset.n = String(cnt)),
         (X.innerHTML = Oe ? Po(Oe) : ""),
+        cnt > 1 && X.appendChild(z("b", "sf-slot__n sf-num", String(cnt))),
         X.classList.toggle("sf-slot--empty", !Oe),
         X.setAttribute("aria-label", Oe ? `${ln[Oe].name}（点选可出售）` : "空装备栏")),
-        X.classList.toggle("is-active", a?.kind === "inv" && a.index === Re));
+        X.classList.toggle("is-active", a?.kind === "inv" && a.index === Re);
     }
     o = a?.kind === "card" ? (ce?.[a.order - 1]?.buyId ?? null) : null;
     const js = Dt(Tt, ce),
@@ -970,8 +983,11 @@ function IG(n) {
     for (let J = 0; J < S.length; J++) {
       const Z = S[J],
         ot = N.items[J] ?? null;
-      if (ot !== Z.id) {
+      // 消耗品要显示剩余个数；数量变化也要触发重绘，所以判重要带上个数
+      const cnt = ot && ln[ot].stack > 1 ? (N.rt.itemN?.[J] ?? 0) : 0;
+      if (ot !== Z.id || Z.n !== cnt) {
         ((Z.id = ot),
+          (Z.n = cnt),
           Z.off?.(),
           (Z.off = null),
           (Z.cdEl = Z.secEl = null),
@@ -987,6 +1003,8 @@ function IG(n) {
             ((Z.cdEl = z("i", "sf-hud__st-cd")),
             (Z.secEl = z("b", "sf-hud__st-sec sf-num")),
             Z.el.append(Z.cdEl, Z.secEl, z("i", "sf-hud__st-num sf-num", String(J + 1))));
+          // 角标最后加，避免被上面的 append / innerHTML 覆盖
+          cnt > 1 && Z.el.appendChild(z("b", "sf-slot__n sf-num", String(cnt)));
           D && uo(Z.el, "is-new");
         } else (Z.el.removeAttribute("aria-label"), Z.el.classList.remove("is-new", "is-cd"));
       }

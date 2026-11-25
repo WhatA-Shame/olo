@@ -1874,6 +1874,8 @@ function nu(n, t, e, s, i) {
     moveMode: Qh,
     // 装备主动的冷却，按装备栏下标存（6 格）。买/卖装备时对应格会清 0。
     itemCd: [0, 0, 0, 0, 0, 0],
+    // 消耗品的剩余个数，同样按格存。普通装备这一格恒为 0。
+    itemN: [0, 0, 0, 0, 0, 0],
     dirX: 0,
     dirY: 0,
     path: null,
@@ -2508,6 +2510,9 @@ function gW() {
     (pe.magicPen = 0),
     (pe.hpRegen = 0),
     (pe.manaRegen = 0),
+    // 按最大生命/法力的百分比回复（消耗品的"每秒回 X%"走这里，和定值回复分开累加）
+    (pe.hpRegenPct = 0),
+    (pe.manaRegenPct = 0),
     (pe.adPct = 0),
     (pe.hpPct = 0),
     (pe.hpToAdPct = 0),

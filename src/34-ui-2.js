@@ -719,6 +719,89 @@ const tH = {
         `<path d="M18 40h11v9H18zM35 40h11v9H35z" fill="${Ln(n, 0.3)}" opacity=".55" ${eP(n, 1)}/>` +
         `<path d="M23 13l4 5" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
     ),
+
+  // ── 消耗品专用形制 ──────────────────────────────────────────
+  // 针剂：群勃龙(0) 康力龙(1)。安瓿瓶 + 针头，靠瓶身颜色和标签区分。
+  syringe: (n, v = 0) => {
+    const g = 'url(#@sy)';
+    const body =
+      v === 0
+        ? // 群勃龙：粗安瓿 + 长针，刻度明显
+          `<path d="M26 26h12v20c0 3.4-2.4 5.8-6 5.8s-6-2.4-6-5.8Z" fill="${g}" ${eP(n, 1.3)}/>` +
+          `<path d="M27.5 20h9v6.5h-9z" fill="${Ln(n, 0.4)}" ${eP(n, 1.1)}/>` +
+          `<path d="M32 20V9" stroke="${Ln(n, 0.5)}" stroke-width="2.6" stroke-linecap="round"/>` +
+          `<path d="M32 9l-1.8-4.4h3.6z" fill="${Hn(n, 0.55)}"/>` +
+          `<path d="M25.5 33h13v9h-13z" fill="#f4f7fb" opacity=".85"/>` +
+          `<path d="M28 35.5v4M31 35.5v4M34 35.5v4" stroke="${Ln(n, 0.55)}" stroke-width="1.1" opacity=".75"/>` +
+          `<path d="M27.5 28v18" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" opacity=".4"/>`
+        : // 康力龙：小药瓶 + 短针 + 药片
+          `<path d="M25 30h14v16c0 3.2-2.4 5.4-5.6 5.4H30.6C27.4 51.4 25 49.2 25 46Z" fill="${g}" ${eP(n, 1.3)}/>` +
+          `<path d="M27 24h10v6.4H27z" fill="${Ln(n, 0.38)}" ${eP(n, 1.1)}/>` +
+          `<path d="M32 24V13" stroke="${Ln(n, 0.5)}" stroke-width="2.2" stroke-linecap="round"/>` +
+          `<circle cx="32" cy="11.6" r="1.8" fill="${Hn(n, 0.5)}"/>` +
+          `<ellipse cx="32" cy="39" rx="4.6" ry="2.8" fill="#f4f7fb" opacity=".8"/>` +
+          `<path d="M27.6 39h8.8" stroke="${Ln(n, 0.5)}" stroke-width="1.2" opacity=".7"/>` +
+          `<path d="M26.8 32v15" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".38"/>`;
+    return dn(
+      Mi(n),
+      fn('sy', 22, 30, 42, 30, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 36, 24) + body,
+    );
+  },
+
+  // 香烟：硬盒 + 露出的一支 + 盒面标签
+  cigpack: (n) => {
+    const g = 'url(#@cg)';
+    return dn(
+      Mi(n),
+      fn('cg', 16, 24, 48, 24, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 34, 24) +
+        `<path d="M22 22h20v32c0 2.4-1.8 4.2-4.2 4.2H26.2C23.8 58.2 22 56.4 22 54Z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M22 22h20v7H22z" fill="${Ln(n, 0.3)}" opacity=".8"/>` +
+        `<path d="M26 15h3.4v8H26z" fill="#fbf7ef" ${eP(n, 1)}/>` +
+        `<path d="M26 15h3.4v2.6H26z" fill="${Hn(n, 0.5)}" opacity=".9"/>` +
+        `<path d="M31.5 16h3.4v7h-3.4z" fill="#f2ece0" ${eP(n, 1)}/>` +
+        `<path d="M22.5 36h19v12h-19z" fill="#f4f7fb" opacity=".85"/>` +
+        `<path d="M26 42h12" stroke="${Ln(n, 0.55)}" stroke-width="1.6" stroke-linecap="round" opacity=".75"/>` +
+        `<path d="M25.5 39h9" stroke="${Ln(n, 0.4)}" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>` +
+        `<path d="M24 26v26" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".34"/>`,
+    );
+  },
+
+  // 槟榔干：牛皮纸袋 + 袋口卷边 + 三颗槟榔
+  betel: (n) => {
+    const g = 'url(#@bt2)';
+    return dn(
+      Mi(n),
+      fn('bt2', 18, 26, 46, 26, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 34, 24) +
+        `<path d="M20 24h24l-2.4 30c-.2 2.6-2.2 4.4-4.8 4.4H27.2c-2.6 0-4.6-1.8-4.8-4.4Z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M20 24h24l-.8 6H20.8z" fill="${Ln(n, 0.28)}" opacity=".85"/>` +
+        `<path d="M22 30.5h20" stroke="${Ln(n, 0.5)}" stroke-width="1.2" opacity=".6"/>` +
+        `<ellipse cx="27" cy="41" rx="4.2" ry="3.2" fill="${Ln(n, 0.42)}" ${eP(n, 1)}/>` +
+        `<ellipse cx="36" cy="44.5" rx="3.6" ry="2.8" fill="${Ln(n, 0.55)}" ${eP(n, 1)}/>` +
+        `<ellipse cx="32" cy="35.5" rx="3" ry="2.4" fill="${Hn(n, 0.25)}" ${eP(n, 1)}/>` +
+        `<path d="M22.5 33v20" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".32"/>`,
+    );
+  },
+
+  // 发酵果汁：玻璃瓶 + 吸管 + 果肉沉淀
+  juice: (n) => {
+    const g = 'url(#@ju)';
+    return dn(
+      Mi(n),
+      fn('ju', 22, 30, 42, 30, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 36, 24) +
+        `<path d="M24 22h16v8c0 2.4 3 4.4 3 9v15c0 2.6-2 4.4-4.6 4.4H25.6C23 58.4 21 56.6 21 54V39c0-4.6 3-6.6 3-9Z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M26.5 17h11v5.4h-11z" fill="${Ln(n, 0.38)}" ${eP(n, 1.1)}/>` +
+        `<path d="M38 15l5-7" stroke="#f4f7fb" stroke-width="2.6" stroke-linecap="round" opacity=".9"/>` +
+        `<path d="M21.5 38h21v16h-21z" fill="#f4f7fb" opacity=".28"/>` +
+        `<circle cx="27" cy="48" r="2.2" fill="${Hn(n, 0.4)}" opacity=".8"/>` +
+        `<circle cx="34" cy="50" r="1.6" fill="${Hn(n, 0.4)}" opacity=".7"/>` +
+        `<circle cx="31" cy="44" r="1.4" fill="${Hn(n, 0.4)}" opacity=".6"/>` +
+        `<path d="M23 30v24" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".4"/>`,
+    );
+  },
 };
 
 // 63 件装备 → 10 个形制族。装备的 id 不进 tH，统一在这里归类；
@@ -806,6 +889,12 @@ const tHx = {
   nail_gun: 'gun',
   dumbbell: 'dumbbell',
   e_bike: 'bike',
+  // 消耗品：一件一个样子，不共用形制
+  trenbolone: ['syringe', 0],
+  stanozolol: ['syringe', 1],
+  cigarette: 'cigpack',
+  betel_nut: 'betel',
+  fermented_juice: 'juice',
 };
 
 function Po(n) {
@@ -980,6 +1069,14 @@ const S3 = { top: "上路", mid: "中路", bot: "下路", jungle: "打野" },
     fengling_crit: { name: "下一箭必暴", kind: "buff" },
     yeque_shadow: { name: "得手", kind: "buff" },
     tower_focus: { name: "防御塔锁定", kind: "debuff" },
+    // 消耗品带来的持续增益。id 必须和 _o() 里的 case 完全一致，
+    // 漏登记一个就会让 HUD 状态行读 T3[id].kind 时炸掉（lH 有兜底但不解决图标错）。
+    ad_up: { name: "物攻提升", kind: "buff" },
+    ap_up: { name: "法强提升", kind: "buff" },
+    armor_up: { name: "护甲提升", kind: "buff" },
+    mr_up: { name: "魔抗提升", kind: "buff" },
+    hp_regen: { name: "持续回血", kind: "buff" },
+    mana_regen: { name: "持续回蓝", kind: "buff" },
   },
   Ys = nH,
   Eo = sH;
@@ -1087,6 +1184,14 @@ const k4 =
     tower_focus: () => Hs("#c8303a", M4("target")),
     // 装备主动带来的状态（金身护符）
     stasis: () => Hs("#ffd76a", M4("shield")),
+    // 消耗品的持续增益：和 T3 一一对应。图标复用状态行的 24×24 符号集
+    // （M4 只认这些键；别塞完整 <svg>，Hs 是把它嵌进 <g transform> 里的）
+    ad_up: () => Hs("#ff8a5a", M4("damage")),
+    ap_up: () => Hs("#9cb4ff", M4("damage")),
+    armor_up: () => Hs("#9fb4c9", M4("shield")),
+    mr_up: () => Hs("#8fc7ff", M4("shield")),
+    hp_regen: () => Hs("#56c7a0", M4("heart")),
+    mana_regen: () => Hs("#5b9bff", M4("mana")),
   };
 
 function lH(n) {
