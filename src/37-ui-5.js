@@ -787,7 +787,17 @@ function A$(n, t) {
     );
   };
   (c("keydown", (O) => {
-    if (!n.enabled || Sf() || kt(O) || O.ctrlKey || O.metaKey || O.altKey) return;
+    // 表情快捷键 Ctrl1~4。必须挡在下面那个 return 前面 —— 它一进门就把带修饰键的键全丢了。
+    // （浏览器把 Ctrl1~8 拿去切标签页，preventDefault 不一定拦得住，所以按钮/下拉也能点。）
+    if (!n.enabled || Sf() || kt(O) || O.metaKey || O.altKey) return;
+    if (O.ctrlKey && !O.repeat) {
+      const et = { Digit1: "taunt", Digit2: "joke", Digit3: "dance", Digit4: "cheer" }[O.code];
+      if (et) {
+        (O.preventDefault(), n.actions.emote(et));
+        return;
+      }
+    }
+    if (O.ctrlKey) return;
     const Y = O.code;
     if ((!t.forced && S$.has(Y) && t.setMode("kbm"), Rt(Y, !0))) {
       (O.preventDefault(), b());

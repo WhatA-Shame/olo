@@ -15,6 +15,7 @@ import { u8 } from './21-core-4.js';
 import { $8, G8, Hf, Jn, Kx, M0, Sf, T0, V8, W8, Wx, X8, Xx, Zn, _e, jx, po, q8, qx, ro, z, za, zi } from './32-ui.js';
 import { Ia, K1, X1, Y1, ln } from './33-data-2.js';
 import { Ad, Ar, Jx, Ml, Po, Qx, S3, T4, Tf, Vt, Zh, ck, dH, ey, fH, fk, hH, hh, k3, ks, ny, rk, ty, uH } from './34-ui-2.js';
+import { KART_SPECS, kartSpec } from './47-kart.js';
 
 const I2 = { passive: "被动", s1: "一技能", s2: "二技能", ult: "大招" },
   MH = { s1: "Q", s2: "E", ult: "R" },
@@ -36,6 +37,10 @@ const I2 = { passive: "被动", s1: "一技能", s2: "二技能", ult: "大招" 
 
 /* ── 英雄卡 ── */
 .sf-select__roster { grid-area: roster; display: flex; flex-direction: column; gap: max(5px, 9u); min-height: 0; }
+/* 花名册现在能塞二十多个（正式英雄 + 占位皮角色）。卡片原来 flex:1 平分高度，
+   人一多就挤成一条条看不清 —— 改成固定高度、让列表自己滚。 */
+.sf-select__roster { overflow-y: auto; overflow-x: hidden; padding-right: max(2px, 4u); scrollbar-width: thin; scrollbar-color: rgba(150, 178, 235, 0.45) transparent; }
+.sf-select__roster > .sf-hcard { flex: 0 0 auto; height: max(46px, 62u); min-height: 0; }
 .sf-hcard {
   --hero: #8fe9ff;
   position: relative; flex: 1 1 0; min-height: 0; max-height: 122u; display: flex; align-items: center; gap: 12u; padding: 0 12u 0 9u; margin: 0; border: 0; cursor: pointer; text-align: left;
@@ -306,6 +311,8 @@ function RH(n) {
   const { host: t } = n;
   let e = n.initial.heroId,
     s = n.initial.difficulty,
+    // sk = 占位皮 id（null 表示用英雄原皮）。技能包始终跟着 e（heroId）走。
+    sk = n.initial.skin ?? null,
     i = "s1",
     a = null,
     o = !1;
@@ -345,18 +352,25 @@ function RH(n) {
     f = z("div", "sf-select__roster");
   (f.setAttribute("role", "listbox"), f.setAttribute("aria-label", "英雄列表"));
   const d = new Map();
-  Ml.forEach((q, et) => {
-    const ct = Se[q],
+  // 花名册 = 正式英雄 + 占位皮角色。占位皮只是外观，技能包借 ROSTER 里标的那个英雄，
+  // 所以卡片上写"XX 的技能包"，让人知道点下去是套谁的手感。
+  const ROSTER = [
+    ...Ml.map((h) => ({ hero: h, skin: null })),
+    ...KART_SPECS.map((k) => ({ hero: k.kit, skin: k.id })),
+  ];
+  ROSTER.forEach((pick, et) => {
+    const ct = Se[pick.hero],
+      sp = pick.skin ? kartSpec(pick.skin) : null,
       rt = z("span", "sf-hcard__role", _e(Ar(ct.role))),
       mt = z(
         "button",
         "sf-hcard",
-        z("span", "sf-hcard__pic-wrap", Zh(t, q, "sf-hcard__pic"), rt),
+        z("span", "sf-hcard__pic-wrap", Zh(t, pick.skin || pick.hero, "sf-hcard__pic"), rt),
         z(
           "span",
           "sf-hcard__info",
-          z("span", "sf-hcard__name", Qx(q)),
-          z("span", "sf-hcard__title", ct.title),
+          z("span", "sf-hcard__name", sp ? sp.name : Qx(pick.hero)),
+          z("span", "sf-hcard__title", sp ? `${ct.name}的技能包` : ct.title),
           z(
             "span",
             "sf-hcard__meta",
@@ -367,13 +381,14 @@ function RH(n) {
       );
     ((mt.type = "button"),
       mt.setAttribute("role", "option"),
-      (mt.dataset.hero = q),
+      (mt.dataset.hero = pick.hero),
+      pick.skin && (mt.dataset.skin = pick.skin),
       (mt.dataset.sfSnd = "select"),
       mt.style.setProperty("--hero", ct.palette.glow),
       mt.style.setProperty("--role", Tf[ct.role]),
       (mt.style.animationDelay = `${0.06 * et}s`),
-      mt.addEventListener("click", () => M(q)),
-      d.set(q, mt),
+      mt.addEventListener("click", () => M(pick.hero, pick.skin)),
+      d.set(`${pick.hero}|${pick.skin ?? ""}`, mt),
       f.appendChild(mt));
   });
   const h = z("canvas", "sf-select__canvas"),
@@ -407,7 +422,7 @@ function RH(n) {
       value: s,
       label: "对手难度",
       onChange: (q) => {
-        ((s = q), (x.textContent = hh[q].desc), n.onChange?.({ heroId: e, difficulty: s }));
+        ((s = q), (x.textContent = hh[q].desc), n.onChange?.({ heroId: e, skin: sk, difficulty: s }));
       },
     });
   x.textContent = hh[s].desc;
@@ -434,20 +449,21 @@ function RH(n) {
     _ = z("aside", "sf-select__detail sf-panel", v);
   l.append(c, z("div", "sf-select__main", f, m, y, _));
   function k(q) {
-    const et = Ml.indexOf(e);
-    M(Ml[(et + q + Ml.length) % Ml.length]);
+    const at = ROSTER.findIndex((r) => r.hero === e && (r.skin ?? null) === (sk ?? null)),
+      nx = ROSTER[(at + q + ROSTER.length) % ROSTER.length];
+    M(nx.hero, nx.skin);
   }
-  function M(q) {
-    if (q !== e) {
-      ((e = q), (i = "s1"), E(!0));
+  function M(q, s2 = null) {
+    if (q !== e || (s2 ?? null) !== (sk ?? null)) {
+      ((e = q), (sk = s2 ?? null), (i = "s1"), E(!0));
       try {
-        a?.setHero(q);
+        a?.setHero(e, sk);
       } catch {}
-      n.onChange?.({ heroId: e, difficulty: s });
+      n.onChange?.({ heroId: e, skin: sk, difficulty: s });
     }
   }
   function S() {
-    o || ((o = !0), (g.disabled = !0), n.onConfirm({ heroId: e, difficulty: s }));
+    o || ((o = !0), (g.disabled = !0), n.onConfirm({ heroId: e, skin: sk, difficulty: s }));
   }
   function b(q) {
     try {
@@ -487,11 +503,12 @@ function RH(n) {
     return (ct.append(nt), ct);
   }
   function E(q) {
-    const et = Se[e];
+    const et = Se[e],
+      sp = sk ? kartSpec(sk) : null;
     (l.style.setProperty("--hero", et.palette.glow),
       l.style.setProperty("--role", Tf[et.role]),
       d.forEach((ot, j) => {
-        const at = j === e;
+        const at = j === `${e}|${sk ?? ""}`;
         (ot.classList.toggle("is-active", at), ot.setAttribute("aria-selected", String(at)));
       }),
       (u.textContent = ""),
@@ -499,10 +516,10 @@ function RH(n) {
         z(
           "h3",
           "sf-select__name",
-          z("span", "sf-metal", et.name),
+          z("span", "sf-metal", sp ? sp.name : et.name),
           z("small", "sf-select__name-role", _e(Ar(et.role)), et.roleName),
         ),
-        z("span", "sf-select__sub", et.title),
+        z("span", "sf-select__sub", sp ? `${et.name} · ${et.title}` : et.title),
       ));
     for (const ot of r.splice(0)) ot();
     ((v.textContent = ""), (v.scrollTop = 0));
@@ -641,6 +658,8 @@ function RH(n) {
       }
       try {
         ((a = t.createHeroPreview(h, e)), a.resize());
+        // 记住上次选的是占位皮：预览要按皮出模型，不然读档回来看到的是英雄原皮
+        sk && a.setHero(e, sk);
       } catch {
         a = null;
       }
@@ -1190,19 +1209,21 @@ function BH(n) {
 }
 
 const pk = "starfall.lastChoice.v1",
-  P2 = { heroId: "chijin", difficulty: "easy" };
+  P2 = { heroId: "chijin", skin: null, difficulty: "easy" };
 
 function HH() {
   const n = $8(pk);
   if (!n || typeof n != "object") return { ...P2 };
   const t = typeof n.heroId == "string" && n.heroId in Se ? n.heroId : P2.heroId,
     e = n.difficulty,
-    s = e === "easy" || e === "normal" || e === "hard" ? e : P2.difficulty;
-  return { heroId: t, difficulty: s };
+    s = e === "easy" || e === "normal" || e === "hard" ? e : P2.difficulty,
+    // 占位皮要校验：只认当前版本里还真存在、且确实挂在同一个英雄上的皮
+    k = typeof n.skin == "string" && kartSpec(n.skin)?.kit === t ? n.skin : null;
+  return { heroId: t, skin: k, difficulty: s };
 }
 
 function I4(n) {
-  Wx(pk, JSON.stringify({ heroId: n.heroId, difficulty: n.difficulty }));
+  Wx(pk, JSON.stringify({ heroId: n.heroId, skin: n.skin ?? null, difficulty: n.difficulty }));
 }
 
 function $H(n, t, e = {}) {

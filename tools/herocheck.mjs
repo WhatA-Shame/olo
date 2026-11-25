@@ -925,6 +925,70 @@ const main = async () => {
     ok('停下来的瞬间播急停', stopSeen >= 0, `stopT 起点 ${stopSeen.toFixed(2)}s`);
   }
 
+  // ── 商店：小件 → 中件 的合成 ──────────────────────────────────
+  // 放在最后跑，免得给英雄塞装备后影响前面那些断言。
+  if (argv.includes('--shop')) {
+    const snap = async (expr) => {
+      const r = await ev(expr);
+      try {
+        return JSON.parse(r);
+      } catch {
+        return null;
+      }
+    };
+    await ev(`(()=>{const u=${U}; u.items.fill(null); u.gold=5000; u.autoBuy=false; return 1;})()`);
+    const buy = async (id) => {
+      await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"buy",itemId:${JSON.stringify(id)}}); return 1;})()`);
+      await sleep(140);
+      return snap(`(()=>{const u=${U}; return JSON.stringify({gold:Math.round(u.gold),items:u.items.slice()});})()`);
+    };
+    const a1 = await buy('iron_sword');
+    const a2 = await buy('iron_blade');
+    // 金币有被动收入，所以只看"这一步扣了多少"，并留一点容差
+    const near = (v, want, tol = 15) => Math.abs(v - want) <= tol;
+    ok('买两件小件（铁剑 300 + 玄铁重剑 630）', a1 && near(a1.gold - 5000, -300) && a2 && near(a2.gold - a1.gold, -630), `金币 ${a1?.gold} → ${a2?.gold}`);
+    // 青锋剑 1000，组件已值 930 → 只该扣 70
+    const a3 = await buy('azure_blade');
+    const combined = a3 && a3.items.filter((x) => x === 'azure_blade').length === 1 && a3.items.filter((x) => x).length === 1;
+    ok(
+      '组件凑齐后合成青锋剑只付差价',
+      a3 && near(a3.gold - a2.gold, -70) && combined,
+      `这一步扣 ${a2 && a3 ? a2.gold - a3.gold : '?'}（应 70），装备栏 ${JSON.stringify(a3?.items)}`,
+    );
+    // 出售返还 60%
+    await ev(`(()=>{const w=window.__moba.world,u=${U}; w.command(u.id,{type:"sell",index:0}); return 1;})()`);
+    await sleep(140);
+    const a4 = await snap(`(()=>{const u=${U}; return JSON.stringify({gold:Math.round(u.gold),items:u.items.slice()});})()`);
+    ok('出售合成件返还 60% 全价', a4 && near(a4.gold - a3.gold, 600), `这一步返 ${a3 && a4 ? a4.gold - a3.gold : '?'}（应 600）`);
+    // 鞋：草鞋 + 布甲 → 护甲铁靴，只付 710-400=310
+    const b1 = await buy('cloth_armor');
+    const b2 = await buy('boots');
+    const b3 = await buy('boots_guard');
+    ok(
+      '鞋子也能走合成（草鞋+布甲→铁靴）',
+      b1 && b2 && b3 && near(b3.gold - b2.gold, -310) && b3.items.includes('boots_guard'),
+      `这一步扣 ${b2 && b3 ? b2.gold - b3.gold : '?'}（应 310），装备栏 ${JSON.stringify(b3?.items)}`,
+    );
+    await ev(`(()=>{const u=${U}; u.items.fill(null); u.gold=0; u.autoBuy=true; return 1;})()`);
+    // 商店面板本身：51 件装备、图标、合成路径都要能画出来
+    if (shots) {
+      await ev(`(()=>{const u=${U}; u.gold=3000;
+        const b=document.querySelector('.sf-hud__st-shop'); b&&b.click();
+        return 1;})()`);
+      await sleep(500);
+      await shot('shop-all', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      // 选中一件中件，看详情面板里的"合成"那一行
+      await ev(`(()=>{const c=document.querySelector('[data-item="azure_blade"]'); c&&c.click(); return 1;})()`);
+      await sleep(350);
+      await shot('shop-recipe', { x: 0, y: 0, width: 1088, height: 615 }, 2.0);
+      // 攻击分类：新加的小件/中件图标能不能画出来
+      await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='攻击'); t&&t.click(); return 1;})()`);
+      await sleep(400);
+      await shot('shop-attack', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      await ev(`(()=>{const b=document.querySelector('.sf-hud__st-shop'); b&&b.click(); return 1;})()`);
+    }
+  }
+
   const fx = await ev(`JSON.stringify(window.__hcFx)`);
   const keys = JSON.parse(fx && !fx.__err ? fx : '[]');
   const beforeKeys = JSON.parse(before && !before.__err ? before : '[]');

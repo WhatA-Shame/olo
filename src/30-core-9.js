@@ -835,11 +835,11 @@ function yO() {
       (v.rot(n.jaw, 4 + 30 * w, 0, 0),
         i.forEach((C, R) => {
           const I = 0.85 + 0.3 * Math.sin(M * 9 + R * 2.1) + 0.15 * Math.sin(M * 17 + R);
-          (v.scale(C, v.s[C] * I),
+          (v.scale(C, v.s[C * 3] * I),
             v.rot(C, Math.sin(M * 6 + R * 1.7) * 10, M * 40 * (R % 2 ? 1 : -1), Math.cos(M * 5 + R) * 10));
         }),
         a.forEach((C, R) => {
-          (v.scale(C, v.s[C] * (1 + 0.06 * Math.sin(M * 7 + R * 1.6))),
+          (v.scale(C, v.s[C * 3] * (1 + 0.06 * Math.sin(M * 7 + R * 1.6))),
             v.rot(
               C,
               Math.sin(M * 4.3 + R * 1.9) * 4 - (_.anim === "move" ? 8 : 0),
@@ -847,7 +847,7 @@ function yO() {
               Math.sin(M * 5.1 + R * 2.3) * 3,
             ));
         }),
-        v.scale(s, v.s[s] * (1 + 0.06 * S)),
+        v.scale(s, v.s[s * 3] * (1 + 0.06 * S)),
         (k.glow = Math.max(0.03, T)),
         E && _a(n, v));
     };
@@ -1309,7 +1309,7 @@ function MO() {
             const G = b.spawnT,
               q = (ct, rt, mt, nt, H) => {
                 const st = 1 - Gn(Ct(G, 1 + nt * 0.1, 1.9 + nt * 0.1));
-                (k(S, ct, st, rt, mt, H), S.scale(ct, S.s[ct] * Math.min(1, Ct(G, 0.9, 1.1) + 0.001)));
+                (k(S, ct, st, rt, mt, H), S.scale(ct, S.s[ct * 3] * Math.min(1, Ct(G, 0.9, 1.1) + 0.001)));
               };
             (u.forEach((ct, rt) => q(ct, 70 + rt, d[rt], 5 - rt, 1.6)),
               c.forEach((ct, rt) => q(ct, 60 + rt, 3.4, 3 + rt, 2.2)),
@@ -1338,14 +1338,14 @@ function MO() {
         (c.forEach((G, q) => S.move(G, (q % 2 ? -1 : 1) * 0.16 * F, 0, (q < 2 ? 1 : -1) * 0.16 * F)),
         l.forEach((G, q) => S.move(G, (q === 0 ? 1 : -1) * 0.2 * F, 0.08 * F, 0)),
         S.add(o, -8 * F, 0, 0),
-        S.scale(i, S.s[i] * (1 + 0.3 * F)),
+        S.scale(i, S.s[i * 3] * (1 + 0.3 * F)),
         (I += 0.5 * F));
       const L = [20, 33, -14],
         B = [16, 34, -27];
       (a.forEach((G, q) => {
         (S.rot(G, 0, b.time * L[q] * C + q * 70, 0),
           S.add(G, B[q], 0, 0),
-          S.scale(G, S.s[G] * Math.max(0.001, P)));
+          S.scale(G, S.s[G * 3] * Math.max(0.001, P)));
       }),
         S.rot(r, 0, 0, b.time * 24 * R),
         (w.glow = Math.max(0.04, I)));

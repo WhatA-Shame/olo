@@ -22,6 +22,7 @@ import { QH, XH } from './36-ui-4.js';
 import { $a, E0, FG } from './40-ui-8.js';
 import { WG, rf } from './41-ai.js';
 import { JV, KV, NV, Oi, QV, RV, Ss, XV, Xk, Zo, hW, iu, jV, qV, ql, tu, x6 } from './42-ai-2.js';
+import { kartSpec, preloadKart } from './47-kart.js';
 import { $j, AW, Aj, Ba, CW, Cj, Cs, Dh, Fj, Gj, HW, Hm, Jj, Kj, Lj, O6, Oj, Pr, Qj, Uj, Va, Vj, Wj, Wm, Wn, Xj, YW, Yj, Zj, _o, am, aq, by, ds, eq, fW, fj, gS, hj, ia, iq, jW, jj, my, nS, oa, om, qj, sq, tq, tr, vS, wo, xS, yS, zW, zh } from './43-data-3.js';
 
 Oi("panyue", "ult", {
@@ -1748,10 +1749,19 @@ async function Uq(n, t, e, s) {
     };
   const p = () => (s.cancelled ? (x(), !0) : !1);
   try {
+    if (t.skin) {
+      // 原版角色模型是运行时拉的（dist/kart/<id>.bin），进对局前先等它到齐，
+      // 否则第一帧会拿一个还没登记的模型 key 去取定义。
+      r.setProgress(dl.world, `加载 ${kartSpec(t.skin)?.name ?? '角色'}…`);
+      await preloadKart(t.skin);
+      if (p()) return null;
+    }
     if ((r.setProgress(dl.world, "集结双方英雄…"), await zc(), p())) return null;
     const g = {
         seed: e.seed,
         playerHero: t.heroId,
+        // 占位皮：玩家选的角色外观（技能包还是 heroId 那套）
+        skin: t.skin ?? null,
         difficulty: t.difficulty,
         autoPlay: e.autoPlay,
         autoBuy: n.getSettings().autoBuy,
@@ -2095,6 +2105,8 @@ function Hq(n, t = "") {
   }
   return {
     hero: a !== null && kr.includes(a) ? a : null,
+    // ?skin=frog：直接进对局时用哪个占位皮（调试试玩用）
+    skin: i("skin"),
     difficulty: o === "easy" || o === "normal" || o === "hard" ? o : null,
     seed: l,
     skipMenu: C1(i("skipmenu")),
@@ -2462,7 +2474,7 @@ function Xq() {
     let et = L;
     for (;;) {
       let ct;
-      if (et === "direct") ct = { heroId: n.hero ?? "chijin", difficulty: n.difficulty ?? "normal" };
+      if (et === "direct") ct = { heroId: n.hero ?? "chijin", skin: n.skin ?? null, difficulty: n.difficulty ?? "normal" };
       else if (((a = "menu"), (ct = await $H(e, E, { start: et, signal: q })), B !== l)) return;
       (m(), f++);
       const rt = await Uq(

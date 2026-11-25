@@ -26,6 +26,12 @@ import { $U, KU, ZU, jU } from './28-core-7.js';
 import { JU, QU, fO, lO } from './29-core-8.js';
 import { $x, CO, L8, LO, MO, W1, ao, jc, pO, qi, qw, rs, xa, yO } from './30-core-9.js';
 
+// 调试用：?dbg=1 时记下每个单位这一帧喂给动画的输入（见下面 ANIM_DBG.set）。
+// 不开就不建这张表，正常对局零开销。herocheck 靠它验"动作档位"这类只在渲染侧成立的逻辑。
+const ANIM_DBG =
+  typeof location !== 'undefined' && /[?&]dbg=1/.test(location.search) ? new Map() : null;
+if (ANIM_DBG) globalThis.__animDbg = ANIM_DBG;
+
 function Ec(n, t) {
   const e = $x[t],
     s = new Wa(),
@@ -847,6 +853,13 @@ function Qw() {
   return Object.keys(Gx);
 }
 
+// 外部原版模型（.kart 那批）是运行时按需 fetch 的，加载完再登记进来。
+// 不能写进 Gx 字面量：那样会被打进 bundle，20 个角色 20MB。
+function registerModel(key, build) {
+  if (!Gx[key]) Gx[key] = build;
+  return Gx[key];
+}
+
 const Jw = new Map();
 
 function Md(n, t) {
@@ -1232,8 +1245,12 @@ function nB(n) {
   switch (n.kind) {
     case "hero": {
       // 牛魔开大换成变身形态的模型（骨架一样，只是网格/贴图不同）
-      const k =
-        n.heroId === "niumo" && n.buffs && n.buffs.some((b) => b.id === "niumo_ult") ? "hero:niumo2" : Vx(n.heroId);
+      // 占位皮：单位上带 skin 就优先用 skin 的模型（技能包还是原英雄的）
+      const k = n.skin
+        ? `hero:${n.skin}`
+        : n.heroId === "niumo" && n.buffs && n.buffs.some((b) => b.id === "niumo_ult")
+          ? "hero:niumo2"
+          : Vx(n.heroId);
       // 场上可能同时有多个牛魔（玩家 + AI），钩子按单位 id 分开记，
       // 否则后渲染的那个会把前一个的值覆盖掉，测试读到的永远是 AI 的普通形态。
       n.heroId === "niumo" && ((globalThis.__niumoKey ??= {})[n.id] = k);
@@ -1393,7 +1410,7 @@ function lB(n) {
       let Q = a.get(D.key);
       if (!Q) {
         const $ = D.key.startsWith("hero:") || D.key.startsWith("minion:") || D.key.startsWith("monster:");
-        ((Q = new ux(D.geometry, D.rig.count, oB(D.key), { outline: aB(D), xray: $, map: D.map }, D.key)),
+        ((Q = new ux(D.geometry, D.rig.count, oB(D.key), { outline: aB(D), xray: $, map: D.map, mapSRGB: D.mapSRGB, specular: D.specular }, D.key)),
           Q.setShadows(p),
           Q.setOutlineVisible(x),
           B(Q, D),
@@ -1424,6 +1441,8 @@ function lB(n) {
         look: J,
         seen: !0,
         isPlayer: D.id === Q.playerId,
+        // 单位 id 留一份：tt() 里只有视觉对象，没有单位，?dbg=1 的调试表要靠它做键
+        unitId: D.id,
         alive: !0,
         x: D.pos.x,
         y: 0,
@@ -1543,6 +1562,15 @@ function lB(n) {
         const _t = Q.kind === "hero" ? 18 : Q.kind === "minion" ? 12 : 9;
         D.yaw += ft * (1 - Math.exp(-_t * $.dt));
       }
+      // 转向角速度：给"左拐/右拐"用。
+      // yaw = π/2 - facing，而世界 +y 在屏幕上朝下（相机从 +Y 往下看，屏幕右 = +X、屏幕下 = +Z = 世界 +y），
+      // 所以 facing 变大 = 屏幕上顺时针 = 右拐，即 yaw 变小是右拐、yaw 变大是左拐。
+      {
+        let ft = D.yaw - (D.prevYaw ?? D.yaw);
+        ft -= Math.round(ft / (Math.PI * 2)) * Math.PI * 2;
+        D.yawRate = $.dt > 1e-4 ? ft / $.dt : 0;
+        D.prevYaw = D.yaw;
+      }
       const Rt = Q.team === $.playerTeam || f0[Q.kind] || Q.kind === "monster" || Q.visible[$.playerTeam];
       let kt = Rt ? 1 : 0;
       if (Rt) {
@@ -1569,12 +1597,37 @@ function lB(n) {
       ((D.flashBoost = lt * KO),
         (D.flash = lt * (f0[Q.kind] || (Q.kind === "monster" && Q.radius >= 1.2) ? QO : ZO)));
       const O = D.puppet.input,
+        prevAnim = D.lastAnim,
         Y = Q.anim === "attack" && (Q.animStart !== D.lastStart || D.lastAnim !== "attack");
       (Y && (D.variant++, (D.special = !1)),
         (D.lastStart = Q.animStart),
         (D.lastAnim = Q.anim),
         (O.anim = Q.anim));
       const gt = Math.max(0, V - Q.animStart);
+      // 卡丁车那套标准动作按"当前移速 / 基础移速"挑档位：
+      //   被减速 → 行走（walk）    正常 → 小加速    提速 → 中加速 / 大加速
+      // h.base 只有英雄有，小兵野怪算出来恒为 1，一律走小加速。
+      const slowNow = Q.buffs.some((ft) => ft.id === "slow" && ft.value > 0) ? 1 : 0;
+      let speedTier = 0;
+      {
+        // 基础移速在 rt.base 上（43-data-3.js 的属性重算写进去的），不是 h.base
+        const base = Q.rt?.base?.moveSpeed ?? 0;
+        const ratio = base > 0 ? Q.stats.moveSpeed / base : 1;
+        speedTier = ratio >= 1.55 ? 2 : ratio >= 1.2 ? 1 : 0;
+      }
+      // 急停：从"走"切到"不动"那一刻开始计时，超过片长就不再播（由 animate 自己比时长）
+      if (Q.anim === "idle" && prevAnim === "move") D.stopT = 0;
+      else if (D.stopT >= 0) D.stopT = D.stopT + $.dt > 1.5 ? -1 : D.stopT + $.dt;
+      // 左拐 / 右拐：移动中航向转得够快就换成转向动作，进度跟着转的持续时间走。
+      // yawRate > 0 = 左拐（见上面 yaw 与 facing 的换算），反了就把这两个分支对调。
+      // 阈值别定太低：yaw 是按 18/s 的指数收敛追过去的，转 20° 就能瞬间到 5rad/s，
+      // 门槛一低就变成"每走两步扭一下"。5 只认 45° 以上的急转。
+      let turn = 0;
+      if (Q.anim === "move" && Math.abs(D.yawRate) > 5) {
+        turn = D.yawRate > 0 ? 1 : -1;
+        if (D.turnSign !== turn) ((D.turnSign = turn), (D.turnT = 0));
+        D.turnT += $.dt;
+      } else ((D.turnSign = 0), (D.turnT = 0));
       if (
         ((O.t = gt),
         (O.p = Q.animDur > 0 ? Math.min(1, gt / Q.animDur) : 0),
@@ -1588,6 +1641,13 @@ function lB(n) {
         (O.passive = Q.kind === "hero" && Q.buffs.length > 0 && Q.buffs.some((ft) => ft.id === "chijin_ember") ? 1 : 0),
         (D.hitT = U >= 0 ? U : 99),
         (O.hitT = D.hitT),
+        // 被减速就只走"行走"，加速档一律不用
+        // 注意字段名不能叫 speed —— 下面 1706 行会用真实移速(m/s)覆盖 input.speed，那是步幅用的
+        (O.slow = slowNow),
+        (O.tier = slowNow ? 0 : speedTier),
+        (O.turn = turn),
+        (O.turnT = D.turnT),
+        (O.stopT = D.stopT),
         D.spawnT >= 0)
       ) {
         const ft = D.def.spawnDur ?? 0;
@@ -1653,6 +1713,9 @@ function lB(n) {
         return;
       }
       const ot = D.puppet.input;
+      // ?dbg=1 时把 puppet 的输入对象本身挂到表上。动作档位（走/小加速/中加速/行走）是纯渲染逻辑，
+      // 从 state 里看不出来，herocheck 就靠这张表验。存的是活对象，读的时候拿到的就是当前帧的值。
+      if (ANIM_DBG) ((ot.modelKey = D.def && D.def.key), ANIM_DBG.set(D.unitId, ot));
       ((ot.time = g),
         (ot.stride = D.stride),
         (ot.speed = D.speed),
@@ -2173,4 +2236,4 @@ function mB(n, t) {
     }
   );
 }
-export { of, qc, Vx, lB, cB, Ac, a4, fB, v3, hB, uB, I8, P8, pB, D8, mB };
+export { of, qc, Vx, lB, cB, Ac, a4, fB, v3, hB, uB, I8, P8, pB, D8, mB, registerModel };

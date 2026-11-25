@@ -21560,28 +21560,66 @@ function Qc(n = {}) {
 var bm = `
 uniform highp sampler2D uBones;
 attribute vec3 aSkin;
+// \u7B2C\u4E8C\u7EC4\u9AA8\uFF1A(\u9AA8C, \u9AA8D, \u6743\u91CDC, \u6743\u91CDD)\u3002\u539F\u751F\u7F51\u683C\u5168\u662F 0\uFF0C\u53EA\u6709\u5916\u90E8\u8499\u76AE\u7F51\u683C\u7528\u6EE1\u56DB\u6839\u3002
+// \u9AA8B \u7684\u6743\u91CD\u6309 1\u2212wA\u2212wC\u2212wD \u53CD\u63A8\uFF0C\u6240\u4EE5\u4E24\u9AA8\u9876\u70B9\uFF08wC=wD=0\uFF09\u548C\u4EE5\u524D\u5B8C\u5168\u4E00\u81F4\u3002
+attribute vec4 aSkin2;
 vec3 qrot(vec4 q, vec3 v) {
   return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
-void boneXf(float idx, out vec4 ps, out vec4 q) {
-  int x = int(idx + 0.5) * 2;
+// \u6BCF\u6839\u9AA8 4 \u4E2A texel\uFF1A(ps,0) / \u56DB\u5143\u6570 q / (\u4E09\u8F74\u7F29\u653E,0) / \u9006\u7ED1\u5B9A\u56DB\u5143\u6570 q2\u3002
+// \u9876\u70B9\u6309 ps + qrot(q, qrot(q2, position) * sc) \u7B97 \u2014\u2014 \u4E5F\u5C31\u662F\u5B8C\u6574 LBS \u7684
+// M = R(wq)\xB7S(s)\xB7R(bindQW)\u207B\xB9\u3002q2 \u8BA9\u4E09\u8F74\u7F29\u653E\u843D\u5728**\u9AA8\u9ABC\u81EA\u5DF1\u7684\u8F74**\u4E0A\uFF0C
+// \u4E0D\u7136\u8F6C\u8FC7 90\xB0 \u7684\u96F6\u4EF6\u4F1A\u5F80\u4E16\u754C\u8F74\u7684\u65B9\u5411\u538B\uFF08\u770B\u7740\u50CF\u88AB\u62C9\u65AD\uFF09\u3002
+// \u7F29\u653E\u5FC5\u987B\u9010\u8F74\u53D6\u51FA\u6765 \u2014\u2014 \u539F\u7248\u52A8\u4F5C\u7684\u6324\u538B\u5927\u91CF\u662F"\u538B\u6241\u540C\u65F6\u6A2A\u5411\u53D8\u5BBD"\uFF0C\u53EA\u7559\u4E00\u4E2A\u6807\u91CF\u5C31\u6CA1\u5F62\u53D8\u4E86\u3002
+void boneXf(float idx, out vec4 ps, out vec4 q, out vec3 sc, out vec4 q2) {
+  int x = int(idx + 0.5) * 4;
   ps = texelFetch(uBones, ivec2(x, gl_InstanceID), 0);
   q = texelFetch(uBones, ivec2(x + 1, gl_InstanceID), 0);
+  sc = texelFetch(uBones, ivec2(x + 2, gl_InstanceID), 0).xyz;
+  q2 = texelFetch(uBones, ivec2(x + 3, gl_InstanceID), 0);
+}
+vec4 qconj(vec4 q) {
+  return vec4(-q.xyz, q.w);
 }
 `;
 var _m = `
   vec4 ps0;
   vec4 q0;
-  vec4 ps1;
-  vec4 q1;
-  boneXf(aSkin.x, ps0, q0);
-  vec3 skinnedPos = ps0.xyz + ps0.w * qrot(q0, position);
-  vec3 skinnedNormal = qrot(q0, normal);
-  if (aSkin.z < 0.999) {
-    boneXf(aSkin.y, ps1, q1);
-    skinnedPos = mix(ps1.xyz + ps1.w * qrot(q1, position), skinnedPos, aSkin.z);
-    skinnedNormal = mix(qrot(q1, normal), skinnedNormal, aSkin.z);
+  vec3 sc0;
+  vec4 q20;
+  vec4 psT;
+  vec4 qT;
+  vec3 scT;
+  vec4 q2T;
+  boneXf(aSkin.x, ps0, q0, sc0, q20);
+  // \u56DB\u9AA8\u6DF7\u5408\uFF0C\u5C31\u662F\u6807\u51C6 LBS \u7684 \u03A3 w_i\xB7(ps_i + R_i\xB7S_i\xB7R2_i\xB7position)\u3002
+  // \u6743\u91CD\u548C\u6052\u4E3A 1\uFF08\u9AA8B \u6309 1\u2212wA\u2212wC\u2212wD \u53CD\u63A8\uFF09\uFF0C\u6240\u4EE5\u4E24\u9AA8\u9876\u70B9\u548C\u4EE5\u524D\u7684 mix \u5B8C\u5168\u7B49\u4EF7\u3002
+  float wB = max(0.0, 1.0 - aSkin.z - aSkin2.z - aSkin2.w);
+  // \u4F4D\u7F6E\uFF1A\u5148\u8F6C\u56DE\u9AA8\u9ABC\u5C40\u90E8\uFF08q2\uFF09\uFF0C\u518D\u7F29\u653E\uFF0C\u518D\u8F6C\u56DE\u4E16\u754C\uFF08q\uFF09
+  vec3 skinnedPos = (ps0.xyz + qrot(q0, qrot(q20, position) * sc0)) * aSkin.z;
+  // \u6CD5\u7EBF\uFF1AM \u7684\u9006\u8F6C\u7F6E = R1\xB7S\u207B\xB9\xB7R2\u207B\xB9\uFF0C\u987A\u5E8F\u4E00\u6837\u3001\u7F29\u653E\u53D6\u5012\u6570
+  vec3 skinnedNormal = qrot(q0, qrot(qconj(q20), normal) / max(sc0, vec3(1e-4))) * aSkin.z;
+  vec3 scAll = sc0 * aSkin.z;
+  if (wB > 0.0005) {
+    boneXf(aSkin.y, psT, qT, scT, q2T);
+    skinnedPos += (psT.xyz + qrot(qT, qrot(q2T, position) * scT)) * wB;
+    skinnedNormal += qrot(qT, qrot(qconj(q2T), normal) / max(scT, vec3(1e-4))) * wB;
+    scAll += scT * wB;
   }
+  if (aSkin2.z > 0.0005) {
+    boneXf(aSkin2.x, psT, qT, scT, q2T);
+    skinnedPos += (psT.xyz + qrot(qT, qrot(q2T, position) * scT)) * aSkin2.z;
+    skinnedNormal += qrot(qT, qrot(qconj(q2T), normal) / max(scT, vec3(1e-4))) * aSkin2.z;
+    scAll += scT * aSkin2.z;
+  }
+  if (aSkin2.w > 0.0005) {
+    boneXf(aSkin2.y, psT, qT, scT, q2T);
+    skinnedPos += (psT.xyz + qrot(qT, qrot(q2T, position) * scT)) * aSkin2.w;
+    skinnedNormal += qrot(qT, qrot(qconj(q2T), normal) / max(scT, vec3(1e-4))) * aSkin2.w;
+    scAll += scT * aSkin2.w;
+  }
+  // \u63CF\u8FB9\u7740\u8272\u5668\u5728\u540E\u9762\u8FD8\u8981\u7528\uFF1Aq0 \u7559\u7740\u4E3B\u5BFC\u9AA8\u7684\u65CB\u8F6C\uFF0Csc0 \u6362\u6210\u6DF7\u5408\u540E\u7684\u5C3A\u5EA6
+  sc0 = scAll;
 `;
 var mL = `
 ${Pf}
@@ -21720,6 +21758,7 @@ uniform vec3 uKickColor;
 uniform float uTime;
 uniform sampler2D uMap;
 uniform float uMapOn;
+uniform float uMapSRGB;
 varying vec4 vFx;
 varying vec4 vInstA;
 varying vec3 vTeam;
@@ -21759,8 +21798,12 @@ void main() {
 
   // \u672C\u4F53\u4E58\u8272\u53EA\u4F5C\u7528\u5728\u975E\u961F\u4F0D\u8272\u533A\u57DF\uFF1B\u961F\u4F0D\u8272\u53EA\u67D3\u8499\u7248\u533A\u57DF\uFF1B\u6574\u4F53\u67D3\u8272(\u77F3\u5316/\u51B0\u51BB/\u9635\u4EA1\u53D8\u7070)\u6309 vTint.a \u7684\u5F3A\u5EA6\u5411\u7070\u5EA6\u5316\u540E\u7684\u67D3\u8272\u8FC7\u6E21
   vec3 base = mix(vColor.rgb * vBody, vTeam, vFx.z);
-  // \u5916\u90E8\u7F51\u683C(glTF)\u7684 basecolor\uFF1AuMapOn=0 \u65F6\u662F\u7EAF\u767D\uFF0C\u4E58\u4E0A\u53BB\u4E0D\u5F71\u54CD\u539F\u751F\u82F1\u96C4
-  base *= mix(vec3(1.0), texture2D(uMap, vUv).rgb, uMapOn);
+  // \u5916\u90E8\u7F51\u683C(glTF)\u7684 basecolor\uFF1AuMapOn=0 \u65F6\u662F\u7EAF\u767D\uFF0C\u4E58\u4E0A\u53BB\u4E0D\u5F71\u54CD\u539F\u751F\u82F1\u96C4\u3002
+  // uMapSRGB=1\uFF08\u5361\u4E01\u8F66\u7684\u8D34\u56FE\u56FE\u96C6\uFF09\u8981\u8F6C\u7EBF\u6027 \u2014\u2014 glTF \u7684 baseColorTexture \u662F sRGB \u7F16\u7801\uFF0C
+  // \u5F15\u64CE\u7684\u9876\u70B9\u8272\u4E0E\u5149\u7167\u90FD\u662F\u7EBF\u6027\u7684\uFF0C\u4E0D\u8F6C\u4F1A\u6574\u53EA\u6A21\u578B\u53D1\u767D\u3002
+  vec3 mc = texture2D(uMap, vUv).rgb;
+  mc = mix(mc, mix(mc / 12.92, pow((mc + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), mc)), uMapSRGB);
+  base *= mix(vec3(1.0), mc, uMapOn);
   float lum = dot(base, vec3(0.3, 0.55, 0.15));
   base = mix(base, vTint.rgb * mix(lum, 1.0, 0.25) * 1.6, vTint.a);
 
@@ -21946,11 +21989,9 @@ varying vec3 vBase;
 void main() {
   ${_m}
   vec3 n = qrot(q0, aOutline.xyz);
-  if (aSkin.z < 0.999) n = mix(qrot(q1, aOutline.xyz), n, aSkin.z);
   vec4 mvPosition = viewMatrix * vec4(skinnedPos, 1.0);
   // \u7EBF\u5BBD\u6309\u89C6\u8DDD\u6362\u7B97\u6210\u6052\u5B9A\u7684\u5C4F\u5E55\u50CF\u7D20\uFF1B\u88AB\u7F29\u6CA1\u7684\u90E8\u4EF6(\u9AA8\u9ABC\u7F29\u653E\u8D8B\u96F6)\u4E0D\u7559\u63CF\u8FB9\u6B8B\u70B9
-  float sc = ps0.w;
-  if (aSkin.z < 0.999) sc = mix(ps1.w, ps0.w, aSkin.z);
+  float sc = pow(max(sc0.x * sc0.y * sc0.z, 0.0), 0.3333);
   float w = aOutline.w * uLine * -mvPosition.z * min(1.0, sc * 4.0);
   mvPosition = viewMatrix * vec4(skinnedPos + normalize(n) * w, 1.0);
   vOpacity = aInstA.x;
@@ -22033,7 +22074,8 @@ function TL(n, t, e) {
       uSpec: { value: new Ee(t.specular ?? 0.9, t.gloss ?? 36) },
       uGlowBoost: { value: t.glowBoost ?? 3 },
       uMap: { value: t.map ?? null },
-      uMapOn: { value: t.map ? 1 : 0 }
+      uMapOn: { value: t.map ? 1 : 0 },
+      uMapSRGB: { value: t.mapSRGB ? 1 : 0 }
     }),
     defines: s3 ? { UNIT_PATTERNS: "" } : {},
     vertexShader: mL,
@@ -22143,11 +22185,11 @@ var ux = class {
   allocate() {
     const t = this.capacity, e = new Cf(), s = this.source;
     e.setIndex(s.index);
-    for (const a of ["position", "normal", "color", "aFx", "aMat", "aSkin", "aOutline"])
+    for (const a of ["position", "normal", "color", "aFx", "aMat", "aSkin", "aSkin2", "aOutline"])
       e.setAttribute(a, s.attributes[a]);
     s.attributes.uv && e.setAttribute("uv", s.attributes.uv);
-    this.instA = new Qs(new Float32Array(t * 4), 4), this.instTeam = new Qs(new Float32Array(t * 3), 3), this.instTint = new Qs(new Float32Array(t * 4), 4), this.instBody = new Qs(new Float32Array(t * 3).fill(1), 3), this.instBody.setUsage(Pi), this.instA.setUsage(Pi), this.instTeam.setUsage(Pi), this.instTint.setUsage(Pi), e.setAttribute("aInstA", this.instA), e.setAttribute("aInstTeam", this.instTeam), e.setAttribute("aInstTint", this.instTint), e.setAttribute("aInstBody", this.instBody), this.wantXray && (this.instX = new Qs(new Float32Array(t * 4), 4), this.instX.setUsage(Pi), e.setAttribute("aInstX", this.instX)), e.instanceCount = 0, this.geo = e, this.data = new Float32Array(this.bones * 8 * t);
-    const i = new zr(this.data, this.bones * 2, t, Gs, fo);
+    this.instA = new Qs(new Float32Array(t * 4), 4), this.instTeam = new Qs(new Float32Array(t * 3), 3), this.instTint = new Qs(new Float32Array(t * 4), 4), this.instBody = new Qs(new Float32Array(t * 3).fill(1), 3), this.instBody.setUsage(Pi), this.instA.setUsage(Pi), this.instTeam.setUsage(Pi), this.instTint.setUsage(Pi), e.setAttribute("aInstA", this.instA), e.setAttribute("aInstTeam", this.instTeam), e.setAttribute("aInstTint", this.instTint), e.setAttribute("aInstBody", this.instBody), this.wantXray && (this.instX = new Qs(new Float32Array(t * 4), 4), this.instX.setUsage(Pi), e.setAttribute("aInstX", this.instX)), e.instanceCount = 0, this.geo = e, this.data = new Float32Array(this.bones * 16 * t);
+    const i = new zr(this.data, this.bones * 4, t, Gs, fo);
     i.minFilter = i.magFilter = ti, i.generateMipmaps = false, i.needsUpdate = true, this.tex = i;
   }
   grow() {
@@ -22160,7 +22202,7 @@ var ux = class {
   push(t, e) {
     this.count >= this.capacity && this.grow();
     const s = this.count++;
-    t.pack(this.data, s * this.bones * 8);
+    t.pack(this.data, s * this.bones * 16);
     const i = this.instA.array;
     i[s * 4] = e.opacity, i[s * 4 + 1] = e.flash, i[s * 4 + 2] = e.glow, i[s * 4 + 3] = e.rim;
     const a = this.instTeam.array;
@@ -38537,7 +38579,9 @@ function xU(n, t, e, s, i, a, o, r) {
 }
 var sw = class {
   constructor(t) {
-    this.n = t, this.q = new Float32Array(t * 4), this.t = new Float32Array(t * 3), this.s = new Float32Array(t), this.reset();
+    this.n = t, this.q = new Float32Array(t * 4), this.t = new Float32Array(t * 3), // 每骨三个缩放分量。原版卡丁车那批的挤压/拉长是**三轴独立的节点 scale**，
+    // 只留一个统一缩放会把"压扁同时横向变宽"抹平成几何平均，动作看着就不形变了。
+    this.s = new Float32Array(t * 3), this.reset();
   }
   n;
   q;
@@ -38563,8 +38607,13 @@ var sw = class {
   move(t, e, s, i) {
     return this.t[t * 3] += e, this.t[t * 3 + 1] += s, this.t[t * 3 + 2] += i, this;
   }
+  // 统一缩放（老接口，内部英雄/小兵全用这个，等价于三轴同值）
   scale(t, e) {
-    return this.s[t] = e, this;
+    return this.s[t * 3] = e, this.s[t * 3 + 1] = e, this.s[t * 3 + 2] = e, this;
+  }
+  // 三轴缩放：外部原版模型用（GLB 里的 node.scale 就是三轴的）
+  scale3(t, e, s, i) {
+    return this.s[t * 3] = e, this.s[t * 3 + 1] = s, this.s[t * 3 + 2] = i, this;
   }
   copy(t) {
     return this.q.set(t.q), this.t.set(t.t), this.s.set(t.s), this;
@@ -38576,7 +38625,7 @@ var sw = class {
       i[o] = c / u, i[o + 1] = f / u, i[o + 2] = d / u, i[o + 3] = h / u;
     }
     for (let o = 0; o < this.n * 3; o++) this.t[o] = t.t[o] * a + this.t[o] * e;
-    for (let o = 0; o < this.n; o++) this.s[o] = t.s[o] * a + this.s[o] * e;
+    for (let o = 0; o < this.n * 3; o++) this.s[o] = t.s[o] * a + this.s[o] * e;
     return this;
   }
 };
@@ -38593,7 +38642,7 @@ var bU = class {
   constructor(t, e = 0) {
     this.rig = t;
     const s = t.count;
-    this.wp = new Float32Array(s * 3), this.wq = new Float32Array(s * 4), this.ws = new Float32Array(s), this.chains = t.chains.map((i) => ({
+    this.wp = new Float32Array(s * 3), this.wq = new Float32Array(s * 4), this.ws = new Float32Array(s * 3), this.chains = t.chains.map((i) => ({
       p: new Float32Array(i.joints.length * 3),
       prev: new Float32Array(i.joints.length * 3),
       ready: false
@@ -38613,10 +38662,10 @@ var bU = class {
     for (let p = 0; p < l; p++) {
       const g = u[p], y = h[p * 3] + t.t[p * 3], v = h[p * 3 + 1] + t.t[p * 3 + 1], _ = h[p * 3 + 2] + t.t[p * 3 + 2];
       if (g < 0)
-        no[0] = 0, no[1] = m, no[2] = 0, no[3] = x, Da(no, 0, y * o, v * o, _ * o, c, p * 3), c[p * 3] += e, c[p * 3 + 1] += s, c[p * 3 + 2] += i, Ua(no, 0, t.q, p * 4, f, p * 4), d[p] = o * t.s[p];
+        no[0] = 0, no[1] = m, no[2] = 0, no[3] = x, Da(no, 0, y * o, v * o, _ * o, c, p * 3), c[p * 3] += e, c[p * 3 + 1] += s, c[p * 3 + 2] += i, Ua(no, 0, t.q, p * 4, f, p * 4), d[p * 3] = o * t.s[p * 3], d[p * 3 + 1] = o * t.s[p * 3 + 1], d[p * 3 + 2] = o * t.s[p * 3 + 2];
       else {
-        const k = d[g];
-        Da(f, g * 4, y * k, v * k, _ * k, c, p * 3), c[p * 3] += c[g * 3], c[p * 3 + 1] += c[g * 3 + 1], c[p * 3 + 2] += c[g * 3 + 2], Ua(f, g * 4, t.q, p * 4, f, p * 4), d[p] = k * t.s[p];
+        const k = d[g * 3], k12 = d[g * 3 + 1], k22 = d[g * 3 + 2];
+        Da(f, g * 4, y * k, v * k12, _ * k22, c, p * 3), c[p * 3] += c[g * 3], c[p * 3 + 1] += c[g * 3 + 1], c[p * 3 + 2] += c[g * 3 + 2], Ua(f, g * 4, t.q, p * 4, f, p * 4), d[p * 3] = k * t.s[p * 3], d[p * 3 + 1] = k12 * t.s[p * 3 + 1], d[p * 3 + 2] = k22 * t.s[p * 3 + 2];
       }
     }
   }
@@ -38636,7 +38685,7 @@ var bU = class {
           x.p[M * 3] += l, x.p[M * 3 + 1] += c, x.p[M * 3 + 2] += f, x.prev[M * 3] += l, x.prev[M * 3 + 1] += c, x.prev[M * 3 + 2] += f;
       const g = Math.pow(m.drag, h * 60), y = 1 - Math.exp(-m.stiffness * h), v = Math.cos(m.maxAngle * ch), _ = Math.sin(m.maxAngle * ch), k = (m.wind ?? 0) * (0.55 + 0.45 * Math.sin(s * 2.3 + this.phase + u * 1.7)) + (m.wind ?? 0) * 0.25 * Math.sin(s * 7.1 + this.phase * 2 + u);
       for (let M = 0; M < p; M++) {
-        const S = m.joints[M], b = i.parent[S], w = r[S];
+        const S = m.joints[M], b = i.parent[S], w = Math.cbrt(Math.max(1e-6, r[S * 3] * r[S * 3 + 1] * r[S * 3 + 2]));
         M > 0 && (a[S * 3] = x.p[(M - 1) * 3], a[S * 3 + 1] = x.p[(M - 1) * 3 + 1], a[S * 3 + 2] = x.p[(M - 1) * 3 + 2]), Ua(o, b * 4, t.q, S * 4, no, 0);
         let T, E, A;
         if (M < p - 1) {
@@ -38684,21 +38733,25 @@ var bU = class {
   pack(t, e) {
     const s = this.rig, i = s.count, a = this.wp, o = this.wq, r = this.ws, l = s.bind, BW2 = s.bindWorld, BQ = s.bindQW;
     for (let c = 0; c < i; c++) {
-      const f = r[c], d = e + c * 8;
-      if (BW2) {
-        pb2[0] = -BQ[c * 4], pb2[1] = -BQ[c * 4 + 1], pb2[2] = -BQ[c * 4 + 2], pb2[3] = BQ[c * 4 + 3];
-        Ua(o, c * 4, pb2, 0, qb2, 0);
-        Da(qb2, 0, BW2[c * 3] * f, BW2[c * 3 + 1] * f, BW2[c * 3 + 2] * f, Aa, 0);
-        t[d] = a[c * 3] - Aa[0], t[d + 1] = a[c * 3 + 1] - Aa[1], t[d + 2] = a[c * 3 + 2] - Aa[2], t[d + 3] = f, t[d + 4] = qb2[0], t[d + 5] = qb2[1], t[d + 6] = qb2[2], t[d + 7] = qb2[3];
+      const sx2 = r[c * 3], sy2 = r[c * 3 + 1], sz2 = r[c * 3 + 2], d = e + c * 16;
+      if (s.localVerts) {
+        t[d] = a[c * 3], t[d + 1] = a[c * 3 + 1], t[d + 2] = a[c * 3 + 2], t[d + 3] = 0, t[d + 4] = o[c * 4], t[d + 5] = o[c * 4 + 1], t[d + 6] = o[c * 4 + 2], t[d + 7] = o[c * 4 + 3], t[d + 8] = sx2, t[d + 9] = sy2, t[d + 10] = sz2, t[d + 11] = 0, t[d + 12] = 0, t[d + 13] = 0, t[d + 14] = 0, t[d + 15] = 1;
         continue;
       }
-      Da(o, c * 4, l[c * 3] * f, l[c * 3 + 1] * f, l[c * 3 + 2] * f, Aa, 0);
-      t[d] = a[c * 3] - Aa[0], t[d + 1] = a[c * 3 + 1] - Aa[1], t[d + 2] = a[c * 3 + 2] - Aa[2], t[d + 3] = f, t[d + 4] = o[c * 4], t[d + 5] = o[c * 4 + 1], t[d + 6] = o[c * 4 + 2], t[d + 7] = o[c * 4 + 3];
+      const bx2 = BW2 ? BW2[c * 3] : l[c * 3], by2 = BW2 ? BW2[c * 3 + 1] : l[c * 3 + 1], bz2 = BW2 ? BW2[c * 3 + 2] : l[c * 3 + 2];
+      if (BQ) {
+        pb2[0] = -BQ[c * 4], pb2[1] = -BQ[c * 4 + 1], pb2[2] = -BQ[c * 4 + 2], pb2[3] = BQ[c * 4 + 3];
+        Da(pb2, 0, bx2, by2, bz2, qb2, 0);
+        Da(o, c * 4, qb2[0] * sx2, qb2[1] * sy2, qb2[2] * sz2, Aa, 0);
+      } else Da(o, c * 4, bx2 * sx2, by2 * sy2, bz2 * sz2, Aa, 0);
+      t[d] = a[c * 3] - Aa[0], t[d + 1] = a[c * 3 + 1] - Aa[1], t[d + 2] = a[c * 3 + 2] - Aa[2], t[d + 3] = 0, t[d + 4] = o[c * 4], t[d + 5] = o[c * 4 + 1], t[d + 6] = o[c * 4 + 2], t[d + 7] = o[c * 4 + 3], t[d + 8] = sx2, t[d + 9] = sy2, t[d + 10] = sz2, t[d + 11] = 0;
+      if (BQ) t[d + 12] = pb2[0], t[d + 13] = pb2[1], t[d + 14] = pb2[2], t[d + 15] = pb2[3];
+      else t[d + 12] = 0, t[d + 13] = 0, t[d + 14] = 0, t[d + 15] = 1;
     }
   }
   point(t, e, s, i, a) {
-    const o = this.ws[t];
-    Da(this.wq, t * 4, e * o, s * o, i * o, Aa, 0), a.x = this.wp[t * 3] + Aa[0], a.y = this.wp[t * 3 + 1] + Aa[1], a.z = this.wp[t * 3 + 2] + Aa[2];
+    const ox2 = this.ws[t * 3], oy2 = this.ws[t * 3 + 1], oz2 = this.ws[t * 3 + 2];
+    Da(this.wq, t * 4, e * ox2, s * oy2, i * oz2, Aa, 0), a.x = this.wp[t * 3] + Aa[0], a.y = this.wp[t * 3 + 1] + Aa[1], a.z = this.wp[t * 3 + 2] + Aa[2];
   }
 };
 var hp = [0, 0, 0];
@@ -39613,10 +39666,10 @@ function spinPose(R, J, time, o = {}) {
   return R;
 }
 function chantPose(R, J, time, p, o = {}) {
-  const k = smooth(p / 0.18), s = Math.sin(time * 13.5), c = Math.sin(time * 7.3), ax2 = o.ax ?? 110, az2 = o.az ?? -50, hx2 = o.hx ?? -80, hz2 = o.hz ?? 40;
+  const k = smooth(p / 0.18), s = Math.sin(time * 13.5), c = Math.sin(time * 7.3), ax2 = o.ax ?? 110, az2 = o.az ?? -50, hx3 = o.hx ?? -80, hz2 = o.hz ?? 40;
   R.add(J.upperR, ax2 * k, 0, az2 * k);
   R.add(J.foreR, -10 * k, 0, 0);
-  R.add(J.handR, hx2 * k + s * 1.2 * k, 0, hz2 * k);
+  R.add(J.handR, hx3 * k + s * 1.2 * k, 0, hz2 * k);
   R.add(J.upperL, ax2 * 0.62 * k, 0, -az2 * 0.9 * k);
   R.add(J.foreL, -14 * k, 0, 0);
   R.add(J.chest, -6 * k + s * 1.6 * k, c * 1.2 * k, 0);
@@ -39633,10 +39686,14 @@ var Ls = class {
   uvX = 0;
   uvY = 0;
   skinTriple = null;
+  // 第二组骨 (骨C, 骨D, 权重C, 权重D)；全零表示只用前两根骨。
+  // 原生网格永远是全零，只有外部导入的蒙皮网格（大肥蛆的身体）会用满 4 根。
+  skinQuad = null;
   mapOn = 0;
   col = [];
   fx = [];
   skin = [];
+  skin2 = [];
   line = [];
   mat = [];
   idx = [];
@@ -39761,6 +39818,8 @@ var Ls = class {
       this.skin.push(h[0], h[1], h[2]);
     } else if (this.skinTriple) this.skin.push(this.skinTriple[0], this.skinTriple[1], this.skinTriple[2]);
     else this.skin.push(this.boneId, this.boneId, 1);
+    if (this.skinQuad) this.skin2.push(this.skinQuad[0], this.skinQuad[1], this.skinQuad[2], this.skinQuad[3]);
+    else this.skin2.push(0, 0, 0, 0);
   }
   skinRings(t, e, s, i, a, o, r, l, c = 0, f = 1) {
     const d = [], h = r ? s : s - 1;
@@ -39965,6 +40024,8 @@ var Ls = class {
     for (let i = 0; i < n; i++) {
       this.uvX = m.uv[i * 2], this.uvY = m.uv[i * 2 + 1];
       this.skinTriple = m.skin ? [m.skin[i * 3], m.skin[i * 3 + 1], m.skin[i * 3 + 2]] : null;
+      this.skinQuad = m.skin2 ? [m.skin2[i * 4], m.skin2[i * 4 + 1], m.skin2[i * 4 + 2], m.skin2[i * 4 + 3]] : null;
+      if (m.col) this.c = [m.col[i * 3], m.col[i * 3 + 1], m.col[i * 3 + 2]], this.c2 = null;
       this.writeVertex(
         m.pos[i * 3],
         m.pos[i * 3 + 1],
@@ -39976,6 +40037,7 @@ var Ls = class {
       );
     }
     this.skinTriple = null;
+    this.skinQuad = null;
     for (let i = 0; i < m.idx.length; i++) this.idx.push(m.idx[i] + base);
     this.prims.push({ start, count: this.idx.length - start, size: o.size ?? 2.2, outlined: this.lineW > 0 }), [this.c, this.c2, this.by, this.gloss, this.glow, this.ao, this.ao2, this.lineW, this.matX, this.matY, this.matZ, this.matW] = keep;
     return this;
@@ -39986,6 +40048,7 @@ var Ls = class {
     const e = new Uint8Array(this.fx.length);
     for (let h = 0; h < e.length; h++) e[h] = Math.round(Xi(this.fx[h]) * 255);
     t.setAttribute("aFx", new On(e, 4, true)), t.setAttribute("aSkin", new Ae(this.skin, 3));
+    t.setAttribute("aSkin2", new Ae(this.skin2, 4));
     const s = new Uint8Array(this.mat.length);
     for (let h = 0; h < s.length; h++) s[h] = Math.round(Xi(this.mat[h]) * 255);
     t.setAttribute("aMat", new On(s, 4, true));
@@ -46234,15 +46297,15 @@ function yO() {
     }
     v.rot(n.jaw, 4 + 30 * w, 0, 0), i.forEach((C, R) => {
       const I = 0.85 + 0.3 * Math.sin(M * 9 + R * 2.1) + 0.15 * Math.sin(M * 17 + R);
-      v.scale(C, v.s[C] * I), v.rot(C, Math.sin(M * 6 + R * 1.7) * 10, M * 40 * (R % 2 ? 1 : -1), Math.cos(M * 5 + R) * 10);
+      v.scale(C, v.s[C * 3] * I), v.rot(C, Math.sin(M * 6 + R * 1.7) * 10, M * 40 * (R % 2 ? 1 : -1), Math.cos(M * 5 + R) * 10);
     }), a.forEach((C, R) => {
-      v.scale(C, v.s[C] * (1 + 0.06 * Math.sin(M * 7 + R * 1.6))), v.rot(
+      v.scale(C, v.s[C * 3] * (1 + 0.06 * Math.sin(M * 7 + R * 1.6))), v.rot(
         C,
         Math.sin(M * 4.3 + R * 1.9) * 4 - (_.anim === "move" ? 8 : 0),
         0,
         Math.sin(M * 5.1 + R * 2.3) * 3
       );
-    }), v.scale(s, v.s[s] * (1 + 0.06 * S)), k.glow = Math.max(0.03, T), E && _a(n, v);
+    }), v.scale(s, v.s[s * 3] * (1 + 0.06 * S)), k.glow = Math.max(0.03, T), E && _a(n, v);
   };
   return {
     key: "monster:ember_golem",
@@ -46552,7 +46615,7 @@ function MO() {
         if (b.spawnT >= 0) {
           const G = b.spawnT, q = (ct, rt, mt, nt, H) => {
             const st = 1 - Gn(Ct(G, 1 + nt * 0.1, 1.9 + nt * 0.1));
-            k(S, ct, st, rt, mt, H), S.scale(ct, S.s[ct] * Math.min(1, Ct(G, 0.9, 1.1) + 1e-3));
+            k(S, ct, st, rt, mt, H), S.scale(ct, S.s[ct * 3] * Math.min(1, Ct(G, 0.9, 1.1) + 1e-3));
           };
           u.forEach((ct, rt) => q(ct, 70 + rt, d[rt], 5 - rt, 1.6)), c.forEach((ct, rt) => q(ct, 60 + rt, 3.4, 3 + rt, 2.2)), l.forEach((ct, rt) => q(ct, 50 + rt, 5.05, 5 + rt, 2.6)), f.forEach((ct, rt) => q(ct, 40 + rt, 2.9, 6 + rt, 1.2)), q(o, 80, 5.6, 7, 1.4);
           const et = Kn(Ct(G, 0.9, 1.5));
@@ -46564,10 +46627,10 @@ function MO() {
           }), S.add(s, 4, 0, 0)) : f.forEach((G, q) => S.add(G, Math.sin(T * 0.6 + q * Math.PI) * 14, 0, 0));
     }
     const F = Jo(b.hitT);
-    F > 0 && b.anim !== "dead" && (c.forEach((G, q) => S.move(G, (q % 2 ? -1 : 1) * 0.16 * F, 0, (q < 2 ? 1 : -1) * 0.16 * F)), l.forEach((G, q) => S.move(G, (q === 0 ? 1 : -1) * 0.2 * F, 0.08 * F, 0)), S.add(o, -8 * F, 0, 0), S.scale(i, S.s[i] * (1 + 0.3 * F)), I += 0.5 * F);
+    F > 0 && b.anim !== "dead" && (c.forEach((G, q) => S.move(G, (q % 2 ? -1 : 1) * 0.16 * F, 0, (q < 2 ? 1 : -1) * 0.16 * F)), l.forEach((G, q) => S.move(G, (q === 0 ? 1 : -1) * 0.2 * F, 0.08 * F, 0)), S.add(o, -8 * F, 0, 0), S.scale(i, S.s[i * 3] * (1 + 0.3 * F)), I += 0.5 * F);
     const L = [20, 33, -14], B = [16, 34, -27];
     a.forEach((G, q) => {
-      S.rot(G, 0, b.time * L[q] * C + q * 70, 0), S.add(G, B[q], 0, 0), S.scale(G, S.s[G] * Math.max(1e-3, P));
+      S.rot(G, 0, b.time * L[q] * C + q * 70, 0), S.add(G, B[q], 0, 0), S.scale(G, S.s[G * 3] * Math.max(1e-3, P));
     }), S.rot(r, 0, 0, b.time * 24 * R), w.glow = Math.max(0.04, I);
   };
   return {
@@ -47094,6 +47157,8 @@ function W1(n, t, e, s, i, a, o = 1.012) {
 }
 
 // src/31-render-10.js
+var ANIM_DBG = typeof location !== "undefined" && /[?&]dbg=1/.test(location.search) ? /* @__PURE__ */ new Map() : null;
+if (ANIM_DBG) globalThis.__animDbg = ANIM_DBG;
 function Ec(n, t) {
   const e = $x[t], s = new Wa(), i = s.add("root", -1, 0, 0, 0), a = n === 3 ? 1.15 : 1, o = 4.1 + n * 0.4, r = 2.5, l = o + 1.35, c = s.add("lower", i, 0, 0.35, 0), f = s.add("upper", c, 0, r, 0), d = s.add("core", i, 0, l, 0), h = Array.from({ length: n }, (T, E) => s.add(`ring${E}`, i, 0, l - 0.15 + E * 0.2, 0)), u = s.add("tip", i, 0, l + 1.5, 0), m = s.add("alert", u, 0, l + 1.9, 0), x = [0, 1, 2, 3].map((T) => s.add(`chunk${T}`, T < 2 ? c : f, 0, T < 2 ? 1.7 : 3.2, 0)), p = [0, 1, 2].map((T) => s.add(`crack${T}`, T === 0 ? f : c, 0, T === 0 ? 3.2 : 1.6, 0)), g = n === 3 ? s.add("flag", f, 0, o - 0.5, 0) : -1, y = new Ls();
   y.crease = 30;
@@ -47690,6 +47755,10 @@ var UO = (n) => `monster:${n}`;
 function Qw() {
   return Object.keys(Gx);
 }
+function registerModel(key, build) {
+  if (!Gx[key]) Gx[key] = build;
+  return Gx[key];
+}
 var Jw = /* @__PURE__ */ new Map();
 function Md(n, t) {
   const e = `fallback:${n.toFixed(2)}:${t.toFixed(2)}`;
@@ -48010,7 +48079,7 @@ var eB = {
 function nB(n) {
   switch (n.kind) {
     case "hero": {
-      const k = n.heroId === "niumo" && n.buffs && n.buffs.some((b) => b.id === "niumo_ult") ? "hero:niumo2" : Vx(n.heroId);
+      const k = n.skin ? `hero:${n.skin}` : n.heroId === "niumo" && n.buffs && n.buffs.some((b) => b.id === "niumo_ult") ? "hero:niumo2" : Vx(n.heroId);
       n.heroId === "niumo" && ((globalThis.__niumoKey ??= {})[n.id] = k);
       return k;
     }
@@ -48116,7 +48185,7 @@ function lB(n) {
     let Q = a.get(D.key);
     if (!Q) {
       const $ = D.key.startsWith("hero:") || D.key.startsWith("minion:") || D.key.startsWith("monster:");
-      Q = new ux(D.geometry, D.rig.count, oB(D.key), { outline: aB(D), xray: $, map: D.map }, D.key), Q.setShadows(p), Q.setOutlineVisible(x), B(Q, D), Q.addTo(t), a.set(D.key, Q), o.push(Q);
+      Q = new ux(D.geometry, D.rig.count, oB(D.key), { outline: aB(D), xray: $, map: D.map, mapSRGB: D.mapSRGB, specular: D.specular }, D.key), Q.setShadows(p), Q.setOutlineVisible(x), B(Q, D), Q.addTo(t), a.set(D.key, Q), o.push(Q);
     }
     return Q;
   }, q = (D, Q) => {
@@ -48137,6 +48206,8 @@ function lB(n) {
       look: J,
       seen: true,
       isPlayer: D.id === Q.playerId,
+      // 单位 id 留一份：tt() 里只有视觉对象，没有单位，?dbg=1 的调试表要靠它做键
+      unitId: D.id,
       alive: true,
       x: D.pos.x,
       y: 0,
@@ -48232,6 +48303,12 @@ function lB(n) {
       const _t = Q.kind === "hero" ? 18 : Q.kind === "minion" ? 12 : 9;
       D.yaw += ft * (1 - Math.exp(-_t * $.dt));
     }
+    {
+      let ft = D.yaw - (D.prevYaw ?? D.yaw);
+      ft -= Math.round(ft / (Math.PI * 2)) * Math.PI * 2;
+      D.yawRate = $.dt > 1e-4 ? ft / $.dt : 0;
+      D.prevYaw = D.yaw;
+    }
     const Rt = Q.team === $.playerTeam || f0[Q.kind] || Q.kind === "monster" || Q.visible[$.playerTeam];
     let kt = Rt ? 1 : 0;
     if (Rt) {
@@ -48252,11 +48329,28 @@ function lB(n) {
     Q.lastHitTime !== D.flashSeen && (D.flashSeen = Q.lastHitTime, (Q.lastHitTime - D.flashStart >= YO || Q.lastHitTime < D.flashStart) && (D.flashStart = Q.lastHitTime));
     const ht = V - D.flashStart, lt = ht >= 0 && ht < s4 && Q.alive ? (1 - ht / s4) ** 2 : 0;
     D.flashBoost = lt * KO, D.flash = lt * (f0[Q.kind] || Q.kind === "monster" && Q.radius >= 1.2 ? QO : ZO);
-    const O = D.puppet.input, Y = Q.anim === "attack" && (Q.animStart !== D.lastStart || D.lastAnim !== "attack");
+    const O = D.puppet.input, prevAnim = D.lastAnim, Y = Q.anim === "attack" && (Q.animStart !== D.lastStart || D.lastAnim !== "attack");
     Y && (D.variant++, D.special = false), D.lastStart = Q.animStart, D.lastAnim = Q.anim, O.anim = Q.anim;
     const gt = Math.max(0, V - Q.animStart);
+    const slowNow = Q.buffs.some((ft) => ft.id === "slow" && ft.value > 0) ? 1 : 0;
+    let speedTier = 0;
+    {
+      const base = Q.rt?.base?.moveSpeed ?? 0;
+      const ratio = base > 0 ? Q.stats.moveSpeed / base : 1;
+      speedTier = ratio >= 1.55 ? 2 : ratio >= 1.2 ? 1 : 0;
+    }
+    if (Q.anim === "idle" && prevAnim === "move") D.stopT = 0;
+    else if (D.stopT >= 0) D.stopT = D.stopT + $.dt > 1.5 ? -1 : D.stopT + $.dt;
+    let turn = 0;
+    if (Q.anim === "move" && Math.abs(D.yawRate) > 5) {
+      turn = D.yawRate > 0 ? 1 : -1;
+      if (D.turnSign !== turn) D.turnSign = turn, D.turnT = 0;
+      D.turnT += $.dt;
+    } else D.turnSign = 0, D.turnT = 0;
     if (O.t = gt, O.p = Q.animDur > 0 ? Math.min(1, gt / Q.animDur) : 0, O.hp = D.hp, O.windup = D.windup, O.deathT = -1, O.variant = D.variant, O.team = D.team, O.mode = 0, // 身上挂着「血怒」= 这一斧是重斧，动画那边换成劈砍
-    O.passive = Q.kind === "hero" && Q.buffs.length > 0 && Q.buffs.some((ft) => ft.id === "chijin_ember") ? 1 : 0, D.hitT = U >= 0 ? U : 99, O.hitT = D.hitT, D.spawnT >= 0) {
+    O.passive = Q.kind === "hero" && Q.buffs.length > 0 && Q.buffs.some((ft) => ft.id === "chijin_ember") ? 1 : 0, D.hitT = U >= 0 ? U : 99, O.hitT = D.hitT, // 被减速就只走"行走"，加速档一律不用
+    // 注意字段名不能叫 speed —— 下面 1706 行会用真实移速(m/s)覆盖 input.speed，那是步幅用的
+    O.slow = slowNow, O.tier = slowNow ? 0 : speedTier, O.turn = turn, O.turnT = D.turnT, O.stopT = D.stopT, D.spawnT >= 0) {
       const ft = D.def.spawnDur ?? 0;
       (D.spawnT >= ft || U < D.spawnT || !Q.alive) && (D.spawnT = -1);
     }
@@ -48279,6 +48373,7 @@ function lB(n) {
       return;
     }
     const ot = D.puppet.input;
+    if (ANIM_DBG) ot.modelKey = D.def && D.def.key, ANIM_DBG.set(D.unitId, ot);
     ot.time = g, ot.stride = D.stride, ot.speed = D.speed, D.dying >= 0 && (ot.anim = "dead", ot.t = D.dying, ot.p = Number.isFinite(D.deathDur) ? Math.min(1, D.dying / D.deathDur) : Math.min(1, D.dying / 3), ot.deathT = D.dying, ot.hp = 0, ot.spawnT = -1, ot.hitT = 99), (D.culled || D.fresh) && D.puppet.snap(), D.culled = false, D.fresh = false, D.puppet.update(
       D.lastStart + D.mode * 1e-4 + (ot.spawnT >= 0 ? 5e-4 : 0),
       $,
@@ -48616,6 +48711,488 @@ function mB(n, t) {
   };
 }
 
+// src/47-kart-decode.js
+function toBuf(src) {
+  if (src instanceof ArrayBuffer) return src;
+  if (ArrayBuffer.isView(src)) return src.buffer.slice(src.byteOffset, src.byteOffset + src.byteLength);
+  const s = atob(src);
+  const u82 = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) u82[i] = s.charCodeAt(i);
+  return u82.buffer;
+}
+function kartDecode(src) {
+  const buf = toBuf(src);
+  const dv2 = new DataView(buf);
+  const u82 = new Uint8Array(buf);
+  const td2 = new TextDecoder();
+  let o = 0;
+  const rU32 = () => {
+    const v = dv2.getUint32(o, true);
+    o += 4;
+    return v;
+  };
+  const rI32 = () => {
+    const v = dv2.getInt32(o, true);
+    o += 4;
+    return v;
+  };
+  const rI16 = () => {
+    const v = dv2.getInt16(o, true);
+    o += 2;
+    return v;
+  };
+  const rF32 = () => {
+    const v = dv2.getFloat32(o, true);
+    o += 4;
+    return v;
+  };
+  const magic = rU32();
+  if (magic !== 1262572116) throw new Error("\u4E0D\u662F KART \u6570\u636E\u5757");
+  const nV2 = rU32(), nI2 = rU32(), nJ = rU32(), nameLen = rU32();
+  const names = td2.decode(u82.subarray(o, o + nameLen)).split("\0");
+  o += nameLen;
+  const texW = rU32(), texH = rU32(), flags = rU32();
+  const parent = new Int32Array(nJ);
+  for (let j = 0; j < nJ; j++) parent[j] = rI32();
+  const pos = new Float32Array(nV2 * 3), nor = new Float32Array(nV2 * 3), col = new Float32Array(nV2 * 3), uv2 = new Float32Array(nV2 * 2), skin = new Float32Array(nV2 * 3), skin2 = new Float32Array(nV2 * 4);
+  for (let v = 0; v < nV2; v++) {
+    pos[v * 3] = rI16() / 2e3;
+    pos[v * 3 + 1] = rI16() / 2e3;
+    pos[v * 3 + 2] = rI16() / 2e3;
+    nor[v * 3] = dv2.getInt8(o) / 127;
+    nor[v * 3 + 1] = dv2.getInt8(o + 1) / 127;
+    nor[v * 3 + 2] = dv2.getInt8(o + 2) / 127;
+    o += 3;
+    col[v * 3] = u82[o] / 255;
+    col[v * 3 + 1] = u82[o + 1] / 255;
+    col[v * 3 + 2] = u82[o + 2] / 255;
+    o += 3;
+    uv2[v * 2] = dv2.getUint16(o, true) / 65535;
+    uv2[v * 2 + 1] = dv2.getUint16(o + 2, true) / 65535;
+    o += 4;
+    skin[v * 3] = dv2.getUint16(o, true);
+    skin[v * 3 + 1] = dv2.getUint16(o + 2, true);
+    skin2[v * 4] = dv2.getUint16(o + 4, true);
+    skin2[v * 4 + 1] = dv2.getUint16(o + 6, true);
+    o += 8;
+    skin[v * 3 + 2] = u82[o] / 255;
+    skin2[v * 4 + 2] = u82[o + 2] / 255;
+    skin2[v * 4 + 3] = u82[o + 3] / 255;
+    o += 4;
+  }
+  const idx = new Uint32Array(nI2);
+  for (let k = 0; k < nI2; k++) idx[k] = rU32();
+  const bindWorld = new Float32Array(nJ * 3), bindQ = new Float32Array(nJ * 4), bindWQ = new Float32Array(nJ * 4), localPos = new Float32Array(nJ * 3);
+  for (let j = 0; j < nJ; j++) {
+    bindWorld[j * 3] = rI16() / 2e3;
+    bindWorld[j * 3 + 1] = rI16() / 2e3;
+    bindWorld[j * 3 + 2] = rI16() / 2e3;
+    for (let k = 0; k < 4; k++) bindQ[j * 4 + k] = rI16() / 32767;
+    for (let k = 0; k < 4; k++) bindWQ[j * 4 + k] = rI16() / 32767;
+    localPos[j * 3] = rI16() / 2e3;
+    localPos[j * 3 + 1] = rI16() / 2e3;
+    localPos[j * 3 + 2] = rI16() / 2e3;
+  }
+  const nA2 = rU32();
+  const anim = {};
+  for (let a = 0; a < nA2; a++) {
+    const frames = rU32(), dur = rF32(), nl2 = rU32();
+    const key = td2.decode(u82.subarray(o, o + nl2)) || `a${a}`;
+    o += nl2;
+    const data = new Float32Array(frames * nJ * 10);
+    for (let k = 0; k < frames * nJ; k++) {
+      const b = k * 10;
+      data[b] = rI16() / 1e3;
+      data[b + 1] = rI16() / 1e3;
+      data[b + 2] = rI16() / 1e3;
+      for (let q = 3; q < 7; q++) data[b + q] = rI16() / 32767;
+      data[b + 7] = rI16() / 1e4;
+      data[b + 8] = rI16() / 1e4;
+      data[b + 9] = rI16() / 1e4;
+    }
+    anim[key] = { frames, dur, fps: 24, data };
+  }
+  return {
+    mesh: { pos, nor, uv: uv2, col, idx, skin, skin2 },
+    rig: { names, parent, bindWorld, bindQ, bindWQ, localPos, bindSpace: (flags & 1) !== 0 },
+    tex: { w: texW, h: texH },
+    anim
+  };
+}
+
+// src/47-kart.js
+var KART_SPECS = [
+  { id: "frog", name: "\u4E11\u9EC4\u86E4\u87C6", kit: "yeque" },
+  { id: "mannequin", name: "\u8DD1\u6B65\u5047\u4EBA", kit: "chijin" },
+  { id: "boxman", name: "\u591A\u811A\u7EB8\u7BB1", kit: "panyue" },
+  { id: "scallion", name: "\u8471\u4ED4\u4ED4", kit: "fengling" },
+  { id: "maggot", name: "\u767D\u8272\u5927\u80A5\u86C6", kit: "mushroom" },
+  { id: "slime", name: "\u9EC4\u8272\u53F2\u83B1\u59C6", kit: "mushroom" },
+  { id: "monkey", name: "\u8F6E\u6905\u5927\u5723", kit: "chijin" },
+  { id: "mushroom", name: "\u676F\u676F\u83C7", kit: "mushroom" },
+  { id: "cow", name: "\u5927\u811A\u725B", kit: "niumo" },
+  { id: "stone", name: "\u5C0F\u80A5\u77F3", kit: "panyue" },
+  { id: "kangaroo", name: "\u888B\u9F20\u5355\u738B", kit: "yeque" },
+  { id: "magnet", name: "\u667A\u6167\u78C1\u94C1", kit: "xingli" },
+  { id: "boxtree", name: "\u96EA\u677E\u8001\u5E08", kit: "xingli" },
+  { id: "bighead", name: "\u6F02\u6D6E\u5927\u8111\u888B", kit: "fengling" },
+  { id: "girlhead", name: "\u6F02\u6D6E\u5973\u8111\u888B", kit: "fengling" },
+  { id: "horseman", name: "\u534A\u9A6C\u4EBA", kit: "chijin" },
+  { id: "skeleton", name: "\u66B4\u8D70\u9AB7\u9AC5", kit: "yeque" },
+  { id: "coconut", name: "\u6930\u5B50\u4FDD\u9F84\u7403", kit: "panyue" },
+  { id: "panda", name: "\u718A\u732B\u8B66\u5BDF", kit: "niumo" },
+  { id: "bear", name: "\u72D7\u718A\u8B66\u5B98", kit: "niumo" }
+];
+var KART_IDS = KART_SPECS.map((s) => s.id);
+var BY_ID = new Map(KART_SPECS.map((s) => [s.id, s]));
+function kartSpec(id2) {
+  return id2 && BY_ID.get(id2) || null;
+}
+var DATA = /* @__PURE__ */ new Map();
+var ART_W = 320;
+var ART_H = 416;
+var MAX_H = 3.15;
+var MAX_W = 2.8;
+var MAX_K = 1.6;
+function playClip(R, clip, time, loop, N) {
+  if (!clip) return;
+  const span = clip.dur || 1;
+  const fpos = loop ? time % span / span * (clip.frames - 1) : Math.min(clip.frames - 1, time / span * (clip.frames - 1));
+  const f02 = Math.floor(fpos), f12 = Math.min(clip.frames - 1, f02 + 1), w = fpos - f02, d = clip.data;
+  for (let j = 0; j < N; j++) {
+    const o02 = (f02 * N + j) * 10, o12 = (f12 * N + j) * 10, p32 = j * 3, p42 = j * 4;
+    R.t[p32] = d[o02] + (d[o12] - d[o02]) * w;
+    R.t[p32 + 1] = d[o02 + 1] + (d[o12 + 1] - d[o02 + 1]) * w;
+    R.t[p32 + 2] = d[o02 + 2] + (d[o12 + 2] - d[o02 + 2]) * w;
+    const x = d[o02 + 3] + (d[o12 + 3] - d[o02 + 3]) * w, y = d[o02 + 4] + (d[o12 + 4] - d[o02 + 4]) * w, z10 = d[o02 + 5] + (d[o12 + 5] - d[o02 + 5]) * w, ww2 = d[o02 + 6] + (d[o12 + 6] - d[o02 + 6]) * w, l = Math.hypot(x, y, z10, ww2) || 1;
+    R.q[p42] = x / l;
+    R.q[p42 + 1] = y / l;
+    R.q[p42 + 2] = z10 / l;
+    R.q[p42 + 3] = ww2 / l;
+    for (let k = 0; k < 3; k++)
+      R.s[j * 3 + k] = d[o02 + 7 + k] + (d[o12 + 7 + k] - d[o02 + 7 + k]) * w;
+  }
+}
+var GLOSSY = /[?&]gloss=1/.test(typeof location === "undefined" ? "" : location.search);
+function kartDef(id2) {
+  const d = DATA.get(id2);
+  if (!d) throw new Error(`\u89D2\u8272\u6A21\u578B\u6CA1\u52A0\u8F7D: ${id2}`);
+  const HR2 = d.rig, N = HR2.names.length;
+  const BIND = HR2.bindSpace;
+  const rig = {
+    names: HR2.names,
+    parent: HR2.parent,
+    bind: new Float32Array(N * 3),
+    localVerts: !BIND,
+    bindWorld: BIND ? HR2.bindWorld : null,
+    bindQW: BIND ? HR2.bindWQ : null,
+    local: HR2.localPos,
+    chains: [],
+    get count() {
+      return N;
+    }
+  };
+  const rootJ = Math.max(0, HR2.parent.indexOf(-1));
+  const P = d.mesh.pos;
+  let minY = Infinity, maxY = -Infinity, minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (let i = 0; i < P.length; i += 3) {
+    if (P[i + 1] < minY) minY = P[i + 1];
+    if (P[i + 1] > maxY) maxY = P[i + 1];
+    if (P[i] < minX) minX = P[i];
+    if (P[i] > maxX) maxX = P[i];
+    if (P[i + 2] < minZ) minZ = P[i + 2];
+    if (P[i + 2] > maxZ) maxZ = P[i + 2];
+  }
+  const rawH = Math.max(0.2, maxY - minY), rawW = Math.max(0.2, Math.max(maxX - minX, maxZ - minZ));
+  const k = Math.min(MAX_H / rawH, MAX_W / rawW, MAX_K);
+  const mesh = {
+    pos: new Float32Array(d.mesh.pos),
+    nor: new Float32Array(d.mesh.nor),
+    uv: d.mesh.uv,
+    col: d.mesh.col,
+    idx: d.mesh.idx,
+    skin: d.mesh.skin,
+    // 第三、四根骨（只有真蒙皮网格才有；其余模型全零，走两骨路径）
+    skin2: d.mesh.skin2
+  }, BW2 = HR2.bindWorld, BQ = HR2.bindWQ, o32 = [0, 0, 0];
+  if (!BIND)
+    for (let v = 0; v < mesh.pos.length / 3; v++) {
+      const j = mesh.skin[v * 3], qx2 = -BQ[j * 4], qy2 = -BQ[j * 4 + 1], qz2 = -BQ[j * 4 + 2], qw2 = BQ[j * 4 + 3];
+      for (let k10 = 0; k10 < 2; k10++) {
+        const src = k10 === 0 ? mesh.pos : mesh.nor, off = k10 === 0 ? 1 : 0, x = src[v * 3] - (off ? BW2[j * 3] : 0), y = src[v * 3 + 1] - (off ? BW2[j * 3 + 1] : 0), z10 = src[v * 3 + 2] - (off ? BW2[j * 3 + 2] : 0), tx2 = 2 * (qy2 * z10 - qz2 * y), ty2 = 2 * (qz2 * x - qx2 * z10), tz2 = 2 * (qx2 * y - qy2 * x);
+        o32[0] = x + qw2 * tx2 + (qy2 * tz2 - qz2 * ty2), o32[1] = y + qw2 * ty2 + (qz2 * tx2 - qx2 * tz2), o32[2] = z10 + qw2 * tz2 + (qx2 * ty2 - qy2 * tx2), src[v * 3] = o32[0], src[v * 3 + 1] = o32[1], src[v * 3 + 2] = o32[2];
+      }
+    }
+  const t = new Ls();
+  t.crease = 42;
+  t.bone(rootJ);
+  t.rawMesh(mesh, { mat: K.cloth, gloss: GLOSSY ? 0.34 : 0, ao: 1, line: 1 });
+  const geometry = t.build();
+  let map = null;
+  if (d.tex && d.tex.w > 0) {
+    map = new Vs();
+    map.flipY = false;
+    const c = document.createElement("canvas");
+    c.width = d.tex.w, c.height = d.tex.h;
+    const g = c.getContext("2d"), n = mesh.col.length / 3;
+    let cr2 = 0, cg2 = 0, cb2 = 0;
+    for (let i = 0; i < n; i++) cr2 += mesh.col[i * 3], cg2 += mesh.col[i * 3 + 1], cb2 += mesh.col[i * 3 + 2];
+    const q = (v) => Math.round(Math.min(255, Math.max(0, Math.sqrt(v / n) * 255)));
+    g.fillStyle = `rgb(${q(cr2)},${q(cg2)},${q(cb2)})`;
+    g.fillRect(0, 0, d.tex.w, d.tex.h);
+    map.image = c;
+    map.needsUpdate = true;
+    if (d.texUrl) {
+      const img = new Image();
+      img.onload = () => {
+        map.image = img, map.needsUpdate = true;
+        globalThis.__sfTextureReady?.();
+      };
+      img.src = d.texUrl;
+    }
+  }
+  const A = d.anim, pick = (...keys) => {
+    for (const k10 of keys) if (A[k10]) return A[k10];
+    return null;
+  };
+  const once = (R, clip, p) => clip && playClip(R, clip, Math.max(0, Math.min(1, p)) * (clip.dur || 1), false, N), loop = (R, clip, t10) => clip && playClip(R, clip, t10, true, N), hold = (R, clip, t10) => clip && playClip(R, clip, Math.min(clip.dur || 1, Math.max(0, t10)), false, N);
+  const animate = (R, I, out) => {
+    const st = I.anim;
+    out.glow = 1;
+    I.clip = null;
+    if (st === "dead") {
+      const c = pick("die");
+      if (c) playClip(R, c, Math.min(c.dur || 1, I.t), false, N);
+      I.clip = "die";
+      out.glow = Math.max(0.15, 1 - I.t * 1.2);
+      return;
+    }
+    if (st === "airborne") {
+      loop(R, pick("air", "spin", "stun"), I.time);
+      I.clip = "air";
+      out.glow = 1.2;
+      return;
+    }
+    if (st === "stunned" || st === "hit" || st === "hurt") {
+      loop(R, pick("stun", "spin"), I.time);
+      I.clip = "stun";
+      return;
+    }
+    if (st === "roll" || st === "spin") {
+      loop(R, pick("spin", "accelL", "walk"), I.time);
+      I.clip = "spin";
+      out.glow = 2.2;
+      return;
+    }
+    if (st === "attack") {
+      once(R, pick("attack", "attackL", "attackR"), I.p);
+      out.glow = 1 + 1.2 * Math.sin(Math.min(1, I.p) * Math.PI);
+      return;
+    }
+    if (st === "attack2") {
+      once(R, pick("attackR", "attack", "attackL"), I.p);
+      out.glow = 1 + 1.2 * Math.sin(Math.min(1, I.p) * Math.PI);
+      return;
+    }
+    if (st === "cast_s1") {
+      once(R, pick("attackL", "attack", "attackR"), I.p);
+      out.glow = 1 + 1.6 * Math.sin(Math.min(1, I.p) * Math.PI);
+      return;
+    }
+    if (st === "cast_s2") {
+      once(R, pick("attackR", "attack", "attackL"), I.p);
+      out.glow = 1 + 1.6 * Math.sin(Math.min(1, I.p) * Math.PI);
+      return;
+    }
+    if (st === "cast_ult") {
+      once(R, pick("chant", "attack"), I.p);
+      out.glow = 1 + 2 * Math.sin(Math.min(1, I.p) * Math.PI);
+      return;
+    }
+    if (st === "channel") {
+      loop(R, pick("chant", "attack"), I.time);
+      out.glow = 1.5 + 0.4 * Math.sin(I.time * 6);
+      return;
+    }
+    if (st.startsWith("emote_")) {
+      hold(R, pick(st.slice(6), "taunt", "joke"), I.t);
+      I.clip = st;
+      out.glow = 1.3;
+      return;
+    }
+    if (st === "cheer") {
+      loop(R, pick("cheer", "dance"), I.time);
+      I.clip = "cheer";
+      out.glow = 1.6;
+      return;
+    }
+    if (st === "revive") {
+      once(R, pick("revive", "cheer"), I.p);
+      I.clip = "revive";
+      return;
+    }
+    if (st === "stop") {
+      once(R, pick("stop", "stun"), I.p);
+      I.clip = "stop";
+      return;
+    }
+    if (st === "turnL" || st === "turnR") {
+      once(R, pick(st, "stop", "walk"), I.p);
+      I.clip = st;
+      return;
+    }
+    if (st === "move" || st === "run") {
+      if (I.turn) {
+        const k11 = I.turn > 0 ? "turnL" : "turnR", c10 = pick(k11, "stop", "walk");
+        if (c10 && I.turnT < Math.min(c10.dur || 1, 0.45)) {
+          hold(R, c10, I.turnT), I.clip = k11;
+          return;
+        }
+      }
+      const k10 = I.slow ? "walk" : I.tier >= 2 ? "accelL" : I.tier >= 1 ? "accelM" : "accelS", c = pick(k10, "accelS", "walk");
+      loop(R, c, I.time), I.clip = k10;
+      return;
+    }
+    if (I.stopT >= 0) {
+      const c = pick("stop", "stun");
+      if (c && I.stopT < Math.min(c.dur || 1, 0.6)) {
+        hold(R, c, I.stopT), I.clip = "stop";
+        return;
+      }
+    }
+    if (A.idle) loop(R, A.idle, I.time + (I.seed ?? 0) * 3);
+    out.glow = 1 + 0.1 * Math.sin(I.time * 2);
+  };
+  const at = (y, z10 = 0) => ({ joint: rootJ, x: 0, y: rawH * y, z: rawH * z10 });
+  const wh2 = rawH * k, ww2 = rawW * k, wide = Math.min(1, Math.max(0, ww2 / Math.max(0.01, wh2) - 1));
+  const portrait = {
+    dist: 2.63 * Math.max(wh2, ww2),
+    drop: wh2 * (0.45 + 0.12 * wide),
+    // head 挂点在 0.95×wh
+    yaw: -16,
+    x: 0,
+    anim: "idle",
+    p: 0
+  };
+  return {
+    key: `hero:${id2}`,
+    geometry,
+    rig,
+    map,
+    // 图集是 sRGB 编码的（glTF baseColorTexture 就是这么定义的），顶点色是线性的，
+    // 所以片元里要把贴图转一次线性，否则会比以前的顶点色版亮一截
+    mapSRGB: map ? 1 : 0,
+    // 原版这批是平涂卡通，不要硬边高光（见上面 rawMesh 的注释）
+    specular: GLOSSY ? void 0 : 0,
+    height: 3.05 / k,
+    radius: Math.min(rawW * 0.42, 1.15),
+    scale: 1,
+    stride: 3,
+    triangles: t.triangleCount,
+    portrait,
+    attach: {
+      head: at(0.95),
+      chest: at(0.62),
+      handR: at(0.5, 0.18),
+      handL: at(0.5, 0.18),
+      weapon: at(0.5, 0.28),
+      muzzle: at(0.5, 0.34)
+    },
+    blend: () => 0.14,
+    animate,
+    // 某段动作的原始时长（秒）。表情按钮要按原速播完，得知道播多久。
+    animDur: (name) => A[name]?.dur ?? 0
+  };
+}
+function kartAnimDur(id2, name) {
+  const d = DATA.get(id2);
+  return d && d.anim && d.anim[name] && d.anim[name].dur || 0;
+}
+async function preloadKart(id2) {
+  if (!id2 || !BY_ID.has(id2)) return false;
+  if (DATA.has(id2)) return true;
+  for (const p of [`kart/${id2}.bin`, `../kart/${id2}.bin`, `../dist/kart/${id2}.bin`]) {
+    try {
+      const r = await fetch(p);
+      if (!r.ok) continue;
+      const d = kartDecode(await r.arrayBuffer());
+      if (d.tex && d.tex.w > 0) d.texUrl = p.replace(/\.bin$/, ".png");
+      DATA.set(id2, d);
+      registerModel(`hero:${id2}`, () => kartDef(id2));
+      return true;
+    } catch {
+    }
+  }
+  console.warn("\u89D2\u8272\u6A21\u578B\u52A0\u8F7D\u5931\u8D25", id2);
+  return false;
+}
+function kartReady(id2) {
+  return DATA.has(id2);
+}
+var playerSkin = null;
+function setPlayerSkin(id2) {
+  playerSkin = id2 && BY_ID.has(id2) ? id2 : null;
+  return playerSkin;
+}
+function lookId(heroId, isPlayer) {
+  return isPlayer && playerSkin || heroId;
+}
+var PAL = /* @__PURE__ */ new Map();
+var s2hex = (v) => {
+  const s = v <= 31308e-7 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+  return Math.round(Math.min(1, Math.max(0, s)) * 255);
+};
+var hx2 = (r, g, b) => "#" + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+function kartPalette(id2) {
+  const hit = PAL.get(id2);
+  if (hit) return hit;
+  const d = DATA.get(id2);
+  if (!d) return null;
+  const C = d.mesh.col;
+  let r = 0, g = 0, b = 0, w = 0;
+  for (let i = 0; i < C.length; i += 3) {
+    const k = 0.12 + (0.2126 * C[i] + 0.7152 * C[i + 1] + 0.0722 * C[i + 2]) * 2.4;
+    r += C[i] * k;
+    g += C[i + 1] * k;
+    b += C[i + 2] * k;
+    w += k;
+  }
+  if (!(w > 0)) return null;
+  const R = s2hex(r / w), G = s2hex(g / w), B = s2hex(b / w);
+  const p = {
+    primary: hx2(R, G, B),
+    secondary: hx2(R * 0.4, G * 0.4, B * 0.5),
+    accent: hx2(R * 1.2 + 22, G * 1.12 + 16, B * 1.06 + 10),
+    glow: hx2(R * 1.25 + 46, G * 1.25 + 46, B * 1.2 + 54)
+  };
+  PAL.set(id2, p);
+  return p;
+}
+
+// src/47-kart-art.js
+var KART_ART = {
+  bear: "images/portrait/bear.png",
+  bighead: "images/portrait/bighead.png",
+  boxman: "images/portrait/boxman.png",
+  boxtree: "images/portrait/boxtree.png",
+  coconut: "images/portrait/coconut.png",
+  cow: "images/portrait/cow.png",
+  frog: "images/portrait/frog.png",
+  girlhead: "images/portrait/girlhead.png",
+  horseman: "images/portrait/horseman.png",
+  kangaroo: "images/portrait/kangaroo.png",
+  maggot: "images/portrait/maggot.png",
+  magnet: "images/portrait/magnet.png",
+  mannequin: "images/portrait/mannequin.png",
+  monkey: "images/portrait/monkey.png",
+  mushroom: "images/portrait/mushroom.png",
+  panda: "images/portrait/panda.png",
+  scallion: "images/portrait/scallion.png",
+  skeleton: "images/portrait/skeleton.png",
+  slime: "images/portrait/slime.png",
+  stone: "images/portrait/stone.png"
+};
+
 // src/32-ui.js
 function gB(n, t) {
   let e;
@@ -48654,10 +49231,23 @@ function gB(n, t) {
     } catch {
       return -1;
     }
+  })(), qTime = (() => {
+    try {
+      const v10 = parseFloat(new URLSearchParams(location.search).get("t"));
+      return Number.isFinite(v10) && v10 >= 0 ? v10 : -1;
+    } catch {
+      return -1;
+    }
   })();
-  let f = t, d = qAnim, h = 0, u = 0, m = 0, x = 0, p = 0.3, g = false, y = 0, v = performance.now();
-  const _ = (b) => {
-    f = b, o = qc(Vx(b)), r = new of(o, 0.37), l && (l.removeFrom(s.scene), l.dispose()), l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map }, `preview:${b}`), l.addTo(s.scene);
+  let f = t, d = qAnim, curSkin = null, h = 0, u = 0, m = 0, x = 0, p = 0.3, g = false, y = 0, v = performance.now();
+  const _ = (b, sk2) => {
+    if (sk2 && !kartReady(sk2)) {
+      preloadKart(sk2).then((ok2) => {
+        ok2 && f === b && curSkin === sk2 && _(b, sk2);
+      });
+    }
+    const us = sk2 && kartReady(sk2) ? sk2 : null;
+    f = b, o = qc(Vx(us || b)), r = new of(o, 0.37), l && (l.removeFrom(s.scene), l.dispose()), l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map, mapSRGB: o.mapSRGB, specular: o.specular }, `preview:${us || b}`), l.addTo(s.scene);
     const w = new Ut(Se[b].palette.glow);
     s.rim.color.copy(w).lerp(new Ut(1, 1, 1), 0.35), a && (s.scene.remove(a), a.geometry.dispose()), a = new Sn(pB(w, b === "panyue" ? 1.5 : 1.12), i), a.receiveShadow = true, s.scene.add(a), d = qAnim, h = 0, // 一次性动作必须给个时长：原来 u 一直是 0，?anim=attack 第一帧就被判成"播完了"退回 idle
     u = qAnim === "idle" || qAnim === "move" ? 0 : qAnim === "cast_ult" ? 2.6 : 1.1, r.snap(), k();
@@ -48676,13 +49266,14 @@ function gB(n, t) {
     x += w, p = (v3[f] || v3.chijin)[0] + Math.sin(x * 0.5) * (v3[f] || v3.chijin)[1];
     const T = r.input;
     const cyc = d === "idle" || d === "move";
-    d !== "idle" && d !== "move" && qFreeze < 0 && (h += w, h >= u && (d = "idle", h = 0)), T.anim = d, T.time = x, T.t = cyc ? x : h, T.p = qFreeze >= 0 ? qFreeze : cyc ? 0 : Math.min(1, h / u), T.variant = m, T.windup = 0.35, T.passive = qPassive, T.stride = 0, T.speed = 0;
+    d !== "idle" && d !== "move" && qFreeze < 0 && (h += w, h >= u && (d = "idle", h = 0)), T.anim = d, T.time = qTime >= 0 ? qTime : x, T.t = cyc ? x : h, T.p = qFreeze >= 0 ? qFreeze : cyc ? 0 : Math.min(1, h / u), T.variant = m, T.windup = 0.35, T.passive = qPassive, T.stride = 0, T.speed = 0;
     const E = d === "leap" ? 4 * 1.5 * T.p * (1 - T.p) : 0;
     r.update(m * 10 + (d === "idle" ? 0 : 1), w, 0, E, 0, p, 1), c.glow = r.output.glow, l.begin(), l.push(r.skeleton, c), l.end(), e.render(s.scene, s.camera);
   };
   return _(t), M(), y = requestAnimationFrame(S), {
-    setHero(b) {
-      g || b === f || _(b);
+    setHero(b, sk2) {
+      const s22 = sk2 || null;
+      g || b === f && s22 === curSkin || (curSkin = s22, _(b, s22));
     },
     play(b) {
       if (g) return;
@@ -48697,26 +49288,28 @@ function gB(n, t) {
 }
 var jd = 192;
 var j1 = /* @__PURE__ */ new Map();
-function l4(n, t) {
-  const e = Se[n], s = document.createElement("canvas");
-  s.width = s.height = jd;
+function l4(n, t, pal, w02, h02) {
+  const e = Se[n], P = pal || e.palette, w = w02 || jd, h = h02 || w, s = document.createElement("canvas");
+  s.width = w, s.height = h;
   const i = s.getContext("2d");
   if (!i) return "";
-  if (!t) return D8(i, jd, jd, n, true), s.toDataURL("image/png");
-  const a = jd, o = new Ut(e.palette.primary).lerp(new Ut(659494), 0.72), r = new Ut(e.palette.primary).lerp(new Ut(1055292), 0.35), l = i.createLinearGradient(0, 0, 0, a);
-  l.addColorStop(0, `#${r.getHexString()}`), l.addColorStop(1, `#${o.getHexString()}`), i.fillStyle = l, i.fillRect(0, 0, a, a);
-  const c = new Ut(e.palette.glow), f = i.createRadialGradient(a * 0.5, a * 0.42, a * 0.05, a * 0.5, a * 0.46, a * 0.62);
-  f.addColorStop(0, `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},0.55)`), f.addColorStop(1, "rgba(0,0,0,0)"), i.fillStyle = f, i.fillRect(0, 0, a, a), i.strokeStyle = "rgba(255,255,255,0.08)", i.lineWidth = 1;
-  for (let h = 0; h < 5; h++)
-    i.beginPath(), i.moveTo(-20 + h * 52, a), i.lineTo(60 + h * 52, 0), i.stroke();
-  i.imageSmoothingQuality = "high", i.drawImage(t, 0, 0, a, a);
-  const d = i.createLinearGradient(0, a * 0.7, 0, a);
-  return d.addColorStop(0, "rgba(6,10,26,0)"), d.addColorStop(1, "rgba(6,10,26,0.5)"), i.fillStyle = d, i.fillRect(0, 0, a, a), s.toDataURL("image/png");
+  if (!t) return D8(i, w, h, n, true), s.toDataURL("image/png");
+  const a = Math.max(w, h), o = new Ut(P.primary).lerp(new Ut(659494), 0.72), r = new Ut(P.primary).lerp(new Ut(1055292), 0.35), l = i.createLinearGradient(0, 0, 0, h);
+  l.addColorStop(0, `#${r.getHexString()}`), l.addColorStop(1, `#${o.getHexString()}`), i.fillStyle = l, i.fillRect(0, 0, w, h);
+  const c = new Ut(P.glow), f = i.createRadialGradient(w * 0.5, h * 0.42, a * 0.05, w * 0.5, h * 0.46, a * 0.62);
+  f.addColorStop(0, `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},0.55)`), f.addColorStop(1, "rgba(0,0,0,0)"), i.fillStyle = f, i.fillRect(0, 0, w, h), i.strokeStyle = "rgba(255,255,255,0.08)", i.lineWidth = 1;
+  for (let u = 0; u < 5; u++)
+    i.beginPath(), i.moveTo(-20 + u * 52, h), i.lineTo(60 + u * 52, 0), i.stroke();
+  i.imageSmoothingQuality = "high", i.drawImage(t, 0, (h - w) / 2, w, w);
+  const d = i.createLinearGradient(0, h * 0.7, 0, h);
+  return d.addColorStop(0, "rgba(6,10,26,0)"), d.addColorStop(1, "rgba(6,10,26,0.5)"), i.fillStyle = d, i.fillRect(0, 0, w, h), s.toDataURL("image/png");
 }
 var dh = null;
 var c4 = false;
 var k2 = false;
 var MAP_HEROES = ["chijin", "niumo", "mushroom"];
+var ALL_PORTRAITS = kr.concat(KART_IDS).filter((e) => !KART_ART[e]);
+var ART_BASE = /\/modular\//.test(location.pathname) ? "../" : "";
 var mapFixTries = 0;
 globalThis.__sfTextureReady = () => {
   if (mapFixTries++ > 4) return;
@@ -48734,64 +49327,129 @@ function z8() {
   const n = dh;
   dh = null, n && (n.renderer.dispose(), n.renderer.forceContextLoss());
 }
-function N8(n) {
-  let t = "";
-  if (!c4)
-    try {
-      if (!dh) {
-        const r = Math.round(jd * 1.5), l = document.createElement("canvas");
-        l.width = l.height = r;
-        const c = new cx({
-          canvas: l,
-          antialias: true,
-          alpha: true,
-          premultipliedAlpha: true,
-          preserveDrawingBuffer: true
-        });
-        P8(c), c.setPixelRatio(1), c.setSize(r, r, false), dh = { renderer: c, stage: I8(false) };
+var FIT_MARGIN = 0.86;
+var FIT_TAN = 2 * Math.tan(24 / 2 * (Math.PI / 180));
+function fitPortrait(canvas, aimX, aimY, dist) {
+  const r = canvas.width;
+  let px2;
+  try {
+    const c22 = document.createElement("canvas");
+    c22.width = c22.height = r, c22.getContext("2d").drawImage(canvas, 0, 0);
+    px2 = c22.getContext("2d").getImageData(0, 0, r, r).data;
+  } catch {
+    return null;
+  }
+  let x02 = r, y02 = r, x12 = -1, y12 = -1;
+  for (let y = 0; y < r; y++)
+    for (let x = 0; x < r; x++)
+      if (px2[(y * r + x) * 4 + 3] > 24) {
+        x < x02 && (x02 = x), x > x12 && (x12 = x), y < y02 && (y02 = y), y > y12 && (y12 = y);
       }
-      const { renderer: e, stage: s } = dh, i = qc(Vx(n)), a = new of(i, 0.37), o = new ux(i.geometry, i.rig.count, 1, { outline: 1.7, map: i.map }, `portrait:${n}`);
+  if (x12 < x02 || y12 < y02) return null;
+  const vis = FIT_TAN * dist, bw2 = (x12 - x02 + 1) / r * vis, bh2 = (y12 - y02 + 1) / r * vis, cx2 = aimX + ((x02 + x12 + 1) / 2 / r - 0.5) * vis, cy2 = aimY - ((y02 + y12 + 1) / 2 / r - 0.5) * vis;
+  return {
+    cx: cx2,
+    cy: cy2,
+    dist: Math.min(30, Math.max(0.15, Math.max(bw2, bh2) / (FIT_MARGIN * FIT_TAN)))
+  };
+}
+function N8(n, w02, h02) {
+  const sp2 = kartSpec(n), base = sp2?.kit ?? n, pal = sp2 && kartPalette(n) || null, w = w02 || (sp2 ? ART_W : jd), h = h02 || (sp2 ? ART_H : w);
+  let t = "";
+  if (sp2 && !kartReady(n)) {
+    preloadKart(n).then((ok2) => {
+      if (!ok2) return;
+      j1.delete(n);
+      const u = xB(n);
+      for (const img of document.querySelectorAll(`img[data-sf-portrait="${n}"]`)) if (u) img.src = u;
+    });
+    t = l4(base, null, pal, w, h);
+    j1.set(n, t);
+    return t;
+  }
+  if (!c4 && !dh)
+    try {
+      const r = Math.round(Math.max(jd * 1.5, w)), l = document.createElement("canvas");
+      l.width = l.height = r;
+      const c = new cx({
+        canvas: l,
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: true
+      });
+      P8(c), c.setPixelRatio(1), c.setSize(r, r, false), dh = { renderer: c, stage: I8(false) };
+    } catch (err) {
+      console.warn("[\u7ACB\u7ED8] \u79BB\u5C4F\u6E32\u67D3\u5668\u5EFA\u4E0D\u8D77\u6765\uFF0C\u6574\u5957\u7ACB\u7ED8\u9000\u56DE\u5E95\u677F\u56FE", err), c4 = true, z8();
+    }
+  if (!c4 && dh)
+    try {
+      const { renderer: e, stage: s } = dh, i = qc(Vx(n)), a = new of(i, 0.37), o = new ux(i.geometry, i.rig.count, 1, { outline: 1.7, map: i.map, mapSRGB: i.mapSRGB, specular: i.specular }, `portrait:${n}`);
       o.setShadows(false), o.addTo(s.scene);
       try {
-        const r = new Ut(Se[n].palette.glow);
+        const r = new Ut(pal?.glow ?? Se[base].palette.glow);
         s.rim.color.copy(r).lerp(new Ut(1, 1, 1), 0.3);
-        const l = fB[n], c = a.input;
+        const l = i.portrait ?? fB[base] ?? fB.chijin, c = a.input;
         c.anim = l.anim ?? "idle", c.time = 1.3, c.p = l.p ?? 0, c.t = c.anim === "idle" || c.anim === "channel" ? 1.3 : c.p * 0.8, c.windup = 0.35, c.variant = l.variant ?? 0, a.update(0, 0, 0, 0, 0, l.yaw * Math.PI / 180, 1), a.settle();
         const f = sh();
         f.team.set(Yt.blue.main), f.glow = a.output.glow, o.begin(), o.push(a.skeleton, f), o.end();
         const d = { x: 0, y: 0, z: 0 };
         a.attach("head", d) || (d.y = i.height * i.scale * 0.86);
-        const h = s.camera, u = d.y - l.drop;
-        h.aspect = 1, h.fov = 24, h.position.set(d.x + l.x, u + 0.1, d.z + l.dist), h.lookAt(d.x + l.x, u, d.z), h.updateProjectionMatrix(), e.clear(), e.render(s.scene, h), t = l4(n, e.domElement);
+        const cam = s.camera, aimX = d.x + l.x, aimY = d.y - l.drop, draw = (cx2, cy2, dist) => {
+          cam.aspect = 1, cam.fov = 24, cam.position.set(cx2, cy2 + 0.1, d.z + dist), cam.lookAt(cx2, cy2, d.z), cam.updateProjectionMatrix(), e.clear(), e.render(s.scene, cam);
+        };
+        draw(aimX, aimY, l.dist);
+        if (sp2) {
+          let cur = { cx: aimX, cy: aimY, dist: l.dist * 1.7 };
+          draw(cur.cx, cur.cy, cur.dist);
+          for (let k = 0; k < 3; k++) {
+            const fit = fitPortrait(e.domElement, cur.cx, cur.cy, cur.dist);
+            if (!fit) {
+              cur = { cx: aimX, cy: aimY, dist: l.dist }, draw(cur.cx, cur.cy, cur.dist);
+              break;
+            }
+            const steady = Math.abs(fit.dist / cur.dist - 1) < 0.02;
+            cur = fit, draw(cur.cx, cur.cy, cur.dist);
+            if (steady) break;
+          }
+        }
+        t = l4(base, e.domElement, pal, w, h);
       } finally {
         o.removeFrom(s.scene), o.dispose();
       }
-    } catch {
-      c4 = true, z8();
+    } catch (err) {
+      console.warn("[\u7ACB\u7ED8] \u6E32\u67D3\u5931\u8D25", n, err && (err.stack || err.message || err));
     }
-  return t || (t = l4(n, null)), j1.set(n, t), t;
+  return t || (t = l4(base, null, pal, w, h)), j1.set(n, t), t;
 }
 function F8() {
   if (k2) return;
-  if (kr.find((e) => !j1.has(e)) === void 0) {
+  if (ALL_PORTRAITS.find((e) => !j1.has(e)) === void 0) {
     z8();
     return;
   }
   k2 = true;
   const t = () => {
     k2 = false;
-    const e = kr.find((s) => !j1.has(s));
+    const e = ALL_PORTRAITS.find((s) => !j1.has(s));
     e !== void 0 && N8(e), F8();
   };
   typeof window.requestIdleCallback == "function" ? window.requestIdleCallback(t, { timeout: 400 }) : window.setTimeout(t, 60);
 }
 function xB(n) {
+  const art = KART_ART[n];
+  if (art) return ART_BASE + art;
   const t = j1.get(n);
   if (t !== void 0) return t;
   const e = N8(n);
   return F8(), e;
 }
 var U8 = [mU, lB, cz, Nz];
+globalThis.__sfPortrait = async (id2, w, h) => {
+  await preloadKart(id2);
+  j1.delete(id2);
+  return N8(id2, w || ART_W, h || ART_H);
+};
 function yB(n, t, e) {
   return II(n, t, e, U8);
 }
@@ -49975,6 +50633,234 @@ function Kx(n, t = "menu") {
 
 // src/33-data-2.js
 var ln = {
+  iron_sword: {
+    id: "iron_sword",
+    name: "\u94C1\u5251",
+    brief: "\u6700\u57FA\u7840\u7684\u7269\u653B\u4EF6",
+    category: "attack",
+    tier: 1,
+    cost: 300,
+    stats: {
+      ad: 20
+    },
+    color: "#c8ccd4"
+  },
+  iron_blade: {
+    id: "iron_blade",
+    name: "\u7384\u94C1\u91CD\u5251",
+    brief: "\u7269\u653B\u66F4\u9AD8\u7684\u57FA\u7840\u4EF6",
+    category: "attack",
+    tier: 1,
+    cost: 630,
+    stats: {
+      ad: 42
+    },
+    color: "#9aa4b2"
+  },
+  hunting_bow: {
+    id: "hunting_bow",
+    name: "\u730E\u5F13",
+    brief: "\u4E00\u70B9\u70B9\u653B\u901F",
+    category: "attack",
+    tier: 1,
+    cost: 190,
+    stats: {
+      attackSpeedPct: 0.12
+    },
+    color: "#c9a86a"
+  },
+  horn_bow: {
+    id: "horn_bow",
+    name: "\u89D2\u5F13",
+    brief: "\u653B\u901F\u4EF6\uFF0C\u5408\u6210\u75BE\u98CE\u5F29",
+    category: "attack",
+    tier: 1,
+    cost: 350,
+    stats: {
+      attackSpeedPct: 0.22
+    },
+    color: "#b08d52"
+  },
+  short_dagger: {
+    id: "short_dagger",
+    name: "\u77ED\u5315",
+    brief: "\u4E00\u70B9\u70B9\u66B4\u51FB\u7387",
+    category: "attack",
+    tier: 1,
+    cost: 160,
+    stats: {
+      critChance: 0.1
+    },
+    color: "#b8bcc4"
+  },
+  blood_jade: {
+    id: "blood_jade",
+    name: "\u8840\u7389",
+    brief: "\u666E\u653B\u56DE\u8840\u7684\u57FA\u7840\u4EF6",
+    category: "attack",
+    tier: 1,
+    cost: 210,
+    stats: {
+      lifesteal: 0.07
+    },
+    color: "#d8433f"
+  },
+  armor_piercer: {
+    id: "armor_piercer",
+    name: "\u7834\u7532\u9525",
+    brief: "\u4E00\u70B9\u70B9\u62A4\u7532\u7A7F\u900F",
+    category: "attack",
+    tier: 1,
+    cost: 160,
+    stats: {
+      armorPen: 0.1
+    },
+    color: "#8fa6bb"
+  },
+  apprentice_staff: {
+    id: "apprentice_staff",
+    name: "\u5B66\u5F92\u6CD5\u6756",
+    brief: "\u6700\u57FA\u7840\u7684\u6CD5\u5F3A\u4EF6",
+    category: "magic",
+    tier: 1,
+    cost: 200,
+    stats: {
+      ap: 22
+    },
+    color: "#7f8cff"
+  },
+  jade_slip: {
+    id: "jade_slip",
+    name: "\u7389\u7B80",
+    brief: "\u6CD5\u5F3A\u66F4\u9AD8\u7684\u57FA\u7840\u4EF6",
+    category: "magic",
+    tier: 1,
+    cost: 400,
+    stats: {
+      ap: 44
+    },
+    color: "#9ad0c8"
+  },
+  mana_crystal: {
+    id: "mana_crystal",
+    name: "\u84DD\u6676\u77F3",
+    brief: "\u6491\u84DD\u91CF",
+    category: "magic",
+    tier: 1,
+    cost: 160,
+    stats: {
+      mana: 320
+    },
+    color: "#5b9bff"
+  },
+  curse_charm: {
+    id: "curse_charm",
+    name: "\u5492\u7B26",
+    brief: "\u4E00\u70B9\u70B9\u6CD5\u672F\u7A7F\u900F",
+    category: "magic",
+    tier: 1,
+    cost: 160,
+    stats: {
+      magicPen: 0.1
+    },
+    color: "#a86bd8"
+  },
+  hourglass: {
+    id: "hourglass",
+    name: "\u6F0F\u523B",
+    brief: "\u4E00\u70B9\u70B9\u51B7\u5374\u7F29\u51CF",
+    category: "magic",
+    tier: 1,
+    cost: 160,
+    stats: {
+      cdr: 0.06
+    },
+    color: "#7ec8e3"
+  },
+  cloth_armor: {
+    id: "cloth_armor",
+    name: "\u5E03\u7532",
+    brief: "\u6700\u57FA\u7840\u7684\u62A4\u7532",
+    category: "defense",
+    tier: 1,
+    cost: 150,
+    stats: {
+      armor: 36
+    },
+    color: "#b9a07a"
+  },
+  chain_mail: {
+    id: "chain_mail",
+    name: "\u9501\u5B50\u7532",
+    brief: "\u62A4\u7532\u4EF6\uFF0C\u5408\u6210\u9F9F\u7532\u76FE",
+    category: "defense",
+    tier: 1,
+    cost: 340,
+    stats: {
+      armor: 80
+    },
+    color: "#8d99a8"
+  },
+  wood_shield: {
+    id: "wood_shield",
+    name: "\u6728\u76FE",
+    brief: "\u4E00\u70B9\u70B9\u751F\u547D",
+    category: "defense",
+    tier: 1,
+    cost: 260,
+    stats: {
+      hp: 260
+    },
+    color: "#a8794f"
+  },
+  leather_vest: {
+    id: "leather_vest",
+    name: "\u76AE\u7532",
+    brief: "\u751F\u547D\u4EF6\uFF0C\u5408\u6210\u62A4\u5FC3\u955C",
+    category: "defense",
+    tier: 1,
+    cost: 430,
+    stats: {
+      hp: 430
+    },
+    color: "#a06a44"
+  },
+  heart_mirror: {
+    id: "heart_mirror",
+    name: "\u62A4\u5FC3\u955C",
+    brief: "\u5927\u5757\u751F\u547D\uFF0C\u5408\u6210\u5927\u4EF6",
+    category: "defense",
+    tier: 1,
+    cost: 720,
+    stats: {
+      hp: 720
+    },
+    color: "#d9a441"
+  },
+  ward_cloak: {
+    id: "ward_cloak",
+    name: "\u6297\u9B54\u62AB\u98CE",
+    brief: "\u6700\u57FA\u7840\u7684\u9B54\u6297",
+    category: "defense",
+    tier: 1,
+    cost: 160,
+    stats: {
+      mr: 40
+    },
+    color: "#7f9ad8"
+  },
+  rune_cloak: {
+    id: "rune_cloak",
+    name: "\u7075\u7EB9\u62AB\u98CE",
+    brief: "\u9B54\u6297\u4EF6\uFF0C\u5408\u6210\u7384\u51B0\u62A4\u7B26",
+    category: "defense",
+    tier: 1,
+    cost: 350,
+    stats: {
+      mr: 90
+    },
+    color: "#6f8fd0"
+  },
   boots: {
     id: "boots",
     name: "\u79FB\u901F\u8349\u978B",
@@ -49982,7 +50868,9 @@ var ln = {
     category: "boots",
     tier: 1,
     cost: 250,
-    stats: { moveSpeed: 0.5 },
+    stats: {
+      moveSpeed: 0.5
+    },
     color: "#a8794f"
   },
   boots_guard: {
@@ -49992,7 +50880,11 @@ var ln = {
     category: "boots",
     tier: 2,
     cost: 710,
-    stats: { moveSpeed: 0.6, armor: 110 },
+    from: ["boots", "cloth_armor"],
+    stats: {
+      moveSpeed: 0.6,
+      armor: 110
+    },
     color: "#8d99a8"
   },
   boots_arcane: {
@@ -50002,7 +50894,11 @@ var ln = {
     category: "boots",
     tier: 2,
     cost: 710,
-    stats: { moveSpeed: 0.6, cdr: 0.15 },
+    from: ["boots", "hourglass"],
+    stats: {
+      moveSpeed: 0.6,
+      cdr: 0.15
+    },
     color: "#7f8cff"
   },
   boots_fury: {
@@ -50012,17 +50908,180 @@ var ln = {
     category: "boots",
     tier: 2,
     cost: 710,
-    stats: { moveSpeed: 0.6, attackSpeedPct: 0.25 },
+    from: ["boots", "hunting_bow"],
+    stats: {
+      moveSpeed: 0.6,
+      attackSpeedPct: 0.25
+    },
     color: "#56c7a0"
+  },
+  azure_blade: {
+    id: "azure_blade",
+    name: "\u9752\u950B\u5251",
+    brief: "\u7269\u653B\u4E2D\u4EF6\uFF0C\u5408\u6210\u65A9\u9A6C\u5251",
+    category: "attack",
+    tier: 2,
+    cost: 1e3,
+    from: ["iron_sword", "iron_blade"],
+    stats: {
+      ad: 68
+    },
+    color: "#6fa8d8"
+  },
+  war_halberd: {
+    id: "war_halberd",
+    name: "\u7834\u519B\u957F\u621F",
+    brief: "\u7269\u653B + \u62A4\u7532\u7A7F\u900F",
+    category: "attack",
+    tier: 2,
+    cost: 940,
+    from: ["iron_blade", "armor_piercer"],
+    stats: {
+      ad: 45,
+      armorPen: 0.18
+    },
+    color: "#9fb4c9"
+  },
+  wind_crossbow: {
+    id: "wind_crossbow",
+    name: "\u75BE\u98CE\u5F29",
+    brief: "\u653B\u901F + \u66B4\u51FB",
+    category: "attack",
+    tier: 2,
+    cost: 940,
+    from: ["horn_bow", "short_dagger"],
+    stats: {
+      ad: 15,
+      attackSpeedPct: 0.3,
+      critChance: 0.16
+    },
+    color: "#56c7a0"
+  },
+  blood_dagger: {
+    id: "blood_dagger",
+    name: "\u996E\u8840\u77ED\u5200",
+    brief: "\u7269\u653B + \u5438\u8840",
+    category: "attack",
+    tier: 2,
+    cost: 880,
+    from: ["blood_jade", "iron_sword"],
+    stats: {
+      ad: 30,
+      lifesteal: 0.15
+    },
+    color: "#d8433f"
+  },
+  spell_codex: {
+    id: "spell_codex",
+    name: "\u5492\u672F\u6CD5\u5178",
+    brief: "\u6CD5\u5F3A + \u51B7\u5374\u7F29\u51CF",
+    category: "magic",
+    tier: 2,
+    cost: 980,
+    from: ["jade_slip", "hourglass"],
+    stats: {
+      ap: 85,
+      cdr: 0.09
+    },
+    color: "#8b7bff"
+  },
+  shaman_mask: {
+    id: "shaman_mask",
+    name: "\u5DEB\u795D\u9762\u5177",
+    brief: "\u6CD5\u5F3A + \u751F\u547D",
+    category: "magic",
+    tier: 2,
+    cost: 990,
+    from: ["jade_slip", "wood_shield"],
+    stats: {
+      ap: 70,
+      hp: 380
+    },
+    color: "#c07ad8"
+  },
+  spell_piercer: {
+    id: "spell_piercer",
+    name: "\u7834\u6CD5\u7389\u7B80",
+    brief: "\u6CD5\u5F3A + \u6CD5\u672F\u7A7F\u900F",
+    category: "magic",
+    tier: 2,
+    cost: 910,
+    from: ["curse_charm", "jade_slip"],
+    stats: {
+      ap: 75,
+      magicPen: 0.16
+    },
+    color: "#9a6bd8"
+  },
+  star_robe: {
+    id: "star_robe",
+    name: "\u661F\u7EB9\u957F\u888D",
+    brief: "\u6CD5\u5F3A + \u84DD\u91CF + \u51B7\u5374",
+    category: "magic",
+    tier: 2,
+    cost: 890,
+    from: ["mana_crystal", "cloth_armor"],
+    stats: {
+      ap: 60,
+      mana: 420,
+      cdr: 0.06
+    },
+    color: "#6a86e8"
+  },
+  iron_bracer: {
+    id: "iron_bracer",
+    name: "\u7384\u94C1\u62A4\u8155",
+    brief: "\u751F\u547D + \u62A4\u7532",
+    category: "defense",
+    tier: 2,
+    cost: 880,
+    from: ["chain_mail", "wood_shield"],
+    stats: {
+      hp: 600,
+      armor: 70
+    },
+    color: "#98a4b4"
+  },
+  turtle_shield: {
+    id: "turtle_shield",
+    name: "\u9F9F\u7532\u76FE",
+    brief: "\u5927\u5757\u751F\u547D + \u62A4\u7532",
+    category: "defense",
+    tier: 2,
+    cost: 1060,
+    from: ["chain_mail", "heart_mirror"],
+    stats: {
+      hp: 700,
+      armor: 90
+    },
+    color: "#7fa07a"
+  },
+  frost_amulet: {
+    id: "frost_amulet",
+    name: "\u7384\u51B0\u62A4\u7B26",
+    brief: "\u751F\u547D + \u9B54\u6297",
+    category: "defense",
+    tier: 2,
+    cost: 1e3,
+    from: ["rune_cloak", "wood_shield"],
+    stats: {
+      hp: 650,
+      mr: 95
+    },
+    color: "#7fb8d8"
   },
   starfall_blade: {
     id: "starfall_blade",
     name: "\u6536\u5272\u65A9\u9A6C\u5251",
     brief: "\u7269\u653B\u6700\u9AD8\uFF0C\u6253\u6B8B\u8840\u66F4\u75BC",
     category: "attack",
-    tier: 2,
+    tier: 3,
     cost: 2100,
-    stats: { ad: 110, cdr: 0.1 },
+    from: ["azure_blade", "iron_blade"],
+    stats: {
+      ad: 134,
+      cdr: 0.1
+    },
     passive: {
       id: "execute_bonus",
       name: "\u6536\u5272",
@@ -50037,14 +51096,20 @@ var ln = {
     name: "\u653B\u901F\u89D2\u5F13",
     brief: "\u653B\u901F\u5927\u6DA8\uFF0C\u666E\u653B\u9644\u5E26\u6CD5\u4F24",
     category: "attack",
-    tier: 2,
+    tier: 3,
     cost: 1900,
-    stats: { attackSpeedPct: 0.35, critChance: 0.15, moveSpeed: 0.25 },
+    from: ["wind_crossbow", "horn_bow"],
+    stats: {
+      ad: 35,
+      attackSpeedPct: 0.5,
+      critChance: 0.3,
+      moveSpeed: 0.5
+    },
     passive: {
       id: "onhit_magic",
       name: "\u9644\u5E26\u6CD5\u4F24",
-      desc: "\u666E\u653B\u989D\u5916\u9020\u6210 45 \u70B9\u6CD5\u672F\u4F24\u5BB3(\u5BF9\u5EFA\u7B51\u65E0\u6548)\u3002",
-      value: 45
+      desc: "\u666E\u653B\u989D\u5916\u9020\u6210 60 \u70B9\u6CD5\u672F\u4F24\u5BB3(\u5BF9\u5EFA\u7B51\u65E0\u6548)\u3002",
+      value: 60
     },
     color: "#ffd76a"
   },
@@ -50053,19 +51118,27 @@ var ln = {
     name: "\u5438\u8840\u73AF\u9996\u5200",
     brief: "\u666E\u653B\u9020\u6210\u4F24\u5BB3\uFF0C\u81EA\u5DF1\u56DE\u8840",
     category: "attack",
-    tier: 2,
-    cost: 1800,
-    stats: { ad: 85, lifesteal: 0.2 },
+    tier: 3,
+    cost: 1900,
+    from: ["blood_dagger", "azure_blade"],
+    stats: {
+      ad: 86,
+      lifesteal: 0.25
+    },
     color: "#d8433f"
   },
   piercing_spear: {
     id: "piercing_spear",
     name: "\u7834\u7532\u957F\u621F",
-    brief: "\u4E13\u514B\u9AD8\u62A4\u7532\uFF1A\u65E0\u89C6 35% \u62A4\u7532",
+    brief: "\u4E13\u514B\u9AD8\u62A4\u7532\uFF1A\u65E0\u89C6 40% \u62A4\u7532",
     category: "attack",
-    tier: 2,
-    cost: 2e3,
-    stats: { ad: 75, armorPen: 0.35 },
+    tier: 3,
+    cost: 1950,
+    from: ["war_halberd", "azure_blade"],
+    stats: {
+      ad: 98,
+      armorPen: 0.4
+    },
     color: "#9fb4c9"
   },
   phantom_edge: {
@@ -50073,39 +51146,57 @@ var ln = {
     name: "\u66B4\u51FB\u5434\u94A9",
     brief: "\u66B4\u51FB\u7387\u9AD8\uFF0C\u66B4\u51FB\u6253\u5F97\u66F4\u75BC",
     category: "attack",
-    tier: 2,
+    tier: 3,
     cost: 2150,
-    stats: { ad: 60, critChance: 0.3, critDamage: 0.3 },
+    from: ["wind_crossbow", "short_dagger"],
+    stats: {
+      ad: 80,
+      critChance: 0.4,
+      critDamage: 0.4
+    },
     color: "#b48cff"
   },
   astral_staff: {
     id: "astral_staff",
     name: "\u51CF\u51B7\u5374\u6CD5\u6756",
-    brief: "\u6CD5\u5F3A\u3001\u84DD\u91CF\u3001\u51CF\u51B7\u5374\u90FD\u7ED9",
+    brief: "\u6CD5\u5F3A\u3001\u84DD\u91CF\u3001\u51B7\u5374\u90FD\u6CBE",
     category: "magic",
-    tier: 2,
+    tier: 3,
     cost: 2e3,
-    stats: { ap: 180, mana: 300, cdr: 0.1 },
-    color: "#6aa8ff"
+    from: ["spell_codex", "mana_crystal"],
+    stats: {
+      ap: 170,
+      mana: 400,
+      cdr: 0.15
+    },
+    color: "#7f8cff"
   },
   void_crown: {
     id: "void_crown",
     name: "\u6CD5\u7A7F\u7389\u51A0",
-    brief: "\u4E13\u514B\u9AD8\u9B54\u6297\uFF1A\u65E0\u89C6 35% \u9B54\u6297",
+    brief: "\u4E13\u514B\u9AD8\u9B54\u6297\uFF1A\u65E0\u89C6 40% \u9B54\u6297",
     category: "magic",
-    tier: 2,
+    tier: 3,
     cost: 2100,
-    stats: { ap: 150, magicPen: 0.35 },
-    color: "#9b6bff"
+    from: ["spell_piercer", "jade_slip"],
+    stats: {
+      ap: 180,
+      magicPen: 0.4
+    },
+    color: "#a86bd8"
   },
   winter_scepter: {
     id: "winter_scepter",
     name: "\u51CF\u901F\u6743\u6756",
-    brief: "\u6280\u80FD\u6253\u4E2D\u5C31\u51CF\u901F\uFF0C\u81EA\u5DF1\u66F4\u8010\u6253",
+    brief: "\u6CD5\u5F3A + \u751F\u547D\uFF0C\u6280\u80FD\u51CF\u901F",
     category: "magic",
-    tier: 2,
+    tier: 3,
     cost: 2e3,
-    stats: { ap: 110, hp: 800 },
+    from: ["shaman_mask", "heart_mirror"],
+    stats: {
+      ap: 140,
+      hp: 900
+    },
     passive: {
       id: "spell_slow",
       name: "\u6280\u80FD\u51CF\u901F",
@@ -50113,26 +51204,34 @@ var ln = {
       value: 0.2,
       value2: 1
     },
-    color: "#8fe3ff"
+    color: "#8fd8ff"
   },
   sage_codex: {
     id: "sage_codex",
     name: "\u6CD5\u5F3A\u7AF9\u7B80",
-    brief: "\u6CD5\u5F3A\u6700\u9AD8\uFF0C\u6280\u80FD\u4F24\u5BB3\u6700\u731B",
+    brief: "\u6CD5\u5F3A\u6700\u9AD8\uFF0C\u8FD8\u6309\u6BD4\u4F8B\u52A0\u6CD5\u5F3A",
     category: "magic",
-    tier: 2,
+    tier: 3,
     cost: 2300,
-    stats: { ap: 220, apPct: 0.3 },
-    color: "#f1d27a"
+    from: ["jade_slip", "apprentice_staff"],
+    stats: {
+      ap: 220,
+      apPct: 0.3
+    },
+    color: "#c9f6ff"
   },
   guardian_plate: {
     id: "guardian_plate",
     name: "\u62A4\u7532\u91CD\u94E0",
-    brief: "\u62A4\u7532\u6700\u9AD8\uFF0C\u6253\u4F60\u7684\u4EBA\u653B\u901F\u964D\u4F4E",
+    brief: "\u62A4\u7532\u6700\u9AD8\uFF0C\u6253\u4F60\u7684\u4EBA\u53D8\u6162",
     category: "defense",
-    tier: 2,
+    tier: 3,
     cost: 1900,
-    stats: { hp: 1e3, armor: 210 },
+    from: ["turtle_shield", "chain_mail"],
+    stats: {
+      hp: 1e3,
+      armor: 250
+    },
     passive: {
       id: "cripple_aura",
       name: "\u51CF\u653B\u901F",
@@ -50140,16 +51239,20 @@ var ln = {
       value: 0.2,
       value2: 2
     },
-    color: "#7f8ea3"
+    color: "#8d99a8"
   },
   starweave_cloak: {
     id: "starweave_cloak",
     name: "\u9B54\u6297\u72D0\u88D8",
-    brief: "\u5F88\u6297\u6CD5\u672F\uFF0C\u6B8B\u8840\u81EA\u52A8\u5F00\u76FE",
+    brief: "\u4F4E\u8840\u81EA\u52A8\u7ED9\u4E00\u5C42\u62A4\u76FE",
     category: "defense",
-    tier: 2,
+    tier: 3,
     cost: 1850,
-    stats: { hp: 1e3, mr: 200 },
+    from: ["frost_amulet", "rune_cloak"],
+    stats: {
+      hp: 1e3,
+      mr: 255
+    },
     passive: {
       id: "spell_shield",
       name: "\u4FDD\u547D\u76FE",
@@ -50157,39 +51260,103 @@ var ln = {
       value: 600,
       value2: 60
     },
-    color: "#6fd0c5"
+    color: "#7f9ad8"
   },
   undying_heart: {
     id: "undying_heart",
     name: "\u56DE\u8840\u62A4\u5FC3\u955C",
-    brief: "\u8840\u6700\u539A\uFF0C\u8131\u6218\u540E\u5FEB\u901F\u56DE\u8840",
+    brief: "\u751F\u547D\u6700\u9AD8\uFF0C\u8131\u6218\u56DE\u8840",
     category: "defense",
-    tier: 2,
+    tier: 3,
     cost: 2e3,
-    stats: { hp: 2e3 },
+    from: ["heart_mirror", "leather_vest"],
+    stats: {
+      hp: 2100
+    },
     passive: {
       id: "regen_ooc",
       name: "\u8131\u6218\u56DE\u8840",
       desc: "\u8131\u79BB\u6218\u6597 5 \u79D2\u540E\uFF0C\u6BCF\u79D2\u56DE\u590D 2% \u6700\u5927\u751F\u547D\u3002",
       value: 0.02
     },
-    color: "#e0566f"
+    color: "#ff9a9a"
   },
   thorn_mail: {
     id: "thorn_mail",
     name: "\u53CD\u4F24\u9489\u76FE",
-    brief: "\u8C01\u666E\u653B\u4F60\uFF0C\u8C01\u5C31\u88AB\u53CD\u4F24",
+    brief: "\u88AB\u666E\u653B\u5C31\u53CD\u5F39\u4F24\u5BB3",
     category: "defense",
-    tier: 2,
+    tier: 3,
     cost: 1750,
-    stats: { hp: 500, armor: 170 },
+    from: ["chain_mail", "heart_mirror"],
+    stats: {
+      hp: 900,
+      armor: 235
+    },
     passive: {
       id: "thorns",
       name: "\u53CD\u4F24",
       desc: "\u88AB\u666E\u653B\u6253\u4E2D\u65F6\uFF0C\u5BF9\u653B\u51FB\u8005\u9020\u6210\u8BE5\u6B21\u4F24\u5BB3 18% \u7684\u6CD5\u672F\u4F24\u5BB3\u3002",
       value: 0.18
     },
-    color: "#7da36b"
+    color: "#c07a5a"
+  },
+  heaven_splitter: {
+    id: "heaven_splitter",
+    name: "\u5F00\u5929\u65A7",
+    brief: "\u7EAF\u7269\u653B\u7684\u9876\u7EA7\u5927\u4EF6",
+    category: "attack",
+    tier: 3,
+    cost: 3280,
+    from: ["azure_blade", "war_halberd"],
+    stats: {
+      ad: 215,
+      cdr: 0.12
+    },
+    color: "#ff8a3c"
+  },
+  dragon_scale: {
+    id: "dragon_scale",
+    name: "\u9F99\u9CDE\u7532",
+    brief: "\u53CC\u6297\u4E0E\u751F\u547D\u90FD\u6781\u9AD8",
+    category: "defense",
+    tier: 3,
+    cost: 3240,
+    from: ["turtle_shield", "frost_amulet"],
+    stats: {
+      hp: 1800,
+      armor: 220,
+      mr: 200
+    },
+    color: "#5fa88f"
+  },
+  void_staff: {
+    id: "void_staff",
+    name: "\u592A\u865A\u6CD5\u6756",
+    brief: "\u6CD5\u5F3A + \u6CD5\u7A7F + \u51B7\u5374",
+    category: "magic",
+    tier: 3,
+    cost: 2900,
+    from: ["spell_codex", "spell_piercer"],
+    stats: {
+      ap: 260,
+      magicPen: 0.3,
+      cdr: 0.12
+    },
+    color: "#b48cff"
+  },
+  giant_belt: {
+    id: "giant_belt",
+    name: "\u5DE8\u4EBA\u4E4B\u529B",
+    brief: "\u4E00\u4EF6\u9876\u4E09\u4EF6\u7684\u8840\u91CF",
+    category: "defense",
+    tier: 3,
+    cost: 3430,
+    from: ["leather_vest", "heart_mirror"],
+    stats: {
+      hp: 3700
+    },
+    color: "#d9a441"
   }
 };
 var IB = Object.values(ln);
@@ -50243,6 +51410,10 @@ var FB = {
   chijin_ember: () => "\u4E0B\u4E00\u6B21\u666E\u653B\u53D8\u4E3A\u91CD\u65A7\uFF0C\u5E76\u56DE\u590D\u81EA\u8EAB\u751F\u547D\u3002",
   chijin_blaze: (n) => n.value > 0 ? `\u653B\u901F\u63D0\u9AD8 ${Ps(n.value)}\u3002` : "\u653B\u901F\u5927\u5E45\u63D0\u9AD8\u3002",
   chijin_spin: () => "\u65A7\u5F71\u6301\u7EED\u5288\u780D\u5468\u56F4\u654C\u4EBA\uFF1B\u671F\u95F4\u514D\u75AB\u51CF\u901F\u5E76\u83B7\u5F97\u51CF\u4F24\u3002",
+  // 牛魔这两个以前只登记了名字和图标、漏了说明 —— 鼠标移到状态图标上 UB() 取不到函数，
+  // 直接抛 "FB[n.id] is not a function" 把整个界面打断。
+  niumo_flame: (n) => n.stacks > 1 ? `\u78E8\u7802\u706B\u7130 ${n.stacks} \u5C42\uFF1A\u6BCF\u79D2\u53D7\u5230 ${Math.round(n.value * n.stacks)} \u70B9\u9B54\u6CD5\u4F24\u5BB3\u3002` : `\u78E8\u7802\u706B\u7130\uFF1A\u6BCF\u79D2\u53D7\u5230 ${Math.round(n.value)} \u70B9\u9B54\u6CD5\u4F24\u5BB3\u3002`,
+  niumo_ult: () => "\u70C8\u7130\u725B\u9B54\uFF1A\u514D\u75AB\u63A7\u5236\uFF0C\u811A\u4E0B\u4E0D\u65AD\u7559\u4E0B\u706B\u7130\uFF0C\u8E29\u5230\u7684\u654C\u4EBA\u4F1A\u88AB\u70B9\u71C3\u3002",
   xingli_mark: (n) => `\u4F59\u97F3 ${n.stacks}/3\uFF1A\u53E0\u6EE1\u540E\u5F26\u97F3\u5171\u632F\uFF0C\u9020\u6210\u4F24\u5BB3\u5E76\u7729\u6655\u3002`,
   fengling_gale: (n) => `\u8FDE\u5C04 ${n.stacks}/5\uFF1A\u6BCF\u5C42\u63D0\u9AD8\u653B\u901F\uFF0C\u6EE1\u5C42\u540E\u79FB\u901F\u63D0\u9AD8\u3001\u666E\u653B\u9644\u5E26\u989D\u5916\u4F24\u5BB3\u3002`,
   fengling_crit: () => "\u4E0B\u4E00\u6B21\u666E\u653B\u5FC5\u5B9A\u66B4\u51FB\u3002",
@@ -50250,7 +51421,8 @@ var FB = {
   tower_focus: (n) => `\u5854\u5728\u6253\u4F60\uFF1A\u5854\u7684\u4F24\u5BB3\u8D8A\u6253\u8D8A\u75BC\uFF0C\u73B0\u5728 +${Ps(Math.min(yr.rampMax, n.stacks * yr.rampPerHit))}\u3002\u5854\u4E0B\u6CA1\u6709\u5C0F\u5175\u5C31\u5148\u9000\u51FA\u6765\u3002`
 };
 function UB(n) {
-  return FB[n.id](n);
+  const f = FB[n.id];
+  return f ? f(n) : "";
 }
 function OB(n) {
   const t = Y1(n);
@@ -51106,8 +52278,45 @@ var tH = {
     );
   }
 };
+var tHx = {
+  iron_sword: "starfall_blade",
+  iron_blade: "starfall_blade",
+  azure_blade: "starfall_blade",
+  heaven_splitter: "blood_scythe",
+  war_halberd: "piercing_spear",
+  armor_piercer: "piercing_spear",
+  hunting_bow: "sunchaser_bow",
+  horn_bow: "sunchaser_bow",
+  wind_crossbow: "sunchaser_bow",
+  short_dagger: "phantom_edge",
+  blood_dagger: "phantom_edge",
+  blood_jade: "blood_scythe",
+  apprentice_staff: "astral_staff",
+  hourglass: "astral_staff",
+  mana_crystal: "astral_staff",
+  void_staff: "astral_staff",
+  jade_slip: "sage_codex",
+  spell_codex: "sage_codex",
+  spell_piercer: "void_crown",
+  curse_charm: "void_crown",
+  shaman_mask: "void_crown",
+  star_robe: "starweave_cloak",
+  cloth_armor: "guardian_plate",
+  chain_mail: "guardian_plate",
+  dragon_scale: "guardian_plate",
+  iron_bracer: "thorn_mail",
+  turtle_shield: "thorn_mail",
+  wood_shield: "undying_heart",
+  leather_vest: "undying_heart",
+  heart_mirror: "undying_heart",
+  giant_belt: "undying_heart",
+  ward_cloak: "starweave_cloak",
+  rune_cloak: "starweave_cloak",
+  frost_amulet: "starweave_cloak"
+};
 function Po(n) {
-  return tH[n](ln[n].color);
+  const f = tH[n] ?? tH[tHx[n]] ?? tH.boots;
+  return f(ln[n].color);
 }
 var Ye = 'fill="currentColor"';
 var Ne = (n = 2.2) => `fill="none" stroke="currentColor" stroke-width="${n}" stroke-linecap="round" stroke-linejoin="round"`;
@@ -51166,6 +52375,8 @@ var Zx = {
   cancel: `<circle cx="12" cy="12" r="9" ${Ne(2.3)}/><path d="M5.800 5.800l12.400 12.400" ${Ne(2.3)}/>`,
   shop: `<path fill-rule="evenodd" d="M9 2.800h6l-1.300 3.400c3.600 2.200 6.300 6.200 6.300 9.800 0 3.600-3 5.500-8 5.500s-8-1.900-8-5.500c0-3.600 2.700-7.600 6.300-9.800zM${hn(12, 14, 4.6, 0.2).slice(1)}" ${Ye}/>`,
   scoreboard: `<g ${Ye}><rect x="2.800" y="3.600" width="4.400" height="4.400" rx="1.100"/><rect x="9.300" y="4.600" width="12" height="2.400" rx="1.200"/><rect x="2.800" y="9.800" width="4.400" height="4.400" rx="1.100"/><rect x="9.300" y="10.800" width="12" height="2.400" rx="1.200"/><rect x="2.800" y="16" width="4.400" height="4.400" rx="1.100"/><rect x="9.300" y="17" width="12" height="2.400" rx="1.200"/></g>`,
+  // 表情：气泡 + 笑脸（气泡走描边，五官走填充，小尺寸下比实心块清楚）
+  emote: `<path d="M4.400 3.600h15.200c1 0 1.800.8 1.800 1.800v10c0 1-.8 1.800-1.800 1.800h-7.500L7 21.400v-4.200H4.400c-1 0-1.800-.8-1.800-1.800v-10c0-1 .8-1.800 1.800-1.800z" ${Ne(1.9)}/><circle cx="8.900" cy="9.800" r="1.400" ${Ye}/><circle cx="15.100" cy="9.800" r="1.400" ${Ye}/><path d="M8.900 13.200q3.100 2.600 6.200 0" ${Ne(1.7)}/>`,
   volume: `<path d="M3 9.200h3.600L12 4.500v15l-5.400-4.700H3z" ${Ye}/><path d="M15.300 8.500a5 5 0 0 1 0 7M18 5.800a8.800 8.800 0 0 1 0 12.400" ${Ne(2.1)}/>`,
   mute: `<path d="M3 9.200h3.600L12 4.500v15l-5.400-4.700H3z" ${Ye}/><path d="M15.500 9l5.500 6M21 9l-5.500 6" ${Ne(2.3)}/>`,
   sfx: `<path d="M3 9.200h3.600L12 4.500v15l-5.400-4.700H3z" ${Ye}/><path d="M${hn(18, 12, 4.8, 0.2).slice(1)}" ${Ye}/>`,
@@ -51377,7 +52588,7 @@ var hh = {
 var uH = ["easy", "normal", "hard"];
 var Z1 = /* @__PURE__ */ new Set();
 function Zh(n, t, e) {
-  const s = Se[t], i = z("span", `sf-portrait${e ? ` ${e}` : ""}`, _e(Ar(s.role), "sf-portrait__fallback"));
+  const s = Se[kartSpec(t)?.kit ?? t], i = z("span", `sf-portrait${e ? ` ${e}` : ""}`, _e(Ar(s.role), "sf-portrait__fallback"));
   i.style.setProperty("--sf-hero-a", s.palette.primary), i.style.setProperty("--sf-hero-b", s.palette.secondary), i.style.setProperty("--sf-hero-c", s.palette.glow);
   let a = "";
   try {
@@ -51437,7 +52648,7 @@ function ks(n) {
 }
 function Qx(n, t) {
   Jx();
-  const e = Se[n], s = z("small", "sf-heroname__role", ` \xB7 ${e.roleName}`), i = z("span", `sf-heroname${t ? ` ${t}` : ""}`, e.name, s);
+  const sp2 = kartSpec(n), e = Se[sp2?.kit ?? n], s = z("small", "sf-heroname__role", ` \xB7 ${e.roleName}`), i = z("span", `sf-heroname${t ? ` ${t}` : ""}`, sp2?.name ?? e.name, s);
   return i.style.setProperty("--role", Tf[e.role]), i;
 }
 var mH = Jn(`
@@ -51729,6 +52940,10 @@ var TH = Jn(`
 
 /* \u2500\u2500 \u82F1\u96C4\u5361 \u2500\u2500 */
 .sf-select__roster { grid-area: roster; display: flex; flex-direction: column; gap: max(5px, 9u); min-height: 0; }
+/* \u82B1\u540D\u518C\u73B0\u5728\u80FD\u585E\u4E8C\u5341\u591A\u4E2A\uFF08\u6B63\u5F0F\u82F1\u96C4 + \u5360\u4F4D\u76AE\u89D2\u8272\uFF09\u3002\u5361\u7247\u539F\u6765 flex:1 \u5E73\u5206\u9AD8\u5EA6\uFF0C
+   \u4EBA\u4E00\u591A\u5C31\u6324\u6210\u4E00\u6761\u6761\u770B\u4E0D\u6E05 \u2014\u2014 \u6539\u6210\u56FA\u5B9A\u9AD8\u5EA6\u3001\u8BA9\u5217\u8868\u81EA\u5DF1\u6EDA\u3002 */
+.sf-select__roster { overflow-y: auto; overflow-x: hidden; padding-right: max(2px, 4u); scrollbar-width: thin; scrollbar-color: rgba(150, 178, 235, 0.45) transparent; }
+.sf-select__roster > .sf-hcard { flex: 0 0 auto; height: max(46px, 62u); min-height: 0; }
 .sf-hcard {
   --hero: #8fe9ff;
   position: relative; flex: 1 1 0; min-height: 0; max-height: 122u; display: flex; align-items: center; gap: 12u; padding: 0 12u 0 9u; margin: 0; border: 0; cursor: pointer; text-align: left;
@@ -51972,7 +53187,7 @@ function AH(n) {
 function RH(n) {
   Zn("sf-menu-select", TH), Jx();
   const { host: t } = n;
-  let e = n.initial.heroId, s = n.initial.difficulty, i = "s1", a = null, o = false;
+  let e = n.initial.heroId, s = n.initial.difficulty, sk2 = n.initial.skin ?? null, i = "s1", a = null, o = false;
   const r = [], l = z("div", "sf-screen sf-select"), c = z(
     "header",
     "sf-select__top",
@@ -52005,16 +53220,20 @@ function RH(n) {
   ), f = z("div", "sf-select__roster");
   f.setAttribute("role", "listbox"), f.setAttribute("aria-label", "\u82F1\u96C4\u5217\u8868");
   const d = /* @__PURE__ */ new Map();
-  Ml.forEach((q, et) => {
-    const ct = Se[q], rt = z("span", "sf-hcard__role", _e(Ar(ct.role))), mt = z(
+  const ROSTER = [
+    ...Ml.map((h10) => ({ hero: h10, skin: null })),
+    ...KART_SPECS.map((k10) => ({ hero: k10.kit, skin: k10.id }))
+  ];
+  ROSTER.forEach((pick, et) => {
+    const ct = Se[pick.hero], sp2 = pick.skin ? kartSpec(pick.skin) : null, rt = z("span", "sf-hcard__role", _e(Ar(ct.role))), mt = z(
       "button",
       "sf-hcard",
-      z("span", "sf-hcard__pic-wrap", Zh(t, q, "sf-hcard__pic"), rt),
+      z("span", "sf-hcard__pic-wrap", Zh(t, pick.skin || pick.hero, "sf-hcard__pic"), rt),
       z(
         "span",
         "sf-hcard__info",
-        z("span", "sf-hcard__name", Qx(q)),
-        z("span", "sf-hcard__title", ct.title),
+        z("span", "sf-hcard__name", sp2 ? sp2.name : Qx(pick.hero)),
+        z("span", "sf-hcard__title", sp2 ? `${ct.name}\u7684\u6280\u80FD\u5305` : ct.title),
         z(
           "span",
           "sf-hcard__meta",
@@ -52023,7 +53242,7 @@ function RH(n) {
         )
       )
     );
-    mt.type = "button", mt.setAttribute("role", "option"), mt.dataset.hero = q, mt.dataset.sfSnd = "select", mt.style.setProperty("--hero", ct.palette.glow), mt.style.setProperty("--role", Tf[ct.role]), mt.style.animationDelay = `${0.06 * et}s`, mt.addEventListener("click", () => M(q)), d.set(q, mt), f.appendChild(mt);
+    mt.type = "button", mt.setAttribute("role", "option"), mt.dataset.hero = pick.hero, pick.skin && (mt.dataset.skin = pick.skin), mt.dataset.sfSnd = "select", mt.style.setProperty("--hero", ct.palette.glow), mt.style.setProperty("--role", Tf[ct.role]), mt.style.animationDelay = `${0.06 * et}s`, mt.addEventListener("click", () => M(pick.hero, pick.skin)), d.set(`${pick.hero}|${pick.skin ?? ""}`, mt), f.appendChild(mt);
   });
   const h = z("canvas", "sf-select__canvas"), u = z("div", "sf-select__plate"), m = z(
     "div",
@@ -52052,7 +53271,7 @@ function RH(n) {
     value: s,
     label: "\u5BF9\u624B\u96BE\u5EA6",
     onChange: (q) => {
-      s = q, x.textContent = hh[q].desc, n.onChange?.({ heroId: e, difficulty: s });
+      s = q, x.textContent = hh[q].desc, n.onChange?.({ heroId: e, skin: sk2, difficulty: s });
     }
   });
   x.textContent = hh[s].desc;
@@ -52076,21 +53295,21 @@ function RH(n) {
   ), v = z("div", "sf-select__detail-body sf-scroll"), _ = z("aside", "sf-select__detail sf-panel", v);
   l.append(c, z("div", "sf-select__main", f, m, y, _));
   function k(q) {
-    const et = Ml.indexOf(e);
-    M(Ml[(et + q + Ml.length) % Ml.length]);
+    const at = ROSTER.findIndex((r10) => r10.hero === e && (r10.skin ?? null) === (sk2 ?? null)), nx2 = ROSTER[(at + q + ROSTER.length) % ROSTER.length];
+    M(nx2.hero, nx2.skin);
   }
-  function M(q) {
-    if (q !== e) {
-      e = q, i = "s1", E(true);
+  function M(q, s22 = null) {
+    if (q !== e || (s22 ?? null) !== (sk2 ?? null)) {
+      e = q, sk2 = s22 ?? null, i = "s1", E(true);
       try {
-        a?.setHero(q);
+        a?.setHero(e, sk2);
       } catch {
       }
-      n.onChange?.({ heroId: e, difficulty: s });
+      n.onChange?.({ heroId: e, skin: sk2, difficulty: s });
     }
   }
   function S() {
-    o || (o = true, g.disabled = true, n.onConfirm({ heroId: e, difficulty: s }));
+    o || (o = true, g.disabled = true, n.onConfirm({ heroId: e, skin: sk2, difficulty: s }));
   }
   function b(q) {
     try {
@@ -52116,18 +53335,18 @@ function RH(n) {
     return ct.append(nt), ct;
   }
   function E(q) {
-    const et = Se[e];
+    const et = Se[e], sp2 = sk2 ? kartSpec(sk2) : null;
     l.style.setProperty("--hero", et.palette.glow), l.style.setProperty("--role", Tf[et.role]), d.forEach((ot, j) => {
-      const at = j === e;
+      const at = j === `${e}|${sk2 ?? ""}`;
       ot.classList.toggle("is-active", at), ot.setAttribute("aria-selected", String(at));
     }), u.textContent = "", u.append(
       z(
         "h3",
         "sf-select__name",
-        z("span", "sf-metal", et.name),
+        z("span", "sf-metal", sp2 ? sp2.name : et.name),
         z("small", "sf-select__name-role", _e(Ar(et.role)), et.roleName)
       ),
-      z("span", "sf-select__sub", et.title)
+      z("span", "sf-select__sub", sp2 ? `${et.name} \xB7 ${et.title}` : et.title)
     );
     for (const ot of r.splice(0)) ot();
     v.textContent = "", v.scrollTop = 0;
@@ -52237,6 +53456,7 @@ function RH(n) {
     }
     try {
       a = t.createHeroPreview(h, e), a.resize();
+      sk2 && a.setHero(e, sk2);
     } catch {
       a = null;
     }
@@ -52696,15 +53916,15 @@ function BH(n) {
   };
 }
 var pk = "starfall.lastChoice.v1";
-var P2 = { heroId: "chijin", difficulty: "easy" };
+var P2 = { heroId: "chijin", skin: null, difficulty: "easy" };
 function HH() {
   const n = $8(pk);
   if (!n || typeof n != "object") return { ...P2 };
-  const t = typeof n.heroId == "string" && n.heroId in Se ? n.heroId : P2.heroId, e = n.difficulty, s = e === "easy" || e === "normal" || e === "hard" ? e : P2.difficulty;
-  return { heroId: t, difficulty: s };
+  const t = typeof n.heroId == "string" && n.heroId in Se ? n.heroId : P2.heroId, e = n.difficulty, s = e === "easy" || e === "normal" || e === "hard" ? e : P2.difficulty, k = typeof n.skin == "string" && kartSpec(n.skin)?.kit === t ? n.skin : null;
+  return { heroId: t, skin: k, difficulty: s };
 }
 function I4(n) {
-  Wx(pk, JSON.stringify({ heroId: n.heroId, difficulty: n.difficulty }));
+  Wx(pk, JSON.stringify({ heroId: n.heroId, skin: n.skin ?? null, difficulty: n.difficulty }));
 }
 function $H(n, t, e = {}) {
   return Hf(), new Promise((s) => {
@@ -52891,7 +54111,7 @@ var jH = Jn(`
 }
 `);
 function qH(n, t, e, s, i, lnIn) {
-  const a = Se[t], o = z("span", "sf-lcard__role", _e(Ar(a.role)), a.roleName), ln2 = lnIn || a.lane, r = z(
+  const sp2 = kartSpec(t), a = Se[sp2?.kit ?? t], nm2 = sp2?.name ?? a.name, o = z("span", "sf-lcard__role", _e(Ar(a.role)), a.roleName), ln2 = lnIn || a.lane, r = z(
     "div",
     `sf-lcard${s ? " is-me" : ""}`,
     Zh(n, t, "sf-lcard__pic"),
@@ -52900,14 +54120,15 @@ function qH(n, t, e, s, i, lnIn) {
       "span",
       "sf-lcard__info",
       o,
-      z("span", "sf-lcard__name", a.name),
+      z("span", "sf-lcard__name", nm2),
       z("span", "sf-lcard__title", a.title),
       z("span", "sf-lcard__lane", _e(k3(ln2)), S3[ln2])
     )
   );
-  return r.setAttribute("aria-label", `${z0(a)}\uFF0C${a.title}`), r.style.setProperty("--hero", a.palette.glow), r.style.setProperty("--role", Tf[a.role]), r.style.animationDelay = `${0.1 + (e === 0 ? i : 4 - i) * 0.07}s`, r;
+  return r.setAttribute("aria-label", `${nm2}\uFF0C${a.title}`), r.style.setProperty("--hero", a.palette.glow), r.style.setProperty("--role", Tf[a.role]), r.style.animationDelay = `${0.1 + (e === 0 ? i : 4 - i) * 0.07}s`, r;
 }
 function XH(n, t, e, lu2) {
+  setPlayerSkin(t.skin ?? null);
   Hf(), Zn("sf-menu-loading", jH);
   const roster = (y) => (y === 0 ? lu2?.blue : lu2?.red) || Ml.slice(0, 5), me2 = lu2?.me || t.heroId;
   const s = (y) => z(
@@ -52922,7 +54143,10 @@ function XH(n, t, e, lu2) {
     z(
       "div",
       "sf-loading__cards",
-      ...roster(y).map((v, _) => qH(e, v, y, y === 0 && v === me2, _, (y === 0 ? lu2?.blueLanes : lu2?.redLanes)?.[_]))
+      ...roster(y).map((v, _) => {
+        const isMe = y === 0 && v === me2;
+        return qH(e, isMe ? lookId(v, true) : v, y, isMe, _, (y === 0 ? lu2?.blueLanes : lu2?.redLanes)?.[_]);
+      })
     )
   ), i = z("span"), a = z("p", "sf-loading__tip", _e(Vt("info")), i), o = z("span", "sf-loading__label", "\u6B63\u5728\u51C6\u5907\u6218\u573A\u2026"), r = z("span", "sf-loading__pct sf-num", "0%"), l = AB(), c = z(
     "div",
@@ -52936,7 +54160,10 @@ function XH(n, t, e, lu2) {
         "sf-loading__mode",
         "5v5 \u5BF9\u6218",
         z("i"),
-        `\u4F60\u7684\u82F1\u96C4\uFF1A${z0(me2)}`,
+        `\u4F60\u7684\u82F1\u96C4\uFF1A${(() => {
+          const sp2 = kartSpec(lookId(me2, true));
+          return sp2 ? `${sp2.name} \xB7 ${Se[sp2.kit].roleName}` : z0(me2);
+        })()}`,
         z("i"),
         `\u5BF9\u624B\u96BE\u5EA6\uFF1A${hh[t.difficulty].label}`
       )
@@ -53234,10 +54461,10 @@ function QH(n, t, e, s = {}) {
         z(
           "span",
           "sf-rt__pic-wrap",
-          Zh(e, F.heroId, "sf-rt__pic"),
+          Zh(e, lookId(F.heroId, F.isPlayer), "sf-rt__pic"),
           z("span", "sf-rt__lv", String(F.level))
         ),
-        Qx(F.heroId, "sf-rt__name"),
+        Qx(lookId(F.heroId, F.isPlayer), "sf-rt__name"),
         q
       ), ct = ll("kda", "\u6218\u7EE9", "");
       ct.querySelector(".sf-rt__val").innerHTML = `<span class="sf-rt__kda">${F.kills}<i>/</i><span class="is-d">${F.deaths}</span><i>/</i><span class="is-a">${F.assists}</span></span>`;
@@ -53365,7 +54592,7 @@ function Dl(n, t, e = false) {
   return e ? "is-me" : n === t ? "is-blue" : "is-red";
 }
 function Na(n, t, e, s = "") {
-  return Zh(n, t.heroId, `sf-hud__face ${Dl(t.team, e, t.isPlayer)}${s ? ` ${s}` : ""}`);
+  return Zh(n, lookId(t.heroId, t.isPlayer), `sf-hud__face ${Dl(t.team, e, t.isPlayer)}${s ? ` ${s}` : ""}`);
 }
 function Rl(n, t = "") {
   return z("span", `sf-hud__face sf-hud__face--glyph${t ? ` ${t}` : ""}`, _e(n));
@@ -54374,7 +55601,15 @@ function A$(n, t) {
     return Y instanceof HTMLInputElement || Y instanceof HTMLTextAreaElement || Y instanceof HTMLSelectElement;
   };
   c("keydown", (O) => {
-    if (!n.enabled || Sf() || kt(O) || O.ctrlKey || O.metaKey || O.altKey) return;
+    if (!n.enabled || Sf() || kt(O) || O.metaKey || O.altKey) return;
+    if (O.ctrlKey && !O.repeat) {
+      const et2 = { Digit1: "taunt", Digit2: "joke", Digit3: "dance", Digit4: "cheer" }[O.code];
+      if (et2) {
+        O.preventDefault(), n.actions.emote(et2);
+        return;
+      }
+    }
+    if (O.ctrlKey) return;
     const Y = O.code;
     if (!t.forced && S$.has(Y) && t.setMode("kbm"), Rt(Y, true)) {
       O.preventDefault(), b();
@@ -56622,16 +57857,35 @@ function $f(n) {
   }
   return null;
 }
-function Gf(n, t) {
+function Sk2(n, t) {
   const e = ln[t];
+  if (!e || !e.from || !e.from.length) return null;
+  const a = n.items, used = [];
+  let v = 0;
+  for (const c of e.from) {
+    let k = -1;
+    for (let i = 0; i < a.length; i++)
+      if (a[i] === c && !used.includes(i)) {
+        k = i;
+        break;
+      }
+    if (k < 0) return null;
+    used.push(k), v += ln[c].cost;
+  }
+  return { slots: used, value: v };
+}
+function Gf(n, t) {
+  const e = ln[t], s = Sk2(n, t);
+  if (s) return Math.max(0, e.cost - s.value);
   if (e.category === "boots") {
-    const s = Dm(n.items);
-    if (s) return e.cost - Math.floor(ln[s].cost * Yh);
+    const i = Dm(n.items);
+    if (i) return e.cost - Math.floor(ln[i].cost * Yh);
   }
   return e.cost;
 }
 function zm(n, t) {
   const e = ln[t];
+  if (Sk2(n, t)) return true;
   if (e.category === "boots") {
     const s = Dm(n.items);
     if (s) return e.tier !== 1 && s !== t;
@@ -56677,7 +57931,7 @@ function Yd(n) {
       baseId: null,
       stage: f ? "done" : "todo",
       buyId: f ? null : c,
-      cost: f ? 0 : ln[c].cost,
+      cost: f ? 0 : Gf(n, c),
       next: false,
       order: a.length + 1
     });
@@ -56830,8 +58084,8 @@ function bG(n) {
     )
   ), c = /* @__PURE__ */ new Map(), f = [];
   function d(g) {
-    const y = Se[g.heroId], v = _e(Ar(y.role), "sf-hud__sb-rolei"), _ = z("span", "sf-hud__sb-name", v, Qx(g.heroId));
-    return _.style.setProperty("--role", Tf[y.role]), _.setAttribute("aria-label", z0(y)), _;
+    const A = lookId(g.heroId, g.isPlayer), C = kartSpec(A), y = Se[C?.kit ?? A], v = _e(Ar(y.role), "sf-hud__sb-rolei"), _ = z("span", "sf-hud__sb-name", v, Qx(A));
+    return _.style.setProperty("--role", Tf[y.role]), _.setAttribute("aria-label", C?.name ?? z0(y)), _;
   }
   function h(g) {
     const y = z("span", "sf-hud__sb-lv sf-num"), v = z("span", "sf-num"), _ = z("b", "sf-num"), k = z("b", "sf-num is-d"), M = z("b", "sf-num is-a"), S = z("span", "sf-num"), b = z("span", "sf-hud__sb-gold sf-num"), w = z("span", "sf-hud__sb-items"), T = [];
@@ -57110,6 +58364,12 @@ var _G = Jn(`
 .sf-hud__dt-stat > span { color: var(--sf-c-text-2); }
 .sf-hud__dt-stat > b { color: var(--sf-c-cyan-300); font-weight: 700; text-align: right; white-space: nowrap; }
 .sf-hud__dt-passive { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(255, 184, 77, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.28); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
+/* \u5408\u6210\u8DEF\u5F84\uFF1A\u4E00\u884C\u7EC4\u4EF6\u540D\uFF0C\u5DF2\u6709\u7684\u9AD8\u4EAE */
+.sf-hud__dt-build { margin-top: 8u; display: flex; flex-wrap: wrap; align-items: center; gap: 4u 6u; padding: 7u 9u; border-radius: 6u; background: rgba(120, 190, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 190, 255, 0.22); font-size: var(--sf-fs-sm); }
+.sf-hud__dt-build b { flex: none; color: var(--sf-c-text-3); font-weight: 700; letter-spacing: 0.12em; }
+.sf-hud__dt-part { display: inline-flex; align-items: center; gap: 2u; padding: 1u 5u; border-radius: 4u; color: var(--sf-c-text-2); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+.sf-hud__dt-part.is-own { color: var(--sf-c-green-300); box-shadow: inset 0 0 0 1px rgba(86, 199, 160, 0.5); background: rgba(86, 199, 160, 0.1); }
+.sf-hud__dt-part .sf-i { width: 1em; height: 1em; }
 .sf-hud__dt-passive b { display: block; color: var(--sf-c-amber); font-weight: 700; }
 .sf-hud__dt-nopassive { margin-top: 8u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
 .sf-hud__dt-note { flex: none; margin-bottom: 5u; font-size: var(--sf-fs-sm); line-height: 1.4; color: var(--sf-c-text-3); }
@@ -57430,6 +58690,13 @@ function AG(n) {
       Zt.brief ? z("div", "sf-hud__dt-brief", Zt.brief) : null,
       js
     );
+    if (Zt.from && Zt.from.length) {
+      const parts = Zt.from.map((c10) => {
+        const own = n.me.items.includes(c10);
+        return z("span", `sf-hud__dt-part${own ? " is-own" : ""}`, own ? _e(Vt("check")) : null, ln[c10].name);
+      });
+      qs.appendChild(z("div", "sf-hud__dt-build", z("b", null, "\u5408\u6210"), ...parts));
+    }
     if (Zt.passive ? qs.appendChild(
       z("div", "sf-hud__dt-passive", z("b", null, `\u88AB\u52A8 \xB7 ${Zt.passive.name}`), Zt.passive.desc)
     ) : qs.appendChild(z("div", "sf-hud__dt-nopassive", "(\u65E0\u88AB\u52A8)")), Ot = z("div", "sf-hud__dt-note"), at.append(ce, gi, qs, Ot), Tt.kind === "own") {
@@ -57734,9 +59001,9 @@ var Q4 = new Map(LG.map((n, t) => [n, t]));
 var J4 = 10;
 function IG(n) {
   Zn("sf-hud-status", RG);
-  const { host: t } = n, e = n.me.heroId, s = Se[e], i = [], a = z("span", "sf-hud__st-respawn sf-num"), o = z("span", "sf-hud__st-lv sf-num", "1"), r = ro(Ia(e, "passive"), { round: true, cls: "sf-hud__st-passive", label: `\u88AB\u52A8\uFF1A${s.passive.name}` });
+  const { host: t } = n, e = lookId(n.me.heroId, true), sp2 = kartSpec(e), base = sp2?.kit ?? e, s = Se[base], i = [], a = z("span", "sf-hud__st-respawn sf-num"), o = z("span", "sf-hud__st-lv sf-num", "1"), r = ro(Ia(base, "passive"), { round: true, cls: "sf-hud__st-passive", label: `\u88AB\u52A8\uFF1A${s.passive.name}` });
   r.setAttribute("data-hud-hit", ""), i.push(M0(r, () => u$(s)));
-  const l = z("span", "sf-hud__st-name", _e(Ar(s.role)), s.name);
+  const l = z("span", "sf-hud__st-name", _e(Ar(s.role)), sp2?.name ?? s.name);
   l.style.setProperty("--role", Tf[s.role]), l.setAttribute("aria-label", z0(s));
   const c = z("div", "sf-hud__st-por", Zh(t, e), a, l, o, r), f = z("span", "sf-num"), d = z("em", "sf-num"), h = z("span", "sf-num"), u = z(
     "div",
@@ -57921,6 +59188,26 @@ var PG = Jn(`
 .sf-hud__tr .sf-iconbtn { width: max(38px, 40u); height: max(38px, 40u); }
 .sf-hud__tr .sf-hud__key { right: -4u; bottom: -8u; min-width: max(15px, 16u); height: max(14px, 15u); font-size: max(9px, 9.5u); }
 
+/* \u2500\u2500 \u8868\u60C5\u4E0B\u62C9\uFF1A\u6302\u5728\u6309\u94AE\u4E0B\u9762\uFF0C\u70B9\u5916\u9762\u6216\u518D\u70B9\u4E00\u6B21\u5173\u6389 \u2500\u2500 */
+.sf-hud__emote { position: relative; display: flex; align-items: center; }
+.sf-hud__emote-menu {
+  position: absolute; top: calc(100% + 9u); right: 0; z-index: 5;
+  display: none; flex-direction: column; gap: 2u; min-width: max(150px, 156u);
+  padding: 6u; border-radius: 12u;
+  background: var(--sf-bg-inset);
+  box-shadow: 0 0 0 1px var(--sf-c-line-strong), 0 14u 30u rgba(0, 0, 0, 0.5);
+}
+.sf-hud__emote.is-open .sf-hud__emote-menu { display: flex; }
+.sf-hud__emote.is-open .sf-iconbtn { color: var(--sf-c-gold-200); }
+.sf-hud__emote-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 14u;
+  padding: 8u 10u; border: 0; border-radius: 8u; cursor: pointer;
+  background: transparent; color: var(--sf-c-text); font-family: inherit;
+  font-size: var(--sf-fs-sm); letter-spacing: 0.04em; text-align: left;
+}
+.sf-hud__emote-item:hover, .sf-hud__emote-item:focus-visible { background: rgba(255, 255, 255, 0.1); }
+.sf-hud__emote-item > i { font-style: normal; color: var(--sf-c-text-3); font-size: max(10px, 10.5u); letter-spacing: 0.02em; }
+
 /* \u6A2A\u5C4F\u9010\u7EA7\u6536\u7D27\uFF1A\u5C4F\u8D8A\u7A84\uFF0C\u6BD4\u5206\u724C\u4E0E\u53F3\u4E0A\u89D2\u8D8A\u6324\uFF08\u6309\u4E24\u4F4D\u6570\u51FB\u6740\u3001\u4E94\u4F4D\u6570\u91D1\u5E01\u7684\u6700\u574F\u60C5\u51B5\u7559\u4F4D\u7F6E\uFF09 */
 /* \u2264920px(\u4E3B\u6D41\u624B\u673A\u6A2A\u5C4F)\uFF1A\u53BB\u6389\u961F\u540D\u4E0E\u8865\u5175 */
 @media (orientation: landscape) and (max-width: 920px) {
@@ -57988,9 +59275,41 @@ function DG(n) {
   y.title = "\u91D1\u5E01";
   const v = T0({ icon: Vt("scoreboard"), label: "\u6218\u51B5", onClick: () => n.actions.toggleScoreboard() });
   v.appendChild(z("span", "sf-hud__key", "Tab"));
+  const EMOTES = [
+    ["taunt", "\u5632\u8BBD", "Ctrl 1"],
+    ["joke", "\u7B11\u8BDD", "Ctrl 2"],
+    ["dance", "\u8DF3\u821E", "Ctrl 3"],
+    ["cheer", "\u5E86\u795D", "Ctrl 4"]
+  ], emoteMenu = z("div", "sf-hud__emote-menu");
+  for (const [nm2, label, key] of EMOTES) {
+    const btn = z("button", "sf-hud__emote-item", z("span", null, label), z("i", null, key));
+    btn.type = "button", btn.dataset.sfSnd = "select", btn.addEventListener("click", (ev2) => {
+      ev2.stopPropagation(), n.actions.emote(nm2), setEmoteOpen(false);
+    }), emoteMenu.appendChild(btn);
+  }
+  const emoteBtn = T0({
+    icon: Vt("emote"),
+    label: "\u8868\u60C5\uFF08Ctrl 1-4\uFF09",
+    onClick: (ev2) => {
+      ev2.stopPropagation(), setEmoteOpen(!emoteOpen);
+    }
+  }), emote = z("div", "sf-hud__emote", emoteBtn, emoteMenu);
+  let emoteOpen = false, emoteOff = null;
+  function setEmoteOpen(on2) {
+    if (on2 === emoteOpen) return;
+    emoteOpen = on2, emote.classList.toggle("is-open", on2);
+    if (on2) {
+      emoteOff = (ev2) => {
+        emote.contains(ev2.target) || setEmoteOpen(false);
+      };
+      document.addEventListener("pointerdown", emoteOff, true);
+    } else if (emoteOff) {
+      document.removeEventListener("pointerdown", emoteOff, true), emoteOff = null;
+    }
+  }
   const _ = T0({ icon: Vt("pause"), label: "\u6682\u505C / \u8BBE\u7F6E", onClick: () => n.actions.openSettings() });
   _.appendChild(z("span", "sf-hud__key", "Esc"));
-  const k = z("div", "sf-hud__tr", p, y, v, _), M = Vn(e), S = Vn(s), b = Vn(i), w = Vn(a), T = Vn(l, gk), E = vo(c), A = Vn(h), C = Vn(u), R = Vn(m), I = Vn(x), P = Vn(g);
+  const k = z("div", "sf-hud__tr", p, y, v, emote, _), M = Vn(e), S = Vn(s), b = Vn(i), w = Vn(a), T = Vn(l, gk), E = vo(c), A = Vn(h), C = Vn(u), R = Vn(m), I = Vn(x), P = Vn(g);
   let F = -1, L = -1, B = -1, G = false;
   return {
     els: [d, k],
@@ -58089,6 +59408,13 @@ function FG(n, t, e, s = {}) {
     sell(tt) {
       const it = l.me.items[tt];
       !it || l.state.over || (t.command({ type: "sell", index: tt }), t.audio.ui("confirm"), l.toast(`\u5DF2\u51FA\u552E ${ln[it].name}\uFF0C\u8FD4\u8FD8 ${Ek(it)} \u91D1\u5E01`, "info"));
+    },
+    // 表情：嘲讽 / 笑话 / 跳舞 / 庆祝。时长按当前外观的片段真实长度传下去，
+    // 引擎只用它决定"站多久"，动画那边按原速播完（kartAnimDur 拿不到就交给引擎兜底）。
+    emote(tt) {
+      if (!l.me.alive) return false;
+      const it = lookId(l.me.heroId, true);
+      return t.command({ type: "emote", name: tt, dur: kartAnimDur(it, tt) }), t.audio.ui("click"), true;
     }
   };
   l.actions = w;
@@ -61314,7 +62640,11 @@ function KV(n, t, e, s, i, laneIn) {
     kind: "hero",
     team: e,
     heroId: s,
-    name: a.name,
+    // 占位皮：玩家选的是"角色外观"，技能包还是 heroId 那套。
+    // 只给玩家挂，AI 的同类英雄还是原皮，方便对照。
+    skin: i ? n.state.config.skin ?? null : null,
+    // 顶着占位皮时名字也跟着换，不然场上一只青蛙顶着"荆轲"很出戏
+    name: i && kartSpec(n.state.config.skin)?.name || a.name,
     isPlayer: i,
     // 分路由对局阵容指定（AI 会自由分路），没给就退回英雄的推荐分路
     lane: laneIn || a.lane,
@@ -62257,6 +63587,7 @@ function qW(n, t, e) {
 function XW(n, t) {
   const e = n.state, s = t.team === 0 ? 1 : 0;
   n.nav.removeObstacle(t.id), e.over = true, e.winner = s, e.endTime = e.time, n.fx("core_destroyed", t.pos, t.team, { unitId: t.id }), n.emit({ type: "gameOver", winner: s }), n.emit({ type: "announce", key: s === 0 ? "victory" : "defeat", team: s });
+  for (const i of n.heroes) if (i.alive && i.team === s) eu(n, i, "cheer", 0, true);
 }
 function YW(n, t) {
   const e = n.state, s = n.map.bases;
@@ -62697,6 +64028,19 @@ function cS(n, t, e, s = false) {
   const i = ln[e];
   if (!i) return false;
   const a = t.items;
+  const comb = Sk2(t, e);
+  if (comb) {
+    const price = Math.max(0, i.cost - comb.value);
+    if (t.gold < price) return Do(n, t, "gold", s);
+    t.gold -= price;
+    for (const k of comb.slots) a[k] = null;
+    const slot = comb.slots[0] ?? a.indexOf(null);
+    a[slot] = e;
+    lS(n, t);
+    return n.emit(
+      s ? { type: "itemBought", unitId: t.id, itemId: e, auto: true, combined: comb.slots.map((k) => k) } : { type: "itemBought", unitId: t.id, itemId: e, combined: comb.slots.map((k) => k) }
+    ), true;
+  }
   let o = i.cost, r = -1;
   if (i.category === "boots") {
     const l = a.findIndex((c) => c !== null && ln[c].category === "boots");
@@ -62931,7 +64275,14 @@ function hS(n, t, e, s = false) {
 function D6(n, t) {
   t.h.atkOrder = false, t.targetId = -1, Ga(t), vy(n, t);
 }
+var EMOTE_NAMES = /* @__PURE__ */ new Set(["taunt", "joke", "dance", "cheer"]);
 function Aj(n, t, e) {
+  if (e.type === "emote") {
+    if (!t.alive || t.rt.stunned || t.rt.airborne || !EMOTE_NAMES.has(e.name)) return;
+    const dur = Number.isFinite(e.dur) && e.dur > 0 ? e.dur : 2.4;
+    eu(n, t, `emote_${e.name}`, dur, true);
+    return;
+  }
   if (n.state.over) return;
   if (e.type === "buy") {
     cS(n, t, e.itemId);
@@ -62975,7 +64326,8 @@ function Aj(n, t, e) {
 }
 function Rj(n, t) {
   const e = t.h, s = t.rt;
-  t.alive = true, t.respawnIn = 0, t.pos.x = e.spawn.x, t.pos.y = e.spawn.y, t.prevPos.x = e.spawn.x, t.prevPos.y = e.spawn.y, t.facing = t.team === 1 ? Math.PI * 0.75 : -Math.PI * 0.25, t.anim = "idle", t.animStart = n.state.time, t.animDur = 0, t.targetId = -1, Hl(t), s.atkCd = 0, s.windupLeft = 0, s.lockUntil = 0, s.disarmUntil = 0, s.act = null, s.revealUntil = -999, e.atkOrder = false, e.pendingCast = null, _o(n, t), t.hp = t.stats.maxHp, t.mana = t.stats.maxMana, n.grid.insert(t), Wn(n, t, "respawn_guard", { duration: yj }), n.emit({ type: "respawn", unitId: t.id, pos: { x: t.pos.x, y: t.pos.y } }), n.fx("respawn", t.pos, t.team, { unitId: t.id });
+  t.alive = true, t.respawnIn = 0, t.pos.x = e.spawn.x, t.pos.y = e.spawn.y, t.prevPos.x = e.spawn.x, t.prevPos.y = e.spawn.y, t.facing = t.team === 1 ? Math.PI * 0.75 : -Math.PI * 0.25, t.anim = "idle", t.animStart = n.state.time, t.animDur = 0, t.targetId = -1, Hl(t), s.atkCd = 0, s.windupLeft = 0, s.lockUntil = 0, s.disarmUntil = 0, s.act = null, s.revealUntil = -999, e.atkOrder = false, e.pendingCast = null, // 复活动作：泉眼里起身那一下，播完自动回待机
+  eu(n, t, "revive", 1, true), _o(n, t), t.hp = t.stats.maxHp, t.mana = t.stats.maxMana, n.grid.insert(t), Wn(n, t, "respawn_guard", { duration: yj }), n.emit({ type: "respawn", unitId: t.id, pos: { x: t.pos.x, y: t.pos.y } }), n.fx("respawn", t.pos, t.team, { unitId: t.id });
   for (const i of e.hooks) i.onSpawn && i.onSpawn(n, t);
 }
 function Cj(n, t, e) {
@@ -64744,10 +66096,17 @@ async function Uq(n, t, e, s) {
   };
   const p = () => s.cancelled ? (x(), true) : false;
   try {
+    if (t.skin) {
+      r.setProgress(dl.world, `\u52A0\u8F7D ${kartSpec(t.skin)?.name ?? "\u89D2\u8272"}\u2026`);
+      await preloadKart(t.skin);
+      if (p()) return null;
+    }
     if (r.setProgress(dl.world, "\u96C6\u7ED3\u53CC\u65B9\u82F1\u96C4\u2026"), await zc(), p()) return null;
     const g = {
       seed: e.seed,
       playerHero: t.heroId,
+      // 占位皮：玩家选的角色外观（技能包还是 heroId 那套）
+      skin: t.skin ?? null,
       difficulty: t.difficulty,
       autoPlay: e.autoPlay,
       autoBuy: n.getSettings().autoBuy,
@@ -65001,6 +66360,8 @@ function Hq(n, t = "") {
   }
   return {
     hero: a !== null && kr.includes(a) ? a : null,
+    // ?skin=frog：直接进对局时用哪个占位皮（调试试玩用）
+    skin: i("skin"),
     difficulty: o === "easy" || o === "normal" || o === "hard" ? o : null,
     seed: l,
     skipMenu: C1(i("skipmenu")),
@@ -65305,7 +66666,7 @@ function Xq() {
     let et = L;
     for (; ; ) {
       let ct;
-      if (et === "direct") ct = { heroId: n.hero ?? "chijin", difficulty: n.difficulty ?? "normal" };
+      if (et === "direct") ct = { heroId: n.hero ?? "chijin", skin: n.skin ?? null, difficulty: n.difficulty ?? "normal" };
       else if (a = "menu", ct = await $H(e, E, { start: et, signal: q }), B !== l) return;
       m(), f++;
       const rt = await Uq(

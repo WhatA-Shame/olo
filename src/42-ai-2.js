@@ -12,6 +12,7 @@
 import { K6, Qd, Y6, Z6, eo, rn, ui, va } from './01-audio.js';
 import { Se, ea, f5, lm } from './02-data.js';
 import { p8, yo } from './21-core-4.js';
+import { kartSpec } from './47-kart.js';
 import { BG, S1, t6 } from './40-ui-8.js';
 import { E1, Fk, JG, KG, Kp, MV, Ms, SV, T1, Uk, VG, XG, YG, a6, bV, d6, dV, e5, e6, f6, hV, jG, kV, n6, nV, qG, sV, se, t5, uV, vV, wV, ye, zk } from './41-ai.js';
 
@@ -1958,7 +1959,11 @@ function KV(n, t, e, s, i, laneIn) {
       kind: "hero",
       team: e,
       heroId: s,
-      name: a.name,
+      // 占位皮：玩家选的是"角色外观"，技能包还是 heroId 那套。
+      // 只给玩家挂，AI 的同类英雄还是原皮，方便对照。
+      skin: i ? n.state.config.skin ?? null : null,
+      // 顶着占位皮时名字也跟着换，不然场上一只青蛙顶着"荆轲"很出戏
+      name: (i && kartSpec(n.state.config.skin)?.name) || a.name,
       isPlayer: i,
       // 分路由对局阵容指定（AI 会自由分路），没给就退回英雄的推荐分路
       lane: laneIn || a.lane,

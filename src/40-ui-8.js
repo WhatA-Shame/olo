@@ -16,6 +16,7 @@ import { Ar, Po, T3, Tf, Vt, Zh, fk, ks, lH, ny } from './34-ui-2.js';
 import { Ef, Vn, a$, br, c$, e$, gk, i$, is, l$, o$, u$, uo, vo } from './36-ui-4.js';
 import { A$, D$, E$, N$, p$ } from './37-ui-5.js';
 import { fG, oG } from './38-ui-6.js';
+import { kartAnimDur, kartSpec, lookId } from './47-kart.js';
 import { Ak, EG, Ek, K2, M1, MG, Rk, SG, TG, Tk, X2, Y2, Yd, Z4, _G, bG, kG, mG, q2, wG, yG } from './39-ui-7.js';
 
 function AG(n) {
@@ -338,6 +339,14 @@ function AG(n) {
       Zt.brief ? z("div", "sf-hud__dt-brief", Zt.brief) : null,
       js,
     );
+    // 合成路径：列出组件，已有的打勾。凑齐全部组件时买成品只付差价。
+    if (Zt.from && Zt.from.length) {
+      const parts = Zt.from.map((c) => {
+        const own = n.me.items.includes(c);
+        return z("span", `sf-hud__dt-part${own ? " is-own" : ""}`, own ? _e(Vt("check")) : null, ln[c].name);
+      });
+      qs.appendChild(z("div", "sf-hud__dt-build", z("b", null, "合成"), ...parts));
+    }
     if (
       (Zt.passive
         ? qs.appendChild(
@@ -797,14 +806,17 @@ const RG = Jn(`
 function IG(n) {
   Zn("sf-hud-status", RG);
   const { host: t } = n,
-    e = n.me.heroId,
-    s = Se[e],
+    // 玩家带角色皮时，头像和名字换成皮的；定位/被动/称号还是按它借的那个英雄
+    e = lookId(n.me.heroId, !0),
+    sp = kartSpec(e),
+    base = sp?.kit ?? e,
+    s = Se[base],
     i = [],
     a = z("span", "sf-hud__st-respawn sf-num"),
     o = z("span", "sf-hud__st-lv sf-num", "1"),
-    r = ro(Ia(e, "passive"), { round: !0, cls: "sf-hud__st-passive", label: `被动：${s.passive.name}` });
+    r = ro(Ia(base, "passive"), { round: !0, cls: "sf-hud__st-passive", label: `被动：${s.passive.name}` });
   (r.setAttribute("data-hud-hit", ""), i.push(M0(r, () => u$(s))));
-  const l = z("span", "sf-hud__st-name", _e(Ar(s.role)), s.name);
+  const l = z("span", "sf-hud__st-name", _e(Ar(s.role)), sp?.name ?? s.name);
   (l.style.setProperty("--role", Tf[s.role]), l.setAttribute("aria-label", z0(s)));
   const c = z("div", "sf-hud__st-por", Zh(t, e), a, l, o, r),
     f = z("span", "sf-num"),
@@ -1070,6 +1082,26 @@ const PG = Jn(`
 .sf-hud__tr .sf-iconbtn { width: max(38px, 40u); height: max(38px, 40u); }
 .sf-hud__tr .sf-hud__key { right: -4u; bottom: -8u; min-width: max(15px, 16u); height: max(14px, 15u); font-size: max(9px, 9.5u); }
 
+/* ── 表情下拉：挂在按钮下面，点外面或再点一次关掉 ── */
+.sf-hud__emote { position: relative; display: flex; align-items: center; }
+.sf-hud__emote-menu {
+  position: absolute; top: calc(100% + 9u); right: 0; z-index: 5;
+  display: none; flex-direction: column; gap: 2u; min-width: max(150px, 156u);
+  padding: 6u; border-radius: 12u;
+  background: var(--sf-bg-inset);
+  box-shadow: 0 0 0 1px var(--sf-c-line-strong), 0 14u 30u rgba(0, 0, 0, 0.5);
+}
+.sf-hud__emote.is-open .sf-hud__emote-menu { display: flex; }
+.sf-hud__emote.is-open .sf-iconbtn { color: var(--sf-c-gold-200); }
+.sf-hud__emote-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 14u;
+  padding: 8u 10u; border: 0; border-radius: 8u; cursor: pointer;
+  background: transparent; color: var(--sf-c-text); font-family: inherit;
+  font-size: var(--sf-fs-sm); letter-spacing: 0.04em; text-align: left;
+}
+.sf-hud__emote-item:hover, .sf-hud__emote-item:focus-visible { background: rgba(255, 255, 255, 0.1); }
+.sf-hud__emote-item > i { font-style: normal; color: var(--sf-c-text-3); font-size: max(10px, 10.5u); letter-spacing: 0.02em; }
+
 /* 横屏逐级收紧：屏越窄，比分牌与右上角越挤（按两位数击杀、五位数金币的最坏情况留位置） */
 /* ≤920px(主流手机横屏)：去掉队名与补兵 */
 @media (orientation: landscape) and (max-width: 920px) {
@@ -1152,9 +1184,50 @@ function DG(n) {
   y.title = "金币";
   const v = T0({ icon: Vt("scoreboard"), label: "战况", onClick: () => n.actions.toggleScoreboard() });
   v.appendChild(z("span", "sf-hud__key", "Tab"));
+  // 表情：四个动作正好对应卡丁车那套标准动作里的 嘲讽 / 笑话 / 跳舞 / 庆祝
+  const EMOTES = [
+      ["taunt", "嘲讽", "Ctrl 1"],
+      ["joke", "笑话", "Ctrl 2"],
+      ["dance", "跳舞", "Ctrl 3"],
+      ["cheer", "庆祝", "Ctrl 4"],
+    ],
+    emoteMenu = z("div", "sf-hud__emote-menu");
+  for (const [nm, label, key] of EMOTES) {
+    const btn = z("button", "sf-hud__emote-item", z("span", null, label), z("i", null, key));
+    ((btn.type = "button"),
+      (btn.dataset.sfSnd = "select"),
+      btn.addEventListener("click", (ev) => {
+        (ev.stopPropagation(), n.actions.emote(nm), setEmoteOpen(!1));
+      }),
+      emoteMenu.appendChild(btn));
+  }
+  const emoteBtn = T0({
+      icon: Vt("emote"),
+      label: "表情（Ctrl 1-4）",
+      onClick: (ev) => {
+        (ev.stopPropagation(), setEmoteOpen(!emoteOpen));
+      },
+    }),
+    emote = z("div", "sf-hud__emote", emoteBtn, emoteMenu);
+  let emoteOpen = !1,
+    emoteOff = null;
+  // 点面板外面收起来。不用 setTimeout 延后挂：按钮本身在 emote 里，pointerdown 命中它不会关，
+  // 接着的 click 再 toggle 一次正好关上。
+  function setEmoteOpen(on) {
+    if (on === emoteOpen) return;
+    ((emoteOpen = on), emote.classList.toggle("is-open", on));
+    if (on) {
+      emoteOff = (ev) => {
+        emote.contains(ev.target) || setEmoteOpen(!1);
+      };
+      document.addEventListener("pointerdown", emoteOff, !0);
+    } else if (emoteOff) {
+      (document.removeEventListener("pointerdown", emoteOff, !0), (emoteOff = null));
+    }
+  }
   const _ = T0({ icon: Vt("pause"), label: "暂停 / 设置", onClick: () => n.actions.openSettings() });
   _.appendChild(z("span", "sf-hud__key", "Esc"));
-  const k = z("div", "sf-hud__tr", p, y, v, _),
+  const k = z("div", "sf-hud__tr", p, y, v, emote, _),
     M = Vn(e),
     S = Vn(s),
     b = Vn(i),
@@ -1318,6 +1391,17 @@ function FG(n, t, e, s = {}) {
         (t.command({ type: "sell", index: tt }),
         t.audio.ui("confirm"),
         l.toast(`已出售 ${ln[it].name}，返还 ${Ek(it)} 金币`, "info"));
+    },
+    // 表情：嘲讽 / 笑话 / 跳舞 / 庆祝。时长按当前外观的片段真实长度传下去，
+    // 引擎只用它决定"站多久"，动画那边按原速播完（kartAnimDur 拿不到就交给引擎兜底）。
+    emote(tt) {
+      if (!l.me.alive) return !1;
+      const it = lookId(l.me.heroId, !0);
+      return (
+        t.command({ type: "emote", name: tt, dur: kartAnimDur(it, tt) }),
+        t.audio.ui("click"),
+        !0
+      );
     },
   };
   l.actions = w;

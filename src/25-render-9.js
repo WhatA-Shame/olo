@@ -1281,7 +1281,9 @@ class sw {
     ((this.n = t),
       (this.q = new Float32Array(t * 4)),
       (this.t = new Float32Array(t * 3)),
-      (this.s = new Float32Array(t)),
+      // 每骨三个缩放分量。原版卡丁车那批的挤压/拉长是**三轴独立的节点 scale**，
+      // 只留一个统一缩放会把"压扁同时横向变宽"抹平成几何平均，动作看着就不形变了。
+      (this.s = new Float32Array(t * 3)),
       this.reset());
   }
   n;
@@ -1308,8 +1310,13 @@ class sw {
   move(t, e, s, i) {
     return ((this.t[t * 3] += e), (this.t[t * 3 + 1] += s), (this.t[t * 3 + 2] += i), this);
   }
+  // 统一缩放（老接口，内部英雄/小兵全用这个，等价于三轴同值）
   scale(t, e) {
-    return ((this.s[t] = e), this);
+    return ((this.s[t * 3] = e), (this.s[t * 3 + 1] = e), (this.s[t * 3 + 2] = e), this);
+  }
+  // 三轴缩放：外部原版模型用（GLB 里的 node.scale 就是三轴的）
+  scale3(t, e, s, i) {
+    return ((this.s[t * 3] = e), (this.s[t * 3 + 1] = s), (this.s[t * 3 + 2] = i), this);
   }
   copy(t) {
     return (this.q.set(t.q), this.t.set(t.t), this.s.set(t.s), this);
@@ -1328,7 +1335,7 @@ class sw {
       ((i[o] = c / u), (i[o + 1] = f / u), (i[o + 2] = d / u), (i[o + 3] = h / u));
     }
     for (let o = 0; o < this.n * 3; o++) this.t[o] = t.t[o] * a + this.t[o] * e;
-    for (let o = 0; o < this.n; o++) this.s[o] = t.s[o] * a + this.s[o] * e;
+    for (let o = 0; o < this.n * 3; o++) this.s[o] = t.s[o] * a + this.s[o] * e;
     return this;
   }
 }
@@ -1349,7 +1356,7 @@ class bU {
     const s = t.count;
     ((this.wp = new Float32Array(s * 3)),
       (this.wq = new Float32Array(s * 4)),
-      (this.ws = new Float32Array(s)),
+      (this.ws = new Float32Array(s * 3)),
       (this.chains = t.chains.map((i) => ({
         p: new Float32Array(i.joints.length * 3),
         prev: new Float32Array(i.joints.length * 3),
@@ -1391,15 +1398,21 @@ class bU {
           (c[p * 3 + 1] += s),
           (c[p * 3 + 2] += i),
           Ua(no, 0, t.q, p * 4, f, p * 4),
-          (d[p] = o * t.s[p]));
+          (d[p * 3] = o * t.s[p * 3]),
+          (d[p * 3 + 1] = o * t.s[p * 3 + 1]),
+          (d[p * 3 + 2] = o * t.s[p * 3 + 2]));
       else {
-        const k = d[g];
-        (Da(f, g * 4, y * k, v * k, _ * k, c, p * 3),
+        const k = d[g * 3],
+          k1 = d[g * 3 + 1],
+          k2 = d[g * 3 + 2];
+        (Da(f, g * 4, y * k, v * k1, _ * k2, c, p * 3),
           (c[p * 3] += c[g * 3]),
           (c[p * 3 + 1] += c[g * 3 + 1]),
           (c[p * 3 + 2] += c[g * 3 + 2]),
           Ua(f, g * 4, t.q, p * 4, f, p * 4),
-          (d[p] = k * t.s[p]));
+          (d[p * 3] = k * t.s[p * 3]),
+          (d[p * 3 + 1] = k1 * t.s[p * 3 + 1]),
+          (d[p * 3 + 2] = k2 * t.s[p * 3 + 2]));
       }
     }
   }
@@ -1440,7 +1453,8 @@ class bU {
       for (let M = 0; M < p; M++) {
         const S = m.joints[M],
           b = i.parent[S],
-          w = r[S];
+          // 摆动链只关心"这根骨大概多粗"，三轴取几何平均就够（链子只挂在内部英雄上，缩放恒为 1）
+          w = Math.cbrt(Math.max(1e-6, r[S * 3] * r[S * 3 + 1] * r[S * 3 + 2]));
         (M > 0 &&
           ((a[S * 3] = x.p[(M - 1) * 3]),
           (a[S * 3 + 1] = x.p[(M - 1) * 3 + 1]),
@@ -1547,37 +1561,66 @@ class bU {
       // M = T(worldPos)·R(worldQ·bindQW⁻¹)·T(-bindWorld)，等价于标准 LBS，双骨骼天然可用
       BW = s.bindWorld,
       BQ = s.bindQW;
+    // 每根骨 16 个数 = 4 个 texel：
+    //   (ps.xyz, 0) / 四元数 q / (三轴缩放, 0) / 逆绑定四元数 q2
+    // 顶点位置按 `ps + qrot(q, qrot(q2, position) * sc)` 算，等价于完整 LBS：
+    //   M = R(wq)·S(s)·R(bindQW)⁻¹，ps = wp − M·bindWorld
+    // q2 是这轮加的：没有它就只能把缩放乘在**绑定世界轴**上，转过 90° 的零件会往错方向压（"拉断"）。
+    // 纯节点动画的模型（localVerts）把顶点预变换过了，q2 直接用单位四元数。
     for (let c = 0; c < i; c++) {
-      const f = r[c],
-        d = e + c * 8;
-      if (BW) {
-        ((pb[0] = -BQ[c * 4]), (pb[1] = -BQ[c * 4 + 1]), (pb[2] = -BQ[c * 4 + 2]), (pb[3] = BQ[c * 4 + 3]));
-        Ua(o, c * 4, pb, 0, qb, 0);
-        Da(qb, 0, BW[c * 3] * f, BW[c * 3 + 1] * f, BW[c * 3 + 2] * f, Aa, 0);
-        ((t[d] = a[c * 3] - Aa[0]),
-          (t[d + 1] = a[c * 3 + 1] - Aa[1]),
-          (t[d + 2] = a[c * 3 + 2] - Aa[2]),
-          (t[d + 3] = f),
-          (t[d + 4] = qb[0]),
-          (t[d + 5] = qb[1]),
-          (t[d + 6] = qb[2]),
-          (t[d + 7] = qb[3]));
+      const sx = r[c * 3],
+        sy = r[c * 3 + 1],
+        sz = r[c * 3 + 2],
+        d = e + c * 16;
+      if (s.localVerts) {
+        ((t[d] = a[c * 3]),
+          (t[d + 1] = a[c * 3 + 1]),
+          (t[d + 2] = a[c * 3 + 2]),
+          (t[d + 3] = 0),
+          (t[d + 4] = o[c * 4]),
+          (t[d + 5] = o[c * 4 + 1]),
+          (t[d + 6] = o[c * 4 + 2]),
+          (t[d + 7] = o[c * 4 + 3]),
+          (t[d + 8] = sx),
+          (t[d + 9] = sy),
+          (t[d + 10] = sz),
+          (t[d + 11] = 0),
+          (t[d + 12] = 0),
+          (t[d + 13] = 0),
+          (t[d + 14] = 0),
+          (t[d + 15] = 1));
         continue;
       }
-      Da(o, c * 4, l[c * 3] * f, l[c * 3 + 1] * f, l[c * 3 + 2] * f, Aa, 0);
+      // 绑定世界空间：先把绑定位置转到骨骼局部（逆绑定旋转）→ 缩放 → 用当前世界旋转转回去
+      const bx = BW ? BW[c * 3] : l[c * 3],
+        by = BW ? BW[c * 3 + 1] : l[c * 3 + 1],
+        bz = BW ? BW[c * 3 + 2] : l[c * 3 + 2];
+      if (BQ) {
+        ((pb[0] = -BQ[c * 4]), (pb[1] = -BQ[c * 4 + 1]), (pb[2] = -BQ[c * 4 + 2]), (pb[3] = BQ[c * 4 + 3]));
+        Da(pb, 0, bx, by, bz, qb, 0);
+        Da(o, c * 4, qb[0] * sx, qb[1] * sy, qb[2] * sz, Aa, 0);
+      } else Da(o, c * 4, bx * sx, by * sy, bz * sz, Aa, 0);
       ((t[d] = a[c * 3] - Aa[0]),
         (t[d + 1] = a[c * 3 + 1] - Aa[1]),
         (t[d + 2] = a[c * 3 + 2] - Aa[2]),
-        (t[d + 3] = f),
+        (t[d + 3] = 0),
         (t[d + 4] = o[c * 4]),
         (t[d + 5] = o[c * 4 + 1]),
         (t[d + 6] = o[c * 4 + 2]),
-        (t[d + 7] = o[c * 4 + 3]));
+        (t[d + 7] = o[c * 4 + 3]),
+        (t[d + 8] = sx),
+        (t[d + 9] = sy),
+        (t[d + 10] = sz),
+        (t[d + 11] = 0));
+      if (BQ) ((t[d + 12] = pb[0]), (t[d + 13] = pb[1]), (t[d + 14] = pb[2]), (t[d + 15] = pb[3]));
+      else ((t[d + 12] = 0), (t[d + 13] = 0), (t[d + 14] = 0), (t[d + 15] = 1));
     }
   }
   point(t, e, s, i, a) {
-    const o = this.ws[t];
-    (Da(this.wq, t * 4, e * o, s * o, i * o, Aa, 0),
+    const ox = this.ws[t * 3],
+      oy = this.ws[t * 3 + 1],
+      oz = this.ws[t * 3 + 2];
+    (Da(this.wq, t * 4, e * ox, s * oy, i * oz, Aa, 0),
       (a.x = this.wp[t * 3] + Aa[0]),
       (a.y = this.wp[t * 3 + 1] + Aa[1]),
       (a.z = this.wp[t * 3 + 2] + Aa[2]));

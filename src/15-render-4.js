@@ -647,28 +647,66 @@ function Qc(n = {}) {
 const bm = `
 uniform highp sampler2D uBones;
 attribute vec3 aSkin;
+// 第二组骨：(骨C, 骨D, 权重C, 权重D)。原生网格全是 0，只有外部蒙皮网格用满四根。
+// 骨B 的权重按 1−wA−wC−wD 反推，所以两骨顶点（wC=wD=0）和以前完全一致。
+attribute vec4 aSkin2;
 vec3 qrot(vec4 q, vec3 v) {
   return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
-void boneXf(float idx, out vec4 ps, out vec4 q) {
-  int x = int(idx + 0.5) * 2;
+// 每根骨 4 个 texel：(ps,0) / 四元数 q / (三轴缩放,0) / 逆绑定四元数 q2。
+// 顶点按 ps + qrot(q, qrot(q2, position) * sc) 算 —— 也就是完整 LBS 的
+// M = R(wq)·S(s)·R(bindQW)⁻¹。q2 让三轴缩放落在**骨骼自己的轴**上，
+// 不然转过 90° 的零件会往世界轴的方向压（看着像被拉断）。
+// 缩放必须逐轴取出来 —— 原版动作的挤压大量是"压扁同时横向变宽"，只留一个标量就没形变了。
+void boneXf(float idx, out vec4 ps, out vec4 q, out vec3 sc, out vec4 q2) {
+  int x = int(idx + 0.5) * 4;
   ps = texelFetch(uBones, ivec2(x, gl_InstanceID), 0);
   q = texelFetch(uBones, ivec2(x + 1, gl_InstanceID), 0);
+  sc = texelFetch(uBones, ivec2(x + 2, gl_InstanceID), 0).xyz;
+  q2 = texelFetch(uBones, ivec2(x + 3, gl_InstanceID), 0);
+}
+vec4 qconj(vec4 q) {
+  return vec4(-q.xyz, q.w);
 }
 `,
   _m = `
   vec4 ps0;
   vec4 q0;
-  vec4 ps1;
-  vec4 q1;
-  boneXf(aSkin.x, ps0, q0);
-  vec3 skinnedPos = ps0.xyz + ps0.w * qrot(q0, position);
-  vec3 skinnedNormal = qrot(q0, normal);
-  if (aSkin.z < 0.999) {
-    boneXf(aSkin.y, ps1, q1);
-    skinnedPos = mix(ps1.xyz + ps1.w * qrot(q1, position), skinnedPos, aSkin.z);
-    skinnedNormal = mix(qrot(q1, normal), skinnedNormal, aSkin.z);
+  vec3 sc0;
+  vec4 q20;
+  vec4 psT;
+  vec4 qT;
+  vec3 scT;
+  vec4 q2T;
+  boneXf(aSkin.x, ps0, q0, sc0, q20);
+  // 四骨混合，就是标准 LBS 的 Σ w_i·(ps_i + R_i·S_i·R2_i·position)。
+  // 权重和恒为 1（骨B 按 1−wA−wC−wD 反推），所以两骨顶点和以前的 mix 完全等价。
+  float wB = max(0.0, 1.0 - aSkin.z - aSkin2.z - aSkin2.w);
+  // 位置：先转回骨骼局部（q2），再缩放，再转回世界（q）
+  vec3 skinnedPos = (ps0.xyz + qrot(q0, qrot(q20, position) * sc0)) * aSkin.z;
+  // 法线：M 的逆转置 = R1·S⁻¹·R2⁻¹，顺序一样、缩放取倒数
+  vec3 skinnedNormal = qrot(q0, qrot(qconj(q20), normal) / max(sc0, vec3(1e-4))) * aSkin.z;
+  vec3 scAll = sc0 * aSkin.z;
+  if (wB > 0.0005) {
+    boneXf(aSkin.y, psT, qT, scT, q2T);
+    skinnedPos += (psT.xyz + qrot(qT, qrot(q2T, position) * scT)) * wB;
+    skinnedNormal += qrot(qT, qrot(qconj(q2T), normal) / max(scT, vec3(1e-4))) * wB;
+    scAll += scT * wB;
   }
+  if (aSkin2.z > 0.0005) {
+    boneXf(aSkin2.x, psT, qT, scT, q2T);
+    skinnedPos += (psT.xyz + qrot(qT, qrot(q2T, position) * scT)) * aSkin2.z;
+    skinnedNormal += qrot(qT, qrot(qconj(q2T), normal) / max(scT, vec3(1e-4))) * aSkin2.z;
+    scAll += scT * aSkin2.z;
+  }
+  if (aSkin2.w > 0.0005) {
+    boneXf(aSkin2.y, psT, qT, scT, q2T);
+    skinnedPos += (psT.xyz + qrot(qT, qrot(q2T, position) * scT)) * aSkin2.w;
+    skinnedNormal += qrot(qT, qrot(qconj(q2T), normal) / max(scT, vec3(1e-4))) * aSkin2.w;
+    scAll += scT * aSkin2.w;
+  }
+  // 描边着色器在后面还要用：q0 留着主导骨的旋转，sc0 换成混合后的尺度
+  sc0 = scAll;
 `,
   mL = `
 ${Pf}
@@ -807,6 +845,7 @@ uniform vec3 uKickColor;
 uniform float uTime;
 uniform sampler2D uMap;
 uniform float uMapOn;
+uniform float uMapSRGB;
 varying vec4 vFx;
 varying vec4 vInstA;
 varying vec3 vTeam;
@@ -846,8 +885,12 @@ void main() {
 
   // 本体乘色只作用在非队伍色区域；队伍色只染蒙版区域；整体染色(石化/冰冻/阵亡变灰)按 vTint.a 的强度向灰度化后的染色过渡
   vec3 base = mix(vColor.rgb * vBody, vTeam, vFx.z);
-  // 外部网格(glTF)的 basecolor：uMapOn=0 时是纯白，乘上去不影响原生英雄
-  base *= mix(vec3(1.0), texture2D(uMap, vUv).rgb, uMapOn);
+  // 外部网格(glTF)的 basecolor：uMapOn=0 时是纯白，乘上去不影响原生英雄。
+  // uMapSRGB=1（卡丁车的贴图图集）要转线性 —— glTF 的 baseColorTexture 是 sRGB 编码，
+  // 引擎的顶点色与光照都是线性的，不转会整只模型发白。
+  vec3 mc = texture2D(uMap, vUv).rgb;
+  mc = mix(mc, mix(mc / 12.92, pow((mc + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), mc)), uMapSRGB);
+  base *= mix(vec3(1.0), mc, uMapOn);
   float lum = dot(base, vec3(0.3, 0.55, 0.15));
   base = mix(base, vTint.rgb * mix(lum, 1.0, 0.25) * 1.6, vTint.a);
 
@@ -1033,11 +1076,9 @@ varying vec3 vBase;
 void main() {
   ${_m}
   vec3 n = qrot(q0, aOutline.xyz);
-  if (aSkin.z < 0.999) n = mix(qrot(q1, aOutline.xyz), n, aSkin.z);
   vec4 mvPosition = viewMatrix * vec4(skinnedPos, 1.0);
   // 线宽按视距换算成恒定的屏幕像素；被缩没的部件(骨骼缩放趋零)不留描边残点
-  float sc = ps0.w;
-  if (aSkin.z < 0.999) sc = mix(ps1.w, ps0.w, aSkin.z);
+  float sc = pow(max(sc0.x * sc0.y * sc0.z, 0.0), 0.3333);
   float w = aOutline.w * uLine * -mvPosition.z * min(1.0, sc * 4.0);
   mvPosition = viewMatrix * vec4(skinnedPos + normalize(n) * w, 1.0);
   vOpacity = aInstA.x;
@@ -1132,6 +1173,7 @@ function TL(n, t, e) {
       uGlowBoost: { value: t.glowBoost ?? 3 },
       uMap: { value: t.map ?? null },
       uMapOn: { value: t.map ? 1 : 0 },
+      uMapSRGB: { value: t.mapSRGB ? 1 : 0 },
     }),
     defines: s3 ? { UNIT_PATTERNS: "" } : {},
     vertexShader: mL,
@@ -1283,7 +1325,7 @@ class ux {
       e = new Cf(),
       s = this.source;
     e.setIndex(s.index);
-    for (const a of ["position", "normal", "color", "aFx", "aMat", "aSkin", "aOutline"])
+    for (const a of ["position", "normal", "color", "aFx", "aMat", "aSkin", "aSkin2", "aOutline"])
       e.setAttribute(a, s.attributes[a]);
     // 外部网格才有 uv；原生英雄的几何没有这个属性，材质里 uMapOn=0 也不会采样
     s.attributes.uv && e.setAttribute("uv", s.attributes.uv);
@@ -1305,8 +1347,8 @@ class ux {
         e.setAttribute("aInstX", this.instX)),
       (e.instanceCount = 0),
       (this.geo = e),
-      (this.data = new Float32Array(this.bones * 8 * t)));
-    const i = new zr(this.data, this.bones * 2, t, Gs, fo);
+      (this.data = new Float32Array(this.bones * 16 * t)));
+    const i = new zr(this.data, this.bones * 4, t, Gs, fo);
     ((i.minFilter = i.magFilter = ti), (i.generateMipmaps = !1), (i.needsUpdate = !0), (this.tex = i));
   }
   grow() {
@@ -1344,7 +1386,7 @@ class ux {
   push(t, e) {
     this.count >= this.capacity && this.grow();
     const s = this.count++;
-    t.pack(this.data, s * this.bones * 8);
+    t.pack(this.data, s * this.bones * 16);
     const i = this.instA.array;
     ((i[s * 4] = e.opacity), (i[s * 4 + 1] = e.flash), (i[s * 4 + 2] = e.glow), (i[s * 4 + 3] = e.rim));
     const a = this.instTeam.array;

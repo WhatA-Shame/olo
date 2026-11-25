@@ -7,3 +7,11 @@ tools/report.json
 tools/plan.json
 tools/.build.bundle.js
 .herocheck/
+
+# 卡丁车原版模型的导出工作区：node_modules / 无头浏览器 profile / 中间 GLB / 外部工程副本
+# 都是可再生的，只有 .kart/entry.js 和 .kart/index.html 是手写的导出入口。
+.kart/node_modules/
+.kart/profile/
+.kart/glb/
+.kart/bundle.js
+.kart/src/

@@ -19,6 +19,8 @@ import { II, PI } from './16-render-5.js';
 import { Nz, cz } from './21-core-4.js';
 import { mU } from './25-render-9.js';
 import { Ac, D8, I8, P8, Vx, a4, cB, fB, hB, lB, mB, of, pB, qc, uB, v3 } from './31-render-10.js';
+import { ART_H, ART_W, KART_IDS, kartSpec, kartReady, kartPalette, preloadKart } from './47-kart.js';
+import { KART_ART } from './47-kart-art.js';
 
 function gB(n, t) {
   let e;
@@ -66,9 +68,20 @@ function gB(n, t) {
       } catch {
         return -1;
       }
+    })(),
+    // ?t=0.42：把循环动作（move/idle）冻结在 0.42 秒 —— ?p= 对循环片段无效（它们按真实秒数推进），
+    // 想核对外部模型某一帧的姿势就得能钉住时间
+    qTime = (() => {
+      try {
+        const v = parseFloat(new URLSearchParams(location.search).get("t"));
+        return Number.isFinite(v) && v >= 0 ? v : -1;
+      } catch {
+        return -1;
+      }
     })();
   let f = t,
     d = qAnim,
+    curSkin = null,
     h = 0,
     u = 0,
     m = 0,
@@ -77,12 +90,20 @@ function gB(n, t) {
     g = !1,
     y = 0,
     v = performance.now();
-  const _ = (b) => {
+  const _ = (b, sk) => {
+      // 原版角色模型是运行时拉的，还没到就先用它借的那个英雄顶上；
+      // 拉完再进来一次（不然 qc() 会对着没登记的 key 抛"未知模型"）。
+      if (sk && !kartReady(sk)) {
+        preloadKart(sk).then((ok) => {
+          ok && f === b && curSkin === sk && _(b, sk);
+        });
+      }
+      const us = sk && kartReady(sk) ? sk : null;
       ((f = b),
-        (o = qc(Vx(b))),
+        (o = qc(Vx(us || b))),
         (r = new of(o, 0.37)),
         l && (l.removeFrom(s.scene), l.dispose()),
-        (l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map }, `preview:${b}`)),
+        (l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map, mapSRGB: o.mapSRGB, specular: o.specular }, `preview:${us || b}`)),
         l.addTo(s.scene));
       const w = new Ut(Se[b].palette.glow);
       (s.rim.color.copy(w).lerp(new Ut(1, 1, 1), 0.35),
@@ -135,7 +156,7 @@ function gB(n, t) {
       const cyc = d === "idle" || d === "move";
       (d !== "idle" && d !== "move" && qFreeze < 0 && ((h += w), h >= u && ((d = "idle"), (h = 0))),
         (T.anim = d),
-        (T.time = x),
+        (T.time = qTime >= 0 ? qTime : x),
         (T.t = cyc ? x : h),
         (T.p = qFreeze >= 0 ? qFreeze : cyc ? 0 : Math.min(1, h / u)),
         (T.variant = m),
@@ -156,8 +177,9 @@ function gB(n, t) {
     M(),
     (y = requestAnimationFrame(S)),
     {
-      setHero(b) {
-        g || b === f || _(b);
+      setHero(b, sk) {
+        const s2 = sk || null;
+        g || (b === f && s2 === curSkin) || ((curSkin = s2), _(b, s2));
       },
       play(b) {
         if (g) return;
@@ -183,38 +205,44 @@ function gB(n, t) {
 const jd = 192,
   j1 = new Map();
 
-function l4(n, t) {
+function l4(n, t, pal, w0, h0) {
   const e = Se[n],
+    // 占位皮有自己的配色（从模型顶点色里取），没有就用英雄原配色
+    P = pal || e.palette,
+    w = w0 || jd,
+    h = h0 || w,
     s = document.createElement("canvas");
-  s.width = s.height = jd;
+  (s.width = w), (s.height = h);
   const i = s.getContext("2d");
   if (!i) return "";
-  if (!t) return (D8(i, jd, jd, n, !0), s.toDataURL("image/png"));
-  const a = jd,
-    o = new Ut(e.palette.primary).lerp(new Ut(659494), 0.72),
-    r = new Ut(e.palette.primary).lerp(new Ut(1055292), 0.35),
-    l = i.createLinearGradient(0, 0, 0, a);
+  if (!t) return (D8(i, w, h, n, !0), s.toDataURL("image/png"));
+  const a = Math.max(w, h),
+    o = new Ut(P.primary).lerp(new Ut(659494), 0.72),
+    r = new Ut(P.primary).lerp(new Ut(1055292), 0.35),
+    l = i.createLinearGradient(0, 0, 0, h);
   (l.addColorStop(0, `#${r.getHexString()}`),
     l.addColorStop(1, `#${o.getHexString()}`),
     (i.fillStyle = l),
-    i.fillRect(0, 0, a, a));
-  const c = new Ut(e.palette.glow),
-    f = i.createRadialGradient(a * 0.5, a * 0.42, a * 0.05, a * 0.5, a * 0.46, a * 0.62);
+    i.fillRect(0, 0, w, h));
+  const c = new Ut(P.glow),
+    f = i.createRadialGradient(w * 0.5, h * 0.42, a * 0.05, w * 0.5, h * 0.46, a * 0.62);
   (f.addColorStop(0, `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},0.55)`),
     f.addColorStop(1, "rgba(0,0,0,0)"),
     (i.fillStyle = f),
-    i.fillRect(0, 0, a, a),
+    i.fillRect(0, 0, w, h),
     (i.strokeStyle = "rgba(255,255,255,0.08)"),
     (i.lineWidth = 1));
-  for (let h = 0; h < 5; h++)
-    (i.beginPath(), i.moveTo(-20 + h * 52, a), i.lineTo(60 + h * 52, 0), i.stroke());
-  ((i.imageSmoothingQuality = "high"), i.drawImage(t, 0, 0, a, a));
-  const d = i.createLinearGradient(0, a * 0.7, 0, a);
+  for (let u = 0; u < 5; u++)
+    (i.beginPath(), i.moveTo(-20 + u * 52, h), i.lineTo(60 + u * 52, 0), i.stroke());
+  // 3D 渲染出来的是方图，竖版画布上按宽度居中放，上下多出来的部分由底板渐变自然延展 ——
+  // 不能拉伸，不然蛤蟆会被压成瘦条。
+  ((i.imageSmoothingQuality = "high"), i.drawImage(t, 0, (h - w) / 2, w, w));
+  const d = i.createLinearGradient(0, h * 0.7, 0, h);
   return (
     d.addColorStop(0, "rgba(6,10,26,0)"),
     d.addColorStop(1, "rgba(6,10,26,0.5)"),
     (i.fillStyle = d),
-    i.fillRect(0, 0, a, a),
+    i.fillRect(0, 0, w, h),
     s.toDataURL("image/png")
   );
 }
@@ -226,6 +254,11 @@ let dh = null,
 // 外部 GLB 英雄的贴图是异步解码的，第一次渲染立绘时可能还没到位 → 白模。
 // 贴图 onload 后回调这里，把这些英雄的立绘缓存作废、重画，并把页面上已经贴出去的图换掉。
 const MAP_HEROES = ["chijin", "niumo", "mushroom"];
+// 立绘要预热的全部 id：正式英雄 + 还没烘成图片的占位皮角色
+// （烘好的那批走 KART_ART 直接给图片路径，不用 3D 渲染，也别排进队列）
+const ALL_PORTRAITS = kr.concat(KART_IDS).filter((e) => !KART_ART[e]);
+// dist/index.html 下是 images/…；modular/index.html 开发入口要往上一级
+const ART_BASE = /\/modular\//.test(location.pathname) ? "../" : "";
 let mapFixTries = 0;
 globalThis.__sfTextureReady = () => {
   if (mapFixTries++ > 4) return;
@@ -245,32 +278,92 @@ function z8() {
   ((dh = null), n && (n.renderer.dispose(), n.renderer.forceContextLoss()));
 }
 
-function N8(n) {
-  let t = "";
-  if (!c4)
-    try {
-      if (!dh) {
-        const r = Math.round(jd * 1.5),
-          l = document.createElement("canvas");
-        l.width = l.height = r;
-        const c = new cx({
-          canvas: l,
-          antialias: !0,
-          alpha: !0,
-          premultipliedAlpha: !0,
-          preserveDrawingBuffer: !0,
-        });
-        (P8(c), c.setPixelRatio(1), c.setSize(r, r, !1), (dh = { renderer: c, stage: I8(!1) }));
+// 立绘自动构图：量出离屏渲染里模型的像素包围盒，反解出"刚好占满画框"的相机。
+// 手调的 dist/drop 对 20 个形态各异的模型不可能都合适 —— 蛤蟆会顶到边、史莱姆会缩成一小坨、
+// 大脚牛头顶被切。量像素比猜参数可靠，新模型进来也不用一个个调。
+const FIT_MARGIN = 0.86,
+  FIT_TAN = 2 * Math.tan((24 / 2) * (Math.PI / 180)); // fov 24° 下"可见边长 / 距离"
+function fitPortrait(canvas, aimX, aimY, dist) {
+  const r = canvas.width;
+  let px;
+  try {
+    const c2 = document.createElement("canvas");
+    (c2.width = c2.height = r), c2.getContext("2d").drawImage(canvas, 0, 0);
+    px = c2.getContext("2d").getImageData(0, 0, r, r).data;
+  } catch {
+    return null; // 读不到像素（没开 preserveDrawingBuffer 之类）就保留原帧
+  }
+  let x0 = r, y0 = r, x1 = -1, y1 = -1;
+  for (let y = 0; y < r; y++)
+    for (let x = 0; x < r; x++)
+      if (px[(y * r + x) * 4 + 3] > 24) {
+        (x < x0 && (x0 = x), x > x1 && (x1 = x), y < y0 && (y0 = y), y > y1 && (y1 = y));
       }
+  if (x1 < x0 || y1 < y0) return null; // 一帧全透明 = 模型没画出来，别把相机解到无穷远
+  const vis = FIT_TAN * dist, // 当前画框在世界里的边长
+    bw = ((x1 - x0 + 1) / r) * vis,
+    bh = ((y1 - y0 + 1) / r) * vis,
+    // 屏幕 y 向下、世界 y 向上，所以纵轴是减号
+    cx = aimX + ((x0 + x1 + 1) / 2 / r - 0.5) * vis,
+    cy = aimY - ((y0 + y1 + 1) / 2 / r - 0.5) * vis;
+  return {
+    cx,
+    cy,
+    dist: Math.min(30, Math.max(0.15, Math.max(bw, bh) / (FIT_MARGIN * FIT_TAN))),
+  };
+}
+
+function N8(n, w0, h0) {
+  // 占位皮：n 可能是角色皮 id（frog/boxman…），配色/取景/底板要退回它借的那个英雄
+  const sp = kartSpec(n),
+    base = sp?.kit ?? n,
+    pal = (sp && kartPalette(n)) || null,
+    w = w0 || (sp ? ART_W : jd),
+    h = h0 || (sp ? ART_H : w);
+  let t = "";
+  // 占位皮的模型是运行时拉的。还没到就先给个底板，等它到了再重画这一张 ——
+  // 不能让它抛出去被下面的 catch 接住，那个 catch 会把 c4 置真、把整套立绘都废掉。
+  if (sp && !kartReady(n)) {
+    preloadKart(n).then((ok) => {
+      if (!ok) return;
+      j1.delete(n);
+      const u = xB(n);
+      for (const img of document.querySelectorAll(`img[data-sf-portrait="${n}"]`)) if (u) img.src = u;
+    });
+    t = l4(base, null, pal, w, h);
+    j1.set(n, t);
+    return t;
+  }
+  // 离屏渲染器只建一次。只有"建不起来"（没有 WebGL 之类）才彻底放弃整套立绘；
+  // 单个角色画失败就只影响它自己 —— 之前是一失败就 c4 置真，一个坏角色能把 27 张头像全废掉。
+  if (!c4 && !dh)
+    try {
+      const r = Math.round(Math.max(jd * 1.5, w)),
+        l = document.createElement("canvas");
+      l.width = l.height = r;
+      const c = new cx({
+        canvas: l,
+        antialias: !0,
+        alpha: !0,
+        premultipliedAlpha: !0,
+        preserveDrawingBuffer: !0,
+      });
+      (P8(c), c.setPixelRatio(1), c.setSize(r, r, !1), (dh = { renderer: c, stage: I8(!1) }));
+    } catch (err) {
+      (console.warn("[立绘] 离屏渲染器建不起来，整套立绘退回底板图", err), (c4 = !0), z8());
+    }
+  if (!c4 && dh)
+    try {
       const { renderer: e, stage: s } = dh,
         i = qc(Vx(n)),
         a = new of(i, 0.37),
-        o = new ux(i.geometry, i.rig.count, 1, { outline: 1.7, map: i.map }, `portrait:${n}`);
+        o = new ux(i.geometry, i.rig.count, 1, { outline: 1.7, map: i.map, mapSRGB: i.mapSRGB, specular: i.specular }, `portrait:${n}`);
       (o.setShadows(!1), o.addTo(s.scene));
       try {
-        const r = new Ut(Se[n].palette.glow);
+        const r = new Ut(pal?.glow ?? Se[base].palette.glow);
         s.rim.color.copy(r).lerp(new Ut(1, 1, 1), 0.3);
-        const l = fB[n],
+        // 占位皮用模型自己算出来的取景（i.portrait），正式英雄还是那套手调的 fB
+        const l = i.portrait ?? fB[base] ?? fB.chijin,
           c = a.input;
         ((c.anim = l.anim ?? "idle"),
           (c.time = 1.3),
@@ -284,35 +377,57 @@ function N8(n) {
         (f.team.set(Yt.blue.main), (f.glow = a.output.glow), o.begin(), o.push(a.skeleton, f), o.end());
         const d = { x: 0, y: 0, z: 0 };
         a.attach("head", d) || (d.y = i.height * i.scale * 0.86);
-        const h = s.camera,
-          u = d.y - l.drop;
-        ((h.aspect = 1),
-          (h.fov = 24),
-          h.position.set(d.x + l.x, u + 0.1, d.z + l.dist),
-          h.lookAt(d.x + l.x, u, d.z),
-          h.updateProjectionMatrix(),
-          e.clear(),
-          e.render(s.scene, h),
-          (t = l4(n, e.domElement)));
+        // 注意别叫 h：外层 h 是画布高度，这里遮住的话 l4 会把相机当成高度传进去
+        const cam = s.camera,
+          aimX = d.x + l.x,
+          aimY = d.y - l.drop,
+          draw = (cx, cy, dist) => {
+            (cam.aspect = 1),
+              (cam.fov = 24),
+              cam.position.set(cx, cy + 0.1, d.z + dist),
+              cam.lookAt(cx, cy, d.z),
+              cam.updateProjectionMatrix(),
+              e.clear(),
+              e.render(s.scene, cam);
+          };
+        draw(aimX, aimY, l.dist);
+        // 占位皮才自动构图：正式英雄那套 fB 是手调过的，别动
+        if (sp) {
+          // 第一帧故意拉远，保证整个模型都在画框里 —— 被裁掉的话包围盒会偏小、越量越往里缩
+          let cur = { cx: aimX, cy: aimY, dist: l.dist * 1.7 };
+          draw(cur.cx, cur.cy, cur.dist);
+          for (let k = 0; k < 3; k++) {
+            const fit = fitPortrait(e.domElement, cur.cx, cur.cy, cur.dist);
+            if (!fit) {
+              (cur = { cx: aimX, cy: aimY, dist: l.dist }), draw(cur.cx, cur.cy, cur.dist);
+              break;
+            }
+            const steady = Math.abs(fit.dist / cur.dist - 1) < 0.02;
+            (cur = fit), draw(cur.cx, cur.cy, cur.dist);
+            if (steady) break;
+          }
+        }
+        t = l4(base, e.domElement, pal, w, h);
       } finally {
         (o.removeFrom(s.scene), o.dispose());
       }
-    } catch {
-      ((c4 = !0), z8());
+    } catch (err) {
+      console.warn("[立绘] 渲染失败", n, err && (err.stack || err.message || err));
     }
-  return (t || (t = l4(n, null)), j1.set(n, t), t);
+  return (t || (t = l4(base, null, pal, w, h)), j1.set(n, t), t);
 }
 
 function F8() {
   if (k2) return;
-  if (kr.find((e) => !j1.has(e)) === void 0) {
+  // 立绘预渲染的队列：正式英雄 + 占位皮角色（占位皮也要有头像，选将台才有图）
+  if (ALL_PORTRAITS.find((e) => !j1.has(e)) === void 0) {
     z8();
     return;
   }
   k2 = !0;
   const t = () => {
     k2 = !1;
-    const e = kr.find((s) => !j1.has(s));
+    const e = ALL_PORTRAITS.find((s) => !j1.has(s));
     (e !== void 0 && N8(e), F8());
   };
   typeof window.requestIdleCallback == "function"
@@ -321,6 +436,9 @@ function F8() {
 }
 
 function xB(n) {
+  // 离线烘好的立绘（卡丁车那批角色）：直接给图片路径，不用在运行时拉模型再渲染
+  const art = KART_ART[n];
+  if (art) return ART_BASE + art;
   const t = j1.get(n);
   if (t !== void 0) return t;
   const e = N8(n);
@@ -328,6 +446,14 @@ function xB(n) {
 }
 
 const U8 = [mU, lB, cz, Nz];
+
+// 离线烘焙立绘用（tools/kartportrait.mjs）：把某个外观 id 现渲染成 dataURL。
+// 平时运行时走不到这里 —— 烘好的角色直接由 KART_ART 给图片路径。
+globalThis.__sfPortrait = async (id, w, h) => {
+  await preloadKart(id);
+  j1.delete(id);
+  return N8(id, w || ART_W, h || ART_H);
+};
 
 function yB(n, t, e) {
   return II(n, t, e, U8);

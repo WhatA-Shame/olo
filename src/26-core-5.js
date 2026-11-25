@@ -25,10 +25,14 @@ class Ls {
   uvX = 0;
   uvY = 0;
   skinTriple = null;
+  // 第二组骨 (骨C, 骨D, 权重C, 权重D)；全零表示只用前两根骨。
+  // 原生网格永远是全零，只有外部导入的蒙皮网格（大肥蛆的身体）会用满 4 根。
+  skinQuad = null;
   mapOn = 0;
   col = [];
   fx = [];
   skin = [];
+  skin2 = [];
   line = [];
   mat = [];
   idx = [];
@@ -250,6 +254,8 @@ class Ls {
       this.skin.push(h[0], h[1], h[2]);
     } else if (this.skinTriple) this.skin.push(this.skinTriple[0], this.skinTriple[1], this.skinTriple[2]);
     else this.skin.push(this.boneId, this.boneId, 1);
+    if (this.skinQuad) this.skin2.push(this.skinQuad[0], this.skinQuad[1], this.skinQuad[2], this.skinQuad[3]);
+    else this.skin2.push(0, 0, 0, 0);
   }
   skinRings(t, e, s, i, a, o, r, l, c = 0, f = 1) {
     const d = [],
@@ -590,12 +596,18 @@ class Ls {
       ((this.uvX = m.uv[i * 2]), (this.uvY = m.uv[i * 2 + 1]));
       // 外部网格自带 2 骨骼权重；没有的话退回单骨骼
       this.skinTriple = m.skin ? [m.skin[i * 3], m.skin[i * 3 + 1], m.skin[i * 3 + 2]] : null;
+      // 第三、四根骨（四骨蒙皮的蒙皮网格才有）
+      this.skinQuad = m.skin2 ? [m.skin2[i * 4], m.skin2[i * 4 + 1], m.skin2[i * 4 + 2], m.skin2[i * 4 + 3]] : null;
+      // 外部网格带顶点色时逐顶点用它（卡丁车那批的贴图色是烘进顶点色带过来的）。
+      // 只有整体 color 的话就还是整体刷一层。
+      if (m.col) ((this.c = [m.col[i * 3], m.col[i * 3 + 1], m.col[i * 3 + 2]]), (this.c2 = null));
       this.writeVertex(
         m.pos[i * 3], m.pos[i * 3 + 1], m.pos[i * 3 + 2],
         m.nor[i * 3], m.nor[i * 3 + 1], m.nor[i * 3 + 2], 1,
       );
     }
     this.skinTriple = null;
+    this.skinQuad = null;
     for (let i = 0; i < m.idx.length; i++) this.idx.push(m.idx[i] + base);
     (this.prims.push({ start, count: this.idx.length - start, size: o.size ?? 2.2, outlined: this.lineW > 0 }),
       ([this.c, this.c2, this.by, this.gloss, this.glow, this.ao, this.ao2, this.lineW, this.matX, this.matY, this.matZ, this.matW] = keep));
@@ -611,6 +623,9 @@ class Ls {
     const e = new Uint8Array(this.fx.length);
     for (let h = 0; h < e.length; h++) e[h] = Math.round(Xi(this.fx[h]) * 255);
     (t.setAttribute("aFx", new On(e, 4, !0)), t.setAttribute("aSkin", new Ae(this.skin, 3)));
+    // 每个几何都要带 aSkin2（全零也算）—— 缺属性的网格会拿到 WebGL 的默认值 (0,0,0,1)，
+    // 那等于"第四根骨权重 1"，整个人会被拽到骨D 上。所以无条件设。
+    t.setAttribute("aSkin2", new Ae(this.skin2, 4));
     const s = new Uint8Array(this.mat.length);
     for (let h = 0; h < s.length; h++) s[h] = Math.round(Xi(this.mat[h]) * 255);
     t.setAttribute("aMat", new On(s, 4, !0));

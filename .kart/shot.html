@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf8"><body style="margin:0;background:#101018"></body>
+<script src="./shot.bundle.js"></script>
+<script>
+const q = new URLSearchParams(location.search);
+const i = +(q.get('i') || 0), a = q.get('a') || '小加速', f = +(q.get('f') || 10);
+setTimeout(async () => {
+  try {
+    if (q.get('dump')) { window.__dumpNames(i, a, f); return; }
+    if (q.get('diff')) { window.__d = (await import('./shot.bundle.js')) && null; }
+    await window.__cmp(i, a, f, q.get('side'));
+    if (q.get('diff')) window.__diff(i, a, f);
+  }
+  catch (e) { document.title = 'ERR ' + (e && e.message); console.error(e); document.body.innerHTML = '<pre style="color:#f66;font:13px monospace;white-space:pre-wrap">' + (e && e.stack) + '</pre>'; }
+}, 60);
+</script>

@@ -16,6 +16,7 @@ import { BB, Yh, ln } from './33-data-2.js';
 import { Ar, Po, Qx, Tf, Vt, kl } from './34-ui-2.js';
 import { D2, JH, Na, Vn, gk, is, vo } from './36-ui-4.js';
 import { W2, Y4, hG, j2, pG, uG } from './38-ui-6.js';
+import { kartSpec, lookId } from './47-kart.js';
 
 function mG(n) {
   Zn("sf-hud-mini", hG);
@@ -622,17 +623,41 @@ function $f(n) {
   return null;
 }
 
-function Gf(n, t) {
+// 合成：背包里凑齐 from 列出的组件时，买成品只需付差价。
+// 返回 { slots, value }（slots = 要消耗的装备栏下标，value = 这些组件的总价），凑不齐返回 null。
+function Sk(n, t) {
   const e = ln[t];
+  if (!e || !e.from || !e.from.length) return null;
+  const a = n.items,
+    used = [];
+  let v = 0;
+  for (const c of e.from) {
+    let k = -1;
+    for (let i = 0; i < a.length; i++)
+      if (a[i] === c && !used.includes(i)) {
+        k = i;
+        break;
+      }
+    if (k < 0) return null;
+    (used.push(k), (v += ln[c].cost));
+  }
+  return { slots: used, value: v };
+}
+
+function Gf(n, t) {
+  const e = ln[t],
+    s = Sk(n, t);
+  if (s) return Math.max(0, e.cost - s.value);
   if (e.category === "boots") {
-    const s = Dm(n.items);
-    if (s) return e.cost - Math.floor(ln[s].cost * Yh);
+    const i = Dm(n.items);
+    if (i) return e.cost - Math.floor(ln[i].cost * Yh);
   }
   return e.cost;
 }
 
 function zm(n, t) {
   const e = ln[t];
+  if (Sk(n, t)) return !0; // 能合成就不需要空格子
   if (e.category === "boots") {
     const s = Dm(n.items);
     if (s) return e.tier !== 1 && s !== t;
@@ -686,7 +711,7 @@ function Yd(n) {
       baseId: null,
       stage: f ? "done" : "todo",
       buyId: f ? null : c,
-      cost: f ? 0 : ln[c].cost,
+      cost: f ? 0 : Gf(n, c),
       next: !1,
       order: a.length + 1,
     });
@@ -861,10 +886,17 @@ function bG(n) {
     c = new Map(),
     f = [];
   function d(g) {
-    const y = Se[g.heroId],
+    // 玩家带角色皮时，战况里的名字也换成皮的；定位/图标仍按它借的那个英雄
+    const A = lookId(g.heroId, g.isPlayer),
+      C = kartSpec(A),
+      y = Se[C?.kit ?? A],
       v = _e(Ar(y.role), "sf-hud__sb-rolei"),
-      _ = z("span", "sf-hud__sb-name", v, Qx(g.heroId));
-    return (_.style.setProperty("--role", Tf[y.role]), _.setAttribute("aria-label", z0(y)), _);
+      _ = z("span", "sf-hud__sb-name", v, Qx(A));
+    return (
+      _.style.setProperty("--role", Tf[y.role]),
+      _.setAttribute("aria-label", C?.name ?? z0(y)),
+      _
+    );
   }
   function h(g) {
     const y = z("span", "sf-hud__sb-lv sf-num"),
@@ -1172,6 +1204,12 @@ const K4 = `
 .sf-hud__dt-stat > span { color: var(--sf-c-text-2); }
 .sf-hud__dt-stat > b { color: var(--sf-c-cyan-300); font-weight: 700; text-align: right; white-space: nowrap; }
 .sf-hud__dt-passive { margin-top: 8u; padding: 7u 9u; border-radius: 6u; background: rgba(255, 184, 77, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.28); font-size: var(--sf-fs-sm); line-height: 1.5; color: var(--sf-c-text-2); }
+/* 合成路径：一行组件名，已有的高亮 */
+.sf-hud__dt-build { margin-top: 8u; display: flex; flex-wrap: wrap; align-items: center; gap: 4u 6u; padding: 7u 9u; border-radius: 6u; background: rgba(120, 190, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 190, 255, 0.22); font-size: var(--sf-fs-sm); }
+.sf-hud__dt-build b { flex: none; color: var(--sf-c-text-3); font-weight: 700; letter-spacing: 0.12em; }
+.sf-hud__dt-part { display: inline-flex; align-items: center; gap: 2u; padding: 1u 5u; border-radius: 4u; color: var(--sf-c-text-2); box-shadow: inset 0 0 0 1px var(--sf-c-line-strong); }
+.sf-hud__dt-part.is-own { color: var(--sf-c-green-300); box-shadow: inset 0 0 0 1px rgba(86, 199, 160, 0.5); background: rgba(86, 199, 160, 0.1); }
+.sf-hud__dt-part .sf-i { width: 1em; height: 1em; }
 .sf-hud__dt-passive b { display: block; color: var(--sf-c-amber); font-weight: 700; }
 .sf-hud__dt-nopassive { margin-top: 8u; font-size: var(--sf-fs-xs); color: var(--sf-c-text-3); }
 .sf-hud__dt-note { flex: none; margin-bottom: 5u; font-size: var(--sf-fs-sm); line-height: 1.4; color: var(--sf-c-text-3); }
@@ -1265,4 +1303,4 @@ const K4 = `
   EG = 320,
   Z4 = (n) => n.brief ?? BB(n.stats, 2),
   K2 = (n) => ln[n].name.slice(-2);
-export { mG, $f, Gf, zm, Tk, Yd, q2, xG, Ek, Ak, M1, Rk, X2, yG, bG, _G, wG, MG, kG, Y2, SG, TG, EG, Z4, K2 };
+export { mG, $f, Gf, zm, Sk, Tk, Yd, q2, xG, Ek, Ak, M1, Rk, X2, yG, bG, _G, wG, MG, kG, Y2, SG, TG, EG, Z4, K2 };

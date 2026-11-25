@@ -15,6 +15,7 @@ import { AB, H8, Hf, Jn, Kx, M0, Sf, Wx, Xx, Zn, _e, po, qx, ro, z, za, zi } fro
 import { NB, PB, ln } from './33-data-2.js';
 import { Ar, Ml, Po, Qx, S3, Tf, Vt, Zh, ey, hh, k3, kl, ks, rk, ty } from './34-ui-2.js';
 import { WH, uk } from './35-ui-3.js';
+import { kartSpec, lookId, setPlayerSkin } from './47-kart.js';
 
 const jH = Jn(`
 .sf-loading { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10u; padding: max(18u, var(--sf-safe-t)) max(36u, var(--sf-safe-r)) max(22u, var(--sf-safe-b)) max(36u, var(--sf-safe-l)); background: rgba(3, 6, 16, 0.5); }
@@ -118,7 +119,10 @@ const jH = Jn(`
 `);
 
 function qH(n, t, e, s, i, lnIn) {
-  const a = Se[t],
+  // t 可能是占位皮 id（frog/boxman…）：定位/分路/称号退回它借的那个英雄，名字用皮自己的
+  const sp = kartSpec(t),
+    a = Se[sp?.kit ?? t],
+    nm = sp?.name ?? a.name,
     o = z("span", "sf-lcard__role", _e(Ar(a.role)), a.roleName),
     // 分路以对局阵容为准（AI 是自由分路），没给就退回推荐分路
     ln = lnIn || a.lane,
@@ -131,13 +135,13 @@ function qH(n, t, e, s, i, lnIn) {
         "span",
         "sf-lcard__info",
         o,
-        z("span", "sf-lcard__name", a.name),
+        z("span", "sf-lcard__name", nm),
         z("span", "sf-lcard__title", a.title),
         z("span", "sf-lcard__lane", _e(k3(ln)), S3[ln]),
       ),
     );
   return (
-    r.setAttribute("aria-label", `${z0(a)}，${a.title}`),
+    r.setAttribute("aria-label", `${nm}，${a.title}`),
     r.style.setProperty("--hero", a.palette.glow),
     r.style.setProperty("--role", Tf[a.role]),
     (r.style.animationDelay = `${0.1 + (e === 0 ? i : 4 - i) * 0.07}s`),
@@ -146,6 +150,8 @@ function qH(n, t, e, s, i, lnIn) {
 }
 
 function XH(n, t, e, lu) {
+  // 玩家选的占位皮要在这里登记一次：后面加载卡、HUD 头像、战绩表、结算都靠 lookId() 查
+  setPlayerSkin(t.skin ?? null);
   (Hf(), Zn("sf-menu-loading", jH));
   // 只列真实参战的 5 人，不是整本花名册；没传阵容时退回蓝/红各 5 个
   const roster = (y) => (y === 0 ? lu?.blue : lu?.red) || Ml.slice(0, 5),
@@ -163,7 +169,11 @@ function XH(n, t, e, lu) {
         z(
           "div",
           "sf-loading__cards",
-          ...roster(y).map((v, _) => qH(e, v, y, y === 0 && v === me, _, (y === 0 ? lu?.blueLanes : lu?.redLanes)?.[_])),
+          ...roster(y).map((v, _) => {
+            const isMe = y === 0 && v === me;
+            // 玩家选了角色皮：这张卡连头像带名字都换成皮的
+            return qH(e, isMe ? lookId(v, !0) : v, y, isMe, _, (y === 0 ? lu?.blueLanes : lu?.redLanes)?.[_]);
+          }),
         ),
       ),
     i = z("span"),
@@ -183,7 +193,10 @@ function XH(n, t, e, lu) {
           "sf-loading__mode",
           "5v5 对战",
           z("i"),
-          `你的英雄：${z0(me)}`,
+          `你的英雄：${(() => {
+            const sp = kartSpec(lookId(me, !0));
+            return sp ? `${sp.name} · ${Se[sp.kit].roleName}` : z0(me);
+          })()}`,
           z("i"),
           `对手难度：${hh[t.difficulty].label}`,
         ),
@@ -542,10 +555,10 @@ function QH(n, t, e, s = {}) {
           z(
             "span",
             "sf-rt__pic-wrap",
-            Zh(e, F.heroId, "sf-rt__pic"),
+            Zh(e, lookId(F.heroId, F.isPlayer), "sf-rt__pic"),
             z("span", "sf-rt__lv", String(F.level)),
           ),
-          Qx(F.heroId, "sf-rt__name"),
+          Qx(lookId(F.heroId, F.isPlayer), "sf-rt__name"),
           q,
         ),
         ct = ll("kda", "战绩", "");
@@ -710,7 +723,8 @@ function Dl(n, t, e = !1) {
 }
 
 function Na(n, t, e, s = "") {
-  return Zh(n, t.heroId, `sf-hud__face ${Dl(t.team, e, t.isPlayer)}${s ? ` ${s}` : ""}`);
+  // 玩家带了角色皮：HUD 头像也换成皮的（AI 永远没有皮）
+  return Zh(n, lookId(t.heroId, t.isPlayer), `sf-hud__face ${Dl(t.team, e, t.isPlayer)}${s ? ` ${s}` : ""}`);
 }
 
 function Rl(n, t = "") {

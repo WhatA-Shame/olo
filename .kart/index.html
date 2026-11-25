@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>kart glb export</title>
+  </head>
+  <body>
+    <pre id="log">loading…</pre>
+    <script src="./bundle.js"></script>
+    <script>
+      const log = (s) => (document.getElementById('log').textContent += '\n' + s);
+      if (window.__kartReady) log('ready: ' + window.__kartCount + ' models');
+      else log('bundle failed');
+    </script>
+  </body>
+</html>

@@ -10,6 +10,7 @@
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
 import { Se, kr, z0 } from './02-data.js';
+import { kartSpec } from './47-kart.js';
 import { $8, EB, G8, Hf, Jn, V8, Wx, X8, Zn, _e, j8, po, z } from './32-ui.js';
 import { B0, C2, Hn, Ia, K1, KB, Kh, Ln, Mi, Mr, Pe, Vo, We, Wo, _4, ak, dn, ek, fn, hn, ik, je, ln, ok, sk, w3, w4, xe } from './33-data-2.js';
 
@@ -294,8 +295,49 @@ const tH = {
   },
 };
 
+// 新增装备的图标：先复用同类现有装备的画法、只换成本装备的配色。
+// 一件手绘图标是 20~40 行 SVG，34 件新装备挨个画不现实；按类别挑一个形制接近的旧图标，
+// 颜色跟着装备自己的 color 走，视觉上仍然是"一套里的"。
+const tHx = {
+  iron_sword: 'starfall_blade',
+  iron_blade: 'starfall_blade',
+  azure_blade: 'starfall_blade',
+  heaven_splitter: 'blood_scythe',
+  war_halberd: 'piercing_spear',
+  armor_piercer: 'piercing_spear',
+  hunting_bow: 'sunchaser_bow',
+  horn_bow: 'sunchaser_bow',
+  wind_crossbow: 'sunchaser_bow',
+  short_dagger: 'phantom_edge',
+  blood_dagger: 'phantom_edge',
+  blood_jade: 'blood_scythe',
+  apprentice_staff: 'astral_staff',
+  hourglass: 'astral_staff',
+  mana_crystal: 'astral_staff',
+  void_staff: 'astral_staff',
+  jade_slip: 'sage_codex',
+  spell_codex: 'sage_codex',
+  spell_piercer: 'void_crown',
+  curse_charm: 'void_crown',
+  shaman_mask: 'void_crown',
+  star_robe: 'starweave_cloak',
+  cloth_armor: 'guardian_plate',
+  chain_mail: 'guardian_plate',
+  dragon_scale: 'guardian_plate',
+  iron_bracer: 'thorn_mail',
+  turtle_shield: 'thorn_mail',
+  wood_shield: 'undying_heart',
+  leather_vest: 'undying_heart',
+  heart_mirror: 'undying_heart',
+  giant_belt: 'undying_heart',
+  ward_cloak: 'starweave_cloak',
+  rune_cloak: 'starweave_cloak',
+  frost_amulet: 'starweave_cloak',
+};
+
 function Po(n) {
-  return tH[n](ln[n].color);
+  const f = tH[n] ?? tH[tHx[n]] ?? tH.boots;
+  return f(ln[n].color);
 }
 
 const Ye = 'fill="currentColor"',
@@ -360,6 +402,8 @@ const M3 = `<path d="M21.2 2.8l-1 5.6-8.9 8.9-3.6-3.6 8.9-8.9z" ${Ye}/><path d="
     cancel: `<circle cx="12" cy="12" r="9" ${Ne(2.3)}/><path d="M5.800 5.800l12.400 12.400" ${Ne(2.3)}/>`,
     shop: `<path fill-rule="evenodd" d="M9 2.800h6l-1.300 3.400c3.600 2.200 6.300 6.200 6.300 9.800 0 3.600-3 5.500-8 5.500s-8-1.900-8-5.500c0-3.600 2.700-7.600 6.300-9.800zM${hn(12, 14, 4.6, 0.2).slice(1)}" ${Ye}/>`,
     scoreboard: `<g ${Ye}><rect x="2.800" y="3.600" width="4.400" height="4.400" rx="1.100"/><rect x="9.300" y="4.600" width="12" height="2.400" rx="1.200"/><rect x="2.800" y="9.800" width="4.400" height="4.400" rx="1.100"/><rect x="9.300" y="10.800" width="12" height="2.400" rx="1.200"/><rect x="2.800" y="16" width="4.400" height="4.400" rx="1.100"/><rect x="9.300" y="17" width="12" height="2.400" rx="1.200"/></g>`,
+    // 表情：气泡 + 笑脸（气泡走描边，五官走填充，小尺寸下比实心块清楚）
+    emote: `<path d="M4.400 3.600h15.200c1 0 1.800.8 1.800 1.800v10c0 1-.8 1.800-1.800 1.800h-7.500L7 21.400v-4.200H4.400c-1 0-1.800-.8-1.800-1.800v-10c0-1 .8-1.800 1.800-1.800z" ${Ne(1.9)}/><circle cx="8.900" cy="9.800" r="1.400" ${Ye}/><circle cx="15.100" cy="9.800" r="1.400" ${Ye}/><path d="M8.900 13.200q3.100 2.600 6.200 0" ${Ne(1.7)}/>`,
     volume: `<path d="M3 9.200h3.600L12 4.500v15l-5.400-4.700H3z" ${Ye}/><path d="M15.300 8.500a5 5 0 0 1 0 7M18 5.800a8.800 8.800 0 0 1 0 12.400" ${Ne(2.1)}/>`,
     mute: `<path d="M3 9.200h3.600L12 4.500v15l-5.400-4.700H3z" ${Ye}/><path d="M15.500 9l5.500 6M21 9l-5.500 6" ${Ne(2.3)}/>`,
     sfx: `<path d="M3 9.200h3.600L12 4.500v15l-5.400-4.700H3z" ${Ye}/><path d="M${hn(18, 12, 4.8, 0.2).slice(1)}" ${Ye}/>`,
@@ -601,7 +645,8 @@ const Ml = kr,
   Z1 = new Set();
 
 function Zh(n, t, e) {
-  const s = Se[t],
+  // t 可能是占位皮 id（frog/boxman…）：配色/角色名要退回它借的那个英雄
+  const s = Se[kartSpec(t)?.kit ?? t],
     i = z("span", `sf-portrait${e ? ` ${e}` : ""}`, _e(Ar(s.role), "sf-portrait__fallback"));
   (i.style.setProperty("--sf-hero-a", s.palette.primary),
     i.style.setProperty("--sf-hero-b", s.palette.secondary),
@@ -683,9 +728,11 @@ function ks(n) {
 
 function Qx(n, t) {
   Jx();
-  const e = Se[n],
+  // n 可能是占位皮 id：定位/称号退回它借的英雄，名字用皮自己的
+  const sp = kartSpec(n),
+    e = Se[sp?.kit ?? n],
     s = z("small", "sf-heroname__role", ` · ${e.roleName}`),
-    i = z("span", `sf-heroname${t ? ` ${t}` : ""}`, e.name, s);
+    i = z("span", `sf-heroname${t ? ` ${t}` : ""}`, sp?.name ?? e.name, s);
   return (i.style.setProperty("--role", Tf[e.role]), i);
 }
 

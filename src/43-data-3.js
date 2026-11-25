@@ -13,7 +13,7 @@ import { K6, Qd, Xm, Y6, Z6, eo, rn, ui, v0, va, wS, yn, yr } from './01-audio.j
 import { Nh, Se, ea, eh, f5, lm } from './02-data.js';
 import { xo } from './18-core.js';
 import { Yh, ln } from './33-data-2.js';
-import { $f, Gf, Tk, zm } from './39-ui-7.js';
+import { $f, Gf, Sk, Tk, zm } from './39-ui-7.js';
 import { $a, Ck } from './40-ui-8.js';
 import { Fk, iy } from './41-ai.js';
 import { BV, Bm, CV, F3, G0, HV, Hl, Jh, Kk, LV, M6, N3, Oi, Ok, Qh, Ss, Ui, Wk, Xk, ZV, Zo, aW, cW, cy, dy, em, eu, fy, gW, h6, hy, iu, jk, ly, mW, oW, pW, pe, py, ry, tW, tu, uW, uy } from './42-ai-2.js';
@@ -899,6 +899,8 @@ function XW(n, t) {
     n.fx("core_destroyed", t.pos, t.team, { unitId: t.id }),
     n.emit({ type: "gameOver", winner: s }),
     n.emit({ type: "announce", key: s === 0 ? "victory" : "defeat", team: s }));
+  // 胜利方自动庆祝：动作一直循环到结算界面关掉（dur 0 = 不过期）
+  for (const i of n.heroes) if (i.alive && i.team === s) eu(n, i, "cheer", 0, !0);
 }
 
 function YW(n, t) {
@@ -1557,6 +1559,25 @@ function cS(n, t, e, s = !1) {
   const i = ln[e];
   if (!i) return !1;
   const a = t.items;
+  // 合成优先：组件凑齐就吃掉组件、只付差价（成品比组件总价贵一点点，那部分才是这次要付的）
+  const comb = Sk(t, e);
+  if (comb) {
+    const price = Math.max(0, i.cost - comb.value);
+    if (t.gold < price) return Do(n, t, "gold", s);
+    t.gold -= price;
+    for (const k of comb.slots) a[k] = null;
+    const slot = comb.slots[0] ?? a.indexOf(null);
+    a[slot] = e;
+    lS(n, t);
+    return (
+      n.emit(
+        s
+          ? { type: "itemBought", unitId: t.id, itemId: e, auto: !0, combined: comb.slots.map((k) => k) }
+          : { type: "itemBought", unitId: t.id, itemId: e, combined: comb.slots.map((k) => k) },
+      ),
+      !0
+    );
+  }
   let o = i.cost,
     r = -1;
   if (i.category === "boots") {
@@ -1880,7 +1901,19 @@ function D6(n, t) {
   ((t.h.atkOrder = !1), (t.targetId = -1), Ga(t), vy(n, t));
 }
 
+// 表情动作的四个名字（右上角按钮 + Ctrl1~4）。都对应卡丁车那套标准动作里的同名片段。
+const EMOTE_NAMES = new Set(["taunt", "joke", "dance", "cheer"]);
+
 function Aj(n, t, e) {
+  // 表情放在最前面：结算界面（state.over）也想让玩家再跳一次，不然按了没反应
+  if (e.type === "emote") {
+    // 被控/腾空时别接：qV 会先走眩晕/滞空分支，等控制结束再补播一段表情会很怪
+    if (!t.alive || t.rt.stunned || t.rt.airborne || !EMOTE_NAMES.has(e.name)) return;
+    // dur 由 UI 按模型片段的真实时长传进来；拿不到就给个兜底，宁可多站一会儿也别截断动作
+    const dur = Number.isFinite(e.dur) && e.dur > 0 ? e.dur : 2.4;
+    eu(n, t, `emote_${e.name}`, dur, !0);
+    return;
+  }
   if (n.state.over) return;
   if (e.type === "buy") {
     cS(n, t, e.itemId);
@@ -1948,6 +1981,8 @@ function Rj(n, t) {
     (s.revealUntil = -999),
     (e.atkOrder = !1),
     (e.pendingCast = null),
+    // 复活动作：泉眼里起身那一下，播完自动回待机
+    eu(n, t, "revive", 1, !0),
     _o(n, t),
     (t.hp = t.stats.maxHp),
     (t.mana = t.stats.maxMana),
