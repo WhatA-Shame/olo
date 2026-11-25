@@ -5,8 +5,8 @@
 // dist/kart/<id>.bin —— 一个量化过的自描述数据块，由 47-kart-decode.js 解回来。
 //
 // 为什么是运行时 fetch 而不是打进 bundle：
-//   20 个角色加起来 16MB，全打进来会让首页从 6.5MB 涨到 22MB。只有玩家选的那个
-//   角色需要加载，所以进对局前按需拉一次（200KB~1MB），加载完再登记进模型表。
+//   21 个角色加起来 60MB，全打进来会让首页从 6.5MB 涨到 66MB。只有玩家选的那个
+//   角色需要加载，所以进对局前按需拉一次（0.7~6.5MB），加载完再登记进模型表。
 //
 // 骨架约定：原版模型的"零件 = three 的 node"，节点层级直接当骨架用，
 // 每个零件的顶点刚性绑到自己那根骨（权重 1）。所以这里不需要重算权重，也不会撕裂。
@@ -37,6 +37,7 @@ export const KART_SPECS = [
   { id: 'horseman', name: '半马人', kit: 'chijin' },
   { id: 'skeleton', name: '暴走骷髅', kit: 'yeque' },
   { id: 'coconut', name: '椰子保龄球', kit: 'panyue' },
+  { id: 'paperboy', name: '纸札弟', kit: 'xingli' },
   { id: 'panda', name: '熊猫警察', kit: 'niumo' },
   { id: 'bear', name: '狗熊警官', kit: 'niumo' },
 ];
@@ -241,8 +242,8 @@ function kartDef(id) {
   }
 
   // 二十一段标准动作，一个状态一段，全是原版片段，不叠加任何程序化动作：
-  //   idle   → 空着（这批包缺真正的待机，现在叫"待机"的其实是行走，等下一个包补）
-  //   move   → 小加速；被减速 → 行走；有加速 buff → 中加速 / 大加速
+  //   idle   → 待机（新包已经拆出真正的原地待机，含 3.6 秒环视）
+  //   move   → 小加速；被减速 → 行走（新包的真行走）；有加速 buff → 中加速 / 大加速
   //   attack → 普通攻击   attack2 → 右攻击
   //   s1 → 左攻击   s2 → 右攻击   ult/channel → 吟唱
   //   airborne → 滞空   stunned/hit → 眩晕   roll → 失控
@@ -366,7 +367,7 @@ function kartDef(id) {
           return;
         }
       }
-      // 常规行走一律用"小加速"；只有被减速效果影响时才用"行走"（= 这批包里叫"待机"的那段）
+      // 常规行走一律用"小加速"；只有被减速效果影响时才用"行走"（新包拆出来的真行走）
       const k = I.slow
           ? 'walk'
           : I.tier >= 2
@@ -387,8 +388,8 @@ function kartDef(id) {
         return;
       }
     }
-    // 待机：这个包里没有真正的待机片段，先停在绑定姿势，等下一个包补 idle。
-    // 补进来之后这一句自动生效，别的都不用改。
+    // 待机：新包已经带上真正的待机片段（3.6 秒环视），直接循环。
+    // 万一老包没有 idle，这里就停在绑定姿势。
     if (A.idle) loop(R, A.idle, I.time + (I.seed ?? 0) * 3);
     out.glow = 1 + 0.1 * Math.sin(I.time * 2);
   };

@@ -32323,9 +32323,9 @@ void main() {
       }
       return this.\u6F02\u79FB\u89E6\u70B9\u7EC4;
     }
-    // 标准方法：切换当前动作（同动作不清空计时，防止每帧调用卡死热身与回弹动画）
-    \u8BBE\u7F6E\u52A8\u4F5C(\u52A8\u4F5C) {
-      if (this.\u5F53\u524D\u52A8\u4F5C === \u52A8\u4F5C) return;
+    // 标准方法：切换当前动作（默认同动作不清空计时，传入强制重播时从头播放非循环动作如死亡）
+    \u8BBE\u7F6E\u52A8\u4F5C(\u52A8\u4F5C, \u5F3A\u5236\u91CD\u64AD = false) {
+      if (!\u5F3A\u5236\u91CD\u64AD && this.\u5F53\u524D\u52A8\u4F5C === \u52A8\u4F5C) return;
       this.\u5F53\u524D\u52A8\u4F5C = \u52A8\u4F5C;
       this.\u52A8\u4F5C\u8BA1\u65F6 = 0;
     }
@@ -32492,8 +32492,9 @@ void main() {
       const \u539F\u59CB\u8F6C\u5411 = Math.max(-1, Math.min(1, \u8F6C\u5411\u89D2));
       const \u662F\u5DE6\u62D0 = \u52A8\u4F5C === "\u5DE6\u62D0";
       const \u662F\u53F3\u62D0 = \u52A8\u4F5C === "\u53F3\u62D0";
-      const \u6709\u6548\u901F\u5EA6 = !\u73AF\u5883 && (\u662F\u5DE6\u62D0 || \u662F\u53F3\u62D0) && \u901F\u5EA6 < 1 ? 36 : \u901F\u5EA6;
-      const \u6709\u6548\u4FA7\u504F = !\u73AF\u5883 && \u662F\u5DE6\u62D0 && Math.abs(\u539F\u59CB\u8F6C\u5411) < 0.05 ? 0.85 : !\u73AF\u5883 && \u662F\u53F3\u62D0 && Math.abs(\u539F\u59CB\u8F6C\u5411) < 0.05 ? -0.85 : \u539F\u59CB\u8F6C\u5411;
+      const \u662F\u884C\u8D70 = \u52A8\u4F5C === "\u884C\u8D70";
+      const \u6709\u6548\u901F\u5EA6 = \u52A8\u4F5C === "\u5F85\u673A" || \u52A8\u4F5C === "\u6B7B\u4EA1" ? 0 : !\u73AF\u5883 && (\u662F\u5DE6\u62D0 || \u662F\u53F3\u62D0) && \u901F\u5EA6 < 1 ? 30 : !\u73AF\u5883 && \u662F\u884C\u8D70 && \u901F\u5EA6 < 1 ? 18 : \u901F\u5EA6;
+      const \u6709\u6548\u4FA7\u504F = \u52A8\u4F5C === "\u5F85\u673A" || \u52A8\u4F5C === "\u6B7B\u4EA1" ? 0 : !\u73AF\u5883 && \u662F\u5DE6\u62D0 && Math.abs(\u539F\u59CB\u8F6C\u5411) < 0.05 ? 0.85 : !\u73AF\u5883 && \u662F\u53F3\u62D0 && Math.abs(\u539F\u59CB\u8F6C\u5411) < 0.05 ? -0.85 : \u539F\u59CB\u8F6C\u5411;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A;
       if (!this.\u5DF2\u521D\u59CB\u5316) {
         this.\u5DF2\u521D\u59CB\u5316 = true;
@@ -32564,6 +32565,55 @@ void main() {
   function \u5E73\u6ED1\u9636\u8DC3(\u8FB9\u7F180, \u8FB9\u7F181, x) {
     const t = Math.max(0, Math.min(1, (x - \u8FB9\u7F180) / (\u8FB9\u7F181 - \u8FB9\u7F180 || 1)));
     return t * t * (3 - 2 * t);
+  }
+  function \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(\u8BA1\u65F6, \u603B\u957F = 1.05) {
+    const t = Math.max(0, \u8BA1\u65F6);
+    const \u603B\u8FDB = Math.min(1, t / Math.max(0.1, \u603B\u957F));
+    const \u53D7\u51FB\u9707 = \u603B\u8FDB < 0.24 ? Math.sin(\u603B\u8FDB / 0.24 * Math.PI) : 0;
+    let \u5012\u4E0B = 0;
+    if (\u603B\u8FDB >= 0.16 && \u603B\u8FDB < 0.72) {
+      const p = (\u603B\u8FDB - 0.16) / 0.56;
+      \u5012\u4E0B = p * p * (1.85 - 0.85 * p);
+    } else if (\u603B\u8FDB >= 0.72) {
+      \u5012\u4E0B = 1;
+    }
+    const \u7838\u5730\u5F39 = \u603B\u8FDB >= 0.7 && \u603B\u8FDB < 0.9 ? Math.sin((\u603B\u8FDB - 0.7) / 0.2 * Math.PI) * (1 - (\u603B\u8FDB - 0.7) / 0.2) : 0;
+    const \u62BD\u6410 = \u603B\u8FDB >= 0.76 && \u603B\u8FDB < 0.98 ? Math.sin((\u603B\u8FDB - 0.76) / 0.22 * Math.PI * 3) * (1 - (\u603B\u8FDB - 0.76) / 0.22) : 0;
+    return {
+      \u603B\u8FDB,
+      \u53D7\u51FB\u9707,
+      \u5012\u4E0B,
+      \u7838\u5730\u5F39,
+      \u62BD\u6410,
+      \u5DF2\u6B7B\u900F: \u603B\u8FDB >= 1
+    };
+  }
+  function \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) {
+    const \u5468\u671F = 3.6;
+    const u = (\u65F6\u95F4 % \u5468\u671F + \u5468\u671F) % \u5468\u671F / \u5468\u671F;
+    let \u8F6C\u5934Y = 0;
+    if (u < 0.12) {
+      \u8F6C\u5934Y = 0;
+    } else if (u < 0.26) {
+      \u8F6C\u5934Y = \u5E73\u6ED1\u9636\u8DC3(0.12, 0.26, u);
+    } else if (u < 0.4) {
+      \u8F6C\u5934Y = 1;
+    } else if (u < 0.54) {
+      \u8F6C\u5934Y = 1 - \u5E73\u6ED1\u9636\u8DC3(0.4, 0.54, u);
+    } else if (u < 0.64) {
+      \u8F6C\u5934Y = 0;
+    } else if (u < 0.78) {
+      \u8F6C\u5934Y = -\u5E73\u6ED1\u9636\u8DC3(0.64, 0.78, u);
+    } else if (u < 0.9) {
+      \u8F6C\u5934Y = -1;
+    } else {
+      \u8F6C\u5934Y = -1 + \u5E73\u6ED1\u9636\u8DC3(0.9, 1, u);
+    }
+    const \u89D2 = u * Math.PI * 2;
+    const \u62AC\u5934X = Math.sin(\u89D2) * 0.42 + Math.cos(\u89D2 * 2) * 0.18;
+    const \u6B6A\u5934Z = \u8F6C\u5934Y * 0.28 + Math.sin(\u89D2) * 0.14;
+    const \u547C\u5438 = Math.sin(\u89D2 * 2);
+    return { \u8F6C\u5934Y, \u62AC\u5934X, \u6B6A\u5934Z, \u547C\u5438 };
   }
   var \u8F66\u724C\u7EB9\u7406\u7F13\u5B58 = {};
   function \u83B7\u53D6\u8F66\u724C\u8D34\u82B1\u7EB9\u7406(\u5E95\u8272, \u5B57\u8272, \u94ED\u6587) {
@@ -33079,7 +33129,10 @@ void main() {
       if (this.\u4EEA\u8868\u9488) {
         this.\u4EEA\u8868\u9488.rotation.z = Math.sin(\u65F6\u95F4 * 28) * 0.45 + \u901F\u5EA6 / 60 * 2.2;
       }
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u98DE\u5929 = this.\u5F53\u524D\u52A8\u4F5C === "\u6EDE\u7A7A";
+      const \u662F\u5931\u63A7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5931\u63A7";
       const \u662F\u5DE6\u6363 = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u653B\u51FB";
       const \u662F\u53F3\u6363 = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
@@ -33095,6 +33148,8 @@ void main() {
       const \u662F\u7B11\u8BDD = this.\u5F53\u524D\u52A8\u4F5C === "\u7B11\u8BDD";
       const \u662F\u8DF3\u821E = this.\u5F53\u524D\u52A8\u4F5C === "\u8DF3\u821E";
       const \u662F\u7B49\u5019\u52A8\u4F5C = \u662F\u5632\u8BBD || \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(t, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : t % 1.15 / 1.15 : 0;
       const \u653B\u5411 = \u662F\u5DE6\u6363 ? 1 : \u662F\u53F3\u6363 ? -1 : 0;
       const \u6363\u76F8 = \u73AF\u5883 ? Math.min(1, t / 0.5) : t % 0.72 / 0.72;
@@ -33109,8 +33164,10 @@ void main() {
         if (\u91CD\u521B.\u6FC0\u6D3B) {
           const \u6C14 = 1 + \u91CD\u521B.\u6241\u538B * 0.92 + Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.22;
           this.\u5589\u56CA.scale.set(\u6C14 * 1.15, \u6C14 * 0.82, \u6C14);
-        } else if (\u662F\u6B7B\u4EA1) {
-          this.\u5589\u56CA.scale.set(1.18, 0.48, 1.12);
+        } else if (\u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const \u6C14 = 1 + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.45;
+          this.\u5589\u56CA.scale.set((1 + 0.18 * d) * \u6C14, Math.max(0.42, (1 - 0.52 * d) * \u6C14 - \u6B7B\u6001.\u7838\u5730\u5F39 * 0.18), (1 + 0.12 * d) * \u6C14);
         } else if (\u662F\u541F\u5531) {
           const \u5492\u9F13 = 1.38 + Math.sin(t * 7.5) * 0.22;
           this.\u5589\u56CA.scale.set(\u5492\u9F13, \u5492\u9F13 * 1.24, \u5492\u9F13);
@@ -33128,6 +33185,9 @@ void main() {
           this.\u5589\u56CA.scale.set(\u6B22\u6C14, \u6B22\u6C14 * 1.15, \u6B22\u6C14);
         } else if (this.\u5F53\u524D\u52A8\u4F5C === "\u6025\u505C") {
           this.\u5589\u56CA.scale.set(1.15, 0.65, 1.15);
+        } else if (\u73AF\u89C6) {
+          const \u547C\u5438 = 1 + \u73AF\u89C6.\u547C\u5438 * 0.12;
+          this.\u5589\u56CA.scale.set(\u547C\u5438, \u547C\u5438 * 1.06, \u547C\u5438);
         } else {
           const \u547C\u5438 = 1 + Math.sin(\u65F6\u95F4 * 4.8) * 0.15;
           this.\u5589\u56CA.scale.set(\u547C\u5438, \u547C\u5438 * 1.1, \u547C\u5438);
@@ -33140,33 +33200,53 @@ void main() {
           this.\u773C\u7403\u53F3.scale.set(\u66B4\u51F8 * (\u91CD\u521B.\u63A8\u5411 < 0 ? 1.2 : 0.9), \u66B4\u51F8 * 1.25, \u66B4\u51F8);
           this.\u773C\u7403\u5DE6.position.y = (0.76 + \u91CD\u521B.\u5305\u7EDC * 0.26 + Math.sin(t * 42) * 0.08) * k;
           this.\u773C\u7403\u53F3.position.y = (0.76 + \u91CD\u521B.\u5305\u7EDC * 0.18 - Math.sin(t * 42) * 0.08) * k;
-        } else if (\u662F\u6B7B\u4EA1) {
-          this.\u773C\u7403\u5DE6.scale.set(1.18, 0.42, 1);
-          this.\u773C\u7403\u53F3.scale.set(0.75, 0.35, 1);
-          this.\u773C\u7403\u5DE6.position.y = 0.66 * k;
-          this.\u773C\u7403\u53F3.position.y = 0.62 * k;
+        } else if (\u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const \u60CA = \u6B7B\u6001.\u53D7\u51FB\u9707;
+          this.\u773C\u7403\u5DE6.scale.set(1 + 0.18 * d + \u60CA * 0.35, Math.max(0.35, 1 - 0.58 * d + \u60CA * 0.35), 1);
+          this.\u773C\u7403\u53F3.scale.set(1 - 0.25 * d + \u60CA * 0.35, Math.max(0.32, 1 - 0.65 * d + \u60CA * 0.35), 1);
+          this.\u773C\u7403\u5DE6.position.y = (0.76 - 0.1 * d + \u60CA * 0.14) * k;
+          this.\u773C\u7403\u53F3.position.y = (0.76 - 0.14 * d + \u60CA * 0.1) * k;
+        } else if (\u73AF\u89C6) {
+          this.\u773C\u7403\u5DE6.scale.set(1, 1, 1);
+          this.\u773C\u7403\u53F3.scale.set(1, 1, 1);
+          this.\u773C\u7403\u5DE6.position.y = (0.76 + \u73AF\u89C6.\u547C\u5438 * 0.015) * k;
+          this.\u773C\u7403\u53F3.position.y = (0.76 + \u73AF\u89C6.\u547C\u5438 * 0.015) * k;
+          this.\u773C\u7403\u5DE6.rotation.y = \u73AF\u89C6.\u8F6C\u5934Y * 0.36;
+          this.\u773C\u7403\u53F3.rotation.y = \u73AF\u89C6.\u8F6C\u5934Y * 0.36;
         } else {
           this.\u773C\u7403\u5DE6.scale.set(1, 1, 1);
           this.\u773C\u7403\u53F3.scale.set(1, 1, 1);
+          this.\u773C\u7403\u5DE6.rotation.y = 0;
+          this.\u773C\u7403\u53F3.rotation.y = 0;
           const \u773C\u6643 = Math.sin(\u65F6\u95F4 * 18) * 0.04 * k;
           this.\u773C\u7403\u5DE6.position.y = 0.76 * k + \u773C\u6643;
           this.\u773C\u7403\u53F3.position.y = 0.76 * k - \u773C\u6643;
         }
-        this.\u773C\u7403\u5DE6.rotation.z = Math.sin(\u65F6\u95F4 * 12) * 0.12 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.45 : 0);
-        this.\u773C\u7403\u53F3.rotation.z = -Math.sin(\u65F6\u95F4 * 12) * 0.12 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u9707\u6CE2 * 0.45 : 0);
+        if (\u6B7B\u6001) {
+          this.\u773C\u7403\u5DE6.rotation.z = \u6B7B\u6001.\u62BD\u6410 * 0.16;
+          this.\u773C\u7403\u53F3.rotation.z = -\u6B7B\u6001.\u62BD\u6410 * 0.16;
+        } else if (\u73AF\u89C6) {
+          this.\u773C\u7403\u5DE6.rotation.z = \u73AF\u89C6.\u6B6A\u5934Z * 0.1;
+          this.\u773C\u7403\u53F3.rotation.z = \u73AF\u89C6.\u6B6A\u5934Z * 0.1;
+        } else {
+          this.\u773C\u7403\u5DE6.rotation.z = Math.sin(\u65F6\u95F4 * 12) * 0.12 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.45 : 0);
+          this.\u773C\u7403\u53F3.rotation.z = -Math.sin(\u65F6\u95F4 * 12) * 0.12 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u9707\u6CE2 * 0.45 : 0);
+        }
       }
       if (this.\u820C\u5934) {
-        const \u5410\u820C = \u91CD\u521B.\u6FC0\u6D3B || \u662F\u590D\u4F4D || \u662F\u666E\u653B || \u662F\u6B7B\u4EA1 || \u662F\u7B11\u8BDD || \u901F\u5EA6 > 18 || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5931\u63A7" || \u662F\u6363\u4E71 || \u662F\u98DE\u5929 || \u662F\u51B2\u7EBF;
+        const \u5410\u820C = \u91CD\u521B.\u6FC0\u6D3B || \u662F\u590D\u4F4D || \u662F\u666E\u653B || (\u6B7B\u6001 ? \u6B7B\u6001.\u603B\u8FDB > 0.1 : false) || \u662F\u7B11\u8BDD || !\u662F\u5F85\u673A && \u901F\u5EA6 > 22 || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5931\u63A7" || \u662F\u6363\u4E71 || \u662F\u98DE\u5929 || \u662F\u51B2\u7EBF;
         this.\u820C\u5934.visible = \u5410\u820C;
         if (\u5410\u820C) {
           if (\u91CD\u521B.\u6FC0\u6D3B) {
             this.\u820C\u5934.rotation.x = 0.48 + \u91CD\u521B.\u9707\u6CE2 * 0.35;
             this.\u820C\u5934.rotation.y = \u91CD\u521B.\u63A8\u5411 * 0.85 * \u91CD\u521B.\u5305\u7EDC;
             this.\u820C\u5934.scale.set(1.3, 1.3, 1.45 + \u91CD\u521B.\u5305\u7EDC * 0.9);
-          } else if (\u662F\u6B7B\u4EA1) {
-            this.\u820C\u5934.rotation.x = 0.35;
-            this.\u820C\u5934.rotation.y = 0.58;
-            this.\u820C\u5934.scale.set(1.15, 0.8, 1.45);
+          } else if (\u6B7B\u6001) {
+            const \u5410\u8FDB = Math.min(1, \u6B7B\u6001.\u5012\u4E0B * 1.1 + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.5);
+            this.\u820C\u5934.rotation.x = 0.35 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.22;
+            this.\u820C\u5934.rotation.y = 0.58 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.12;
+            this.\u820C\u5934.scale.set(1 + 0.15 * \u5410\u8FDB, 1 - 0.2 * \u6B7B\u6001.\u5012\u4E0B, 0.3 + 1.15 * \u5410\u8FDB);
           } else if (\u662F\u666E\u653B) {
             this.\u820C\u5934.rotation.x = -0.05;
             this.\u820C\u5934.rotation.y = 0;
@@ -33186,34 +33266,40 @@ void main() {
           }
         }
       }
-      const \u9759\u6B62\u52A8\u4F5C = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 || \u662F\u7B49\u5019\u52A8\u4F5C || this.\u5F53\u524D\u52A8\u4F5C === "\u7729\u6655";
-      const \u6B63\u5728\u8FD0\u52A8 = (\u901F\u5EA6 > 0.5 || !\u9759\u6B62\u52A8\u4F5C) && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u51B2\u7EBF && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u9759\u6B62\u52A8\u4F5C = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 || \u662F\u7B49\u5019\u52A8\u4F5C || this.\u5F53\u524D\u52A8\u4F5C === "\u7729\u6655";
       const \u60EF\u6027\u6001 = this.\u60EF\u6027.\u66F4\u65B0(\u65F6\u95F4, \u589E\u91CF, \u901F\u5EA6, \u8F6C\u5411\u89D2, this.\u5F53\u524D\u52A8\u4F5C, \u73AF\u5883);
+      const \u6B63\u5728\u8FD0\u52A8 = !\u9759\u6B62\u52A8\u4F5C && (\u662F\u884C\u8D70 || \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 > 0.5 || this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || \u662F\u8F6C\u5F2F) && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u51B2\u7EBF && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F * 0.85;
-      let \u6446\u5E45 = \u6B63\u5728\u8FD0\u52A8 ? Math.max(0.45, Math.min(1.05, 0.52 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 / 48)) : 0.14;
+      let \u6446\u5E45 = \u662F\u884C\u8D70 ? 0.58 : \u6B63\u5728\u8FD0\u52A8 ? Math.max(0.45, Math.min(1.05, 0.52 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 / 48)) : 0;
       const \u5B89\u5168\u589E\u91CF = Math.max(1e-3, Math.min(0.08, \u589E\u91CF));
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u8FDE\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
       const \u662F\u55B7\u706B\u52A0\u901F = \u662F\u5C0F\u55B7 || \u662F\u8FDE\u55B7 || \u662F\u5927\u55B7;
       const \u76EE\u6807\u76F4\u7ACB = \u662F\u55B7\u706B\u52A0\u901F || \u662F\u51B2\u7EBF || \u662F\u541F\u5531 ? 1 : 0;
-      const \u8FC7\u6E21\u901F\u5EA6 = \u76EE\u6807\u76F4\u7ACB > this.\u76F4\u7ACB\u8FDB\u5EA6 ? 7.2 : 5.8;
+      const \u8FC7\u6E21\u901F\u5EA6 = \u662F\u5931\u63A7 || \u662F\u98DE\u5929 || !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A ? 15 : \u76EE\u6807\u76F4\u7ACB > this.\u76F4\u7ACB\u8FDB\u5EA6 ? 7.2 : 5.8;
       this.\u76F4\u7ACB\u8FDB\u5EA6 += (\u76EE\u6807\u76F4\u7ACB - this.\u76F4\u7ACB\u8FDB\u5EA6) * (1 - Math.exp(-\u8FC7\u6E21\u901F\u5EA6 * \u5B89\u5168\u589E\u91CF));
       if (Math.abs(\u76EE\u6807\u76F4\u7ACB - this.\u76F4\u7ACB\u8FDB\u5EA6) < 2e-3) this.\u76F4\u7ACB\u8FDB\u5EA6 = \u76EE\u6807\u76F4\u7ACB;
       const u = Math.max(0, Math.min(1, this.\u76F4\u7ACB\u8FDB\u5EA6));
       const uS = u * u * (3 - 2 * u);
       const \u6B65\u9891\u500D\u7387 = Math.max(0.4, (this.\u53C2\u6570.\u57FA\u7840\u6B65\u9891 || 12) / 12);
-      const \u8DF3\u8DC3\u9891\u7387 = \u6B63\u5728\u8FD0\u52A8 ? Math.min(72, (16.5 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 * 1.28) * \u6B65\u9891\u500D\u7387) : 3.2;
+      const \u8DF3\u8DC3\u9891\u7387 = \u6B63\u5728\u8FD0\u52A8 ? \u662F\u884C\u8D70 ? Math.min(26, (10.5 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 * 0.48) * \u6B65\u9891\u500D\u7387) : Math.min(72, (16.5 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 * 1.28) * \u6B65\u9891\u500D\u7387) : 0;
       this.\u722C\u884C\u76F8\u4F4D += \u5B89\u5168\u589E\u91CF * \u8DF3\u8DC3\u9891\u7387;
       const \u6863\u4F4D\u52A0\u9891 = \u662F\u5927\u55B7 ? 17 : \u662F\u8FDE\u55B7 ? 10 : \u662F\u5C0F\u55B7 ? 4 : 0;
-      const \u5954\u8DD1\u9891\u7387 = Math.min(68, (19 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 * 0.46 + \u6863\u4F4D\u52A0\u9891) * \u6B65\u9891\u500D\u7387);
+      const \u5954\u8DD1\u9891\u7387 = \u6B63\u5728\u8FD0\u52A8 ? Math.min(68, (19 + \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6 * 0.46 + \u6863\u4F4D\u52A0\u9891) * \u6B65\u9891\u500D\u7387) : 0;
       this.\u5954\u8DD1\u76F8\u4F4D += \u5B89\u5168\u589E\u91CF * \u5954\u8DD1\u9891\u7387;
       switch (this.\u5F53\u524D\u52A8\u4F5C) {
-        case "\u5F85\u673A":
-          if (!\u6B63\u5728\u8FD0\u52A8) {
-            this.\u8EAF\u5E72.position.y = Math.sin(\u65F6\u95F4 * 3) * 0.04;
-            \u6446\u5E45 = 0.1;
-          }
+        case "\u5F85\u673A": {
+          const r = \u73AF\u89C6;
+          this.\u8EAF\u5E72.position.y = r.\u547C\u5438 * 0.025 * k;
+          this.\u8EAF\u5E72.rotation.y = r.\u8F6C\u5934Y * 0.22;
+          this.\u8EAF\u5E72.rotation.x = r.\u62AC\u5934X * 0.05;
+          this.\u8EAF\u5E72.rotation.z = r.\u6B6A\u5934Z * 0.06;
+          \u6446\u5E45 = 0;
+          break;
+        }
+        case "\u884C\u8D70":
+          \u6446\u5E45 = 0.58;
           break;
         case "\u5632\u8BBD": {
           this.\u8EAF\u5E72.position.y = 0.03 + Math.sin(t * 6.2) * 0.04;
@@ -33255,7 +33341,7 @@ void main() {
           \u6446\u5E45 = 0.88;
           break;
         case "\u6025\u505C":
-          this.\u8EAF\u5E72.rotation.x = -Math.exp(-t * 5) * Math.sin(t * 14) * 0.4;
+          this.\u8EAF\u5E72.rotation.x = -0.14 - Math.sin(t * 16) * 0.14;
           this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.z = 0.84;
           this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.y = 0.78;
           this.\u8EAF\u5E72.position.y = 0.02;
@@ -33284,11 +33370,12 @@ void main() {
           \u6446\u5E45 = 1.25;
           break;
         case "\u5931\u63A7": {
-          const \u97072 = Math.exp(-t * 5);
-          this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.y = 0.65 + (1 - \u97072) * 0.35;
-          this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.x = 1.28 - (1 - \u97072) * 0.28;
-          this.\u8EAF\u5E72.rotation.z = Math.sin(t * 32) * \u97072 * 0.62;
-          this.\u8EAF\u5E72.position.y = 0.16 + Math.abs(Math.sin(t * 22)) * 0.34;
+          const \u97072 = 0.72 + 0.28 * Math.sin(t * 10);
+          this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.y = 0.78 + Math.sin(t * 22) * 0.14;
+          this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.x = 1.18 - Math.sin(t * 22) * 0.12;
+          this.\u8EAF\u5E72.rotation.z = Math.sin(t * 24) * \u97072 * 0.48;
+          this.\u8EAF\u5E72.position.y = (0.16 + Math.abs(Math.sin(t * 22)) * 0.34) * k;
+          \u6446\u5E45 = 0;
           break;
         }
         case "\u5E86\u795D": {
@@ -33327,10 +33414,14 @@ void main() {
           break;
         }
         case "\u6B7B\u4EA1": {
-          this.\u8EAF\u5E72.position.y = 0.02 * k;
-          this.\u8EAF\u5E72.rotation.z = 0.28;
-          this.\u8EAF\u5E72.rotation.x = 0.12;
-          this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.set(1.32, 0.56, 1.18);
+          const s = \u6B7B\u6001;
+          this.\u8EAF\u5E72.position.y = (0.32 * s.\u53D7\u51FB\u9707 + 0.02 * s.\u5012\u4E0B + 0.12 * s.\u7838\u5730\u5F39) * k;
+          this.\u8EAF\u5E72.rotation.z = -0.18 * s.\u53D7\u51FB\u9707 + 0.28 * s.\u5012\u4E0B + 0.08 * s.\u62BD\u6410;
+          this.\u8EAF\u5E72.rotation.x = -0.26 * s.\u53D7\u51FB\u9707 + 0.12 * s.\u5012\u4E0B;
+          const \u538B\u6241Y = Math.max(0.46, 1 + 0.14 * s.\u53D7\u51FB\u9707 - 0.44 * s.\u5012\u4E0B - 0.14 * s.\u7838\u5730\u5F39);
+          const \u644A\u5BBDX = 1 - 0.08 * s.\u53D7\u51FB\u9707 + 0.32 * s.\u5012\u4E0B + 0.14 * s.\u7838\u5730\u5F39;
+          const \u644A\u957FZ = 1 + 0.18 * s.\u5012\u4E0B + 0.08 * s.\u7838\u5730\u5F39;
+          this.\u8EAF\u5E72\u8089\u4F53\u7EC4.scale.set(\u644A\u5BBDX, \u538B\u6241Y, \u644A\u957FZ);
           \u6446\u5E45 = 0;
           break;
         }
@@ -33427,10 +33518,12 @@ void main() {
         this.\u8EAF\u5E72.position.x += \u91CD\u521B.\u63A8\u5411 * 0.28 * k * \u91CD\u521B.\u5305\u7EDC;
         this.\u8EAF\u5E72.position.y += \u91CD\u521B.\u5305\u7EDC * 0.24 * k;
       }
-      const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
+      const \u4E2D\u5FC3\u79BB\u5730\u5DEE = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0, 0, \u73AF\u5883);
+      const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68 || \u4E2D\u5FC3\u79BB\u5730\u5DEE < -0.22 * k;
+      const \u80A2\u4F53\u79BB\u5730 = \u662F\u98DE\u5929 || \u662F\u5426\u817E\u7A7A || \u662F\u5931\u63A7 || \u91CD\u521B.\u6FC0\u6D3B && \u91CD\u521B.\u5305\u7EDC > 0.18;
       const \u603B\u4FA7\u503E\u89D2 = this.\u8EAF\u5E72.rotation.z + this.\u8EAF\u5E72\u8089\u4F53\u7EC4.rotation.z;
       const \u4FA7\u503E\u5F27\u5EA6 = Math.abs(\u603B\u4FA7\u503E\u89D2);
-      if (uS < 0.85 && !\u662F\u98DE\u5929 && !\u662F\u5426\u817E\u7A7A) {
+      if (uS < 0.85 && !\u80A2\u4F53\u79BB\u5730) {
         const \u503E\u659C\u4F4E\u4FA7X = \u603B\u4FA7\u503E\u89D2 >= 0 ? -1.15 * k : 1.15 * k;
         const \u4E2D\u5FC3\u5730\u9AD8 = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(this.\u8EAF\u5E72.position.x, this.\u8EAF\u5E72.position.z, \u73AF\u5883);
         const \u4F4E\u4FA7\u5730\u9AD8 = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(this.\u8EAF\u5E72.position.x + \u503E\u659C\u4F4E\u4FA7X, this.\u8EAF\u5E72.position.z, \u73AF\u5883);
@@ -33472,12 +33565,14 @@ void main() {
         const \u6839Y = \u817F.\u57FA\u51C6\u504F\u89D2 + \u817F\u4FA7\u5411 * \u8DF3\u8DC3\u6446\u89D2 - \u4FA7\u504F * 0.16;
         \u817F.\u6839.position.set(\u817F.\u57FA\u51C6X * k, (\u817F.\u662F\u540E\u817F ? 0.44 : 0.42) * k, \u817F.\u57FA\u51C6Z * k);
         const \u817F\u653B\u4FA7 = \u817F.\u57FA\u51C6X * \u653B\u5411 > 0;
-        if (\u662F\u98DE\u5929) {
-          const \u5212\u52A8 = Math.sin(t * 17 + i * 1.65);
-          _\u4E34\u65F6\u6B27\u62C9.set(\u5212\u52A8 * 0.35, \u6839Y, (\u817F.\u662F\u5DE6 ? -0.35 : 0.35) + Math.cos(t * 14 + i) * 0.25, "XYZ");
+        if (\u80A2\u4F53\u79BB\u5730) {
+          const \u6251\u817E\u9891 = \u662F\u5931\u63A7 || \u91CD\u521B.\u6FC0\u6D3B ? 22 : 17;
+          const \u5212\u52A8 = Math.sin(t * \u6251\u817E\u9891 + i * 1.65);
+          const \u7529\u5E45 = \u662F\u5931\u63A7 || \u91CD\u521B.\u6FC0\u6D3B ? 0.44 : 0.35;
+          _\u4E34\u65F6\u6B27\u62C9.set(\u5212\u52A8 * \u7529\u5E45, \u6839Y, (\u817F.\u662F\u5DE6 ? -0.32 : 0.32) + Math.cos(t * (\u6251\u817E\u9891 - 2) + i) * 0.24, "XYZ");
           \u817F.\u6839.quaternion.setFromEuler(_\u4E34\u65F6\u6B27\u62C9);
           \u817F.\u5927\u817F\u9AA8\u8282.quaternion.identity();
-          \u817F.\u5927\u817F.rotation.set(\u5212\u52A8 * 0.42, 0, (\u817F.\u662F\u5DE6 ? -0.25 : 0.25) + Math.cos(t * 15 + i) * 0.32);
+          \u817F.\u5927\u817F.rotation.set(\u5212\u52A8 * 0.4, 0, (\u817F.\u662F\u5DE6 ? -0.22 : 0.22) + Math.cos(t * (\u6251\u817E\u9891 - 1) + i) * 0.28);
         } else if (\u662F\u6363\u4E71) {
           if (\u817F\u653B\u4FA7) {
             const \u524D\u6298 = \u8E39\u76F8.\u62AC\u817F\u5EA6 * (1 - \u8E39\u76F8.\u626D\u80EF\u5EA6 * 0.25);
@@ -33557,17 +33652,17 @@ void main() {
         const \u662F\u524D\u80A2 = !\u817F.\u662F\u540E\u817F;
         const \u7EB5\u5411\u53D7\u529B\u6BD4 = 1 + (\u662F\u524D\u80A2 ? -1 : 1) * Math.max(-0.5, Math.min(0.5, \u7EB5\u5411\u52A0\u901F\u5EA6 / 20));
         const \u6A2A\u5411\u8FC7\u8F7D\u6BD4 = 1 + (\u817F.\u662F\u5DE6 ? -1 : 1) * Math.max(-0.6, Math.min(0.6, \u6A2A\u5411\u8FC7\u8F7D / 15));
-        const \u80A2\u4F53\u603B\u8377\u8F7D = \u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 ? 0 : Math.max(0.1, \u7EB5\u5411\u53D7\u529B\u6BD4 * \u6A2A\u5411\u8FC7\u8F7D\u6BD4);
-        const \u5173\u8282\u7F13\u51B2\u62AC\u5347 = \u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 ? 0 : Math.max(0, Math.min(0.05 * k, (1 - \u80A2\u4F53\u603B\u8377\u8F7D) * 0.04 * k));
+        const \u80A2\u4F53\u603B\u8377\u8F7D = \u80A2\u4F53\u79BB\u5730 ? 0 : Math.max(0.1, \u7EB5\u5411\u53D7\u529B\u6BD4 * \u6A2A\u5411\u8FC7\u8F7D\u6BD4);
+        const \u5173\u8282\u7F13\u51B2\u62AC\u5347 = \u80A2\u4F53\u79BB\u5730 ? 0 : Math.max(0, Math.min(0.05 * k, (1 - \u80A2\u4F53\u603B\u8377\u8F7D) * 0.04 * k));
         const \u5B9E\u9645\u8DBE\u957F = (\u817F.\u662F\u540E\u817F ? 0.8 : 0.46) * k;
         const \u6709\u6548\u811A\u671D\u5411 = \u662F\u6363\u4E71 && \u817F\u653B\u4FA7 ? \u653B\u5411 * (-0.42 * \u8E39\u76F8.\u626D\u80EF\u5EA6 + 0.72 * \u8E39\u76F8.\u8E6C\u817F\u5EA6) : \u817F.\u662F\u540E\u817F ? (1 - uS) * (\u817F.\u662F\u5DE6 ? 0.26 : -0.26) + uS * ((\u817F.\u662F\u5DE6 ? 0.28 : -0.28) + (\u817F.\u662F\u5DE6 ? 0.36 : -0.36) * \u5954\u8DD1\u62AC\u8D77 + \u4FA7\u504F * 0.25) : (1 - uS) * \u6839Y + uS * (\u817F.\u662F\u5DE6 ? 0.52 : -0.52);
         const \u8DF3\u8DC3\u8E7C\u5F2F = \u817F.\u662F\u540E\u817F ? \u817E\u7A7A\u8DC3\u5EA6 * 0.34 * Math.min(1, \u8DF3\u52A8\u5F3A\u5EA6) - (1 - \u817E\u7A7A\u8DC3\u5EA6) * 0.14 * Math.min(1, \u8DF3\u52A8\u5F3A\u5EA6) : \u524D\u722A\u817E\u7A7A * 0.26 * Math.min(1, \u8DF3\u52A8\u5F3A\u5EA6);
         const \u76F4\u7ACB\u8E7C\u5F2F = \u5954\u8DD1\u6B63\u5F26 > 0 ? 0.36 * \u5954\u8DD1\u62AC\u8D77 : -0.18 * \u5954\u8DD1\u8E6C\u5730;
         const \u6446\u81C2\u503C = Math.sin(this.\u5954\u8DD1\u76F8\u4F4D + (\u817F.\u662F\u5DE6 ? Math.PI : 0));
         const \u76F4\u7ACB\u624B\u5F2F = 0.12 - \u6446\u81C2\u503C * 0.32;
-        const \u8E7C\u5F2F\u66F2 = \u662F\u98DE\u5929 ? Math.sin(t * 18 + i) * 0.48 : \u662F\u6363\u4E71 && \u817F\u653B\u4FA7 ? 0.26 * \u8E39\u76F8.\u5C48\u819D\u5EA6 - 0.35 * \u8E39\u76F8.\u8E6C\u817F\u5EA6 : \u817F.\u662F\u540E\u817F ? (1 - uS) * \u8DF3\u8DC3\u8E7C\u5F2F + uS * \u76F4\u7ACB\u8E7C\u5F2F : (1 - uS) * \u8DF3\u8DC3\u8E7C\u5F2F + uS * \u76F4\u7ACB\u624B\u5F2F;
+        const \u8E7C\u5F2F\u66F2 = \u80A2\u4F53\u79BB\u5730 ? Math.sin(t * 18 + i) * 0.48 : \u662F\u6363\u4E71 && \u817F\u653B\u4FA7 ? 0.26 * \u8E39\u76F8.\u5C48\u819D\u5EA6 - 0.35 * \u8E39\u76F8.\u8E6C\u817F\u5EA6 : \u817F.\u662F\u540E\u817F ? (1 - uS) * \u8DF3\u8DC3\u8E7C\u5F2F + uS * \u76F4\u7ACB\u8E7C\u5F2F : (1 - uS) * \u8DF3\u8DC3\u8E7C\u5F2F + uS * \u76F4\u7ACB\u624B\u5F2F;
         if (this.\u6F02\u79FB\u89E6\u70B9\u7EC4[i]) {
-          this.\u6F02\u79FB\u89E6\u70B9\u7EC4[i].\u8D34\u5730 = !\u662F\u98DE\u5929 && !\u662F\u6B7B\u4EA1 && !(\u662F\u590D\u4F4D && \u590D\u76F8 < 0.68) && !(\u662F\u6363\u4E71 && \u817F\u653B\u4FA7) && (\u817F.\u662F\u540E\u817F ? !\u662F\u5426\u817E\u7A7A && !\u662F\u51B2\u7EBF && !\u662F\u541F\u5531 && (uS > 0.35 ? \u5954\u8DD1\u6B63\u5F26 <= -0.2 : \u817E\u7A7A\u8DC3\u5EA6 <= 0.18) : !\u662F\u5426\u817E\u7A7A && !\u662F\u51B2\u7EBF && !\u662F\u541F\u5531 && uS < 0.25 && \u524D\u722A\u817E\u7A7A <= 0.18);
+          this.\u6F02\u79FB\u89E6\u70B9\u7EC4[i].\u8D34\u5730 = !\u80A2\u4F53\u79BB\u5730 && !\u662F\u6B7B\u4EA1 && !(\u662F\u6363\u4E71 && \u817F\u653B\u4FA7) && (\u817F.\u662F\u540E\u817F ? !\u662F\u51B2\u7EBF && !\u662F\u541F\u5531 && (uS > 0.35 ? \u5954\u8DD1\u6B63\u5F26 <= -0.2 : \u817E\u7A7A\u8DC3\u5EA6 <= 0.18) : !\u662F\u51B2\u7EBF && !\u662F\u541F\u5531 && uS < 0.25 && \u524D\u722A\u817E\u7A7A <= 0.18);
         }
         const \u811A\u638C\u5F20\u5F00\u4FA7\u503E = \u662F\u6363\u4E71 && \u817F\u653B\u4FA7 ? \u653B\u5411 * (0.92 * \u8E39\u76F8.\u626D\u80EF\u5EA6 + 0.36 * \u8E39\u76F8.\u8E6C\u817F\u5EA6) : \u817F.\u662F\u540E\u817F ? (\u817F.\u662F\u5DE6 ? 0.46 : -0.46) * \u5954\u8DD1\u62AC\u8D77 * uS : 0;
         const \u6700\u4F4E\u70B9\u8865\u507F = 0.065 * k + Math.max(
@@ -33580,16 +33675,25 @@ void main() {
         let \u76EE\u6807\u811A\u8E1DY;
         let \u76EE\u6807\u811A\u8E1DZ = kz;
         let \u811A\u5E95\u6700\u9AD8\u5730\u9762 = 0;
-        if (\u662F\u98DE\u5929 || \u662F\u5426\u817E\u7A7A) {
-          const \u8E22\u9891 = \u662F\u590D\u4F4D ? 18 : 17;
-          \u76EE\u6807\u811A\u8E1DX = kx + (\u817F.\u57FA\u51C6X > 0 ? 0.34 : -0.34) * k + Math.cos(t * 15 + i * 1.4) * 0.22 * k;
-          \u76EE\u6807\u811A\u8E1DZ = kz + Math.cos(t * 16 + i * 1.6) * 0.44 * k;
-          \u76EE\u6807\u811A\u8E1DY = ky - (\u817F.\u662F\u540E\u817F ? 0.48 : 0.36) * k + Math.sin(t * \u8E22\u9891 + i * 1.5) * 0.28 * k;
-        } else if (\u662F\u6B7B\u4EA1) {
-          \u76EE\u6807\u811A\u8E1DX = kx + (\u817F.\u662F\u5DE6 ? 0.55 : -0.55) * k;
-          \u76EE\u6807\u811A\u8E1DZ = kz + (\u817F.\u662F\u540E\u817F ? -0.42 : 0.38) * k;
+        if (\u80A2\u4F53\u79BB\u5730) {
+          const \u8E22\u9891 = \u662F\u5931\u63A7 || \u91CD\u521B.\u6FC0\u6D3B ? 22 : \u662F\u590D\u4F4D ? 18 : 17;
+          const \u4FA7\u6446 = \u817F.\u662F\u540E\u817F ? 0.22 : 0.16;
+          const \u524D\u540E\u6446 = \u817F.\u662F\u540E\u817F ? 0.24 : 0.18;
+          const \u5782\u843D\u57FA = \u817F.\u662F\u540E\u817F ? 0.54 : 0.36;
+          const \u5782\u6446 = \u817F.\u662F\u540E\u817F ? 0.22 : 0.16;
+          \u76EE\u6807\u811A\u8E1DX = kx + (\u817F.\u57FA\u51C6X > 0 ? \u4FA7\u6446 : -\u4FA7\u6446) * k + Math.cos(t * (\u8E22\u9891 - 2) + i * 1.4) * 0.14 * k;
+          \u76EE\u6807\u811A\u8E1DZ = kz + ((\u817F.\u662F\u540E\u817F ? -0.24 : 0.16) + Math.cos(t * (\u8E22\u9891 - 1) + i * 1.6) * \u524D\u540E\u6446) * k;
+          \u76EE\u6807\u811A\u8E1DY = ky - \u5782\u843D\u57FA * k + Math.sin(t * \u8E22\u9891 + i * 1.5) * \u5782\u6446 * k;
+          if (!\u662F\u5426\u817E\u7A7A && !\u662F\u98DE\u5929) {
+            \u811A\u5E95\u6700\u9AD8\u5730\u9762 = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(\u76EE\u6807\u811A\u8E1DX, \u76EE\u6807\u811A\u8E1DZ, \u73AF\u5883);
+          }
+        } else if (\u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const \u62BD = \u6B7B\u6001.\u62BD\u6410 * (\u817F.\u662F\u540E\u817F ? 0.16 : 0.08);
+          \u76EE\u6807\u811A\u8E1DX = kx + (\u817F.\u662F\u5DE6 ? 0.55 : -0.55) * k * d + (\u817F.\u662F\u5DE6 ? \u62BD : -\u62BD) * k;
+          \u76EE\u6807\u811A\u8E1DZ = kz + ((\u817F.\u662F\u540E\u817F ? -0.42 : 0.38) * d + \u62BD * 0.5) * k;
           \u811A\u5E95\u6700\u9AD8\u5730\u9762 = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(\u76EE\u6807\u811A\u8E1DX, \u76EE\u6807\u811A\u8E1DZ, \u73AF\u5883);
-          \u76EE\u6807\u811A\u8E1DY = \u811A\u5E95\u6700\u9AD8\u5730\u9762 + \u6700\u4F4E\u70B9\u8865\u507F;
+          \u76EE\u6807\u811A\u8E1DY = \u811A\u5E95\u6700\u9AD8\u5730\u9762 + \u6700\u4F4E\u70B9\u8865\u507F + (\u6B7B\u6001.\u53D7\u51FB\u9707 * 0.22 + Math.max(0, \u62BD) * 0.18) * k;
         } else if (\u662F\u666E\u653B) {
           \u76EE\u6807\u811A\u8E1DX = kx;
           \u76EE\u6807\u811A\u8E1DZ = kz + (\u817F.\u662F\u540E\u817F ? -0.25 : 0.52 * \u666E\u653B\u7A81) * k;
@@ -33664,7 +33768,15 @@ void main() {
         _\u4E34\u65F6\u56DB\u5143\u6570.setFromRotationMatrix(_\u4E34\u65F6\u77E9\u9635A);
         _\u4E34\u65F6\u9006\u56DB\u5143\u6570.copy(_\u4E34\u65F6\u56DB\u5143\u6570).invert();
         _\u4E34\u65F6\u5411\u91CF2.set(\u76EE\u6807\u811A\u8E1DX - kx, \u76EE\u6807\u811A\u8E1DY - ky, \u76EE\u6807\u811A\u8E1DZ - kz).applyQuaternion(_\u4E34\u65F6\u9006\u56DB\u5143\u6570);
-        const \u843D\u5DEE\u957F = Math.max(0.14 * k, _\u4E34\u65F6\u5411\u91CF2.length());
+        if (_\u4E34\u65F6\u5411\u91CF2.lengthSq() < 1e-6) {
+          _\u4E34\u65F6\u5411\u91CF2.set(0, -0.14 * k, 0);
+        }
+        const \u539F\u59CB\u843D\u5DEE\u957F = _\u4E34\u65F6\u5411\u91CF2.length();
+        const \u6700\u5927\u5C0F\u817F\u957F = \u662F\u6363\u4E71 && \u817F\u653B\u4FA7 ? \u817F.\u57FA\u51C6\u5C0F\u817F\u957F * (\u817F.\u662F\u540E\u817F ? 1.12 : 1.38) : \u80A2\u4F53\u79BB\u5730 ? (\u817F.\u662F\u540E\u817F ? 1.05 : 0.72) * k : (\u817F.\u662F\u540E\u817F ? 1.16 + 0.54 * uS : 0.82 + 0.26 * uS) * k;
+        if (\u539F\u59CB\u843D\u5DEE\u957F > \u6700\u5927\u5C0F\u817F\u957F) {
+          _\u4E34\u65F6\u5411\u91CF2.multiplyScalar(\u6700\u5927\u5C0F\u817F\u957F / \u539F\u59CB\u843D\u5DEE\u957F);
+        }
+        const \u843D\u5DEE\u957F = Math.max(0.14 * k, Math.min(\u6700\u5927\u5C0F\u817F\u957F, \u539F\u59CB\u843D\u5DEE\u957F));
         \u817F.\u8E7C\u811A.position.copy(_\u4E34\u65F6\u5411\u91CF2);
         \u817F.\u5C0F\u817F.position.copy(_\u4E34\u65F6\u5411\u91CF2).multiplyScalar(0.5);
         _\u4E34\u65F6\u5411\u91CF3.copy(_\u4E34\u65F6\u5411\u91CF2).normalize();
@@ -34165,6 +34277,8 @@ void main() {
       this.\u8EAF\u5E72.scale.set(1, 1, 1);
       this.\u4E0A\u8EAB\u67A2.rotation.set(0, 0, 0);
       this.\u4E0A\u8EAB\u67A2.position.set(0, \u80EF\u9AD8 + 0.21, 0);
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u98DE\u5929 = this.\u5F53\u524D\u52A8\u4F5C === "\u6EDE\u7A7A";
       const \u662F\u5DE6\u6363 = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u653B\u51FB";
       const \u662F\u53F3\u6363 = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
@@ -34180,6 +34294,8 @@ void main() {
       const \u662F\u7B11\u8BDD = this.\u5F53\u524D\u52A8\u4F5C === "\u7B11\u8BDD";
       const \u662F\u8DF3\u821E = this.\u5F53\u524D\u52A8\u4F5C === "\u8DF3\u821E";
       const \u662F\u7B49\u5019 = \u662F\u5632\u8BBD || \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(t, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : t % 1.15 / 1.15 : 0;
       const \u662F\u590D\u4F4D\u98DE = \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u653B\u5411 = \u662F\u5DE6\u6363 ? 1 : \u662F\u53F3\u6363 ? -1 : 0;
@@ -34191,44 +34307,50 @@ void main() {
       const \u666E\u653B\u7A81 = \u662F\u666E\u653B && \u6363\u76F8 >= 0.24 && \u6363\u76F8 <= 0.78 ? Math.sin((\u6363\u76F8 - 0.24) / 0.54 * Math.PI) : 0;
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u6363\u4E71, \u653B\u5411, \u6363\u76F8, 15680580, 16638023, 1.75, 1.32, 0.02);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || \u662F\u8F6C\u5F2F);
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || \u662F\u8F6C\u5F2F);
       const \u60EF\u6027\u6001 = this.\u60EF\u6027.\u66F4\u65B0(\u65F6\u95F4, dt, \u901F\u5EA6, \u8F6C\u5411\u89D2, this.\u5F53\u524D\u52A8\u4F5C, \u73AF\u5883);
-      const \u6709\u6548\u901F = \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8FD0\u52A8 = (\u6709\u6548\u901F > 0.5 || this.\u5F53\u524D\u52A8\u4F5C !== "\u5F85\u673A" && !\u662F\u7B49\u5019 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && this.\u5F53\u524D\u52A8\u4F5C !== "\u7729\u6655") && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
-      const \u6B63\u5728\u8DD1\u52A8 = (\u6709\u6548\u901F > 0.5 || this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || \u662F\u8F6C\u5F2F) && this.\u5F53\u524D\u52A8\u4F5C !== "\u6025\u505C" && !\u662F\u7B49\u5019 && this.\u5F53\u524D\u52A8\u4F5C !== "\u5E86\u795D" && this.\u5F53\u524D\u52A8\u4F5C !== "\u7729\u6655" && this.\u5F53\u524D\u52A8\u4F5C !== "\u5931\u63A7" && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u6709\u6548\u901F = \u662F\u5F85\u673A ? 0 : \u5C55\u793A\u53F0\u8DD1 ? Math.max(\u662F\u884C\u8D70 ? 18 : 26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8FD0\u52A8 = !\u662F\u5F85\u673A && (\u6709\u6548\u901F > 0.5 || !\u662F\u7B49\u5019 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && this.\u5F53\u524D\u52A8\u4F5C !== "\u7729\u6655") && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5F85\u673A && (\u6709\u6548\u901F > 0.5 || \u662F\u884C\u8D70 || this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F" || this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F" || \u662F\u8F6C\u5F2F) && this.\u5F53\u524D\u52A8\u4F5C !== "\u6025\u505C" && !\u662F\u7B49\u5019 && this.\u5F53\u524D\u52A8\u4F5C !== "\u5E86\u795D" && this.\u5F53\u524D\u52A8\u4F5C !== "\u7729\u6655" && this.\u5F53\u524D\u52A8\u4F5C !== "\u5931\u63A7" && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F * 0.72;
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
       const \u52A0\u901F\u4E2D = \u662F\u5927\u55B7 || \u662F\u53CC\u55B7 || \u662F\u5C0F\u55B7;
       const \u55B7\u706B\u6B65\u9891\u500D\u7387 = \u662F\u5927\u55B7 ? 1.95 : \u662F\u53CC\u55B7 ? 1.65 : \u662F\u5C0F\u55B7 ? 1.35 : 1;
-      const \u9891 = \u6B63\u5728\u8FD0\u52A8 ? Math.max(6.2, Math.min(14.5, 6.2 + \u6709\u6548\u901F / 34 * 8)) : 2.5;
+      const \u9891 = \u662F\u884C\u8D70 ? 5.6 : \u6B63\u5728\u8FD0\u52A8 ? Math.max(6.2, Math.min(14.5, 6.2 + \u6709\u6548\u901F / 34 * 8)) : 0;
       const \u5B9E\u9645\u9891 = \u9891 * \u55B7\u706B\u6B65\u9891\u500D\u7387;
       if (\u6B63\u5728\u8DD1\u52A8) {
         this.\u6B65\u6001\u76F8\u4F4D += dt * \u5B9E\u9645\u9891;
       }
-      const \u5B9E\u9645\u76F8\u4F4D = \u6B63\u5728\u8DD1\u52A8 ? this.\u6B65\u6001\u76F8\u4F4D : \u65F6\u95F4 * \u5B9E\u9645\u9891;
+      const \u5B9E\u9645\u76F8\u4F4D = \u6B63\u5728\u8DD1\u52A8 ? this.\u6B65\u6001\u76F8\u4F4D : 0;
       if (this.\u5934\u90E8) {
-        this.\u5934\u90E8.position.x = \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.08 + \u60EF\u6027\u6001.\u6A2A\u9707 * 0.05;
-        this.\u5934\u90E8.rotation.z = -\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.24 - \u60EF\u6027\u6001.\u6A2A\u9707 * 0.16;
+        this.\u5934\u90E8.position.set(\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.08 + \u60EF\u6027\u6001.\u6A2A\u9707 * 0.05, 0.84, 0.05);
+        this.\u5934\u90E8.rotation.set(0, 0, -\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.24 - \u60EF\u6027\u6001.\u6A2A\u9707 * 0.16);
         if (\u6B63\u5728\u8FD0\u52A8) {
-          this.\u5934\u90E8.position.z = 0.05 + Math.sin(\u5B9E\u9645\u76F8\u4F4D * 2) * 0.08 + \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.04;
-          this.\u5934\u90E8.rotation.x = Math.sin(\u5B9E\u9645\u76F8\u4F4D * 2) * 0.12 - \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.14;
+          const \u6643\u5E45 = \u662F\u884C\u8D70 ? 0.025 : 0.08;
+          this.\u5934\u90E8.position.z = 0.05 + Math.sin(\u5B9E\u9645\u76F8\u4F4D * 2) * \u6643\u5E45 + \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.04;
+          this.\u5934\u90E8.rotation.x = Math.sin(\u5B9E\u9645\u76F8\u4F4D * 2) * (\u662F\u884C\u8D70 ? 0.05 : 0.12) - \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.14;
         } else {
-          this.\u5934\u90E8.position.z = 0.05;
           this.\u5934\u90E8.rotation.x = -\u60EF\u6027\u6001.\u7EB5\u62C9 * 0.14;
         }
         if (this.\u5634\u5DF4) {
-          const \u5403\u60CA\u5634 = \u91CD\u521B.\u6FC0\u6D3B ? 1.8 + \u91CD\u521B.\u5305\u7EDC * 2.2 : 1.2 + (\u6B63\u5728\u8FD0\u52A8 ? Math.abs(Math.sin(\u65F6\u95F4 * 16)) * 0.8 : 0);
+          const \u5403\u60CA\u5634 = \u91CD\u521B.\u6FC0\u6D3B ? 1.8 + \u91CD\u521B.\u5305\u7EDC * 2.2 : \u6B7B\u6001 ? 1 + \u6B7B\u6001.\u53D7\u51FB\u9707 * 2 + 0.5 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u884C\u8D70 ? 1.05 : 1 + (\u6B63\u5728\u8FD0\u52A8 ? Math.abs(Math.sin(\u65F6\u95F4 * 16)) * 0.8 : 0);
           this.\u5634\u5DF4.scale.set(\u91CD\u521B.\u6FC0\u6D3B ? 1.35 : 1, \u5403\u60CA\u5634, 1);
         }
       }
       switch (this.\u5F53\u524D\u52A8\u4F5C) {
-        case "\u5F85\u673A":
-          if (!\u6B63\u5728\u8FD0\u52A8) {
-            this.\u8EAF\u5E72.position.y = Math.sin(\u65F6\u95F4 * 2.5) * 0.02;
-            this.\u4E0A\u8EAB\u67A2.rotation.x = 0.06;
-          }
+        case "\u5F85\u673A": {
+          const r = \u73AF\u89C6;
+          this.\u8EAF\u5E72.position.y = r.\u547C\u5438 * 0.014;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = 0.03 + r.\u547C\u5438 * 0.015;
+          this.\u4E0A\u8EAB\u67A2.rotation.y = r.\u8F6C\u5934Y * 0.12;
+          this.\u5934\u90E8.rotation.y = r.\u8F6C\u5934Y * 0.46;
+          this.\u5934\u90E8.rotation.x = r.\u62AC\u5934X * 0.12;
+          this.\u5934\u90E8.rotation.z = r.\u6B6A\u5934Z * 0.1;
+          break;
+        }
+        case "\u884C\u8D70":
           break;
         case "\u5632\u8BBD": {
           this.\u8EAF\u5E72.position.y = 0.03 + Math.sin(t * 6.2) * 0.025;
@@ -34293,7 +34415,7 @@ void main() {
           break;
         case "\u6025\u505C":
           this.\u8EAF\u5E72.rotation.x = -0.12;
-          this.\u4E0A\u8EAB\u67A2.rotation.x = Math.sin(t * 14) * Math.exp(-t * 4) * 0.45 - 0.18;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = Math.sin(t * 14) * 0.16 - 0.18;
           this.\u5934\u90E8.position.z = 0.18;
           this.\u8EAF\u5E72.position.y = -0.12;
           break;
@@ -34306,7 +34428,7 @@ void main() {
         case "\u5927\u52A0\u901F":
           break;
         case "\u5931\u63A7":
-          this.\u8EAF\u5E72.rotation.z = Math.sin(t * 30) * Math.exp(-t * 5) * 0.65;
+          this.\u8EAF\u5E72.rotation.z = Math.sin(t * 22) * 0.42;
           this.\u5934\u90E8.position.y = 0.84 + Math.sin(t * 22) * 0.22;
           this.\u8EAF\u5E72.position.y = 0.22;
           break;
@@ -34339,12 +34461,19 @@ void main() {
           this.\u4E0A\u8EAB\u67A2.rotation.x = -0.14 * \u666E\u653B\u84C4 + 0.42 * \u666E\u653B\u7A81;
           this.\u5934\u90E8.rotation.y = 0.38 * \u666E\u653B\u84C4 - 0.28 * \u666E\u653B\u7A81;
           break;
-        case "\u6B7B\u4EA1":
-          this.\u8EAF\u5E72.rotation.set(-1.42, 0.1, 0.12);
-          this.\u8EAF\u5E72.position.y = 0.18;
-          this.\u4E0A\u8EAB\u67A2.rotation.x = -0.1;
-          this.\u5934\u90E8.rotation.set(0.22, 0.38, 0.34);
+        case "\u6B7B\u4EA1": {
+          const s = \u6B7B\u6001;
+          this.\u8EAF\u5E72.rotation.set(
+            -0.28 * s.\u53D7\u51FB\u9707 - 1.42 * s.\u5012\u4E0B + 0.12 * s.\u7838\u5730\u5F39,
+            0.1 * s.\u5012\u4E0B,
+            0.12 * s.\u5012\u4E0B + 0.06 * s.\u62BD\u6410
+          );
+          this.\u8EAF\u5E72.position.y = 0.12 * s.\u53D7\u51FB\u9707 + 0.18 * s.\u5012\u4E0B + 0.14 * s.\u7838\u5730\u5F39;
+          this.\u8EAF\u5E72.position.z = -0.35 * s.\u5012\u4E0B;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = -0.26 * s.\u53D7\u51FB\u9707 - 0.1 * s.\u5012\u4E0B + 0.18 * s.\u7838\u5730\u5F39;
+          this.\u5934\u90E8.rotation.set(-0.35 * s.\u53D7\u51FB\u9707 + 0.22 * s.\u5012\u4E0B, 0.38 * s.\u5012\u4E0B, 0.34 * s.\u5012\u4E0B + 0.12 * s.\u62BD\u6410);
           break;
+        }
         case "\u541F\u5531":
           this.\u8EAF\u5E72.position.y = 0.04 + Math.sin(t * 2.8) * 0.03;
           this.\u4E0A\u8EAB\u67A2.rotation.x = -0.18 + Math.sin(t * 2.4) * 0.06;
@@ -34381,18 +34510,29 @@ void main() {
         }
       }
       if (\u6B63\u5728\u8DD1\u52A8) {
-        const \u817E\u7A7A\u6CE2 = Math.pow(Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.12)), 0.78);
-        const \u6EDE\u7A7A\u9AD8 = \u662F\u5927\u55B7 ? 0.28 : \u662F\u53CC\u55B7 ? 0.24 : \u662F\u5C0F\u55B7 ? 0.21 : Math.min(0.2, 0.15 + \u6709\u6548\u901F / 45 * 0.05);
-        this.\u8EAF\u5E72.position.y += -0.03 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8;
-        this.\u8EAF\u5E72.rotation.x = \u662F\u5927\u55B7 ? 0.16 : \u662F\u53CC\u55B7 ? 0.14 : \u662F\u5C0F\u55B7 ? 0.11 : 0.08;
-        const \u57FA\u7840\u524D\u503E = 0.24 + \u6709\u6548\u901F / 60 * 0.08;
-        const \u51B2\u523A\u524D\u503E = \u662F\u5927\u55B7 ? 0.56 : \u662F\u53CC\u55B7 ? 0.46 : \u662F\u5C0F\u55B7 ? 0.36 : \u57FA\u7840\u524D\u503E;
-        this.\u4E0A\u8EAB\u67A2.rotation.x = \u51B2\u523A\u524D\u503E;
-        if (!\u662F\u8F6C\u5F2F) {
-          this.\u8EAF\u5E72.rotation.y = Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.04 : 0.08);
-        }
-        if (this.\u5934\u90E8) {
-          this.\u5934\u90E8.rotation.x = -(this.\u4E0A\u8EAB\u67A2.rotation.x * 0.58) + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.1;
+        if (\u662F\u884C\u8D70) {
+          const \u6B65\u8D77 = Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D)) * 0.055;
+          this.\u8EAF\u5E72.position.y += \u6B65\u8D77 - 0.015;
+          this.\u8EAF\u5E72.rotation.x = 0.04;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = 0.07;
+          this.\u8EAF\u5E72.rotation.y = Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * 0.07;
+          if (this.\u5934\u90E8) {
+            this.\u5934\u90E8.rotation.x = -0.04 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.04;
+          }
+        } else {
+          const \u817E\u7A7A\u6CE2 = Math.pow(Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.12)), 0.78);
+          const \u6EDE\u7A7A\u9AD8 = \u662F\u5927\u55B7 ? 0.28 : \u662F\u53CC\u55B7 ? 0.24 : \u662F\u5C0F\u55B7 ? 0.21 : Math.min(0.2, 0.15 + \u6709\u6548\u901F / 45 * 0.05);
+          this.\u8EAF\u5E72.position.y += -0.03 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8;
+          this.\u8EAF\u5E72.rotation.x = \u662F\u5927\u55B7 ? 0.16 : \u662F\u53CC\u55B7 ? 0.14 : \u662F\u5C0F\u55B7 ? 0.11 : 0.08;
+          const \u57FA\u7840\u524D\u503E = 0.24 + \u6709\u6548\u901F / 60 * 0.08;
+          const \u51B2\u523A\u524D\u503E = \u662F\u5927\u55B7 ? 0.56 : \u662F\u53CC\u55B7 ? 0.46 : \u662F\u5C0F\u55B7 ? 0.36 : \u57FA\u7840\u524D\u503E;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = \u51B2\u523A\u524D\u503E;
+          if (!\u662F\u8F6C\u5F2F) {
+            this.\u8EAF\u5E72.rotation.y = Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.04 : 0.08);
+          }
+          if (this.\u5934\u90E8) {
+            this.\u5934\u90E8.rotation.x = -(this.\u4E0A\u8EAB\u67A2.rotation.x * 0.58) + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.1;
+          }
         }
       }
       if (!\u662F\u7B49\u5019 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
@@ -34438,11 +34578,13 @@ void main() {
         this.\u80A9\u53F3.rotation.set(-1.35 * \u91CD\u521B.\u5305\u7EDC, 0, 0.95 + \u91CD\u521B.\u9707\u6CE2 * 0.45);
         this.\u8098\u5DE6.rotation.set(-0.35, 0, 0);
         this.\u8098\u53F3.rotation.set(-0.35, 0, 0);
-      } else if (\u662F\u6B7B\u4EA1) {
-        this.\u80A9\u5DE6.rotation.set(0.18, 0.25, -1.12);
-        this.\u80A9\u53F3.rotation.set(0.24, -0.25, 1.08);
-        this.\u8098\u5DE6.rotation.set(-0.22, 0, 0);
-        this.\u8098\u53F3.rotation.set(-0.28, 0, 0);
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const \u60CA = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        this.\u80A9\u5DE6.rotation.set(-1.15 * \u60CA + 0.18 * d, 0.25 * d, -0.14 - 0.98 * d - 0.35 * \u60CA - 0.12 * \u6B7B\u6001.\u62BD\u6410);
+        this.\u80A9\u53F3.rotation.set(-1.15 * \u60CA + 0.24 * d, -0.25 * d, 0.14 + 0.94 * d + 0.35 * \u60CA + 0.12 * \u6B7B\u6001.\u62BD\u6410);
+        this.\u8098\u5DE6.rotation.set(-0.22 - 0.35 * \u60CA, 0, 0);
+        this.\u8098\u53F3.rotation.set(-0.28 - 0.35 * \u60CA, 0, 0);
       } else if (\u662F\u541F\u5531) {
         const \u5492\u6446 = Math.sin(t * 3.4) * 0.16;
         this.\u80A9\u5DE6.rotation.set(-2.65 + \u5492\u6446, 0.22, -0.36);
@@ -34487,19 +34629,26 @@ void main() {
         this.\u80A9\u53F3.rotation.set(-Math.sin(t * 26) * 0.85, 0, 0.45);
         this.\u8098\u5DE6.rotation.set(-1.25 + Math.sin(t * 18) * 0.4, 0, 0);
         this.\u8098\u53F3.rotation.set(-1.25 + Math.cos(t * 18) * 0.4, 0, 0);
+      } else if (\u662F\u5F85\u673A) {
+        const r = \u73AF\u89C6;
+        this.\u80A9\u5DE6.rotation.set(0.05 + r.\u547C\u5438 * 0.03, 0.06, -0.14 - r.\u547C\u5438 * 0.02);
+        this.\u80A9\u53F3.rotation.set(0.05 + r.\u547C\u5438 * 0.03, -0.06, 0.14 + r.\u547C\u5438 * 0.02);
+        this.\u8098\u5DE6.rotation.set(-0.28, 0, 0);
+        this.\u8098\u53F3.rotation.set(-0.28, 0, 0);
       } else if (!\u662F\u7B49\u5019) {
-        const \u57FA\u7840\u6446\u81C2 = \u6B63\u5728\u8FD0\u52A8 ? Math.max(0.75, Math.min(1.15, 0.8 + \u6709\u6548\u901F / 45 * 0.35)) : 0.2;
+        const \u57FA\u7840\u6446\u81C2 = \u662F\u884C\u8D70 ? 0.46 : \u6B63\u5728\u8FD0\u52A8 ? Math.max(0.75, Math.min(1.15, 0.8 + \u6709\u6548\u901F / 45 * 0.35)) : 0.12;
         const \u6446\u81C2\u5E45\u5EA6 = \u662F\u5927\u55B7 ? 1.55 : \u662F\u53CC\u55B7 ? 1.35 : \u662F\u5C0F\u55B7 ? 1.15 : \u57FA\u7840\u6446\u81C2;
-        const \u6446\u81C2\u5DE6 = -Math.sin(\u5B9E\u9645\u76F8\u4F4D) * \u6446\u81C2\u5E45\u5EA6 - 0.14;
-        const \u6446\u81C2\u53F3 = Math.sin(\u5B9E\u9645\u76F8\u4F4D) * \u6446\u81C2\u5E45\u5EA6 - 0.14;
+        const \u6446\u81C2\u5DE6 = -Math.sin(\u5B9E\u9645\u76F8\u4F4D) * \u6446\u81C2\u5E45\u5EA6 - (\u662F\u884C\u8D70 ? 0.04 : 0.14);
+        const \u6446\u81C2\u53F3 = Math.sin(\u5B9E\u9645\u76F8\u4F4D) * \u6446\u81C2\u5E45\u5EA6 - (\u662F\u884C\u8D70 ? 0.04 : 0.14);
         this.\u80A9\u5DE6.rotation.x = \u6446\u81C2\u5DE6;
         this.\u80A9\u53F3.rotation.x = \u6446\u81C2\u53F3;
-        this.\u80A9\u5DE6.rotation.z = -0.18 - \u4FA7\u504F * 0.22 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.16;
-        this.\u80A9\u53F3.rotation.z = 0.18 - \u4FA7\u504F * 0.22 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.16;
-        this.\u80A9\u5DE6.rotation.y = 0.12;
-        this.\u80A9\u53F3.rotation.y = -0.12;
-        this.\u8098\u5DE6.rotation.x = -1.45 - Math.sin(\u5B9E\u9645\u76F8\u4F4D) * 0.2;
-        this.\u8098\u53F3.rotation.x = -1.45 + Math.sin(\u5B9E\u9645\u76F8\u4F4D) * 0.2;
+        this.\u80A9\u5DE6.rotation.z = -0.16 - \u4FA7\u504F * 0.22 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.16;
+        this.\u80A9\u53F3.rotation.z = 0.16 - \u4FA7\u504F * 0.22 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.16;
+        this.\u80A9\u5DE6.rotation.y = 0.08;
+        this.\u80A9\u53F3.rotation.y = -0.08;
+        const \u8098\u5F2F = \u662F\u884C\u8D70 ? -0.42 : -1.45;
+        this.\u8098\u5DE6.rotation.x = \u8098\u5F2F - Math.sin(\u5B9E\u9645\u76F8\u4F4D) * (\u662F\u884C\u8D70 ? 0.16 : 0.2);
+        this.\u8098\u53F3.rotation.x = \u8098\u5F2F + Math.sin(\u5B9E\u9645\u76F8\u4F4D) * (\u662F\u884C\u8D70 ? 0.16 : 0.2);
         this.\u8098\u5DE6.rotation.y = 0;
         this.\u8098\u53F3.rotation.y = 0;
         this.\u8098\u5DE6.rotation.z = 0;
@@ -34522,10 +34671,12 @@ void main() {
           \u819D\u76D6.rotation.set(0.22, 0, 0);
           \u978B.rotation.x = -(\u8EAF\u5E72\u4FEF\u4EF0 + \u817F\u6839.rotation.x + \u819D\u76D6.rotation.x) - 0.18;
           \u978B.rotation.z = -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z);
-        } else if (\u662F\u6B7B\u4EA1) {
-          \u817F\u6839.rotation.set(-0.14, 0, \u7B26\u53F7 * 0.24);
-          \u819D\u76D6.rotation.set(0.24, 0, 0);
-          \u978B.rotation.set(0.35, 0, 0);
+        } else if (\u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const \u62BD = \u6B7B\u6001.\u62BD\u6410 * (\u7B26\u53F7 < 0 ? 0.18 : -0.12);
+          \u817F\u6839.rotation.set(-0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.14 * d + \u62BD, 0, \u7B26\u53F7 * (0.04 + 0.2 * d));
+          \u819D\u76D6.rotation.set(0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.24 * d + Math.max(0, \u62BD) * 0.8, 0, 0);
+          \u978B.rotation.set(0.35 * d, 0, 0);
         } else if (\u662F\u541F\u5531) {
           \u817F\u6839.rotation.set(-0.08, 0, \u7B26\u53F7 * 0.12);
           \u819D\u76D6.rotation.set(0.16, 0, 0);
@@ -34587,9 +34738,18 @@ void main() {
           \u978B.rotation.z = -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z);
         } else if (!\u662F\u7B49\u5019) {
           if (!\u6B63\u5728\u8FD0\u52A8) {
-            \u817F\u6839.rotation.set(-0.06, 0, \u7B26\u53F7 * 0.04);
-            \u819D\u76D6.rotation.set(0.12, 0, 0);
+            \u817F\u6839.rotation.set(-0.04, 0, \u7B26\u53F7 * 0.04);
+            \u819D\u76D6.rotation.set(0.08, 0, 0);
             \u978B.rotation.set(-(\u8EAF\u5E72\u4FEF\u4EF0 + \u817F\u6839.rotation.x + \u819D\u76D6.rotation.x), 0, -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z));
+          } else if (\u662F\u884C\u8D70) {
+            const s = Math.sin(\u5355\u817F\u76F8\u4F4D);
+            const c = Math.cos(\u5355\u817F\u76F8\u4F4D);
+            const \u5927\u817F\u89D2 = -s * 0.44;
+            const \u5C48\u819D = 0.1 + Math.max(0, c) * 0.56 + Math.max(0, -s) * 0.14;
+            const \u811A\u8E1D\u89D2 = -(\u8EAF\u5E72\u4FEF\u4EF0 + \u5927\u817F\u89D2 + \u5C48\u819D) * 0.65 + (c > 0 ? -0.14 * c : 0.12 * -c);
+            \u817F\u6839.rotation.set(\u5927\u817F\u89D2, 0, \u7B26\u53F7 * 0.04);
+            \u819D\u76D6.rotation.set(\u5C48\u819D, 0, 0);
+            \u978B.rotation.set(\u811A\u8E1D\u89D2, 0, -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z));
           } else {
             const \u5E45\u500D = Math.max(0.84, Math.min(1.12, (this.\u53C2\u6570.\u5954\u8DD1\u5E45\u5EA6 || 1.1) / 1.1));
             const \u524D\u6446\u9AD8 = (\u662F\u5927\u55B7 ? 1.54 : \u662F\u53CC\u55B7 ? 1.5 : \u662F\u5C0F\u55B7 ? 1.46 : Math.min(1.44, 1.32 + \u6709\u6548\u901F / 45 * 0.12)) * \u5E45\u500D;
@@ -35350,6 +35510,8 @@ void main() {
       const \u79BB\u5FC3 = \u60EF\u6027\u6001.\u79BB\u5FC3\u7529;
       const \u9707 = \u60EF\u6027\u6001.\u6A2A\u9707;
       const \u6709\u6548\u901F = \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -35373,6 +35535,8 @@ void main() {
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6 + dt, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       let \u653B\u84C4\u529B = 0;
       let \u653B\u51FA\u51FB = 0;
@@ -35389,17 +35553,23 @@ void main() {
       const \u666E\u653B\u7A81 = \u662F\u666E\u653B && \u6363\u76F801 >= 0.24 && \u6363\u76F801 <= 0.78 ? Math.sin((\u6363\u76F801 - 0.24) / 0.54 * Math.PI) : 0;
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u6363\u76F801, 14251782, 3718648, 1.72, 1.05, 0.08);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
-      const \u9A71\u52A8\u901F = \u5C55\u793A\u53F0\u8DD1 ? Math.max(24, \u6709\u6548\u901F) : \u6709\u6548\u901F;
-      const \u6B63\u5728\u8DD1\u52A8 = (\u9A71\u52A8\u901F > 0.45 || \u52A0\u901F\u4E2D || \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E || \u662F\u98DE\u5929) && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u666E\u653B;
-      const \u6B65\u9891 = \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E ? 16 : \u662F\u98DE\u5929 ? 16 : 4.2 + \u9A71\u52A8\u901F / 12 * 10.5;
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
+      const \u9A71\u52A8\u901F = \u662F\u5F85\u673A ? 0 : \u5C55\u793A\u53F0\u8DD1 ? Math.max(\u662F\u884C\u8D70 ? 16 : 24, \u6709\u6548\u901F) : \u6709\u6548\u901F;
+      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5F85\u673A && (\u662F\u884C\u8D70 || \u9A71\u52A8\u901F > 0.45 || \u52A0\u901F\u4E2D || \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E || \u662F\u98DE\u5929) && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u666E\u653B;
+      const \u6B65\u9891 = \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E ? 16 : \u662F\u98DE\u5929 ? 16 : \u662F\u884C\u8D70 ? 10.5 : 4.2 + \u9A71\u52A8\u901F / 12 * 10.5;
       if (\u6B63\u5728\u8DD1\u52A8) {
         this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
       }
       const \u51B2\u7EBF\u8DC3 = \u662F\u51B2\u7EBF ? Math.abs(Math.sin(\u65F6\u95F4 * 5.2)) : 0;
       const \u51B2\u7EBF\u5F39 = \u662F\u51B2\u7EBF ? Math.pow(\u51B2\u7EBF\u8DC3, 0.72) : 0;
       const \u60AC\u7A7A\u9AD8 = \u662F\u98DE\u5929 ? Math.max(0.75, \u73AF\u5883?.\u98DE\u884C\u9AD8\u5EA6 ?? 1.05) + Math.sin(\u65F6\u95F4 * 5.2) * 0.14 : 0;
-      if (\u662F\u5632\u8BBD) {
+      if (\u662F\u5F85\u673A) {
+        const r = \u73AF\u89C6;
+        this.\u7BB1\u4F53\u7EC4.position.y = r.\u547C\u5438 * 0.022;
+        this.\u7BB1\u4F53\u7EC4.rotation.y = r.\u8F6C\u5934Y * 0.24;
+        this.\u7BB1\u4F53\u7EC4.rotation.z = r.\u6B6A\u5934Z * 0.05;
+        this.\u7BB1\u4F53\u7EC4.rotation.x = r.\u62AC\u5934X * 0.04;
+      } else if (\u662F\u5632\u8BBD) {
         this.\u7BB1\u4F53\u7EC4.position.y = 0.03 + Math.sin(this.\u52A8\u4F5C\u8BA1\u65F6 * 8) * 0.04;
         this.\u7BB1\u4F53\u7EC4.rotation.y = Math.sin(this.\u52A8\u4F5C\u8BA1\u65F6 * 4) * 0.28;
         this.\u7BB1\u4F53\u7EC4.rotation.x = -0.1;
@@ -35416,10 +35586,19 @@ void main() {
         this.\u7BB1\u4F53\u7EC4.position.y = -0.06 * \u666E\u653B\u84C4 + 0.2 * \u666E\u653B\u7A81;
         this.\u7BB1\u4F53\u7EC4.rotation.x = -0.26 * \u666E\u653B\u84C4 + 0.34 * \u666E\u653B\u7A81;
         this.\u7BB1\u4F53\u7EC4.scale.set(1 + 0.1 * \u666E\u653B\u84C4, 1 - 0.12 * \u666E\u653B\u84C4 + 0.12 * \u666E\u653B\u7A81, 1 + 0.16 * \u666E\u653B\u7A81);
-      } else if (\u662F\u6B7B\u4EA1) {
-        this.\u7BB1\u4F53\u7EC4.position.y = -0.22;
-        this.\u7BB1\u4F53\u7EC4.rotation.set(0.08, 0.1, 0.16);
-        this.\u7BB1\u4F53\u7EC4.scale.set(1.22, 0.56, 1.16);
+      } else if (\u6B7B\u6001) {
+        const s = \u6B7B\u6001;
+        this.\u7BB1\u4F53\u7EC4.position.y = 0.24 * s.\u53D7\u51FB\u9707 - 0.22 * s.\u5012\u4E0B + 0.09 * s.\u7838\u5730\u5F39;
+        this.\u7BB1\u4F53\u7EC4.rotation.set(
+          -0.18 * s.\u53D7\u51FB\u9707 + 0.08 * s.\u5012\u4E0B,
+          0.1 * s.\u5012\u4E0B,
+          0.16 * s.\u5012\u4E0B + 0.07 * s.\u62BD\u6410
+        );
+        this.\u7BB1\u4F53\u7EC4.scale.set(
+          1 + 0.22 * s.\u5012\u4E0B + 0.12 * s.\u7838\u5730\u5F39,
+          Math.max(0.46, 1 + 0.12 * s.\u53D7\u51FB\u9707 - 0.44 * s.\u5012\u4E0B - 0.12 * s.\u7838\u5730\u5F39),
+          1 + 0.16 * s.\u5012\u4E0B + 0.08 * s.\u7838\u5730\u5F39
+        );
       } else if (\u662F\u541F\u5531) {
         this.\u7BB1\u4F53\u7EC4.position.y = 0.24 + Math.sin(this.\u52A8\u4F5C\u8BA1\u65F6 * 3.2) * 0.08;
         this.\u7BB1\u4F53\u7EC4.rotation.y = Math.sin(this.\u52A8\u4F5C\u8BA1\u65F6 * 1.8) * 0.18;
@@ -35475,8 +35654,8 @@ void main() {
         this.\u7BB1\u4F53\u7EC4.rotation.y = Math.sin(\u65F6\u95F4 * 4.4) * 0.62;
         this.\u7BB1\u4F53\u7EC4.rotation.z = Math.sin(\u65F6\u95F4 * 5.2) * 0.2;
       } else if (\u6B63\u5728\u8DD1\u52A8) {
-        this.\u7BB1\u4F53\u7EC4.position.y = Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2)) * 0.055;
-        this.\u7BB1\u4F53\u7EC4.rotation.z = Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * 0.045;
+        this.\u7BB1\u4F53\u7EC4.position.y = Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2)) * (\u662F\u884C\u8D70 ? 0.038 : 0.055);
+        this.\u7BB1\u4F53\u7EC4.rotation.z = Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u884C\u8D70 ? 0.032 : 0.045);
       } else {
         this.\u7BB1\u4F53\u7EC4.position.y = Math.sin(\u65F6\u95F4 * 2.5) * 0.022;
       }
@@ -35522,13 +35701,13 @@ void main() {
       }
       const \u98CE\u62CD = \u6B63\u5728\u8DD1\u52A8 ? Math.sin(\u65F6\u95F4 * (12 + Math.min(24, \u9A71\u52A8\u901F * 0.55))) * (0.12 + Math.min(0.28, \u9A71\u52A8\u901F * 8e-3)) : Math.sin(\u65F6\u95F4 * 2.5) * 0.03;
       const \u6B22\u547C\u6247 = \u662F\u51B2\u7EBF ? Math.sin(\u65F6\u95F4 * 16.5) * 0.56 : \u662F\u98DE\u5929 ? Math.sin(\u65F6\u95F4 * 18) * 0.48 : \u662F\u541F\u5531 ? Math.sin(\u65F6\u95F4 * 3.5) * 0.22 : 0;
-      const \u76D6\u9707\u5F00 = \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u5305\u7EDC * 0.92 + Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.24 : \u662F\u6B7B\u4EA1 ? 1.15 : 0;
+      const \u76D6\u9707\u5F00 = \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u5305\u7EDC * 0.92 + Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.24 : \u6B7B\u6001 ? 0.45 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 1.15 * \u6B7B\u6001.\u5012\u4E0B + 0.22 * \u6B7B\u6001.\u7838\u5730\u5F39 : 0;
       this.\u524D\u76D6\u67A2.rotation.x = -0.82 - \u98CE\u62CD * 0.55 - \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.25 - (\u662F\u51B2\u7EBF || \u662F\u98DE\u5929 || \u662F\u541F\u5531 ? 0.35 + \u6B22\u547C\u6247 : 0) - (\u662F\u666E\u653B ? 0.85 * \u666E\u653B\u7A81 : 0) - \u76D6\u9707\u5F00;
       this.\u540E\u76D6\u67A2.rotation.x = 0.58 + \u98CE\u62CD * 0.85 + (\u52A0\u901F\u4E2D ? 0.35 : 0) + (\u662F\u51B2\u7EBF || \u662F\u98DE\u5929 || \u662F\u541F\u5531 ? 0.48 + \u6B22\u547C\u6247 : 0) + \u76D6\u9707\u5F00;
       this.\u5DE6\u76D6\u67A2.rotation.z = 0.42 + \u98CE\u62CD * 0.9 + \u79BB\u5FC3 * 0.22 + (\u662F\u51B2\u7EBF || \u662F\u98DE\u5929 || \u662F\u541F\u5531 ? 0.52 + Math.cos(\u65F6\u95F4 * 16.5) * 0.52 : 0) + (\u662F\u53F3\u653B ? \u653B\u51FA\u51FB * 0.75 : 0) + \u76D6\u9707\u5F00;
       this.\u53F3\u76D6\u67A2.rotation.z = -0.46 - Math.cos(\u65F6\u95F4 * 14) * (\u6B63\u5728\u8DD1\u52A8 ? 0.18 : 0.03) + \u79BB\u5FC3 * 0.22 - (\u662F\u51B2\u7EBF || \u662F\u98DE\u5929 || \u662F\u541F\u5531 ? 0.52 + Math.cos(\u65F6\u95F4 * 16.5) * 0.52 : 0) - (\u662F\u5DE6\u653B ? \u653B\u51FA\u51FB * 0.75 : 0) - \u76D6\u9707\u5F00;
       const \u7BB1\u9AD8\u57FA = this.\u53C2\u6570.\u7EB8\u7BB1\u9AD8\u5EA6 || 1.08;
-      this.\u7BB1\u5185\u7EB8\u5806.position.y = 0.66 + \u7BB1\u9AD8\u57FA * 0.66 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u5305\u7EDC * 0.58 : \u662F\u541F\u5531 ? 0.38 + Math.sin(\u65F6\u95F4 * 3.6) * 0.18 : \u662F\u666E\u653B ? 0.28 * \u666E\u653B\u7A81 : \u662F\u51B2\u7EBF || \u662F\u653B\u51FB ? 0.12 + Math.abs(Math.sin(\u65F6\u95F4 * 18)) * 0.16 : \u52A0\u901F\u4E2D || \u662F\u98DE\u5929 ? 0.05 + Math.abs(Math.sin(\u65F6\u95F4 * 24)) * 0.09 : Math.sin(\u65F6\u95F4 * 6) * 0.02);
+      this.\u7BB1\u5185\u7EB8\u5806.position.y = 0.66 + \u7BB1\u9AD8\u57FA * 0.66 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u5305\u7EDC * 0.58 : \u6B7B\u6001 ? \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.35 + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.15 : \u662F\u541F\u5531 ? 0.38 + Math.sin(\u65F6\u95F4 * 3.6) * 0.18 : \u662F\u666E\u653B ? 0.28 * \u666E\u653B\u7A81 : \u662F\u51B2\u7EBF || \u662F\u653B\u51FB ? 0.12 + Math.abs(Math.sin(\u65F6\u95F4 * 18)) * 0.16 : \u52A0\u901F\u4E2D || \u662F\u98DE\u5929 ? 0.05 + Math.abs(Math.sin(\u65F6\u95F4 * 24)) * 0.09 : Math.sin(\u65F6\u95F4 * 3) * 0.01);
       this.\u7BB1\u5185\u7EB8\u5806.rotation.x = \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.42 : \u662F\u51B2\u7EBF || \u662F\u653B\u51FB || \u662F\u666E\u653B ? Math.sin(\u65F6\u95F4 * 15) * 0.14 : \u52A0\u901F\u4E2D ? Math.sin(\u65F6\u95F4 * 19) * 0.06 : 0;
       this.\u7BB1\u5185\u7EB8\u5806.rotation.z = \u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.38 * \u91CD\u521B.\u5305\u7EDC : \u662F\u51B2\u7EBF || \u662F\u653B\u51FB ? Math.cos(\u65F6\u95F4 * 14) * 0.14 : \u52A0\u901F\u4E2D ? Math.cos(\u65F6\u95F4 * 17) * 0.06 : 0;
       this.\u7BB1\u4F53\u7EC4.updateMatrix();
@@ -35570,11 +35749,13 @@ void main() {
           \u62AC\u9AD8Y = Math.max(0.18, \u60AC\u7A7A\u9AD8 - 0.18 + Math.sin(\u65F6\u95F4 * 18 + \u817F.\u76F8\u4F4D * 1.5) * 0.24);
           \u8DBE\u4FEF\u4EF0 = Math.sin(\u65F6\u95F4 * 18 + \u817F.\u76F8\u4F4D) * 0.45;
           \u8E29\u5730\u4E2D = false;
-        } else if (\u662F\u6B7B\u4EA1) {
-          \u51B2\u7EBF\u5916\u8E22X = (\u817F.\u662F\u5DE6 ? -1 : 1) * 0.42;
-          \u524D\u540E\u504FZ = (idx - 2.5) * 0.08;
-          \u62AC\u9AD8Y = 0;
-          \u8E29\u5730\u4E2D = true;
+        } else if (\u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const \u62BD = \u6B7B\u6001.\u62BD\u6410 * ((idx % 2 === 0 ? 1 : -1) * 0.12);
+          \u51B2\u7EBF\u5916\u8E22X = (\u817F.\u662F\u5DE6 ? -1 : 1) * (0.42 * d + \u62BD * 0.5);
+          \u524D\u540E\u504FZ = (idx - 2.5) * 0.08 * d;
+          \u62AC\u9AD8Y = Math.max(0, 0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + \u62BD);
+          \u8E29\u5730\u4E2D = \u62AC\u9AD8Y < 0.03;
         } else if (\u662F\u541F\u5531) {
           const \u6D6E\u811A = idx < 2;
           \u524D\u540E\u504FZ = \u6D6E\u811A ? 0.36 : 0;
@@ -36336,6 +36517,8 @@ void main() {
       const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F;
       const \u79BB\u5FC3 = \u60EF\u6027\u6001.\u79BB\u5FC3\u7529;
       const \u9707 = \u60EF\u6027\u6001.\u6A2A\u9707;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -36362,6 +36545,8 @@ void main() {
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       this.\u52A8\u4F5C\u8BA1\u65F6 += dt;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
       const \u6363\u76F801 = \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72;
       let \u653B\u84C4\u529B = 0;
       let \u653B\u51FA\u51FB = 0;
@@ -36376,33 +36561,33 @@ void main() {
       }
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u6363\u76F801, 2278750, 12513892, 2.35, 2.05, 0.04);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
-      const \u6709\u6548\u901F = \u5C55\u793A\u53F0\u8DD1 ? Math.max(24, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
-      const \u55B7\u5439\u5EA6 = Math.min(1.25, (\u662F\u5927\u55B7 ? 1 : \u662F\u53CC\u55B7 ? 0.74 : \u662F\u5C0F\u55B7 ? 0.5 : 0) + Math.min(0.45, \u6709\u6548\u901F / 58));
-      if (this.\u5F53\u524D\u52A8\u4F5C !== "\u6025\u505C" && !\u662F\u6253\u6655 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
+      const \u6709\u6548\u901F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? Math.max(\u662F\u884C\u8D70 ? 18 : 24, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u55B7\u5439\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : Math.min(1.25, (\u662F\u5927\u55B7 ? 1 : \u662F\u53CC\u55B7 ? 0.74 : \u662F\u5C0F\u55B7 ? 0.5 : 0) + Math.min(0.45, \u6709\u6548\u901F / 58));
+      if (this.\u5F53\u524D\u52A8\u4F5C !== "\u6025\u505C" && !\u662F\u5F85\u673A && !\u662F\u6253\u6655 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
         this.\u6EDA\u8F6E\u89D2 += dt * (Math.max(0, \u6709\u6548\u901F) / 0.135) * (\u52A0\u901F\u4E2D ? 1.35 : 1);
       }
       for (const \u8F6E of this.\u6EDA\u8F6E\u5217\u8868) {
         \u8F6E.rotation.x = this.\u6EDA\u8F6E\u89D2;
       }
-      const \u8F6C\u5411\u6865\u504F = \u4FA7\u504F * 0.34;
+      const \u8F6C\u5411\u6865\u504F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u4FA7\u504F * 0.34;
       this.\u524D\u6865\u67A2.rotation.y = \u8F6C\u5411\u6865\u504F;
       this.\u540E\u6865\u67A2.rotation.y = -\u8F6C\u5411\u6865\u504F * 0.55;
       if (this.\u7709\u5DE6 && this.\u7709\u53F3) {
-        const \u6012\u89D2 = \u91CD\u521B.\u6FC0\u6D3B || \u662F\u6253\u6655 || \u662F\u6B7B\u4EA1 ? -0.65 : \u52A0\u901F\u4E2D || \u662F\u653B\u51FB || \u662F\u666E\u653B || \u662F\u5632\u8BBD ? 0.48 : this.\u5F53\u524D\u52A8\u4F5C === "\u6025\u505C" ? -0.36 : 0.2;
+        const \u6012\u89D2 = \u6B7B\u6001 ? 0.2 + -0.85 * \u6B7B\u6001.\u5012\u4E0B - 0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u91CD\u521B.\u6FC0\u6D3B || \u662F\u6253\u6655 ? -0.65 : \u52A0\u901F\u4E2D || \u662F\u653B\u51FB || \u662F\u666E\u653B || \u662F\u5632\u8BBD ? 0.48 : this.\u5F53\u524D\u52A8\u4F5C === "\u6025\u505C" ? -0.36 : 0.2;
         this.\u7709\u5DE6.rotation.z = -\u6012\u89D2;
         this.\u7709\u53F3.rotation.z = \u6012\u89D2;
       }
-      const \u7784X = \u4FA7\u504F * 0.032 + \u653B\u5411 * (\u653B\u51FA\u51FB * 0.05 - \u653B\u84C4\u529B * 0.03);
-      const \u98A4Y = \u52A0\u901F\u4E2D ? Math.sin(\u65F6\u95F4 * 42) * 0.014 : \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.04 : 0;
-      const \u8C46\u7F29 = \u662F\u6B7B\u4EA1 ? 0.25 : \u91CD\u521B.\u6FC0\u6D3B ? 1.38 : \u52A0\u901F\u4E2D ? 1.18 : 1;
+      const \u7784X = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.036 : \u6B7B\u6001 ? 0 : \u4FA7\u504F * 0.032 + \u653B\u5411 * (\u653B\u51FA\u51FB * 0.05 - \u653B\u84C4\u529B * 0.03);
+      const \u98A4Y = \u6B7B\u6001 ? \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.03 : \u52A0\u901F\u4E2D ? Math.sin(\u65F6\u95F4 * 42) * 0.014 : \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.04 : 0;
+      const \u8C46\u7F29 = \u6B7B\u6001 ? Math.max(0.22, 1 + 0.32 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.78 * \u6B7B\u6001.\u5012\u4E0B) : \u91CD\u521B.\u6FC0\u6D3B ? 1.38 : \u52A0\u901F\u4E2D ? 1.18 : 1;
       this.\u5DE6\u773C\u7EC4.position.set(\u7C97 * 0.44 + \u7784X, 0.96 + \u98A4Y, \u7C97 * 0.88);
       this.\u53F3\u773C\u7EC4.position.set(-\u7C97 * 0.44 + \u7784X, 0.96 - \u98A4Y, \u7C97 * 0.88);
       this.\u5DE6\u773C\u7EC4.scale.set(\u91CD\u521B.\u6FC0\u6D3B ? 1.25 : 1, \u8C46\u7F29, 1);
       this.\u53F3\u773C\u7EC4.scale.set(\u91CD\u521B.\u6FC0\u6D3B ? 0.78 : 1, \u8C46\u7F29 * (\u91CD\u521B.\u6FC0\u6D3B ? 1.18 : 1), 1);
       if (this.\u83DC\u724C) {
-        this.\u83DC\u724C.rotation.z = \u662F\u6B7B\u4EA1 ? -0.4 : Math.sin(\u65F6\u95F4 * (8 + \u6709\u6548\u901F * 0.5)) * 0.28 + \u4FA7\u504F * 0.32 - \u79BB\u5FC3 * 0.48 - \u9707 * 0.25 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u5305\u7EDC * 2.4 : 0);
-        this.\u83DC\u724C.rotation.x = -0.12 - Math.min(0.55, \u6709\u6548\u901F * 0.012);
+        this.\u83DC\u724C.rotation.z = \u6B7B\u6001 ? -0.4 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.55 + \u6B7B\u6001.\u62BD\u6410 * 0.14 : \u73AF\u89C6 ? Math.sin(\u65F6\u95F4 * 2.2) * 0.045 + \u73AF\u89C6.\u8F6C\u5934Y * 0.05 : Math.sin(\u65F6\u95F4 * (8 + \u6709\u6548\u901F * 0.5)) * 0.28 + \u4FA7\u504F * 0.32 - \u79BB\u5FC3 * 0.48 - \u9707 * 0.25 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u5305\u7EDC * 2.4 : 0);
+        this.\u83DC\u724C.rotation.x = \u6B7B\u6001 ? -0.12 * (1 - \u6B7B\u6001.\u5012\u4E0B) : \u73AF\u89C6 ? -0.06 : -0.12 - Math.min(0.55, \u6709\u6548\u901F * 0.012);
       }
       const \u6F02\u89D2 = \u73AF\u5883?.\u6F02\u79FB\u4FA7\u6ED1\u89D2 || 0;
       const \u6F14\u793A\u6F02 = !\u73AF\u5883 && \u662F\u8F6C\u5F2F ? \u4FA7\u504F * 0.45 : 0;
@@ -36425,11 +36610,21 @@ void main() {
         this.\u6ED1\u677F\u7EC4.rotation.y = \u62CD * 0.42;
         this.\u8471\u8EAB.rotation.z = \u62CD * 0.24;
         this.\u8471\u8EAB.rotation.y = -\u62CD * 0.2;
-      } else if (\u662F\u6B7B\u4EA1) {
-        this.\u6ED1\u677F\u7EC4.position.set(0, 0.42, 0);
-        this.\u6ED1\u677F\u7EC4.rotation.set(0.14, 0.25, 1.42);
-        this.\u8471\u8EAB.rotation.z = -0.18;
-        this.\u8471\u8EAB.scale.set(1.06, 0.9, 1.06);
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u6ED1\u677F\u7EC4.position.set(
+          -0.16 * \u6B7B\u6001.\u53D7\u51FB\u9707,
+          0.42 * d + 0.18 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.12 * \u6B7B\u6001.\u7838\u5730\u5F39,
+          -0.1 * \u6B7B\u6001.\u53D7\u51FB\u9707
+        );
+        this.\u6ED1\u677F\u7EC4.rotation.set(
+          -0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.14 * d,
+          0.25 * d,
+          -0.24 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 1.42 * d - 0.1 * \u6B7B\u6001.\u7838\u5730\u5F39 + 0.04 * \u6B7B\u6001.\u62BD\u6410
+        );
+        this.\u8471\u8EAB.rotation.set(-0.28 * \u6B7B\u6001.\u53D7\u51FB\u9707, 0, -0.18 * d + 0.06 * \u6B7B\u6001.\u62BD\u6410);
+        const \u6241 = 0.1 * d + 0.08 * \u6B7B\u6001.\u7838\u5730\u5F39;
+        this.\u8471\u8EAB.scale.set(1 + \u6241 * 0.6, 1 - \u6241, 1 + \u6241 * 0.6);
       } else if (\u662F\u541F\u5531) {
         this.\u6ED1\u677F\u7EC4.position.y = 0.26 + Math.sin(\u65F6\u95F4 * 3) * 0.08;
         this.\u6ED1\u677F\u7EC4.rotation.z = Math.sin(\u65F6\u95F4 * 2.1) * 0.08;
@@ -36485,6 +36680,17 @@ void main() {
         this.\u6ED1\u677F\u7EC4.rotation.x = Math.sin(\u65F6\u95F4 * 5.2) * 0.28;
         this.\u6ED1\u677F\u7EC4.rotation.y = Math.sin(\u65F6\u95F4 * 4.2) * 0.85;
         this.\u8471\u8EAB.rotation.y = Math.cos(\u65F6\u95F4 * 6.5) * 0.32;
+      } else if (\u73AF\u89C6) {
+        this.\u8471\u8EAB.rotation.set(\u73AF\u89C6.\u62AC\u5934X * 0.32, \u73AF\u89C6.\u8F6C\u5934Y * 0.52, \u73AF\u89C6.\u6B6A\u5934Z * 0.32);
+        this.\u8471\u8EAB.scale.set(1 + \u73AF\u89C6.\u547C\u5438 * 0.025, 1 - \u73AF\u89C6.\u547C\u5438 * 0.022, 1 + \u73AF\u89C6.\u547C\u5438 * 0.025);
+      } else if (\u662F\u884C\u8D70) {
+        const \u5DE1\u6446 = Math.sin(\u65F6\u95F4 * 3.8);
+        const \u503E\u89D2 = -\u4FA7\u504F * 0.2 + \u5DE1\u6446 * 0.065;
+        this.\u6ED1\u677F\u7EC4.rotation.z = \u503E\u89D2;
+        this.\u6ED1\u677F\u7EC4.rotation.y = \u4FA7\u504F * 0.12 + \u5DE1\u6446 * 0.04;
+        this.\u8471\u8EAB.rotation.x = 0.06 + Math.abs(\u5DE1\u6446) * 0.025;
+        this.\u8471\u8EAB.rotation.z = \u503E\u89D2 * 0.35;
+        this.\u8471\u8EAB.scale.set(1.02, 0.96, 1.01);
       } else {
         const \u503E\u89D2 = -\u4FA7\u504F * 0.28 - \u603B\u6F02 * 0.36 + \u79BB\u5FC3 * 0.16;
         this.\u6ED1\u677F\u7EC4.rotation.z = Math.max(-0.36, Math.min(0.36, \u503E\u89D2));
@@ -36503,15 +36709,19 @@ void main() {
         this.\u8471\u8EAB.scale.set(1 + \u91CD\u521B.\u6241\u538B * 0.34, Math.max(0.56, 1 - \u91CD\u521B.\u6241\u538B * 0.42), 1 + \u91CD\u521B.\u6241\u538B * 0.26);
         this.\u8471\u8EAB.rotation.z += -\u91CD\u521B.\u63A8\u5411 * 0.48 * \u91CD\u521B.\u5305\u7EDC;
       }
-      const \u817F\u8E72\u5EA6 = \u52A0\u901F\u4E2D ? 0.22 : Math.abs(\u603B\u6F02) > 0.1 ? 0.18 : 0.05;
+      const \u817F\u8E72\u5EA6 = \u6B7B\u6001 ? 0.05 * (1 - \u6B7B\u6001.\u5012\u4E0B) : \u73AF\u89C6 ? 0.02 : \u662F\u884C\u8D70 ? 0.08 : \u52A0\u901F\u4E2D ? 0.22 : Math.abs(\u603B\u6F02) > 0.1 ? 0.18 : 0.05;
       this.\u5DE6\u817F\u67A2.scale.set(1, 1 - \u817F\u8E72\u5EA6, 1);
       this.\u53F3\u817F\u67A2.scale.set(1, 1 - \u817F\u8E72\u5EA6, 1);
-      if (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u653B\u51FB) {
+      if (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u653B\u51FB && !\u662F\u6B7B\u4EA1) {
         this.\u5DE6\u81C2\u67A2.rotation.set(0, 0, 1.15 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.4);
         this.\u53F3\u81C2\u67A2.rotation.set(0, 0, -1.15 * \u91CD\u521B.\u5305\u7EDC - \u91CD\u521B.\u9707\u6CE2 * 0.4);
-      } else if (\u662F\u6B7B\u4EA1) {
-        this.\u5DE6\u81C2\u67A2.rotation.set(0.3, 0.4, 0.9);
-        this.\u53F3\u81C2\u67A2.rotation.set(-0.2, -0.4, -0.9);
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u5DE6\u81C2\u67A2.rotation.set(0.3 * d, 0.4 * d, -0.22 * (1 - d) + 0.9 * d + 0.85 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.16 * \u6B7B\u6001.\u62BD\u6410);
+        this.\u53F3\u81C2\u67A2.rotation.set(-0.2 * d, -0.4 * d, 0.22 * (1 - d) - 0.9 * d - 0.85 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.16 * \u6B7B\u6001.\u62BD\u6410);
+      } else if (\u73AF\u89C6) {
+        this.\u5DE6\u81C2\u67A2.rotation.set(0, \u73AF\u89C6.\u8F6C\u5934Y * 0.12, -0.34 + \u73AF\u89C6.\u547C\u5438 * 0.06);
+        this.\u53F3\u81C2\u67A2.rotation.set(0, \u73AF\u89C6.\u8F6C\u5934Y * 0.12, 0.34 - \u73AF\u89C6.\u547C\u5438 * 0.06);
       } else if (\u662F\u541F\u5531) {
         const \u6447 = Math.sin(\u65F6\u95F4 * 3.5) * 0.16;
         this.\u5DE6\u81C2\u67A2.rotation.set(-0.2, 0.15, 1.18 + \u6447);
@@ -36529,7 +36739,7 @@ void main() {
         this.\u5DE6\u81C2\u67A2.rotation.set(0, \u653B\u5411 * 0.35 * \u653B\u51FA\u51FB, 0.45 * \u653B\u84C4\u529B - 0.55 * \u653B\u51FA\u51FB);
         this.\u53F3\u81C2\u67A2.rotation.set(0, \u653B\u5411 * 0.35 * \u653B\u51FA\u51FB, -0.45 * \u653B\u84C4\u529B + 0.55 * \u653B\u51FA\u51FB);
       } else {
-        const \u5E73\u8861\u6446 = \u4FA7\u504F * 0.55 + Math.sin(\u65F6\u95F4 * 5.2) * 0.14;
+        const \u5E73\u8861\u6446 = \u4FA7\u504F * 0.55 + Math.sin(\u65F6\u95F4 * (\u662F\u884C\u8D70 ? 3.8 : 5.2)) * (\u662F\u884C\u8D70 ? 0.12 : 0.14);
         this.\u5DE6\u81C2\u67A2.rotation.set(0, \u55B7\u5439\u5EA6 * 0.35, -0.22 + \u5E73\u8861\u6446);
         this.\u53F3\u81C2\u67A2.rotation.set(0, -\u55B7\u5439\u5EA6 * 0.35, 0.22 + \u5E73\u8861\u6446);
       }
@@ -36562,20 +36772,31 @@ void main() {
           \u53F6.\u4E2D\u8282.rotation.set(0.18, 0, 0);
           \u53F6.\u68A2\u8282.rotation.set(0.16, 0, 0);
         });
-      } else if (\u662F\u6B7B\u4EA1) {
-        this.\u53F6\u53D1\u6839.rotation.set(0.08, 0, -0.22);
-        this.\u53F6\u53D1\u6839.scale.set(1, 0.86, 1);
-        this.\u5C3E\u53F6\u7FA4.forEach((\u53F6) => {
-          \u53F6.\u57FA\u7EC4.rotation.set(\u53F6.\u57FA\u51C6XRot * 0.4, \u53F6.\u504FY, \u53F6.\u57FA\u51C6ZRot * 0.3 - 0.1);
-          \u53F6.\u4E2D\u8282.rotation.set(0.08, 0, -0.06);
-          \u53F6.\u68A2\u8282.rotation.set(0.06, 0, -0.05);
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u53F6\u53D1\u6839.rotation.set(-0.32 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.08 * d, 0, -0.22 * d + 0.14 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.08 * \u6B7B\u6001.\u62BD\u6410);
+        this.\u53F6\u53D1\u6839.scale.set(1, 1 - 0.14 * d, 1);
+        this.\u5C3E\u53F6\u7FA4.forEach((\u53F6, i) => {
+          const \u9707\u6563 = Math.sin(i * 1.9) * 0.24 * \u6B7B\u6001.\u53D7\u51FB\u9707;
+          \u53F6.\u57FA\u7EC4.rotation.set(\u53F6.\u57FA\u51C6XRot * (1 - 0.6 * d) + \u9707\u6563, \u53F6.\u504FY, \u53F6.\u57FA\u51C6ZRot * (1 - 0.7 * d) - 0.1 * d + 0.05 * \u6B7B\u6001.\u62BD\u6410);
+          \u53F6.\u4E2D\u8282.rotation.set(0.08 * d, 0, -0.06 * d);
+          \u53F6.\u68A2\u8282.rotation.set((i === 4 ? -0.64 * (1 - d) : 0) + 0.06 * d, 0, (i === 4 ? 0.26 * (1 - d) : 0) - 0.05 * d);
+        });
+      } else if (\u73AF\u89C6) {
+        this.\u53F6\u53D1\u6839.rotation.set(-0.02 + \u73AF\u89C6.\u547C\u5438 * 0.03, 0, -\u73AF\u89C6.\u8F6C\u5934Y * 0.12 + \u73AF\u89C6.\u6B6A\u5934Z * 0.18);
+        this.\u53F6\u53D1\u6839.scale.set(1, 1 + \u73AF\u89C6.\u547C\u5438 * 0.02, 1);
+        this.\u5C3E\u53F6\u7FA4.forEach((\u53F6, i) => {
+          const \u67D4\u6CE2 = Math.sin(\u65F6\u95F4 * 2.2 - \u53F6.\u76F8\u4F4D) * 0.03;
+          \u53F6.\u57FA\u7EC4.rotation.set(\u53F6.\u57FA\u51C6XRot + \u67D4\u6CE2, \u53F6.\u504FY, \u53F6.\u57FA\u51C6ZRot);
+          \u53F6.\u4E2D\u8282.rotation.set(Math.sin(\u65F6\u95F4 * 2.2 - \u53F6.\u76F8\u4F4D - 0.6) * 0.025, 0, \u53F6.\u57FA\u51C6ZRot * 0.3);
+          \u53F6.\u68A2\u8282.rotation.set(i === 4 ? -0.66 + \u67D4\u6CE2 : \u53F6.\u57FA\u51C6XRot * 0.25 + \u67D4\u6CE2, 0, i === 4 ? 0.26 : \u53F6.\u57FA\u51C6ZRot * 0.22);
         });
       } else {
         const \u540E\u98D8\u503E\u89D2 = -(0.04 + Math.min(1.02, \u55B7\u5439\u5EA6 * 0.78 + Math.min(0.24, \u6709\u6548\u901F / 95)));
         const \u79BB\u5FC3\u4FA7\u7529 = \u79BB\u5FC3 * 0.24 - \u4FA7\u504F * 0.16 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.48 * \u91CD\u521B.\u5305\u7EDC : 0);
         this.\u53F6\u53D1\u6839.rotation.set(\u540E\u98D8\u503E\u89D2, 0, Math.max(-0.56, Math.min(0.56, \u79BB\u5FC3\u4FA7\u7529)));
         this.\u53F6\u53D1\u6839.scale.set(1, 1 + \u55B7\u5439\u5EA6 * 0.26, 1);
-        const \u6296\u9891 = 8.5 + \u6709\u6548\u901F * 0.42 + \u55B7\u5439\u5EA6 * 12;
+        const \u6296\u9891 = \u662F\u884C\u8D70 ? 6.5 : 8.5 + \u6709\u6548\u901F * 0.42 + \u55B7\u5439\u5EA6 * 12;
         this.\u5C3E\u53F6\u7FA4.forEach((\u53F6, i) => {
           const \u6D6A = Math.sin(\u65F6\u95F4 * \u6296\u9891 - \u53F6.\u76F8\u4F4D);
           const \u6251\u817E = \u662F\u98DE\u5929 ? Math.sin(\u65F6\u95F4 * 20 + i) * 0.32 : 0;
@@ -36632,7 +36853,7 @@ void main() {
           g.mesh.visible = false;
         }
       }
-      const \u9AD8\u901F = \u901F\u5EA6 > 12 || \u52A0\u901F\u4E2D;
+      const \u9AD8\u901F = !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 && !\u662F\u6B7B\u4EA1 && (\u6709\u6548\u901F > 22 || \u52A0\u901F\u4E2D);
       const \u91C7\u6837\u95F4\u9694 = \u662F\u5927\u55B7 ? 0.018 : \u662F\u53CC\u55B7 ? 0.025 : 0.036;
       if (\u9AD8\u901F) {
         this.\u6B8B\u5F71\u91C7\u6837\u8BA1\u65F6 += dt;
@@ -37147,6 +37368,8 @@ void main() {
         this.\u8F6C\u5411\u65F6\u95F4\u5386\u53F2[this.\u5386\u53F2\u5934\u6307\u9488] = this.\u7D2F\u65F6;
       }
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -37169,13 +37392,15 @@ void main() {
       const \u662F\u6253\u6655 = this.\u5F53\u524D\u52A8\u4F5C === "\u7729\u6655";
       const \u662F\u5931\u63A7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5931\u63A7";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
-      const \u57FA\u7840\u6CE2\u901F = \u6709\u6548\u901F\u5EA6 > 0.25 ? 4.2 + Math.min(\u6709\u6548\u901F\u5EA6, 90) * 0.45 : 2.7;
-      const \u52A8\u4F5C\u6CE2\u500D\u7387 = \u662F\u5927\u55B7 ? 1.38 : \u662F\u53CC\u55B7 ? 1.24 : \u662F\u5C0F\u55B7 ? 1.12 : \u662F\u7B49\u5019 ? 1.15 : \u662F\u6B7B\u4EA1 ? 0 : 1;
+      const \u57FA\u7840\u6CE2\u901F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u884C\u8D70 ? 5.8 : \u6709\u6548\u901F\u5EA6 > 0.25 ? 4.2 + Math.min(\u6709\u6548\u901F\u5EA6, 90) * 0.45 : 2.7;
+      const \u52A8\u4F5C\u6CE2\u500D\u7387 = \u662F\u5927\u55B7 ? 1.38 : \u662F\u53CC\u55B7 ? 1.24 : \u662F\u5C0F\u55B7 ? 1.12 : \u662F\u7B49\u5019 ? 1.15 : \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : 1;
       const \u5B9E\u9645\u6CE2\u901F = Math.min(48, \u57FA\u7840\u6CE2\u901F * \u52A8\u4F5C\u6CE2\u500D\u7387);
       this.\u6CE2\u76F8 += \u5B89\u5168\u589E\u91CF * \u5B9E\u9645\u6CE2\u901F;
       const TAU = Math.PI * 2;
-      const p = \u662F\u6B7B\u4EA1 ? 0 : (this.\u6CE2\u76F8 % TAU + TAU) % TAU / TAU;
+      const p = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : (this.\u6CE2\u76F8 % TAU + TAU) % TAU / TAU;
       this.\u52A8\u4F5C\u8BA1\u65F6 += \u5B89\u5168\u589E\u91CF;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
       const \u662F\u5426\u817E\u7A7A\u6700\u7EC8 = \u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u6363\u76F801 = \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72;
@@ -37192,11 +37417,11 @@ void main() {
       }
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(\u5B89\u5168\u589E\u91CF);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u6363\u76F801, 16707722, 10741301, 1.48, 0.58, 0.14);
-      const \u79FB\u52A8\u4E2D = (\u6709\u6548\u901F\u5EA6 > 0.5 || \u52A0\u901F\u4E2D || \u662F\u98DE\u5929) && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
-      let \u8FD0\u52A8\u5F3A\u5EA6 = \u79FB\u52A8\u4E2D ? 1 : 0.14;
-      let \u62F1\u80CC\u5E45\u5EA6 = (\u79FB\u52A8\u4E2D ? \u662F\u5927\u55B7 ? 1.22 : \u662F\u53CC\u55B7 ? 1.1 : 0.98 : 0.04) * \u6536\u7F29\u5E45;
-      let \u626D\u8170\u5E45 = \u79FB\u52A8\u4E2D ? 0.09 : 0.012;
-      let \u62AC\u5934\u89D2 = Math.abs(\u4FA7\u504F) * 0.16;
+      const \u79FB\u52A8\u4E2D = (\u662F\u884C\u8D70 || \u6709\u6548\u901F\u5EA6 > 0.5 || \u52A0\u901F\u4E2D || \u662F\u98DE\u5929) && !\u662F\u5F85\u673A && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      let \u8FD0\u52A8\u5F3A\u5EA6 = \u662F\u884C\u8D70 ? 0.82 : \u79FB\u52A8\u4E2D ? 1 : 0;
+      let \u62F1\u80CC\u5E45\u5EA6 = (\u662F\u884C\u8D70 ? 0.78 : \u79FB\u52A8\u4E2D ? \u662F\u5927\u55B7 ? 1.22 : \u662F\u53CC\u55B7 ? 1.1 : 0.98 : 0) * \u6536\u7F29\u5E45;
+      let \u626D\u8170\u5E45 = \u662F\u884C\u8D70 ? 0.06 : \u79FB\u52A8\u4E2D ? 0.09 : 0;
+      let \u62AC\u5934\u89D2 = \u73AF\u89C6 ? 0.24 + \u73AF\u89C6.\u62AC\u5934X * 0.3 : Math.abs(\u4FA7\u504F) * 0.16;
       let \u52A8\u4F5C\u65F6\u95F4 = \u65F6\u95F4;
       const \u60AC\u7A7A\u57FA\u51C6\u9AD8 = \u662F\u98DE\u5929 ? Math.max(0.75, \u73AF\u5883?.\u98DE\u884C\u9AD8\u5EA6 ?? 0.98) + Math.sin(\u65F6\u95F4 * 4.8) * 0.14 : 0;
       if (\u662F\u5632\u8BBD) {
@@ -37300,9 +37525,9 @@ void main() {
         ]);
         \u5C3E\u538B\u6241 = Math.exp(-Math.pow((p - 0.54) / 0.09, 2)) * 1.15 + (p >= 0.56 && p <= 0.86 ? 0.55 : 0);
         \u5934\u538B\u6241 = Math.exp(-Math.pow((p - 0.96) / 0.08, 2)) * 1.15 + Math.exp(-Math.pow((p - 0.04) / 0.08, 2)) * 0.9 + (p >= 0 && p <= 0.44 ? 0.55 : 0);
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u5C3E\u538B\u6241 = 1.05;
-        \u5934\u538B\u6241 = 1.05;
+      } else if (\u6B7B\u6001) {
+        \u5C3E\u538B\u6241 = 0.35 + 0.75 * \u6B7B\u6001.\u5012\u4E0B + 0.25 * \u6B7B\u6001.\u7838\u5730\u5F39;
+        \u5934\u538B\u6241 = 0.35 + 0.75 * \u6B7B\u6001.\u5012\u4E0B + 0.25 * \u6B7B\u6001.\u7838\u5730\u5F39;
       } else {
         \u5C3E\u538B\u6241 = 0.35;
         \u5934\u538B\u6241 = 0.35;
@@ -37313,7 +37538,7 @@ void main() {
         const node = this.\u810A\u67F1\u8282\u70B9[i];
         const u = node.u;
         const \u5C40\u90E8\u6CE2\u76F8 = this.\u6CE2\u76F8 - u * 2.95;
-        const \u7C98\u6EDE\u8089\u6D6A = \u662F\u6B7B\u4EA1 ? 0 : Math.tanh(2.1 * Math.sin(\u5C40\u90E8\u6CE2\u76F8)) * 0.74 + 0.26 * Math.sin(\u5C40\u90E8\u6CE2\u76F8 * 2 - 0.55);
+        const \u7C98\u6EDE\u8089\u6D6A = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.tanh(2.1 * Math.sin(\u5C40\u90E8\u6CE2\u76F8)) * 0.74 + 0.26 * Math.sin(\u5C40\u90E8\u6CE2\u76F8 * 2 - 0.55);
         const \u60EF\u6027\u7EB5\u6324\u504F\u79FB = -\u7EB5\u62C9 * 0.065 * Math.sin(u * Math.PI);
         const \u6CE2\u5CF0\u805A\u62E2\u504F\u79FB = (0.056 * \u8FD0\u52A8\u5F3A\u5EA6 * \u6536\u7F29\u5E45 * \u7C98\u6EDE\u8089\u6D6A + \u60EF\u6027\u7EB5\u6324\u504F\u79FB) * Math.sin(u * Math.PI);
         const uEff = Math.max(0, Math.min(1, u + \u6CE2\u5CF0\u805A\u62E2\u504F\u79FB));
@@ -37326,6 +37551,9 @@ void main() {
         const \u524D\u6BB5\u6BD4 = Math.max(0, 1 - u * (\u662F\u541F\u5531 ? 1.55 : 2.15));
         const \u62AC\u5934\u62AC\u5347 = \u62AC\u5934\u89D2 > 0 ? Math.pow(\u524D\u6BB5\u6BD4, \u662F\u541F\u5531 ? 1.18 : 1.38) * \u62AC\u5934\u89D2 * 1.15 : 0;
         const \u51B2\u7EBF\u7FD8\u5C41\u80A1 = \u662F\u51B2\u7EBF && u > 0.58 ? Math.pow((u - 0.58) / 0.42, 1.45) * (0.64 + Math.sin(\u65F6\u95F4 * 14) * 0.14) : 0;
+        const \u6B7B\u60CA\u62F1\u9AD8 = \u6B7B\u6001 ? Math.sin(u * Math.PI) * (0.58 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.16 * \u6B7B\u6001.\u7838\u5730\u5F39) + Math.max(0, 1 - u * 2.4) * 0.24 * \u6B7B\u6001.\u53D7\u51FB\u9707 + Math.sin(u * Math.PI) * 0.05 * Math.abs(\u6B7B\u6001.\u62BD\u6410) : 0;
+        const \u6B7B\u60CA\u7529X = \u6B7B\u6001 ? Math.sin(u * Math.PI * 1.6) * 0.46 * \u6B7B\u6001.\u53D7\u51FB\u9707 + Math.sin(u * Math.PI) * 0.22 * \u6B7B\u6001.\u5012\u4E0B + Math.cos(u * Math.PI * 2) * 0.09 * \u6B7B\u6001.\u62BD\u6410 : 0;
+        const \u5F85\u673A\u73AF\u89C6X = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.42 * Math.pow(Math.max(0, 1 - u * 2.4), 1.45) : 0;
         let \u590D\u4F4D\u9AD8 = 0;
         let \u590D\u4F4D\u6A2AX = 0;
         if (\u662F\u590D\u4F4D) {
@@ -37347,21 +37575,21 @@ void main() {
             \u590D\u4F4D\u9AD8 = Math.sin(Math.max(0, 1 - Math.abs(u - r) * 3) * Math.PI) * 0.36;
           }
         }
-        const \u86C7\u8EAB\u5F2F\u5F27 = \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u63A8\u5411 * (Math.sin(u * Math.PI) * 1.38 - 0.45 * Math.cos(u * Math.PI * 2)) * \u91CD\u521B.\u5305\u7EDC + Math.sin(u * Math.PI * 3 + \u91CD\u521B.\u8FDB\u5EA6 * 26) * 0.28 * \u91CD\u521B.\u5305\u7EDC : 0;
-        const \u53D7\u51FB\u62F1\u8D77 = \u91CD\u521B.\u6FC0\u6D3B ? Math.sin(u * Math.PI) * 0.42 * \u91CD\u521B.\u5305\u7EDC : 0;
-        node.\u9AA8\u6865\u9AD8 = \u9AA8\u6865\u9AD8 + \u524D\u63A8\u6E05\u64E6 + \u62AC\u5934\u62AC\u5347 + \u51B2\u7EBF\u7FD8\u5C41\u80A1 + \u590D\u4F4D\u9AD8 + \u53D7\u51FB\u62F1\u8D77;
-        const \u524D\u6BB5\u8F6C\u5411 = this.\u91C7\u6837\u6EDE\u540E\u8F6C\u5411(u * \u5934\u5C3E\u603B\u5EF6\u8FDF * 0.35);
-        const \u5C3E\u6BB5\u8F6C\u5411 = this.\u91C7\u6837\u6EDE\u540E\u8F6C\u5411(\u5934\u5C3E\u603B\u5EF6\u8FDF * (0.42 + 0.58 * u));
+        const \u86C7\u8EAB\u5F2F\u5F27 = \u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? \u91CD\u521B.\u63A8\u5411 * (Math.sin(u * Math.PI) * 1.38 - 0.45 * Math.cos(u * Math.PI * 2)) * \u91CD\u521B.\u5305\u7EDC + Math.sin(u * Math.PI * 3 + \u91CD\u521B.\u8FDB\u5EA6 * 26) * 0.28 * \u91CD\u521B.\u5305\u7EDC : 0;
+        const \u53D7\u51FB\u62F1\u8D77 = \u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? Math.sin(u * Math.PI) * 0.42 * \u91CD\u521B.\u5305\u7EDC : 0;
+        node.\u9AA8\u6865\u9AD8 = \u9AA8\u6865\u9AD8 + \u524D\u63A8\u6E05\u64E6 + \u62AC\u5934\u62AC\u5347 + \u51B2\u7EBF\u7FD8\u5C41\u80A1 + \u590D\u4F4D\u9AD8 + \u53D7\u51FB\u62F1\u8D77 + \u6B7B\u60CA\u62F1\u9AD8;
+        const \u524D\u6BB5\u8F6C\u5411 = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : this.\u91C7\u6837\u6EDE\u540E\u8F6C\u5411(u * \u5934\u5C3E\u603B\u5EF6\u8FDF * 0.35);
+        const \u5C3E\u6BB5\u8F6C\u5411 = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : this.\u91C7\u6837\u6EDE\u540E\u8F6C\u5411(\u5934\u5C3E\u603B\u5EF6\u8FDF * (0.42 + 0.58 * u));
         const \u8111\u888B\u5185\u6446 = \u524D\u6BB5\u8F6C\u5411 * 1.04 * Math.pow(Math.max(0, 1 - u * 1.32), 1.3);
         const \u5C3E\u5DF4\u57FA\u7529 = -\u5C3E\u6BB5\u8F6C\u5411 * 1.1 * Math.pow(Math.max(0, (u - 0.14) / 0.86), 1.35);
-        const \u809A\u76AE\u79BB\u5FC3\u5916\u7529 = \u79BB\u5FC3 * 0.42 * Math.pow(Math.sin(u * Math.PI), 0.85) + \u5C3E\u90E8\u7529\u6EDE * 0.38 * Math.pow(Math.max(0, (u - 0.18) / 0.82), 1.25);
-        const \u679C\u51BB\u98A4\u6CE2 = Math.sin(\u65F6\u95F4 * 21 - u * 5.2) * \u6A2A\u9707 * 0.16 * (0.18 + 0.82 * u);
-        const \u86C7\u884C\u5FAE\u6446 = Math.sin(\u52A8\u4F5C\u65F6\u95F4 * (\u52A0\u901F\u4E2D || \u662F\u98DE\u5929 ? 12 : 7) - u * 2.75) * \u626D\u8170\u5E45 * 0.36;
+        const \u809A\u76AE\u79BB\u5FC3\u5916\u7529 = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : \u79BB\u5FC3 * 0.42 * Math.pow(Math.sin(u * Math.PI), 0.85) + \u5C3E\u90E8\u7529\u6EDE * 0.38 * Math.pow(Math.max(0, (u - 0.18) / 0.82), 1.25);
+        const \u679C\u51BB\u98A4\u6CE2 = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.sin(\u65F6\u95F4 * 21 - u * 5.2) * \u6A2A\u9707 * 0.16 * (0.18 + 0.82 * u);
+        const \u86C7\u884C\u5FAE\u6446 = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.sin(\u52A8\u4F5C\u65F6\u95F4 * (\u52A0\u901F\u4E2D || \u662F\u98DE\u5929 ? 12 : 7) - u * 2.75) * \u626D\u8170\u5E45 * 0.36;
         const \u80A5\u8089\u7529\u51FBX = \u662F\u653B\u51FB ? \u653B\u5411 * (-\u653B\u84C4\u529B * (0.35 + 0.28 * Math.sin(u * Math.PI)) + \u653B\u51FA\u51FB * (1.48 * Math.sin(u * Math.PI) + 0.65 * Math.max(0, 1 - u * 1.6))) : 0;
-        this._\u539F\u59CBX[i] = \u8111\u888B\u5185\u6446 + \u5C3E\u5DF4\u57FA\u7529 + \u809A\u76AE\u79BB\u5FC3\u5916\u7529 + \u679C\u51BB\u98A4\u6CE2 + \u86C7\u884C\u5FAE\u6446 + \u80A5\u8089\u7529\u51FBX + \u590D\u4F4D\u6A2AX + \u86C7\u8EAB\u5F2F\u5F27;
+        this._\u539F\u59CBX[i] = \u8111\u888B\u5185\u6446 + \u5C3E\u5DF4\u57FA\u7529 + \u809A\u76AE\u79BB\u5FC3\u5916\u7529 + \u679C\u51BB\u98A4\u6CE2 + \u86C7\u884C\u5FAE\u6446 + \u80A5\u8089\u7529\u51FBX + \u590D\u4F4D\u6A2AX + \u86C7\u8EAB\u5F2F\u5F27 + \u6B7B\u60CA\u7529X + \u5F85\u673A\u73AF\u89C6X;
         const \u809A\u80A5\u6743\u91CD = Math.sin(u * Math.PI) * 0.72 + Math.max(0, u - 0.35) * 0.45;
-        this._\u8282\u70B9\u7529\u8089\u504F[i] = (\u79BB\u5FC3 * 0.12 + \u6A2A\u9707 * 0.09 * Math.cos(\u65F6\u95F4 * 18 - u * 4.5)) * \u809A\u80A5\u6743\u91CD + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u63A8\u5411 * 0.16 * \u91CD\u521B.\u5305\u7EDC * Math.sin(u * Math.PI) : 0);
-        this._\u8282\u70B9\u79BB\u5FC3\u503E\u89D2[i] = -(\u79BB\u5FC3 * 0.38 + \u6A2A\u9707 * 0.22 * Math.sin(\u65F6\u95F4 * 18 - u * 4)) * (0.3 + 0.7 * \u809A\u80A5\u6743\u91CD) + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.48 * \u91CD\u521B.\u5305\u7EDC : 0);
+        this._\u8282\u70B9\u7529\u8089\u504F[i] = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : (\u79BB\u5FC3 * 0.12 + \u6A2A\u9707 * 0.09 * Math.cos(\u65F6\u95F4 * 18 - u * 4.5)) * \u809A\u80A5\u6743\u91CD + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u63A8\u5411 * 0.16 * \u91CD\u521B.\u5305\u7EDC * Math.sin(u * Math.PI) : 0);
+        this._\u8282\u70B9\u79BB\u5FC3\u503E\u89D2[i] = \u6B7B\u6001 ? (0.92 * \u6B7B\u6001.\u5012\u4E0B - 0.28 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.08 * \u6B7B\u6001.\u62BD\u6410) * (0.35 + 0.65 * Math.sin(u * Math.PI)) : \u662F\u5F85\u673A ? 0 : -(\u79BB\u5FC3 * 0.38 + \u6A2A\u9707 * 0.22 * Math.sin(\u65F6\u95F4 * 18 - u * 4)) * (0.3 + 0.7 * \u809A\u80A5\u6743\u91CD) + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.48 * \u91CD\u521B.\u5305\u7EDC : 0);
       }
       this._\u539F\u59CBZ[0] = this._\u8282\u8DDDZ\u6570\u7EC4[0];
       let \u5747Z = this._\u539F\u59CBZ[0];
@@ -37396,8 +37624,8 @@ void main() {
         const \u538B\u7F29\u6BD4 = \u57FA\u51C6\u8282\u8DDD / \u5B9E\u9645\u8282\u8DDD;
         const \u975E\u7EBF\u6027\u81A8\u80C0 = Math.pow(\u538B\u7F29\u6BD4, 0.58);
         const \u5C40\u90E8\u6CE2\u76F8 = this.\u6CE2\u76F8 - u * 2.95;
-        const \u7C98\u6EDE\u8089\u6D6A = \u662F\u6B7B\u4EA1 ? 0 : Math.tanh(2.1 * Math.sin(\u5C40\u90E8\u6CE2\u76F8)) * 0.74 + 0.26 * Math.sin(\u5C40\u90E8\u6CE2\u76F8 * 2 - 0.55);
-        const \u8109\u52A8\u6DA8\u7F29 = 1 + 0.16 * \u6536\u7F29\u5E45 * (\u79FB\u52A8\u4E2D ? 1 : \u662F\u6B7B\u4EA1 ? 0 : 0.45) * \u7C98\u6EDE\u8089\u6D6A;
+        const \u7C98\u6EDE\u8089\u6D6A = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.tanh(2.1 * Math.sin(\u5C40\u90E8\u6CE2\u76F8)) * 0.74 + 0.26 * Math.sin(\u5C40\u90E8\u6CE2\u76F8 * 2 - 0.55);
+        const \u8109\u52A8\u6DA8\u7F29 = \u73AF\u89C6 ? 1 + \u73AF\u89C6.\u547C\u5438 * 0.032 * Math.sin(u * Math.PI) : 1 + 0.16 * \u6536\u7F29\u5E45 * (\u79FB\u52A8\u4E2D ? 1 : \u662F\u6B7B\u4EA1 ? 0 : 0.45) * \u7C98\u6EDE\u8089\u6D6A;
         const \u8D34\u5730\u7CFB\u6570 = Math.max(0, 1 - node.\u9AA8\u6865\u9AD8 / 0.16);
         const \u5934\u6743\u91CD = Math.max(0, 1 - u * 3.8);
         const \u5C3E\u6743\u91CD = Math.max(0, (u - 0.7) / 0.3);
@@ -37408,9 +37636,9 @@ void main() {
         const \u5782\u538B\u5BBD = -\u5782\u538B * 0.18;
         const \u5782\u538B\u9AD8 = \u5782\u538B * 0.22;
         const \u60AC\u7A7A\u62C9\u7D27 = Math.min(1, node.\u9AA8\u6865\u9AD8 / 0.45);
-        const \u53D7\u51FB\u9F13 = \u91CD\u521B.\u6FC0\u6D3B ? Math.sin(u * Math.PI) * \u91CD\u521B.\u6241\u538B * 0.58 : 0;
+        const \u53D7\u51FB\u9F13 = \u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? Math.sin(u * Math.PI) * \u91CD\u521B.\u6241\u538B * 0.58 : 0;
         const \u590D\u4F4D\u6241 = \u662F\u590D\u4F4D && \u590D\u76F8 >= 0.68 ? Math.sin((\u590D\u76F8 - 0.68) / 0.32 * Math.PI) * 0.34 : 0;
-        const \u6B7B\u4EA1\u6EE9 = \u662F\u6B7B\u4EA1 ? 0.36 : 0;
+        const \u6B7B\u4EA1\u6EE9 = \u6B7B\u6001 ? 0.38 * \u6B7B\u6001.\u5012\u4E0B + 0.14 * \u6B7B\u6001.\u7838\u5730\u5F39 : 0;
         const \u6A2A\u5411\u7CFB\u6570 = 1 + 0.1 * \u8D34\u5730\u7CFB\u6570 + 0.22 * \u51B2\u51FB\u538B\u6241 - 0.06 * \u60AC\u7A7A\u62C9\u7D27 + \u79BB\u5FC3\u5C55\u5BBD + \u7EB5\u60EF\u80D6\u7626 + \u5782\u538B\u5BBD + \u53D7\u51FB\u9F13 + \u590D\u4F4D\u6241 + \u6B7B\u4EA1\u6EE9 + (\u662F\u653B\u51FB ? 0.58 * \u653B\u51FA\u51FB * Math.sin(u * Math.PI) : 0);
         const \u7EB5\u5411\u7CFB\u6570 = 1 - 0.09 * \u8D34\u5730\u7CFB\u6570 - 0.2 * \u51B2\u51FB\u538B\u6241 + 0.05 * \u60AC\u7A7A\u62C9\u7D27 - \u79BB\u5FC3\u538B\u4F4E + \u7EB5\u60EF\u80D6\u7626 * 0.7 + \u5782\u538B\u9AD8 - \u53D7\u51FB\u9F13 * 0.52 - \u590D\u4F4D\u6241 * 0.65 - \u6B7B\u4EA1\u6EE9 * 0.78;
         node.\u7F29\u653EX = Math.max(0.7, Math.min(1.92, \u975E\u7EBF\u6027\u81A8\u80C0 * \u8109\u52A8\u6DA8\u7F29 * \u6A2A\u5411\u7CFB\u6570));
@@ -37449,16 +37677,27 @@ void main() {
         node.\u8089\u808C\u9AA8.scale.set(node.\u7F29\u653EX, node.\u7F29\u653EY, 1);
       }
       if (this.\u5DE6\u53E3\u94A9 && this.\u53F3\u53E3\u94A9) {
-        const \u53E3\u94A9\u4FEF\u89D2 = p < 0.48 ? 0.48 + 0.12 * Math.sin(p * Math.PI * 4) : 0.05 + 0.35 * Math.sin((p - 0.48) / 0.52 * Math.PI);
-        const \u53E3\u94A9\u5F20\u5F00 = p >= 0.56 && p <= 0.9 ? 0.3 : 0.1;
+        let \u53E3\u94A9\u4FEF\u89D2 = 0.22;
+        let \u53E3\u94A9\u5F20\u5F00 = 0.12;
+        if (\u6B7B\u6001) {
+          \u53E3\u94A9\u4FEF\u89D2 = 0.22 * (1 - \u6B7B\u6001.\u5012\u4E0B) - 0.18 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.05 * \u6B7B\u6001.\u62BD\u6410;
+          \u53E3\u94A9\u5F20\u5F00 = 0.12 + 0.24 * \u6B7B\u6001.\u5012\u4E0B;
+        } else if (\u73AF\u89C6) {
+          \u53E3\u94A9\u4FEF\u89D2 = 0.14 + \u73AF\u89C6.\u547C\u5438 * 0.04;
+          \u53E3\u94A9\u5F20\u5F00 = 0.1 + Math.abs(\u73AF\u89C6.\u8F6C\u5934Y) * 0.08;
+        } else {
+          \u53E3\u94A9\u4FEF\u89D2 = p < 0.48 ? 0.48 + 0.12 * Math.sin(p * Math.PI * 4) : 0.05 + 0.35 * Math.sin((p - 0.48) / 0.52 * Math.PI);
+          \u53E3\u94A9\u5F20\u5F00 = p >= 0.56 && p <= 0.9 ? 0.3 : 0.1;
+        }
         this.\u5DE6\u53E3\u94A9.rotation.x = \u53E3\u94A9\u4FEF\u89D2;
         this.\u53F3\u53E3\u94A9.rotation.x = \u53E3\u94A9\u4FEF\u89D2;
         this.\u5DE6\u53E3\u94A9.rotation.y = -\u53E3\u94A9\u5F20\u5F00;
         this.\u53F3\u53E3\u94A9.rotation.y = \u53E3\u94A9\u5F20\u5F00;
       }
       if (this.\u5927\u5634) {
-        const \u5438\u542E = Math.max(0, Math.sin(this.\u6CE2\u76F8));
-        this.\u5927\u5634.scale.set(1.25 + \u5438\u542E * 0.45, 0.85 + (\u52A0\u901F\u4E2D ? 0.45 : \u5438\u542E * 0.35), 0.9);
+        const \u5438\u542E = \u6B7B\u6001 ? 0.4 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u73AF\u89C6 ? Math.max(0, \u73AF\u89C6.\u547C\u5438) * 0.12 : Math.max(0, Math.sin(this.\u6CE2\u76F8));
+        const \u6B7B\u677E = \u6B7B\u6001 ? 1 - 0.45 * \u6B7B\u6001.\u5012\u4E0B : 1;
+        this.\u5927\u5634.scale.set((1.25 + \u5438\u542E * 0.45) * \u6B7B\u677E, (0.85 + (\u52A0\u901F\u4E2D ? 0.45 : \u5438\u542E * 0.35)) * \u6B7B\u677E, 0.9);
       }
       if (this.\u524D\u7C98\u6DB2\u57AB) {
         const \u7C98\u644A = 1 + \u5934\u538B\u6241 * 0.38;
@@ -37499,7 +37738,7 @@ void main() {
           g.mesh.visible = false;
         }
       }
-      const \u9AD8\u901F = \u901F\u5EA6 > 12 || \u662F\u5927\u55B7 || \u662F\u53CC\u55B7 || \u662F\u5C0F\u55B7;
+      const \u9AD8\u901F = !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 && !\u662F\u6B7B\u4EA1 && (\u6709\u6548\u901F\u5EA6 > 22 || \u662F\u5927\u55B7 || \u662F\u53CC\u55B7 || \u662F\u5C0F\u55B7);
       const \u91C7\u6837\u95F4\u9694 = \u662F\u5927\u55B7 ? 0.018 : \u662F\u53CC\u55B7 ? 0.025 : 0.036;
       if (\u9AD8\u901F) {
         this.\u6B8B\u5F71\u91C7\u6837\u8BA1\u65F6 += \u589E\u91CF;
@@ -38155,6 +38394,8 @@ void main() {
       const \u7EB5\u62C9 = \u60EF\u6027\u6001.\u7EB5\u62C9;
       const \u5782\u538B = \u60EF\u6027\u6001.\u5782\u538B;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -38178,6 +38419,9 @@ void main() {
       const \u662F\u8F6C\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u662F\u5426\u817E\u7A7A\u6700\u7EC8 = \u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
+      const \u6D3B\u5EA6 = \u6B7B\u6001 ? Math.max(0, 1 - \u6B7B\u6001.\u5012\u4E0B) : 1;
       const \u653B\u76F801 = \u662F\u653B\u51FB || \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       let \u653B\u84C4\u529B = 0;
       let \u653B\u51FA\u51FB = 0;
@@ -38220,11 +38464,11 @@ void main() {
       const \u5934\u9760 = this.\u5934\u9760\u5F39\u7C27.\u66F4\u65B0(\u76EE\u6807\u5934\u9760, \u5B89\u5168\u589E\u91CF, 96, 7.2, 1.6);
       const \u7EB5\u6D8C = this.\u7EB5\u6D8C\u5F39\u7C27.\u66F4\u65B0(\u7EB5\u62C9 * 1.1, \u5B89\u5168\u589E\u91CF, 74, 5.4, 2);
       const \u538B\u6241\u6001 = this.\u538B\u6241\u5F39\u7C27.\u66F4\u65B0(\u6F02\u79FB\u5F3A\u5EA6 * 0.18, \u5B89\u5168\u589E\u91CF, 86, 6.2, 1.8);
-      const \u6ED1\u6CE2\u901F = (\u6709\u6548\u901F\u5EA6 > 0.3 ? 7.4 + Math.min(\u6709\u6548\u901F\u5EA6, 90) * 0.56 : 3.6) * (\u662F\u5927\u55B7 ? 1.48 : \u662F\u53CC\u55B7 ? 1.3 : \u662F\u5C0F\u55B7 ? 1.15 : 1);
-      this.\u6ED1\u6CE2\u76F8 += \u5B89\u5168\u589E\u91CF * (\u662F\u6B7B\u4EA1 ? 0.2 : \u6ED1\u6CE2\u901F);
-      this.\u6F02\u6CE2\u76F8 += \u5B89\u5168\u589E\u91CF * (6.5 + \u6F02\u79FB\u5F3A\u5EA6 * 10.5);
-      this.\u6DB2\u7EB9V = (this.\u6DB2\u7EB9V + \u5B89\u5168\u589E\u91CF * (\u662F\u6B7B\u4EA1 ? 0.02 : 0.28 + Math.min(1.85, \u6709\u6548\u901F\u5EA6 * 0.028) + (\u52A0\u901F\u4E2D ? 0.55 : 0) + \u6F02\u79FB\u5F3A\u5EA6 * 0.35)) % 1;
-      const \u901F\u5EA6\u62C9\u4F38 = Math.min(1.15, Math.pow(Math.max(0, \u6709\u6548\u901F\u5EA6) / 50, 1.15) * 0.78);
+      const \u6ED1\u6CE2\u901F = \u662F\u5F85\u673A ? 1.8 : \u662F\u884C\u8D70 ? 10.5 : (\u6709\u6548\u901F\u5EA6 > 0.3 ? 7.4 + Math.min(\u6709\u6548\u901F\u5EA6, 90) * 0.56 : 3.6) * (\u662F\u5927\u55B7 ? 1.48 : \u662F\u53CC\u55B7 ? 1.3 : \u662F\u5C0F\u55B7 ? 1.15 : 1);
+      this.\u6ED1\u6CE2\u76F8 += \u5B89\u5168\u589E\u91CF * (\u6B7B\u6001 ? 3.2 * \u6D3B\u5EA6 : \u6ED1\u6CE2\u901F);
+      this.\u6F02\u6CE2\u76F8 += \u5B89\u5168\u589E\u91CF * (\u6B7B\u6001 ? 2.5 * \u6D3B\u5EA6 : \u662F\u5F85\u673A ? 1.8 : 6.5 + \u6F02\u79FB\u5F3A\u5EA6 * 10.5);
+      this.\u6DB2\u7EB9V = (this.\u6DB2\u7EB9V + \u5B89\u5168\u589E\u91CF * (\u6B7B\u6001 ? 0.18 * \u6D3B\u5EA6 : \u662F\u5F85\u673A ? 0.04 : 0.28 + Math.min(1.85, \u6709\u6548\u901F\u5EA6 * 0.028) + (\u52A0\u901F\u4E2D ? 0.55 : 0) + \u6F02\u79FB\u5F3A\u5EA6 * 0.35)) % 1;
+      const \u901F\u5EA6\u62C9\u4F38 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : Math.min(1.15, Math.pow(Math.max(0, \u6709\u6548\u901F\u5EA6) / 50, 1.15) * 0.78);
       let \u7EB5\u5411\u62C9\u957F = \u901F\u5EA6\u62C9\u4F38 * 0.8 + (\u662F\u5927\u55B7 ? 0.42 : \u662F\u53CC\u55B7 ? 0.28 : \u662F\u5C0F\u55B7 ? 0.16 : 0) + Math.max(0, \u7EB5\u6D8C) * 0.14;
       let \u9AD8\u5EA6\u538B\u6241 = (\u52A0\u901F\u4E2D ? 0.04 : Math.min(0.14, \u6709\u6548\u901F\u5EA6 * 2e-3)) - \u5782\u538B * 0.18 + \u538B\u6241\u6001;
       let \u989D\u5916\u644A\u5BBD = Math.min(0.32, \u6F02\u79FB\u5F3A\u5EA6 * 0.2);
@@ -38251,11 +38495,14 @@ void main() {
         \u626D\u8F6C\u7ED5Y = Math.sin(\u65F6\u95F4 * 3.6) * 0.48;
         \u9AD8\u5EA6\u538B\u6241 = 0.14 * Math.sin(\u65F6\u95F4 * 14.4) * \u5F39\u8DF3\u5EA6;
         \u6296\u52A8\u6A2A += \u62CD * 0.18;
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u9AD8\u5EA6\u538B\u6241 = 0.7;
-        \u989D\u5916\u644A\u5BBD = 0.72;
-        \u7EB5\u5411\u62C9\u957F = 0.22;
-        \u5F39\u8DF3\u9AD8 = 0;
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        \u9AD8\u5EA6\u538B\u6241 = -0.3 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.7 * d + 0.14 * \u6B7B\u6001.\u7838\u5730\u5F39 + 0.06 * \u6B7B\u6001.\u62BD\u6410;
+        \u989D\u5916\u644A\u5BBD = -0.15 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.72 * d + 0.18 * \u6B7B\u6001.\u7838\u5730\u5F39;
+        \u7EB5\u5411\u62C9\u957F = 0.22 * d;
+        \u5F39\u8DF3\u9AD8 = 0.32 * \u6B7B\u6001.\u53D7\u51FB\u9707;
+        \u6296\u52A8\u6A2A = 0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.06 * \u6B7B\u6001.\u62BD\u6410;
+        \u7FFB\u6EDA\u7ED5Z = 0.24 * \u6B7B\u6001.\u53D7\u51FB\u9707;
       } else if (\u662F\u541F\u5531) {
         \u9AD8\u5EA6\u538B\u6241 = -0.58 + Math.sin(\u65F6\u95F4 * 3.4) * 0.08;
         \u7EB5\u5411\u62C9\u957F = -0.18;
@@ -38320,10 +38567,15 @@ void main() {
           \u989D\u5916\u644A\u5BBD += 0.62 * \u6241\u5EA6;
           \u7EB5\u5411\u62C9\u957F = 0.24 * \u6241\u5EA6;
         }
-      } else if (this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A") {
-        const \u547C\u5438 = Math.sin(\u65F6\u95F4 * 2.5) * 0.085 * \u5F39\u8DF3\u5EA6;
-        \u9AD8\u5EA6\u538B\u6241 = \u547C\u5438;
-        \u989D\u5916\u644A\u5BBD += Math.max(0, \u547C\u5438) * 0.8;
+      } else if (\u73AF\u89C6) {
+        \u9AD8\u5EA6\u538B\u6241 = \u73AF\u89C6.\u547C\u5438 * 0.055 * \u5F39\u8DF3\u5EA6;
+        \u989D\u5916\u644A\u5BBD = Math.max(0, \u73AF\u89C6.\u547C\u5438) * 0.04;
+        \u7EB5\u5411\u62C9\u957F = 0;
+        \u626D\u8F6C\u7ED5Y = \u73AF\u89C6.\u8F6C\u5934Y * 0.16;
+      } else if (\u662F\u884C\u8D70) {
+        const \u6B65\u97F5 = Math.sin(\u65F6\u95F4 * 5.2);
+        \u9AD8\u5EA6\u538B\u6241 = 0.05 + \u6B65\u97F5 * 0.05 * \u5F39\u8DF3\u5EA6;
+        \u7EB5\u5411\u62C9\u957F = 0.18 + Math.max(0, -\u6B65\u97F5) * 0.06;
       }
       if (\u91CD\u521B.\u6FC0\u6D3B) {
         \u6296\u52A8\u6A2A += \u91CD\u521B.\u63A8\u5411 * 0.38 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.22;
@@ -38370,9 +38622,10 @@ void main() {
         const ntTail = Math.max(0, Math.min(1, (-nz + 0.04) / 1.04));
         const \u540E\u5C3E\u6743 = ntTail * ntTail * (3 - 2 * ntTail);
         const \u9876\u6743 = Math.max(0, Math.min(1, oy / 1.16));
-        const \u884C\u8FDB\u7EB5\u6CE2 = Math.sin(this.\u6ED1\u6CE2\u76F8 - nz * 4.4) * (0.045 + Math.min(0.055, \u6709\u6548\u901F\u5EA6 * 8e-4)) * \u5F39\u8DF3\u5EA6 * (1 - \u540E\u5C3E\u6743 * 0.45);
-        const \u73AF\u6D8C\u6CE2 = Math.sin(this.\u6F02\u6CE2\u76F8 - nz * 3.4 + Math.cos(theta * 2) * 1.1) * (0.022 + \u6F02\u79FB\u5F3A\u5EA6 * 0.068) * \u5F39\u8DF3\u5EA6 * (0.25 + \u9876\u6743 * 0.75) * (1 - \u540E\u5C3E\u6743 * 0.4);
-        const \u88D9\u8FB9\u62CD\u6D6A = \u63A5\u6743 > 0.1 ? Math.sin(this.\u6ED1\u6CE2\u76F8 * 1.15 - nz * 3.8 + Math.cos(theta * 4) * 1.2) * (0.11 + \u6F02\u79FB\u5F3A\u5EA6 * 0.13) * \u63A5\u6743 * \u5F39\u8DF3\u5EA6 * (1 - \u540E\u5C3E\u6743 * 0.7) : 0;
+        const \u6CE2\u7CFB = \u6B7B\u6001 ? \u6D3B\u5EA6 : \u662F\u5F85\u673A ? 0.25 : 1;
+        const \u884C\u8FDB\u7EB5\u6CE2 = Math.sin(this.\u6ED1\u6CE2\u76F8 - nz * 4.4) * (0.045 + Math.min(0.055, \u6709\u6548\u901F\u5EA6 * 8e-4)) * \u5F39\u8DF3\u5EA6 * (1 - \u540E\u5C3E\u6743 * 0.45) * \u6CE2\u7CFB;
+        const \u73AF\u6D8C\u6CE2 = Math.sin(this.\u6F02\u6CE2\u76F8 - nz * 3.4 + Math.cos(theta * 2) * 1.1) * (0.022 + \u6F02\u79FB\u5F3A\u5EA6 * 0.068) * \u5F39\u8DF3\u5EA6 * (0.25 + \u9876\u6743 * 0.75) * (1 - \u540E\u5C3E\u6743 * 0.4) * \u6CE2\u7CFB;
+        const \u88D9\u8FB9\u62CD\u6D6A = \u63A5\u6743 > 0.1 ? Math.sin(this.\u6ED1\u6CE2\u76F8 * 1.15 - nz * 3.8 + Math.cos(theta * 4) * 1.2) * (0.11 + \u6F02\u79FB\u5F3A\u5EA6 * 0.13) * \u63A5\u6743 * \u5F39\u8DF3\u5EA6 * (1 - \u540E\u5C3E\u6743 * 0.7) * \u6CE2\u7CFB : 0;
         const \u901F\u5EA6\u5C3E\u5C16\u524A = 1 - Math.pow(\u540E\u5C3E\u6743, 1.15) * Math.min(0.45, \u901F\u5EA6\u62C9\u4F38 * 0.36);
         const \u901F\u5EA6\u5C3E\u6241\u524A = 1 - Math.pow(\u540E\u5C3E\u6743, 1.05) * Math.min(0.48, \u901F\u5EA6\u62C9\u4F38 * 0.38);
         const \u622A\u5BBD = (\u5BBD\u500D + \u88D9\u8FB9\u62CD\u6D6A * 0.65) * \u901F\u5EA6\u5C3E\u5C16\u524A;
@@ -38488,8 +38741,9 @@ void main() {
         \u5185\u51E0.computeVertexNormals();
       }
       if (this.\u5185\u810F\u6838) {
-        const \u6838X = \u5934\u9760 * 0.26 + \u6296\u52A8\u6A2A * 0.65 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u63A8\u5411 * 0.22 * \u91CD\u521B.\u5305\u7EDC : 0);
-        const \u6838Y = Math.max(0.18, 0.44 * \u9AD8\u500D + \u6838\u524D\u9AD8Y + \u5F39\u8DF3\u9AD8 + \u4E2D\u5730\u9AD8 + Math.sin(\u65F6\u95F4 * 8.5) * 0.055 * \u5F39\u8DF3\u5EA6);
+        const \u6838X = \u5934\u9760 * 0.26 + \u6296\u52A8\u6A2A * 0.65 + (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? \u91CD\u521B.\u63A8\u5411 * 0.22 * \u91CD\u521B.\u5305\u7EDC : 0);
+        const \u6838\u6D6E = \u6B7B\u6001 ? 0 : \u662F\u5F85\u673A ? Math.sin(\u65F6\u95F4 * 2.2) * 0.02 : Math.sin(\u65F6\u95F4 * 8.5) * 0.055 * \u5F39\u8DF3\u5EA6;
+        const \u6838Y = Math.max(0.18, 0.44 * \u9AD8\u500D + \u6838\u524D\u9AD8Y + \u5F39\u8DF3\u9AD8 + \u4E2D\u5730\u9AD8 + \u6838\u6D6E);
         const \u6838Z = -0.04 + \u6838\u524D\u6D8CZ + (\u662F\u6025\u5239 ? 0.28 : -\u7EB5\u6D8C * 0.14);
         this.\u5185\u810F\u6838.position.set(\u6838X, \u6838Y, \u6838Z);
         this.\u5185\u810F\u6838.scale.set(
@@ -38500,49 +38754,58 @@ void main() {
         this.\u5185\u810F\u6838.rotation.set(-Math.max(0, \u51B2\u523A\u524D\u6D8C) * 0.18 + \u7EB5\u6D8C * 0.2, \u5934\u9760 * 0.2 + \u626D\u8F6C\u7ED5Y * 0.6, -\u5934\u9760 * 0.12 + \u7FFB\u6EDA\u7ED5Z * 0.4);
       }
       for (const b of this.\u6C14\u6CE1\u5217\u8868) {
-        const \u6DA1\u89D2 = Math.sin(\u65F6\u95F4 * 1.6 + b.\u76F8\u4F4D) * 0.35 + \u6F02\u79FB\u5F3A\u5EA6 * 0.35 * Math.sin(\u65F6\u95F4 * 2.4 + b.\u76F8\u4F4D);
+        const \u6CE1\u6D3B = \u6B7B\u6001 ? \u6D3B\u5EA6 : \u662F\u5F85\u673A ? 0.35 : 1;
+        const \u6DA1\u89D2 = (Math.sin(\u65F6\u95F4 * 1.6 + b.\u76F8\u4F4D) * 0.35 + \u6F02\u79FB\u5F3A\u5EA6 * 0.35 * Math.sin(\u65F6\u95F4 * 2.4 + b.\u76F8\u4F4D)) * \u6CE1\u6D3B;
         const cs = Math.cos(\u6DA1\u89D2);
         const sn = Math.sin(\u6DA1\u89D2);
         const \u65CBX = b.\u57FA\u51C6X * cs - b.\u57FA\u51C6Z * sn;
         const \u65CBZ = b.\u57FA\u51C6X * sn + b.\u57FA\u51C6Z * cs;
-        const \u6F02\u6D6E = Math.sin(\u65F6\u95F4 * b.\u98D8\u901F + b.\u76F8\u4F4D) * 0.095 * \u5F39\u8DF3\u5EA6;
+        const \u6F02\u6D6E = Math.sin(\u65F6\u95F4 * b.\u98D8\u901F + b.\u76F8\u4F4D) * 0.095 * \u5F39\u8DF3\u5EA6 * \u6CE1\u6D3B;
         const \u6CE1\u524D\u6BD4 = Math.max(0, Math.min(1, \u65CBZ / (0.8 * \u80D6) + 0.3));
-        const bx = \u65CBX * \u5BBD\u500D * 0.86 + \u6CE1\u524D\u6BD4 * \u5934\u9760 * 0.22 + Math.cos(\u65F6\u95F4 * 3.5 + b.\u76F8\u4F4D) * 0.045 + \u6296\u52A8\u6A2A * 0.45;
+        const bx = \u65CBX * \u5BBD\u500D * 0.86 + \u6CE1\u524D\u6BD4 * \u5934\u9760 * 0.22 + Math.cos(\u65F6\u95F4 * 3.5 + b.\u76F8\u4F4D) * 0.045 * \u6CE1\u6D3B + \u6296\u52A8\u6A2A * 0.45;
         const by = Math.max(0.1, (b.\u57FA\u51C6Y + \u6F02\u6D6E) * \u9AD8\u500D + \u6CE1\u524D\u6BD4 * Math.max(0, \u51B2\u523A\u524D\u6D8C) * 0.22 + \u5F39\u8DF3\u9AD8 + \u4E2D\u5730\u9AD8);
         const bz = \u65CBZ * \u957F\u500D + \u6838\u524D\u6D8CZ * 0.55 + (\u662F\u6025\u5239 ? 0.18 : 0);
         b.mesh.position.set(bx, by, bz);
-        const \u6CE1\u7F29 = 1 + Math.sin(\u65F6\u95F4 * 5.6 + b.\u76F8\u4F4D) * 0.16 + (\u91CD\u521B.\u6FC0\u6D3B ? Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.42 : 0);
+        const \u6CE1\u7F29 = 1 + Math.sin(\u65F6\u95F4 * 5.6 + b.\u76F8\u4F4D) * 0.16 * \u6CE1\u6D3B + (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.42 : 0);
         b.mesh.scale.setScalar(\u6CE1\u7F29);
       }
-      const \u5934\u63A2X = \u5934\u9760 * 0.44 + \u6296\u52A8\u6A2A * 0.55;
+      const \u5934\u63A2X = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.16 : \u5934\u9760 * 0.44 + \u6296\u52A8\u6A2A * 0.55;
       const \u5934\u63A2Z = 0.88 * \u80D6 * (1 + \u7EB5\u5411\u62C9\u957F * 0.52) + Math.max(0, \u51B2\u523A\u524D\u6D8C) * 0.44 + Math.abs(\u5934\u9760) * 0.14 + (\u662F\u666E\u653B ? 0.62 * \u653B\u51FA\u51FB : 0);
-      const \u5934Y = Math.max(\u662F\u6B7B\u4EA1 ? 0.14 : 0.24, 0.52 * \u9AD8\u500D * (1 + Math.max(0, \u51B2\u523A\u524D\u6D8C) * 0.34 + Math.abs(\u5934\u9760) * 0.12)) + \u5F39\u8DF3\u9AD8 + \u9AD8\u524D * 0.85;
+      const \u5934Y = Math.max(\u6B7B\u6001 ? 0.24 - 0.1 * \u6B7B\u6001.\u5012\u4E0B : 0.24, 0.52 * \u9AD8\u500D * (1 + Math.max(0, \u51B2\u523A\u524D\u6D8C) * 0.34 + Math.abs(\u5934\u9760) * 0.12)) + \u5F39\u8DF3\u9AD8 + \u9AD8\u524D * 0.85;
       this.\u524D\u8138\u7EC4.position.set(\u5934\u63A2X, \u5934Y, \u5934\u63A2Z);
       this.\u524D\u8138\u7EC4.rotation.set(
-        \u662F\u6025\u5239 ? -0.26 : \u662F\u541F\u5531 ? -0.45 : \u662F\u6B7B\u4EA1 ? 0.32 : \u52A0\u901F\u4E2D ? 0.12 : 0,
-        \u5934\u9760 * 0.32 + \u626D\u8F6C\u7ED5Y * 0.8 + \u653B\u5411 * (\u653B\u51FA\u51FB * 0.42 - \u653B\u84C4\u529B * 0.28),
-        -\u5934\u9760 * 0.14 + \u7FFB\u6EDA\u7ED5Z * 0.5 - \u653B\u5411 * 0.24 * \u653B\u51FA\u51FB
+        \u6B7B\u6001 ? -0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.32 * \u6B7B\u6001.\u5012\u4E0B : \u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.28 : \u662F\u6025\u5239 ? -0.26 : \u662F\u541F\u5531 ? -0.45 : \u52A0\u901F\u4E2D ? 0.12 : 0,
+        \u6B7B\u6001 ? 0 : \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.55 : \u5934\u9760 * 0.32 + \u626D\u8F6C\u7ED5Y * 0.8 + \u653B\u5411 * (\u653B\u51FA\u51FB * 0.42 - \u653B\u84C4\u529B * 0.28),
+        \u6B7B\u6001 ? 0.18 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.25 : -\u5934\u9760 * 0.14 + \u7FFB\u6EDA\u7ED5Z * 0.5 - \u653B\u5411 * 0.24 * \u653B\u51FA\u51FB
       );
       if (this.\u5DE6\u77B3 && this.\u53F3\u77B3) {
-        if (\u662F\u6253\u6655 || \u91CD\u521B.\u6FC0\u6D3B) {
+        if (\u6B7B\u6001) {
+          this.\u5DE6\u77B3.position.set(0, 0.02 * \u6B7B\u6001.\u53D7\u51FB\u9707, 0);
+          this.\u53F3\u77B3.position.set(0, -0.02 * \u6B7B\u6001.\u53D7\u51FB\u9707, 0);
+        } else if (\u662F\u6253\u6655 || \u91CD\u521B.\u6FC0\u6D3B) {
           this.\u5DE6\u77B3.position.set(Math.cos(\u65F6\u95F4 * 16) * 0.055, Math.sin(\u65F6\u95F4 * 16) * 0.055, 0);
           this.\u53F3\u77B3.position.set(Math.cos(-\u65F6\u95F4 * 18) * 0.045, Math.sin(-\u65F6\u95F4 * 18) * 0.045, 0);
+        } else if (\u73AF\u89C6) {
+          const \u773C\u76EF = \u73AF\u89C6.\u8F6C\u5934Y * 0.045;
+          this.\u5DE6\u77B3.position.set(\u773C\u76EF, \u73AF\u89C6.\u62AC\u5934X * 0.02, 0);
+          this.\u53F3\u77B3.position.set(\u773C\u76EF * 0.88, \u73AF\u89C6.\u62AC\u5934X * 0.018, 0);
         } else {
           const \u773C\u76EF = \u4FA7\u504F * 0.05;
           this.\u5DE6\u77B3.position.set(\u773C\u76EF, Math.sin(\u65F6\u95F4 * 4) * 0.015, 0);
           this.\u53F3\u77B3.position.set(\u773C\u76EF * 0.85, -Math.sin(\u65F6\u95F4 * 4) * 0.012, 0);
         }
-        const \u77B3\u5F20 = \u662F\u6B7B\u4EA1 ? 0.18 : \u91CD\u521B.\u6FC0\u6D3B ? 1.45 : \u52A0\u901F\u4E2D ? 1.24 : \u662F\u6025\u5239 ? 0.72 : 1;
-        this.\u5DE6\u773C\u7EC4.scale.set(\u91CD\u521B.\u6FC0\u6D3B ? 1.32 : 1, \u77B3\u5F20, 1);
-        this.\u53F3\u773C\u7EC4.scale.set(\u91CD\u521B.\u6FC0\u6D3B ? 0.75 : 1, \u77B3\u5F20 * (\u91CD\u521B.\u6FC0\u6D3B ? 1.22 : 1), 1);
+        const \u77B3\u5F20 = \u6B7B\u6001 ? Math.max(0.18, 1 + 0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.82 * \u6B7B\u6001.\u5012\u4E0B) : \u91CD\u521B.\u6FC0\u6D3B ? 1.45 : \u52A0\u901F\u4E2D ? 1.24 : \u662F\u6025\u5239 ? 0.72 : 1;
+        this.\u5DE6\u773C\u7EC4.scale.set(\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? 1.32 : 1, \u77B3\u5F20, 1);
+        this.\u53F3\u773C\u7EC4.scale.set(\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? 0.75 : 1, \u77B3\u5F20 * (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? 1.22 : 1), 1);
       }
-      const \u5F20\u5634\u5EA6 = \u662F\u6B7B\u4EA1 ? 0.35 : \u662F\u541F\u5531 ? 1.35 + Math.sin(\u65F6\u95F4 * 5.2) * 0.22 : \u91CD\u521B.\u6FC0\u6D3B ? 1.78 + Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.35 : \u52A0\u901F\u4E2D ? 1.42 + Math.sin(\u65F6\u95F4 * 18) * 0.18 : \u662F\u6025\u5239 ? 0.65 : \u662F\u51B2\u7EBF ? 1.56 : 1 + Math.sin(\u65F6\u95F4 * 3.8) * 0.16;
+      const \u5F20\u5634\u5EA6 = \u6B7B\u6001 ? Math.max(0.32, 1 + 0.55 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.65 * \u6B7B\u6001.\u5012\u4E0B) : \u73AF\u89C6 ? 0.92 + \u73AF\u89C6.\u547C\u5438 * 0.06 : \u662F\u541F\u5531 ? 1.35 + Math.sin(\u65F6\u95F4 * 5.2) * 0.22 : \u91CD\u521B.\u6FC0\u6D3B ? 1.78 + Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.35 : \u52A0\u901F\u4E2D ? 1.42 + Math.sin(\u65F6\u95F4 * 18) * 0.18 : \u662F\u6025\u5239 ? 0.65 : \u662F\u51B2\u7EBF ? 1.56 : 1 + Math.sin(\u65F6\u95F4 * 3.8) * 0.16;
       if (this.\u5927\u5634) {
-        this.\u5927\u5634.scale.set(1.42 + \u989D\u5916\u644A\u5BBD * 0.25 + (\u91CD\u521B.\u6FC0\u6D3B ? 0.32 : 0), 0.54 * \u5F20\u5634\u5EA6, 0.65);
+        this.\u5927\u5634.scale.set(1.42 + \u989D\u5916\u644A\u5BBD * 0.25 + (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? 0.32 : 0), 0.54 * \u5F20\u5634\u5EA6, 0.65);
       }
       for (const k of this.\u53E3\u6C34\u4E1D\u5217\u8868) {
-        const \u62C9\u4E1D\u957F = (0.92 + \u5F20\u5634\u5EA6 * 0.45 + \u6F02\u79FB\u5F3A\u5EA6 * 0.28 + Math.sin(\u65F6\u95F4 * 9 + k.\u76F8\u4F4D) * 0.18) * k.\u957F\u500D\u7387;
-        const \u53E3\u6C34\u6446 = Math.sin(\u65F6\u95F4 * 8 + k.\u76F8\u4F4D) * (0.14 + \u6F02\u79FB\u5F3A\u5EA6 * 0.16 + (\u91CD\u521B.\u6FC0\u6D3B ? 0.45 : 0));
+        const \u4E1D\u6D3B = \u6B7B\u6001 ? \u6D3B\u5EA6 : \u662F\u5F85\u673A ? 0.25 : 1;
+        const \u62C9\u4E1D\u957F = (0.92 + \u5F20\u5634\u5EA6 * 0.45 + \u6F02\u79FB\u5F3A\u5EA6 * 0.28 + Math.sin(\u65F6\u95F4 * 9 + k.\u76F8\u4F4D) * 0.18 * \u4E1D\u6D3B) * k.\u957F\u500D\u7387;
+        const \u53E3\u6C34\u6446 = Math.sin(\u65F6\u95F4 * 8 + k.\u76F8\u4F4D) * (0.14 + \u6F02\u79FB\u5F3A\u5EA6 * 0.16 + (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? 0.45 : 0)) * \u4E1D\u6D3B;
         k.mesh.position.set(k.\u4FA7X, -0.14 - \u62C9\u4E1D\u957F * 0.05, 0.24);
         k.mesh.scale.set(1 / Math.sqrt(Math.max(0.45, \u62C9\u4E1D\u957F)), \u62C9\u4E1D\u957F, 1 / Math.sqrt(Math.max(0.45, \u62C9\u4E1D\u957F)));
         k.mesh.rotation.z = \u53E3\u6C34\u6446;
@@ -38587,7 +38850,7 @@ void main() {
           g.mesh.visible = false;
         }
       }
-      const \u7559\u75D5\u6761\u4EF6 = (\u6709\u6548\u901F\u5EA6 > 6 || \u52A0\u901F\u4E2D || \u6F02\u79FB\u5F3A\u5EA6 > 0.2) && \u8D34\u5730\u72B6\u6001;
+      const \u7559\u75D5\u6761\u4EF6 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && (\u6709\u6548\u901F\u5EA6 > 6 || \u52A0\u901F\u4E2D || \u6F02\u79FB\u5F3A\u5EA6 > 0.2) && \u8D34\u5730\u72B6\u6001;
       const \u91C7\u6837\u95F4\u9694 = \u662F\u5927\u55B7 ? 0.026 : \u6F02\u79FB\u5F3A\u5EA6 > 0.25 ? 0.028 : 0.044;
       if (\u7559\u75D5\u6761\u4EF6) {
         this.\u6B8B\u5F71\u91C7\u6837\u8BA1\u65F6 += \u589E\u91CF;
@@ -38609,6 +38872,69 @@ void main() {
   };
 
   // src/core/entities/monkey.ts
+  function \u521B\u5EFA\u5E73\u6ED1\u7334\u81C2\u6BB5\u51E0\u4F55(\u957F\u5EA6, \u8D77\u70B9\u534A\u5F84, \u4E2D\u6BB5\u9F13\u5EA6, \u7EC8\u70B9\u534A\u5F84, \u9F13\u8D77\u4F4D\u7F6E = 0.45, \u5F84\u5411\u5206\u6BB5 = 24, \u8F74\u5411\u5206\u6BB5 = 18) {
+    const \u8F6E\u5ED3\u70B9 = [];
+    const \u5E3D\u6B65 = 8;
+    const \u6307\u6570 = Math.log(0.5) / Math.log(Math.max(0.15, Math.min(0.85, \u9F13\u8D77\u4F4D\u7F6E)));
+    for (let i = 0; i <= \u5E3D\u6B65; i++) {
+      const \u89D2 = -Math.PI * 0.5 + i / \u5E3D\u6B65 * Math.PI * 0.5;
+      const r = i === 0 ? 0 : Math.cos(\u89D2) * \u8D77\u70B9\u534A\u5F84;
+      const y = Math.sin(\u89D2) * \u8D77\u70B9\u534A\u5F84;
+      \u8F6E\u5ED3\u70B9.push(new Vector2(r, y));
+    }
+    for (let i = 1; i <= \u8F74\u5411\u5206\u6BB5; i++) {
+      const t = i / \u8F74\u5411\u5206\u6BB5;
+      const s = t * t * (3 - 2 * t);
+      const \u57FA\u7840\u534A\u5F84 = \u8D77\u70B9\u534A\u5F84 * (1 - s) + \u7EC8\u70B9\u534A\u5F84 * s;
+      const \u9F13\u8D77\u6CE2 = Math.sin(Math.PI * Math.pow(t, \u6307\u6570));
+      const r = Math.max(2e-3, \u57FA\u7840\u534A\u5F84 + \u9F13\u8D77\u6CE2 * \u9F13\u8D77\u6CE2 * \u4E2D\u6BB5\u9F13\u5EA6);
+      \u8F6E\u5ED3\u70B9.push(new Vector2(r, t * \u957F\u5EA6));
+    }
+    for (let i = 1; i <= \u5E3D\u6B65; i++) {
+      const \u89D2 = i / \u5E3D\u6B65 * Math.PI * 0.5;
+      const r = i === \u5E3D\u6B65 ? 0 : Math.cos(\u89D2) * \u7EC8\u70B9\u534A\u5F84;
+      const y = \u957F\u5EA6 + Math.sin(\u89D2) * \u7EC8\u70B9\u534A\u5F84;
+      \u8F6E\u5ED3\u70B9.push(new Vector2(r, y));
+    }
+    const \u51E0\u4F55 = new LatheGeometry(\u8F6E\u5ED3\u70B9, \u5F84\u5411\u5206\u6BB5);
+    \u51E0\u4F55.computeVertexNormals();
+    return \u51E0\u4F55;
+  }
+  function \u521B\u5EFA\u5E73\u6ED1\u5F2F\u6307\u51E0\u4F55(\u6307\u957F, \u6839\u534A\u5F84, \u5C16\u534A\u5F84, \u5F2F\u66F2\u89D2, \u5F2F\u5411) {
+    const \u51E0\u4F55 = \u521B\u5EFA\u5E73\u6ED1\u7334\u81C2\u6BB5\u51E0\u4F55(\u6307\u957F, \u6839\u534A\u5F84, 0, \u5C16\u534A\u5F84, 0.45, 14, 10);
+    if (Math.abs(\u5F2F\u66F2\u89D2) < 1e-4) return \u51E0\u4F55;
+    const \u4F4D\u7F6E = \u51E0\u4F55.attributes.position;
+    const \u5F27\u534A\u5F84 = \u6307\u957F / \u5F2F\u66F2\u89D2;
+    const \u672Bsin = Math.sin(\u5F2F\u66F2\u89D2);
+    const \u672Bcos = Math.cos(\u5F2F\u66F2\u89D2);
+    const \u672Bcx = \u5F2F\u5411 * \u5F27\u534A\u5F84 * (1 - \u672Bcos);
+    const \u672Bcy = \u5F27\u534A\u5F84 * \u672Bsin;
+    for (let i = 0; i < \u4F4D\u7F6E.count; i++) {
+      const vx = \u4F4D\u7F6E.getX(i);
+      const vy = \u4F4D\u7F6E.getY(i);
+      const vz = \u4F4D\u7F6E.getZ(i);
+      if (vy <= 0) continue;
+      if (vy <= \u6307\u957F) {
+        const th = vy / \u5F27\u534A\u5F84;
+        const s = Math.sin(th);
+        const c = Math.cos(th);
+        const cx = \u5F2F\u5411 * \u5F27\u534A\u5F84 * (1 - c);
+        const cy = \u5F27\u534A\u5F84 * s;
+        \u4F4D\u7F6E.setXYZ(i, cx + vx * c, cy - \u5F2F\u5411 * vx * s, vz);
+      } else {
+        const d = vy - \u6307\u957F;
+        \u4F4D\u7F6E.setXYZ(
+          i,
+          \u672Bcx + \u5F2F\u5411 * d * \u672Bsin + vx * \u672Bcos,
+          \u672Bcy + d * \u672Bcos - \u5F2F\u5411 * vx * \u672Bsin,
+          vz
+        );
+      }
+    }
+    \u4F4D\u7F6E.needsUpdate = true;
+    \u51E0\u4F55.computeVertexNormals();
+    return \u51E0\u4F55;
+  }
   var _\u624B\u8F6E\u76EE\u6807\u70B9 = new Vector3();
   var _\u80A9\u672C\u5730\u5411\u91CF = new Vector3();
   var _\u8098\u65B9\u5411\u5411\u91CF = new Vector3();
@@ -39160,39 +39486,54 @@ void main() {
       }
       const \u4E0A\u81C2\u957F = 0.56 * k;
       const \u524D\u81C2\u957F = 0.6 * k;
+      const \u8098\u90E8\u534A\u5F84 = 0.064 * km;
+      const \u624B\u8155\u534A\u5F84 = 0.048 * km;
+      const \u4E0A\u81C2\u5E73\u6ED1\u51E0\u4F55 = \u521B\u5EFA\u5E73\u6ED1\u7334\u81C2\u6BB5\u51E0\u4F55(\u4E0A\u81C2\u957F, 0.088 * km, 0.015 * km, \u8098\u90E8\u534A\u5F84, 0.44, 24, 18);
+      const \u524D\u81C2\u5E73\u6ED1\u51E0\u4F55 = \u521B\u5EFA\u5E73\u6ED1\u7334\u81C2\u6BB5\u51E0\u4F55(\u524D\u81C2\u957F, \u8098\u90E8\u534A\u5F84, 0.011 * km, \u624B\u8155\u534A\u5F84, 0.34, 24, 18);
+      const \u7334\u638C\u5E73\u6ED1\u51E0\u4F55 = \u521B\u5EFA\u5E73\u6ED1\u7334\u81C2\u6BB5\u51E0\u4F55(0.088 * km, 0.046 * km, 0.016 * km, 0.048 * km, 0.58, 22, 12);
       const \u6784\u5EFA\u5355\u81C2 = (\u7B26\u53F7, \u80A9\u7EC4, \u8098\u7EC4, \u624B\u7EC4) => {
         \u80A9\u7EC4.position.set(\u7B26\u53F7 * 0.3 * km, 0.45 * km, 0.03 * k);
         this.\u4E0A\u8EAB\u7EC4.add(\u80A9\u7EC4);
-        const \u4E09\u89D2\u808C = new Mesh(new SphereGeometry(0.098 * km, 12, 10), this.\u7D27\u7EF7\u808C\u6750);
-        \u4E09\u89D2\u808C.scale.set(1.12, 1, 0.95);
-        \u80A9\u7EC4.add(\u4E09\u89D2\u808C);
-        const \u4E0A\u81C2\u67F1 = new Mesh(new CapsuleGeometry(0.062 * km, \u4E0A\u81C2\u957F - 0.06 * k, 6, 10), \u7334\u6BDB\u68D5\u6750);
-        \u4E0A\u81C2\u67F1.position.y = \u4E0A\u81C2\u957F * 0.5;
-        \u4E0A\u81C2\u67F1.castShadow = true;
-        \u80A9\u7EC4.add(\u4E0A\u81C2\u67F1);
-        const \u4E8C\u5934\u808C = new Mesh(new SphereGeometry(0.078 * km, 12, 10), this.\u7D27\u7EF7\u808C\u6750);
-        \u4E8C\u5934\u808C.scale.set(1, 1.45, 1.05);
-        \u4E8C\u5934\u808C.position.set(\u7B26\u53F7 * 0.02 * km, \u4E0A\u81C2\u957F * 0.52, 0.035 * km);
-        \u4E8C\u5934\u808C.castShadow = true;
-        \u80A9\u7EC4.add(\u4E8C\u5934\u808C);
+        const \u4E0A\u81C2\u6BB5 = new Mesh(\u4E0A\u81C2\u5E73\u6ED1\u51E0\u4F55, \u7334\u6BDB\u68D5\u6750);
+        \u4E0A\u81C2\u6BB5.castShadow = true;
+        \u80A9\u7EC4.add(\u4E0A\u81C2\u6BB5);
         \u8098\u7EC4.position.set(0, \u4E0A\u81C2\u957F, 0);
         \u80A9\u7EC4.add(\u8098\u7EC4);
-        const \u8098\u7403 = new Mesh(new SphereGeometry(0.068 * km, 8, 8), \u7334\u6BDB\u68D5\u6750);
-        \u8098\u7EC4.add(\u8098\u7403);
-        const \u524D\u81C2\u67F1 = new Mesh(new CapsuleGeometry(0.054 * km, \u524D\u81C2\u957F - 0.06 * k, 6, 10), \u7334\u6BDB\u68D5\u6750);
-        \u524D\u81C2\u67F1.position.y = \u524D\u81C2\u957F * 0.5;
-        \u524D\u81C2\u67F1.castShadow = true;
-        \u8098\u7EC4.add(\u524D\u81C2\u67F1);
-        const \u524D\u81C2\u808C = new Mesh(new SphereGeometry(0.068 * km, 10, 8), this.\u7D27\u7EF7\u808C\u6750);
-        \u524D\u81C2\u808C.scale.set(1, 1.55, 1.05);
-        \u524D\u81C2\u808C.position.set(\u7B26\u53F7 * 0.015 * km, \u524D\u81C2\u957F * 0.38, 0.024 * km);
-        \u8098\u7EC4.add(\u524D\u81C2\u808C);
+        const \u524D\u81C2\u6BB5 = new Mesh(\u524D\u81C2\u5E73\u6ED1\u51E0\u4F55, \u7334\u6BDB\u68D5\u6750);
+        \u524D\u81C2\u6BB5.castShadow = true;
+        \u8098\u7EC4.add(\u524D\u81C2\u6BB5);
         \u624B\u7EC4.position.set(0, \u524D\u81C2\u957F, 0);
         \u8098\u7EC4.add(\u624B\u7EC4);
-        const \u7334\u638C = new Mesh(new SphereGeometry(0.08 * km, 10, 8), \u7334\u76AE\u6843\u6750);
-        \u7334\u638C.scale.set(0.88, 0.92, 1.2);
+        const \u7334\u638C = new Mesh(\u7334\u638C\u5E73\u6ED1\u51E0\u4F55, \u7334\u76AE\u6843\u6750);
+        \u7334\u638C.position.set(0, -8e-3 * km, 0);
+        \u7334\u638C.scale.set(0.76, 1, 1.18);
+        \u7334\u638C.castShadow = true;
         \u624B\u7EC4.add(\u7334\u638C);
-        return { \u4E8C\u5934\u808C, \u524D\u81C2\u808C };
+        const \u638C\u5FC3\u5F2F\u5411 = -\u7B26\u53F7;
+        const \u6307\u914D\u7F6E = [
+          { z: -0.04, \u957F: 0.058, \u7C97: 0.0135, \u5F2F: 0.82 },
+          { z: -0.014, \u957F: 0.068, \u7C97: 0.0145, \u5F2F: 0.88 },
+          { z: 0.014, \u957F: 0.066, \u7C97: 0.0145, \u5F2F: 0.86 },
+          { z: 0.04, \u957F: 0.054, \u7C97: 0.013, \u5F2F: 0.8 }
+        ];
+        for (const f of \u6307\u914D\u7F6E) {
+          const \u6307 = new Mesh(
+            \u521B\u5EFA\u5E73\u6ED1\u5F2F\u6307\u51E0\u4F55(f.\u957F * km, f.\u7C97 * km, f.\u7C97 * 0.72 * km, f.\u5F2F, \u638C\u5FC3\u5F2F\u5411),
+            \u7334\u76AE\u6843\u6750
+          );
+          \u6307.position.set(\u638C\u5FC3\u5F2F\u5411 * 6e-3 * km, 0.076 * km, f.z * km);
+          \u6307.castShadow = true;
+          \u624B\u7EC4.add(\u6307);
+        }
+        const \u62C7\u6307 = new Mesh(
+          \u521B\u5EFA\u5E73\u6ED1\u5F2F\u6307\u51E0\u4F55(0.052 * km, 0.0165 * km, 0.0125 * km, 0.68, \u638C\u5FC3\u5F2F\u5411),
+          \u7334\u76AE\u6843\u6750
+        );
+        \u62C7\u6307.position.set(\u638C\u5FC3\u5F2F\u5411 * 0.022 * km, 0.036 * km, 0.048 * km);
+        \u62C7\u6307.rotation.set(0.46, \u638C\u5FC3\u5F2F\u5411 * 0.35, 0);
+        \u62C7\u6307.castShadow = true;
+        \u624B\u7EC4.add(\u62C7\u6307);
+        return { \u4E8C\u5934\u808C: \u4E0A\u81C2\u6BB5, \u524D\u81C2\u808C: \u524D\u81C2\u6BB5 };
       };
       const \u6784\u5EFA\u91D1\u7B8D\u68D2 = () => {
         const \u68D2\u7EC4 = new Group();
@@ -39353,6 +39694,8 @@ void main() {
       const \u60EF\u6027\u6001 = this.\u60EF\u6027.\u66F4\u65B0(t, dt, \u901F\u5EA6, \u8F6C\u5411\u89D2, this.\u5F53\u524D\u52A8\u4F5C, \u73AF\u5883);
       const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F;
       const \u6709\u6548\u901F\u5EA6 = \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -39375,6 +39718,8 @@ void main() {
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u8F6C\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u653B\u76F801 = \u662F\u653B\u51FB || \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
@@ -39391,24 +39736,26 @@ void main() {
       }
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u653B\u76F801, 16096779, 15680580, 2.25, 0.88, 0.08);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
-      const \u8DD1\u52A8\u901F\u5EA6 = \u5C55\u793A\u53F0\u8DD1 ? Math.max(24, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u52A0\u901F\u4E2D || \u662F\u8D77\u6B65 || \u662F\u98DE\u5929);
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
+      const \u8DD1\u52A8\u901F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? Math.max(\u662F\u884C\u8D70 ? 16 : 24, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u662F\u884C\u8D70 || \u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u52A0\u901F\u4E2D || \u662F\u8D77\u6B65 || \u662F\u98DE\u5929);
       let \u6447\u901F = 0;
-      if (\u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 || \u662F\u6025\u5239 || \u662F\u6253\u6655 || !\u6B63\u5728\u8DD1\u52A8) {
+      if (\u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 || \u662F\u6025\u5239 || \u662F\u6253\u6655 || !\u6B63\u5728\u8DD1\u52A8) {
         \u6447\u901F = 0;
       } else if (\u662F\u8D77\u6B65) {
         \u6447\u901F = (\u662F\u8DF3\u821E ? 14.5 : 18) * \u624B\u6447\u500D\u7387;
+      } else if (\u662F\u884C\u8D70) {
+        \u6447\u901F = (4.8 + \u8DD1\u52A8\u901F\u5EA6 / 48 * 9) * \u624B\u6447\u500D\u7387;
       } else {
         const \u6863\u4F4D\u52A0\u901F\u500D = \u662F\u5927\u55B7 ? 3.5 : \u662F\u53CC\u55B7 ? 2.65 : \u662F\u5C0F\u55B7 ? 1.95 : 1;
         \u6447\u901F = (6 + \u8DD1\u52A8\u901F\u5EA6 / 48 * 18) * \u6863\u4F4D\u52A0\u901F\u500D * \u624B\u6447\u500D\u7387;
       }
       this.\u624B\u6447\u76F8\u4F4D += dt * \u6447\u901F;
-      const \u901F\u5EA6\u62C9\u6BD4 = Math.max(0, Math.min(0.45, (\u8DD1\u52A8\u901F\u5EA6 - 22) / 45));
+      const \u901F\u5EA6\u62C9\u6BD4 = \u662F\u5F85\u673A || \u662F\u884C\u8D70 || \u662F\u6B7B\u4EA1 ? 0 : Math.max(0, Math.min(0.45, (\u8DD1\u52A8\u901F\u5EA6 - 22) / 45));
       const \u6321\u4F4D\u62C9\u6BD4 = \u662F\u5927\u55B7 ? 1 : \u662F\u53CC\u55B7 ? 0.72 : \u662F\u5C0F\u55B7 ? 0.44 : 0;
-      const \u6781\u901F\u62C9\u626F\u5EA6 = \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 ? 0 : Math.min(1.15, Math.max(\u6321\u4F4D\u62C9\u6BD4, \u901F\u5EA6\u62C9\u6BD4 + (\u52A0\u901F\u4E2D ? 0.25 : 0)));
+      const \u6781\u901F\u62C9\u626F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 ? 0 : Math.min(1.15, Math.max(\u6321\u4F4D\u62C9\u6BD4, \u901F\u5EA6\u62C9\u6BD4 + (\u52A0\u901F\u4E2D ? 0.25 : 0)));
       const \u771F\u5B9E\u8F6E\u901F = \u8DD1\u52A8\u901F\u5EA6 / Math.max(0.25, \u540E\u8F6E\u534A\u5F84) * (\u52A0\u901F\u4E2D ? 1.45 : 1);
-      if (!\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655) {
+      if (!\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655) {
         this.\u8F6E\u8F6C\u89D2 += dt * (\u662F\u8D77\u6B65 ? Math.sin(t * 32) * 3.2 : \u771F\u5B9E\u8F6E\u901F);
       }
       this.\u5DE6\u5927\u8F6E\u65CB.rotation.x = this.\u8F6E\u8F6C\u89D2;
@@ -39416,14 +39763,14 @@ void main() {
       const \u524D\u8F6E\u8F6C\u89D2 = this.\u8F6E\u8F6C\u89D2 * (\u540E\u8F6E\u534A\u5F84 / \u524D\u8F6E\u534A\u5F84);
       this.\u5DE6\u524D\u8F6E\u65CB.rotation.x = \u524D\u8F6E\u8F6C\u89D2;
       this.\u53F3\u524D\u8F6E\u65CB.rotation.x = \u524D\u8F6E\u8F6C\u89D2;
-      const \u5BFC\u8F6E\u504F = \u4FA7\u504F * 0.45 + (\u662F\u6253\u6655 ? Math.sin(t * 11) * 0.45 : 0);
+      const \u5BFC\u8F6E\u504F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u4FA7\u504F * 0.45 + (\u662F\u6253\u6655 ? Math.sin(t * 11) * 0.45 : 0);
       this.\u5DE6\u524D\u53C9.rotation.y = \u5BFC\u8F6E\u504F;
       this.\u53F3\u524D\u53C9.rotation.y = \u5BFC\u8F6E\u504F;
       const \u6447\u8F6E\u534A\u5F84 = 0.36 * k;
       const \u6447\u5FC3Y = 0.08 * k;
       const \u6447\u5FC3Z = 0.04 * k;
-      const \u8F6C\u901F\u5F3A\u5EA6 = Math.max(0, Math.min(1, (\u6447\u901F - 7.5) / 30));
-      const \u663E\u793A\u865A\u5F71\u8F68\u8FF9 = \u8F6C\u901F\u5F3A\u5EA6 > 0.05 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u8F6C\u901F\u5F3A\u5EA6 = \u662F\u884C\u8D70 ? 0 : Math.max(0, Math.min(1, (\u6447\u901F - 7.5) / 30));
+      const \u663E\u793A\u865A\u5F71\u8F68\u8FF9 = \u8F6C\u901F\u5F3A\u5EA6 > 0.05 && !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       if (this.\u865A\u5F71\u73AF\u6750 && this.\u5DE6\u865A\u5F71\u73AF && this.\u53F3\u865A\u5F71\u73AF) {
         this.\u5DE6\u865A\u5F71\u73AF.visible = \u663E\u793A\u865A\u5F71\u8F68\u8FF9;
         this.\u53F3\u865A\u5F71\u73AF.visible = \u663E\u793A\u865A\u5F71\u8F68\u8FF9;
@@ -39433,8 +39780,8 @@ void main() {
         }
       }
       let \u7FD8\u5934\u89D2 = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u7FD8\u5934\u89D2 = 0.14;
+      if (\u6B7B\u6001) {
+        \u7FD8\u5934\u89D2 = 0.34 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.14 * \u6B7B\u6001.\u5012\u4E0B;
       } else if (\u662F\u541F\u5531) {
         \u7FD8\u5934\u89D2 = 0.22 + Math.sin(t * 2.6) * 0.04;
       } else if (\u662F\u98DE\u5929) {
@@ -39463,7 +39810,7 @@ void main() {
         \u7FD8\u5934\u89D2 = 0.18 * \u653B\u84C4\u529B - 0.06 * \u653B\u51FA\u51FB;
       }
       if (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1) \u7FD8\u5934\u89D2 += 0.48 * \u91CD\u521B.\u5305\u7EDC;
-      let \u4FA7\u503E\u89D2 = \u662F\u6B7B\u4EA1 ? 1.38 : \u662F\u541F\u5531 ? Math.sin(t * 2.2) * 0.06 : -\u4FA7\u504F * 0.12 - \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.06 + (\u662F\u649E\u8F66 ? Math.cos(t * 22) * 0.22 : 0) + (\u662F\u98DE\u5929 ? Math.sin(t * 3.8) * 0.12 : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8) * 0.15 : 0) + (\u662F\u5632\u8BBD ? 0.12 * Math.sin(t * 4.5) : 0) + (\u662F\u653B\u51FB ? \u653B\u5411 * 0.18 * \u653B\u84C4\u529B - \u653B\u5411 * 0.28 * \u653B\u51FA\u51FB : 0);
+      let \u4FA7\u503E\u89D2 = \u6B7B\u6001 ? -0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 1.38 * \u6B7B\u6001.\u5012\u4E0B - 0.1 * \u6B7B\u6001.\u7838\u5730\u5F39 + 0.03 * \u6B7B\u6001.\u62BD\u6410 : \u662F\u5F85\u673A ? 0 : \u662F\u541F\u5531 ? Math.sin(t * 2.2) * 0.06 : -\u4FA7\u504F * 0.12 - \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.06 + (\u662F\u649E\u8F66 ? Math.cos(t * 22) * 0.22 : 0) + (\u662F\u98DE\u5929 ? Math.sin(t * 3.8) * 0.12 : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8) * 0.15 : 0) + (\u662F\u5632\u8BBD ? 0.12 * Math.sin(t * 4.5) : 0) + (\u662F\u653B\u51FB ? \u653B\u5411 * 0.18 * \u653B\u84C4\u529B - \u653B\u5411 * 0.28 * \u653B\u51FA\u51FB : 0);
       if (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1) \u4FA7\u503E\u89D2 += -\u91CD\u521B.\u63A8\u5411 * 0.38 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.14;
       const \u4FA7\u503E\u4E0A\u9650 = \u662F\u6B7B\u4EA1 ? 1.5 : \u91CD\u521B.\u6FC0\u6D3B ? 0.56 : 0.34;
       \u4FA7\u503E\u89D2 = Math.max(-\u4FA7\u503E\u4E0A\u9650, Math.min(\u4FA7\u503E\u4E0A\u9650, \u4FA7\u503E\u89D2));
@@ -39475,7 +39822,8 @@ void main() {
       const sinRoll = Math.sin(\u4FA7\u503E\u89D2);
       const \u540E\u5DE6\u9700\u8F74Y = \u540E\u5DE6\u5730\u9AD8 + \u540E\u8F6E\u534A\u5F84 * cosRoll - \u8F6E\u8DDD\u534A\u5BBD * sinRoll;
       const \u540E\u53F3\u9700\u8F74Y = \u540E\u53F3\u5730\u9AD8 + \u540E\u8F6E\u534A\u5F84 * cosRoll + \u8F6E\u8DDD\u534A\u5BBD * sinRoll;
-      let \u67A2\u7EBD\u9AD8Y = \u662F\u6B7B\u4EA1 ? Math.max(\u540E\u5DE6\u5730\u9AD8, \u540E\u53F3\u5730\u9AD8) + 0.93 * k * Math.sin(1.38) + 0.49 * k * Math.cos(1.38) + 0.05 * k : Math.max(\u540E\u5DE6\u9700\u8F74Y, \u540E\u53F3\u9700\u8F74Y);
+      const \u4FA7\u5367\u9700\u8F74Y = Math.max(\u540E\u5DE6\u5730\u9AD8, \u540E\u53F3\u5730\u9AD8) + 0.93 * k * Math.sin(Math.abs(\u4FA7\u503E\u89D2)) + 0.49 * k * Math.max(0, cosRoll) + 0.05 * k;
+      let \u67A2\u7EBD\u9AD8Y = \u6B7B\u6001 ? Math.max(\u540E\u5DE6\u9700\u8F74Y, \u540E\u53F3\u9700\u8F74Y, \u4FA7\u5367\u9700\u8F74Y) + 0.14 * k * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.1 * k * \u6B7B\u6001.\u7838\u5730\u5F39 : Math.max(\u540E\u5DE6\u9700\u8F74Y, \u540E\u53F3\u9700\u8F74Y);
       const \u524D\u5730\u9762\u9AD8 = Math.max(\u524D\u5DE6\u5730\u9AD8, \u524D\u53F3\u5730\u9AD8);
       if (!\u662F\u5426\u817E\u7A7A && !\u662F\u6B7B\u4EA1 && \u7FD8\u5934\u89D2 < 0.08) {
         const \u5761\u9AD8\u5DEE = \u524D\u5730\u9762\u9AD8 - Math.max(\u540E\u5DE6\u5730\u9AD8, \u540E\u53F3\u5730\u9AD8);
@@ -39535,18 +39883,30 @@ void main() {
       const \u624B\u6447\u524D\u4FEF\u6446 = \u624B\u6447\u547C\u5438 * 0.105 * \u6643\u52A8\u5E45;
       const \u624B\u6447\u5DE6\u53F3\u6643 = Math.cos(this.\u624B\u6447\u76F8\u4F4D) * 0.115 * \u6643\u52A8\u5E45;
       const \u624B\u6447\u626D\u8170 = Math.sin(this.\u624B\u6447\u76F8\u4F4D) * 0.075 * \u6643\u52A8\u5E45;
-      const \u57FA\u7840\u524D\u4EF0 = \u662F\u6B7B\u4EA1 ? 0.28 : \u662F\u541F\u5531 ? -0.1 + Math.sin(t * 3) * 0.05 : \u662F\u7B11\u8BDD ? 0.24 + Math.abs(Math.sin(t * 18)) * 0.14 : \u662F\u5632\u8BBD ? 0.14 + Math.sin(t * 10) * 0.06 : \u662F\u8DF3\u821E ? 0.08 + Math.sin(t * 8) * 0.08 : \u662F\u666E\u653B ? -0.22 * \u653B\u84C4\u529B + 0.3 * \u653B\u51FA\u51FB : \u662F\u6025\u5239 ? -0.26 : \u662F\u51B2\u7EBF ? -0.14 + Math.sin(t * 10) * 0.08 : -0.16 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.13;
-      const \u7EC8\u4E0A\u8EABX = Math.max(-0.32, Math.min(0.32, \u57FA\u7840\u524D\u4EF0 + \u624B\u6447\u524D\u4FEF\u6446));
-      const \u7EC8\u4E0A\u8EABZ = \u662F\u6B7B\u4EA1 ? -0.38 : \u662F\u541F\u5531 ? Math.sin(t * 2.6) * 0.06 : Math.max(-0.62, Math.min(0.62, -0.17 * \u6B6A\u5934\u5E45 + \u624B\u6447\u5DE6\u53F3\u6643 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.19 + \u60EF\u6027\u6001.\u6A2A\u9707 * 0.08 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.36 * \u91CD\u521B.\u5305\u7EDC : 0)));
+      const \u57FA\u7840\u524D\u4EF0 = \u6B7B\u6001 ? -0.16 * (1 - \u6B7B\u6001.\u5012\u4E0B) - 0.26 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.28 * \u6B7B\u6001.\u5012\u4E0B : \u73AF\u89C6 ? -0.1 + \u73AF\u89C6.\u547C\u5438 * 0.025 : \u662F\u541F\u5531 ? -0.1 + Math.sin(t * 3) * 0.05 : \u662F\u7B11\u8BDD ? 0.24 + Math.abs(Math.sin(t * 18)) * 0.14 : \u662F\u5632\u8BBD ? 0.14 + Math.sin(t * 10) * 0.06 : \u662F\u8DF3\u821E ? 0.08 + Math.sin(t * 8) * 0.08 : \u662F\u666E\u653B ? -0.22 * \u653B\u84C4\u529B + 0.3 * \u653B\u51FA\u51FB : \u662F\u6025\u5239 ? -0.26 : \u662F\u51B2\u7EBF ? -0.14 + Math.sin(t * 10) * 0.08 : -0.16 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.13;
+      const \u7EC8\u4E0A\u8EABX = Math.max(-0.36, Math.min(0.36, \u57FA\u7840\u524D\u4EF0 + \u624B\u6447\u524D\u4FEF\u6446));
+      const \u7EC8\u4E0A\u8EABZ = \u6B7B\u6001 ? -0.17 * \u6B6A\u5934\u5E45 * (1 - \u6B7B\u6001.\u5012\u4E0B) - 0.38 * \u6B7B\u6001.\u5012\u4E0B + 0.16 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.05 * \u6B7B\u6001.\u62BD\u6410 : \u73AF\u89C6 ? -0.14 * \u6B6A\u5934\u5E45 + \u73AF\u89C6.\u6B6A\u5934Z * 0.16 : \u662F\u541F\u5531 ? Math.sin(t * 2.6) * 0.06 : Math.max(-0.62, Math.min(0.62, -0.17 * \u6B6A\u5934\u5E45 + \u624B\u6447\u5DE6\u53F3\u6643 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.19 + \u60EF\u6027\u6001.\u6A2A\u9707 * 0.08 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.36 * \u91CD\u521B.\u5305\u7EDC : 0)));
       this.\u4E0A\u8EAB\u7EC4.position.set(0, 0.05 * k * m, 0.02 * k + \u6781\u901F\u62C9\u626F\u5EA6 * 0.075 * k);
-      this.\u4E0A\u8EAB\u7EC4.rotation.set(\u7EC8\u4E0A\u8EABX, \u4FA7\u504F * 0.1 + \u624B\u6447\u626D\u8170, \u7EC8\u4E0A\u8EABZ);
+      this.\u4E0A\u8EAB\u7EC4.rotation.set(\u7EC8\u4E0A\u8EABX, \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.14 : \u4FA7\u504F * 0.1 + \u624B\u6447\u626D\u8170, \u7EC8\u4E0A\u8EABZ);
       this.\u4E0A\u8EAB\u7EC4.scale.set(
-        1 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.08 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u6241\u538B * 0.14 : 0),
-        1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.14 - (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u6241\u538B * 0.18 : 0),
+        1 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.08 + (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? \u91CD\u521B.\u6241\u538B * 0.14 : 0),
+        1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.14 - (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? \u91CD\u521B.\u6241\u538B * 0.18 : 0),
         1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.28
       );
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u5934\u90E8\u7EC4.rotation.set(0.55, 0.28, -0.78 * \u6B6A\u5934\u5E45);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u5934\u90E8\u7EC4.rotation.set(
+          0.26 * (1 - d) - 0.42 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.55 * d + 0.08 * \u6B7B\u6001.\u62BD\u6410,
+          0.22 * \u6B6A\u5934\u5E45 * (1 - d) + 0.28 * d,
+          -0.52 * \u6B6A\u5934\u5E45 * (1 - d) - 0.78 * \u6B6A\u5934\u5E45 * d + 0.08 * \u6B7B\u6001.\u62BD\u6410
+        );
+        this.\u5934\u90E8\u7EC4.scale.set(1, 1, 1);
+      } else if (\u73AF\u89C6) {
+        this.\u5934\u90E8\u7EC4.rotation.set(
+          0.16 + \u73AF\u89C6.\u62AC\u5934X * 0.34,
+          0.14 * \u6B6A\u5934\u5E45 + \u73AF\u89C6.\u8F6C\u5934Y * 0.58,
+          -0.36 * \u6B6A\u5934\u5E45 + \u73AF\u89C6.\u6B6A\u5934Z * 0.24
+        );
         this.\u5934\u90E8\u7EC4.scale.set(1, 1, 1);
       } else if (\u662F\u541F\u5531) {
         this.\u5934\u90E8\u7EC4.rotation.set(-0.34 + Math.sin(t * 3) * 0.08, Math.sin(t * 1.8) * 0.18, -0.18 * \u6B6A\u5934\u5E45);
@@ -39620,25 +39980,26 @@ void main() {
           1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.24
         );
       }
-      const \u98D8\u957F = 1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.95 + (\u6B63\u5728\u8DD1\u52A8 ? 0.25 : 0) + (\u91CD\u521B.\u6FC0\u6D3B ? 0.45 : 0);
+      const \u98D8\u957F = 1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.95 + (\u6B63\u5728\u8DD1\u52A8 ? 0.25 : 0) + (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? 0.45 : 0);
       if (this.\u7EA2\u9886\u5DFE\u98D8\u5E26\u5DE6 && this.\u7EA2\u9886\u5DFE\u98D8\u5E26\u53F3) {
-        const \u6296 = \u662F\u6B7B\u4EA1 ? 0 : \u6B63\u5728\u8DD1\u52A8 ? Math.sin(t * 28) * 0.24 : Math.sin(t * 3) * 0.08;
-        const \u521B\u7529 = \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u63A8\u5411 * 0.65 * \u91CD\u521B.\u5305\u7EDC : 0;
+        const \u6296 = \u6B7B\u6001 ? 0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u6B63\u5728\u8DD1\u52A8 ? Math.sin(t * 28) * 0.24 : Math.sin(t * 2.2) * 0.04;
+        const \u521B\u7529 = \u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1 ? \u91CD\u521B.\u63A8\u5411 * 0.65 * \u91CD\u521B.\u5305\u7EDC : 0;
         this.\u7EA2\u9886\u5DFE\u98D8\u5E26\u5DE6.rotation.set(0.18 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.16 + \u6296, 0.18 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.25 + \u521B\u7529, 0);
         this.\u7EA2\u9886\u5DFE\u98D8\u5E26\u53F3.rotation.set(0.18 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.16 - \u6296, -0.18 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.25 + \u521B\u7529, 0);
         this.\u7EA2\u9886\u5DFE\u98D8\u5E26\u5DE6.scale.set(1, 1, \u98D8\u957F);
         this.\u7EA2\u9886\u5DFE\u98D8\u5E26\u53F3.scale.set(1, 1, \u98D8\u957F);
       }
       if (this.\u820C\u5934\u7F51\u683C) {
-        this.\u820C\u5934\u7F51\u683C.rotation.z = \u662F\u6B7B\u4EA1 ? -0.65 : -0.35 + Math.sin(t * (\u662F\u5632\u8BBD ? 20 : 11)) * 0.18 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.24 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.55 : 0);
-        this.\u820C\u5934\u7F51\u683C.scale.setScalar(\u662F\u6B7B\u4EA1 ? 1.55 : \u662F\u5632\u8BBD ? 1.35 : \u91CD\u521B.\u6FC0\u6D3B ? 1.45 : 1);
+        this.\u820C\u5934\u7F51\u683C.rotation.z = \u6B7B\u6001 ? -0.35 - 0.3 * \u6B7B\u6001.\u5012\u4E0B + 0.12 * \u6B7B\u6001.\u62BD\u6410 : \u73AF\u89C6 ? -0.35 + \u73AF\u89C6.\u547C\u5438 * 0.06 : -0.35 + Math.sin(t * (\u662F\u5632\u8BBD ? 20 : 11)) * 0.18 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.24 + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.55 : 0);
+        this.\u820C\u5934\u7F51\u683C.scale.setScalar(\u6B7B\u6001 ? 1 + 0.55 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u5632\u8BBD ? 1.35 : \u91CD\u521B.\u6FC0\u6D3B ? 1.45 : 1);
       }
       if (this.\u76D6\u817F\u6BEF\u7F51\u683C) {
         this.\u76D6\u817F\u6BEF\u7F51\u683C.rotation.x = Math.PI / 2 + 0.06 + (\u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD ? Math.sin(t * 20) * 0.14 : 0);
       }
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u5DE6\u817F\u7EC4.rotation.set(0.18, 0.18, -0.15);
-        this.\u53F3\u817F\u7EC4.rotation.set(0.24, -0.22, 0.12);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u5DE6\u817F\u7EC4.rotation.set(-0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.18 * d + 0.06 * \u6B7B\u6001.\u62BD\u6410, 0.06 + 0.12 * d, -0.05 - 0.1 * d);
+        this.\u53F3\u817F\u7EC4.rotation.set(-0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.24 * d - 0.06 * \u6B7B\u6001.\u62BD\u6410, -0.06 - 0.16 * d, 0.05 + 0.07 * d);
       } else if (\u662F\u51B2\u7EBF || \u662F\u98DE\u5929 || \u662F\u7B11\u8BDD) {
         const \u8E6C\u9891 = \u662F\u98DE\u5929 ? 20 : 18;
         this.\u5DE6\u817F\u7EC4.rotation.set(-0.28 + Math.sin(t * \u8E6C\u9891) * 0.34, 0.1, -0.06);
@@ -39649,21 +40010,22 @@ void main() {
       }
       for (let i = 0; i < this.\u7334\u5C3E\u6BB5.length; i++) {
         const \u5C3E = this.\u7334\u5C3E\u6BB5[i];
-        const \u7FD8 = \u662F\u6B7B\u4EA1 ? -0.08 : \u662F\u51B2\u7EBF ? 0.55 : (i === 0 ? 0.26 : i === 1 ? 0.32 : 0.38) * (1 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.72);
-        const \u6446 = \u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * (\u662F\u51B2\u7EBF ? 18 : \u6B63\u5728\u8DD1\u52A8 ? 13 : 3.2) - i * 0.75) * (\u662F\u51B2\u7EBF ? 0.36 : \u6B63\u5728\u8DD1\u52A8 ? 0.2 : 0.08);
+        const \u5E38\u7FD8 = (i === 0 ? 0.26 : i === 1 ? 0.32 : 0.38) * (1 - \u6781\u901F\u62C9\u626F\u5EA6 * 0.72);
+        const \u7FD8 = \u6B7B\u6001 ? \u5E38\u7FD8 * (1 - \u6B7B\u6001.\u5012\u4E0B) - 0.08 * \u6B7B\u6001.\u5012\u4E0B + 0.24 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u662F\u51B2\u7EBF ? 0.55 : \u5E38\u7FD8;
+        const \u6446 = \u6B7B\u6001 ? 0.1 * \u6B7B\u6001.\u62BD\u6410 * (i % 2 === 0 ? 1 : -1) : Math.sin(t * (\u662F\u51B2\u7EBF ? 18 : \u6B63\u5728\u8DD1\u52A8 ? 13 : 2.2) - i * 0.75) * (\u662F\u51B2\u7EBF ? 0.36 : \u6B63\u5728\u8DD1\u52A8 ? 0.2 : 0.05);
         \u5C3E.rotation.set(\u7FD8, \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.24 + \u6446, 0);
         \u5C3E.scale.set(1, 1, 1 + \u6781\u901F\u62C9\u626F\u5EA6 * 0.3);
       }
       const \u5DE6\u63A8\u529B = \u6B63\u5728\u8DD1\u52A8 ? Math.max(0, Math.cos(this.\u624B\u6447\u76F8\u4F4D)) : 0;
       const \u53F3\u63A8\u529B = \u6B63\u5728\u8DD1\u52A8 ? Math.max(0, Math.cos(this.\u624B\u6447\u76F8\u4F4D + 0.5)) : 0;
-      const \u7D27\u7EF7\u5E95\u529B = \u662F\u6B7B\u4EA1 ? 0 : \u662F\u8D77\u6B65 ? 0.42 : \u52A0\u901F\u4E2D ? 0.48 : \u6B63\u5728\u8DD1\u52A8 ? 0.18 : 0;
-      const \u5DE6\u808C\u6DA8 = 1 + \u7D27\u7EF7\u5E95\u529B + \u5DE6\u63A8\u529B * 0.28;
-      const \u53F3\u808C\u6DA8 = 1 + \u7D27\u7EF7\u5E95\u529B + \u53F3\u63A8\u529B * 0.28;
+      const \u7D27\u7EF7\u5E95\u529B = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : \u662F\u8D77\u6B65 ? 0.35 : \u52A0\u901F\u4E2D ? 0.42 : \u6B63\u5728\u8DD1\u52A8 ? 0.14 : 0;
+      const \u5DE6\u808C\u6DA8 = 1 + \u7D27\u7EF7\u5E95\u529B * 0.14 + \u5DE6\u63A8\u529B * 0.05;
+      const \u53F3\u808C\u6DA8 = 1 + \u7D27\u7EF7\u5E95\u529B * 0.14 + \u53F3\u63A8\u529B * 0.05;
       if (this.\u5DE6\u4E8C\u5934\u808C && this.\u5DE6\u524D\u81C2\u808C && this.\u53F3\u4E8C\u5934\u808C && this.\u53F3\u524D\u81C2\u808C) {
-        this.\u5DE6\u4E8C\u5934\u808C.scale.set(\u5DE6\u808C\u6DA8, 1.45, \u5DE6\u808C\u6DA8 * 1.08);
-        this.\u5DE6\u524D\u81C2\u808C.scale.set(\u5DE6\u808C\u6DA8 * 0.96, 1.55, \u5DE6\u808C\u6DA8);
-        this.\u53F3\u4E8C\u5934\u808C.scale.set(\u53F3\u808C\u6DA8, 1.45, \u53F3\u808C\u6DA8 * 1.08);
-        this.\u53F3\u524D\u81C2\u808C.scale.set(\u53F3\u808C\u6DA8 * 0.96, 1.55, \u53F3\u808C\u6DA8);
+        this.\u5DE6\u4E8C\u5934\u808C.scale.set(\u5DE6\u808C\u6DA8, 1, \u5DE6\u808C\u6DA8);
+        this.\u5DE6\u524D\u81C2\u808C.scale.set(1 + (\u5DE6\u808C\u6DA8 - 1) * 0.72, 1, 1 + (\u5DE6\u808C\u6DA8 - 1) * 0.72);
+        this.\u53F3\u4E8C\u5934\u808C.scale.set(\u53F3\u808C\u6DA8, 1, \u53F3\u808C\u6DA8);
+        this.\u53F3\u524D\u81C2\u808C.scale.set(1 + (\u53F3\u808C\u6DA8 - 1) * 0.72, 1, 1 + (\u53F3\u808C\u6DA8 - 1) * 0.72);
       }
       if (this.\u7D27\u7EF7\u808C\u6750) {
         this.\u7D27\u7EF7\u808C\u6750.emissiveIntensity = \u662F\u6B7B\u4EA1 ? 0.04 : 0.08 + \u7D27\u7EF7\u5E95\u529B * 0.65 + (\u662F\u5927\u55B7 ? 0.22 : 0);
@@ -39679,11 +40041,12 @@ void main() {
         this.\u53F3\u91D1\u7B8D\u68D2.visible = false;
         this.\u53F3\u91D1\u7B8D\u68D2.scale.set(1, 1, 1);
       }
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u80A9\u67A2\u5DE6.rotation.set(0.65, -0.25, -0.35);
-        this.\u8098\u67A2\u5DE6.rotation.set(0.75, 0, 0);
-        this.\u80A9\u67A2\u53F3.rotation.set(0.75, 0.35, 0.55);
-        this.\u8098\u67A2\u53F3.rotation.set(0.85, 0, 0);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u80A9\u67A2\u5DE6.rotation.set(-0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.65 * d, -0.25 * d, 0.85 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.35 * d + 0.12 * \u6B7B\u6001.\u62BD\u6410);
+        this.\u8098\u67A2\u5DE6.rotation.set(-0.45 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.75 * d, 0, 0);
+        this.\u80A9\u67A2\u53F3.rotation.set(-0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.75 * d, 0.35 * d, -0.85 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.55 * d - 0.12 * \u6B7B\u6001.\u62BD\u6410);
+        this.\u8098\u67A2\u53F3.rotation.set(-0.45 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.85 * d, 0, 0);
       } else if (\u662F\u541F\u5531) {
         this.\u80A9\u67A2\u5DE6.rotation.set(-0.18 + Math.sin(t * 3) * 0.08, 0.12, 0.24);
         this.\u8098\u67A2\u5DE6.rotation.set(0.16, 0, 0);
@@ -39853,7 +40216,7 @@ void main() {
           g.mesh.visible = false;
         }
       }
-      const \u89E6\u53D1\u6B8B\u5F71 = (\u8DD1\u52A8\u901F\u5EA6 > 14 || \u52A0\u901F\u4E2D || \u662F\u51B2\u7EBF) && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u89E6\u53D1\u6B8B\u5F71 = !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 && (\u8DD1\u52A8\u901F\u5EA6 > 22 || \u52A0\u901F\u4E2D || \u662F\u51B2\u7EBF) && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       const \u91C7\u6837\u95F4\u9694 = \u662F\u5927\u55B7 ? 0.02 : \u662F\u53CC\u55B7 ? 0.026 : 0.04;
       if (\u89E6\u53D1\u6B8B\u5F71) {
         this.\u6B8B\u5F71\u91C7\u6837\u8BA1\u65F6 += dt;
@@ -40663,12 +41026,16 @@ void main() {
       const \u662F\u53F3\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u653B\u51FB = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u8F6C\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u653B\u76F801 = \u662F\u653B\u51FB || \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       const \u8E39\u76F8 = \u662F\u653B\u51FB ? \u8BA1\u7B97\u4E09\u6BB5\u4FA7\u8E39\u9636\u6BB5(\u653B\u76F801) : { \u62AC\u817F\u5EA6: 0, \u5C48\u819D\u5EA6: 0, \u626D\u80EF\u5EA6: 0, \u8E6C\u817F\u5EA6: 0 };
@@ -40676,9 +41043,9 @@ void main() {
       const \u653B\u51FA\u51FB = \u662F\u653B\u51FB ? \u8E39\u76F8.\u8E6C\u817F\u5EA6 : \u662F\u666E\u653B && \u653B\u76F801 >= 0.24 && \u653B\u76F801 <= 0.78 ? Math.sin((\u653B\u76F801 - 0.24) / 0.54 * Math.PI) : 0;
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u653B\u76F801, 12616956, 16109822, 1.68, 1.05, 0.12);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
-      const \u8DD1\u52A8\u901F\u5EA6 = \u5C55\u793A\u53F0\u8DD1 ? Math.max(24, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1\u52A8 = (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u52A0\u901F\u4E2D || \u662F\u8D77\u6B65 || \u662F\u98DE\u5929) && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
+      const \u8DD1\u52A8\u901F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(24, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1\u52A8 = (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8D77\u6B65 || \u662F\u98DE\u5929) && !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       if (\u52A0\u901F\u4E2D && !this.\u66FE\u5728\u52A0\u901F) {
         this.\u52A0\u901F\u84C4\u529B\u8BA1\u65F6 = 0.16;
         this.\u5239\u8F66\u56DE\u5F39\u8BA1\u65F6 = 0;
@@ -40712,7 +41079,7 @@ void main() {
           this.\u7FFB\u6EDA\u89D2 = Math.round(this.\u7FFB\u6EDA\u89D2 / \u6574\u5708) * \u6574\u5708;
         }
       }
-      const \u6B65\u9891 = \u662F\u8D77\u6B65 ? 18 : \u662F\u51B2\u7EBF ? 14 : 5.8 + \u8DD1\u52A8\u901F\u5EA6 / 40 * 15;
+      const \u6B65\u9891 = \u662F\u8D77\u6B65 ? 18 : \u662F\u51B2\u7EBF ? 14 : \u662F\u884C\u8D70 ? 6.8 : 5.8 + \u8DD1\u52A8\u901F\u5EA6 / 40 * 15;
       if (\u6B63\u5728\u8DD1\u52A8 && this.\u4FA7\u5012\u6743 < 0.85) {
         this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
       }
@@ -40725,8 +41092,8 @@ void main() {
       let \u590D\u5012Z = 0;
       let \u590D\u8F6CY = 0;
       let \u590D\u6A2AX = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u4E2D\u5FC3\u9AD8 = \u5730\u9AD8 + \u6EDA\u7B52\u8D34\u5730\u534A\u5F84 * 1.04;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u4E2D\u5FC3\u9AD8 = \u5730\u9AD8 + \u76F4\u7ACB\u4E2D\u5FC3\u9AD8 + (\u6EDA\u7B52\u8D34\u5730\u534A\u5F84 * 1.04 - \u76F4\u7ACB\u4E2D\u5FC3\u9AD8) * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.24 * km;
       } else if (\u662F\u541F\u5531) {
         \u4E2D\u5FC3\u9AD8 += Math.sin(t * 2.8) * 0.05 * km;
       } else if (\u662F\u98DE\u5929) {
@@ -40763,7 +41130,7 @@ void main() {
       } else if (\u662F\u649E\u8F66) {
         \u4E2D\u5FC3\u9AD8 += Math.abs(Math.sin(t * 14)) * 0.5 * km;
       } else if (\u6B63\u5728\u8DD1\u52A8 && !\u662F\u5426\u817E\u7A7A) {
-        \u4E2D\u5FC3\u9AD8 += Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D)) * 0.078 * km * (1 - \u4FA7\u6B63\u6743);
+        \u4E2D\u5FC3\u9AD8 += Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D)) * (\u662F\u884C\u8D70 ? 0.048 : 0.078) * km * (1 - \u4FA7\u6B63\u6743);
       }
       if (\u91CD\u521B.\u6FC0\u6D3B) \u4E2D\u5FC3\u9AD8 += \u91CD\u521B.\u6241\u538B * 0.22 * km;
       const \u76F4\u7ACB\u4FA7\u503E = Math.max(-0.46, Math.min(0.46, \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.18 + \u60EF\u6027\u6001.\u6A2A\u9707 * 0.1 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u91CD\u521B.\u63A8\u5411 * 0.28 * \u91CD\u521B.\u5305\u7EDC : 0)));
@@ -40784,7 +41151,7 @@ void main() {
       this.\u4FA7\u5012\u67A2.rotation.set(
         0,
         0,
-        \u662F\u6B7B\u4EA1 ? 1.5 : this.\u4FA7\u5012\u6743 * (Math.PI / 2) + (1 - \u4FA7\u6B63\u6743) * \u76F4\u7ACB\u4FA7\u503E + \u590D\u5012Z
+        \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? \u6B7B\u6001.\u53D7\u51FB\u9707 * -0.22 + 1.5 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.14 + \u6B7B\u6001.\u62BD\u6410 * 0.06 : this.\u4FA7\u5012\u6743 * (Math.PI / 2) + (1 - \u4FA7\u6B63\u6743) * \u76F4\u7ACB\u4FA7\u503E + \u590D\u5012Z
       );
       if (this.\u6F02\u79FB\u89E6\u70B9\u7EC4.length >= 3) {
         const \u6EDA\u7B52\u7740\u5730 = \u4FA7\u6B63\u6743 > 0.5;
@@ -40820,11 +41187,11 @@ void main() {
         \u80D6\u644A\u5BBDXZ = 1 + 0.18 * \u56DE\u5F39\u8FDB - \u9707\u6CE2 * 0.08;
         \u8EAB\u524D\u503EX = 0.28 * \u56DE\u5F39\u8FDB + \u9707\u6CE2 * 0.22;
         \u8EAB\u4FA7\u6B6AZ = \u9707\u6CE2 * 0.16;
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u80D6\u538B\u6241Y = 0.94;
-        \u80D6\u644A\u5BBDXZ = 1.06;
-        \u8EAB\u524D\u503EX = 0.14;
-        \u8EAB\u4FA7\u6B6AZ = 0.06;
+      } else if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u80D6\u538B\u6241Y = 1 - 0.06 * \u6B7B\u6001.\u5012\u4E0B - \u6B7B\u6001.\u7838\u5730\u5F39 * 0.14 + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.1;
+        \u80D6\u644A\u5BBDXZ = 1 + 0.06 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.12 - \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.06;
+        \u8EAB\u524D\u503EX = -0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.14 * \u6B7B\u6001.\u5012\u4E0B;
+        \u8EAB\u4FA7\u6B6AZ = 0.06 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.05;
       } else if (\u662F\u541F\u5531) {
         \u80D6\u538B\u6241Y = 1.04 + Math.sin(t * 3) * 0.04;
         \u80D6\u644A\u5BBDXZ = 0.98 - Math.sin(t * 3) * 0.02;
@@ -40879,14 +41246,15 @@ void main() {
         \u8EAB\u4FA7\u6B6AZ = Math.cos(t * 7.8) * 0.18;
       } else if (\u6B63\u5728\u8DD1\u52A8) {
         const \u8DD1\u5F39 = Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2);
-        \u80D6\u538B\u6241Y = 0.96 + \u8DD1\u5F39 * 0.05;
-        \u80D6\u644A\u5BBDXZ = 1.03 - \u8DD1\u5F39 * 0.03;
-        \u8EAB\u524D\u503EX = 0.1;
-        \u8EAB\u4FA7\u6B6AZ = Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * 0.11;
+        \u80D6\u538B\u6241Y = 0.97 + \u8DD1\u5F39 * (\u662F\u884C\u8D70 ? 0.03 : 0.05);
+        \u80D6\u644A\u5BBDXZ = 1.02 - \u8DD1\u5F39 * (\u662F\u884C\u8D70 ? 0.02 : 0.03);
+        \u8EAB\u524D\u503EX = \u662F\u884C\u8D70 ? 0.06 : 0.1;
+        \u8EAB\u4FA7\u6B6AZ = Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u884C\u8D70 ? 0.075 : 0.11);
       } else {
-        const \u547C = Math.sin(t * 2.6);
-        \u80D6\u538B\u6241Y = 0.97 + \u547C * 0.035;
-        \u80D6\u644A\u5BBDXZ = 1.02 - \u547C * 0.025;
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2.4);
+        \u80D6\u538B\u6241Y = 0.98 + \u547C * 0.03;
+        \u80D6\u644A\u5BBDXZ = 1.015 - \u547C * 0.02;
+        \u8EAB\u4FA7\u6B6AZ = \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.22 : 0;
       }
       if (\u91CD\u521B.\u6FC0\u6D3B) {
         \u80D6\u538B\u6241Y = Math.max(0.5, \u80D6\u538B\u6241Y - \u91CD\u521B.\u6241\u538B * 0.48);
@@ -40895,13 +41263,22 @@ void main() {
         \u8EAB\u524D\u503EX += \u91CD\u521B.\u9707\u6CE2 * 0.18;
       }
       this.\u80D6\u8EAB\u7EC4.scale.set(\u80D6\u644A\u5BBDXZ, \u80D6\u538B\u6241Y, \u80D6\u644A\u5BBDXZ);
-      this.\u80D6\u8EAB\u7EC4.rotation.set(\u8EAB\u524D\u503EX, \u4FA7\u504F * 0.18 + (\u662F\u653B\u51FB ? \u653B\u5411 * 0.36 * \u653B\u51FA\u51FB : 0), \u8EAB\u4FA7\u6B6AZ);
+      this.\u80D6\u8EAB\u7EC4.rotation.set(
+        \u8EAB\u524D\u503EX,
+        (\u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.32 : \u4FA7\u504F * 0.18) + (\u662F\u653B\u51FB ? \u653B\u5411 * 0.36 * \u653B\u51FA\u51FB : 0),
+        \u8EAB\u4FA7\u6B6AZ
+      );
       let \u5E3D\u524D\u503E = 0;
       let \u5E3D\u504F\u8F6C = 0;
       let \u5E3D\u4FA7\u503E = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u5E3D\u524D\u503E = 0.12;
-        \u5E3D\u4FA7\u503E = 0.26;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u5E3D\u524D\u503E = -0.26 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.12 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.1;
+        \u5E3D\u4FA7\u503E = -0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.26 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.08;
+        \u5E3D\u504F\u8F6C = 0.18 * \u6B7B\u6001.\u5012\u4E0B;
+      } else if (\u662F\u5F85\u673A && \u73AF\u89C6) {
+        \u5E3D\u524D\u503E = \u73AF\u89C6.\u62AC\u5934X * 0.42;
+        \u5E3D\u504F\u8F6C = \u73AF\u89C6.\u8F6C\u5934Y * 0.72;
+        \u5E3D\u4FA7\u503E = \u73AF\u89C6.\u6B6A\u5934Z * 0.55;
       } else if (\u662F\u541F\u5531) {
         \u5E3D\u524D\u503E = -0.16;
         \u5E3D\u4FA7\u503E = Math.sin(t * 2.4) * 0.18;
@@ -40926,7 +41303,7 @@ void main() {
       } else {
         const \u5E3D\u56DE\u7529X = \u56DE\u5F39\u8FDB > 0 ? Math.sin((1 - \u56DE\u5F39\u8FDB) * Math.PI * 3) * 0.22 * \u56DE\u5F39\u8FDB : 0;
         \u5E3D\u524D\u503E = -\u60EF\u6027\u6001.\u7EB5\u62C9 * 0.08 * (1 - \u4FA7\u6B63\u6743) + \u5E3D\u56DE\u7529X;
-        \u5E3D\u4FA7\u503E = (\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.18 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * 0.07) * (1 - \u4FA7\u6B63\u6743);
+        \u5E3D\u4FA7\u503E = (\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.18 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u884C\u8D70 ? 0.045 : 0.07)) * (1 - \u4FA7\u6B63\u6743);
       }
       if (\u91CD\u521B.\u6FC0\u6D3B) {
         \u5E3D\u4FA7\u503E += -\u91CD\u521B.\u63A8\u5411 * 0.66 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.36;
@@ -40936,7 +41313,7 @@ void main() {
       this.\u9AA8_\u9888.rotation.set(\u5E3D\u524D\u503E * 0.42, \u5E3D\u504F\u8F6C * 0.35, \u5E3D\u4FA7\u503E * 0.42);
       this.\u9AA8_\u5E3D.rotation.set(\u5E3D\u524D\u503E * 0.58, \u5E3D\u504F\u8F6C * 0.65, \u5E3D\u4FA7\u503E * 0.58);
       if (this.\u5634\u7F51\u683C) {
-        const \u5634\u5F20 = \u662F\u6B7B\u4EA1 ? 0.35 : \u91CD\u521B.\u6FC0\u6D3B ? 1.88 : \u662F\u51B2\u7EBF || \u52A0\u901F\u4E2D || \u662F\u7B11\u8BDD ? 1.35 : \u56DE\u5F39\u8FDB > 0.2 ? 1.4 : \u662F\u6253\u6655 ? 0.65 : 1 + Math.sin(t * 3.5) * 0.15;
+        const \u5634\u5F20 = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 1 + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.72 - 0.65 * \u6B7B\u6001.\u5012\u4E0B : \u91CD\u521B.\u6FC0\u6D3B ? 1.88 : \u662F\u51B2\u7EBF || \u52A0\u901F\u4E2D || \u662F\u7B11\u8BDD ? 1.35 : \u56DE\u5F39\u8FDB > 0.2 ? 1.4 : \u662F\u6253\u6655 ? 0.65 : \u662F\u5F85\u673A ? 0.92 + (\u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 * 0.08 : 0) : 1 + Math.sin(t * 3.5) * 0.12;
         this.\u5634\u7F51\u683C.scale.set(1.25 + (\u91CD\u521B.\u6FC0\u6D3B ? 0.35 : 0), 0.78 * \u5634\u5F20, 0.5);
       }
       this.\u5DE6\u81C2\u67A2.scale.set(1, 1, 1);
@@ -40971,11 +41348,14 @@ void main() {
           this.\u53F3\u81C2\u67A2.rotation.set(-\u91CD\u521B.\u9707\u6CE2 * 0.5, 0, -1.15 * \u91CD\u521B.\u5305\u7EDC);
           this.\u5DE6\u817F\u67A2.rotation.set(-0.55 * \u91CD\u521B.\u5305\u7EDC, 0, 0.62 * \u91CD\u521B.\u5305\u7EDC);
           this.\u53F3\u817F\u67A2.rotation.set(-0.55 * \u91CD\u521B.\u5305\u7EDC, 0, -0.62 * \u91CD\u521B.\u5305\u7EDC);
-        } else if (\u662F\u6B7B\u4EA1) {
-          this.\u5DE6\u81C2\u67A2.rotation.set(0.35, 0.3, -0.55);
-          this.\u53F3\u81C2\u67A2.rotation.set(0.35, -0.3, 0.55);
-          this.\u5DE6\u817F\u67A2.rotation.set(0.22, 0, 0.28);
-          this.\u53F3\u817F\u67A2.rotation.set(0.22, 0, -0.28);
+        } else if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+          const tw = \u6B7B\u6001.\u62BD\u6410;
+          this.\u5DE6\u81C2\u67A2.rotation.set(0.35 * d - 0.35 * hit, 0.3 * d, -0.3 + (0.85 * hit - 0.25 * d) + tw * 0.16);
+          this.\u53F3\u81C2\u67A2.rotation.set(0.35 * d - 0.35 * hit, -0.3 * d, 0.3 + (-0.85 * hit + 0.25 * d) - tw * 0.16);
+          this.\u5DE6\u817F\u67A2.rotation.set(0.22 * d - 0.28 * hit + tw * 0.1, 0, 0.28 * d);
+          this.\u53F3\u817F\u67A2.rotation.set(0.22 * d + 0.18 * hit - tw * 0.08, 0, -0.28 * d);
         } else if (\u662F\u541F\u5531) {
           const \u6446 = Math.sin(t * 3.2) * 0.18;
           this.\u5DE6\u81C2\u67A2.rotation.set(0, 0, 1.25 + \u6446);
@@ -41045,14 +41425,16 @@ void main() {
           this.\u53F3\u817F\u67A2.rotation.set(-Math.cos(t * 16) * 0.45, 0, -0.2);
         } else if (\u6B63\u5728\u8DD1\u52A8) {
           const \u6446 = Math.sin(this.\u6B65\u6001\u76F8\u4F4D);
-          this.\u5DE6\u81C2\u67A2.rotation.set(0, -\u6446 * 0.68, -0.18 + Math.abs(\u6446) * 0.28);
-          this.\u53F3\u81C2\u67A2.rotation.set(0, -\u6446 * 0.68, 0.18 - Math.abs(\u6446) * 0.28);
-          this.\u5DE6\u817F\u67A2.rotation.set(-\u6446 * 0.65, 0, 0);
-          this.\u53F3\u817F\u67A2.rotation.set(\u6446 * 0.65, 0, 0);
+          const \u81C2\u5E45 = \u662F\u884C\u8D70 ? 0.44 : 0.68;
+          const \u817F\u5E45 = \u662F\u884C\u8D70 ? 0.44 : 0.65;
+          this.\u5DE6\u81C2\u67A2.rotation.set(0, -\u6446 * \u81C2\u5E45, -0.2 + Math.abs(\u6446) * (\u662F\u884C\u8D70 ? 0.16 : 0.28));
+          this.\u53F3\u81C2\u67A2.rotation.set(0, -\u6446 * \u81C2\u5E45, 0.2 - Math.abs(\u6446) * (\u662F\u884C\u8D70 ? 0.16 : 0.28));
+          this.\u5DE6\u817F\u67A2.rotation.set(-\u6446 * \u817F\u5E45, 0, 0);
+          this.\u53F3\u817F\u67A2.rotation.set(\u6446 * \u817F\u5E45, 0, 0);
         } else {
-          const \u95F2 = Math.sin(t * 2.6) * 0.08;
-          this.\u5DE6\u81C2\u67A2.rotation.set(0, 0, -0.32 + \u95F2);
-          this.\u53F3\u81C2\u67A2.rotation.set(0, 0, 0.32 - \u95F2);
+          const \u95F2 = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 * 0.05 : Math.sin(t * 2.4) * 0.05;
+          this.\u5DE6\u81C2\u67A2.rotation.set(0, 0, -0.3 + \u95F2);
+          this.\u53F3\u81C2\u67A2.rotation.set(0, 0, 0.3 - \u95F2);
           this.\u5DE6\u817F\u67A2.rotation.set(0, 0, 0);
           this.\u53F3\u817F\u67A2.rotation.set(0, 0, 0);
         }
@@ -42174,12 +42556,16 @@ void main() {
       const \u662F\u53F3\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u653B\u51FB = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u8F6C\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u5426\u817E\u7A7A\u6700\u7EC8 = \u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u653B\u76F801 = \u662F\u653B\u51FB || \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       const \u8E39\u76F8 = \u662F\u653B\u51FB ? \u8BA1\u7B97\u4E09\u6BB5\u4FA7\u8E39\u9636\u6BB5(\u653B\u76F801) : { \u62AC\u817F\u5EA6: 0, \u5C48\u819D\u5EA6: 0, \u626D\u80EF\u5EA6: 0, \u8E6C\u817F\u5EA6: 0 };
@@ -42187,11 +42573,11 @@ void main() {
       const \u653B\u51FA\u51FB = \u662F\u653B\u51FB ? \u8E39\u76F8.\u8E6C\u817F\u5EA6 : \u662F\u666E\u653B && \u653B\u76F801 >= 0.28 && \u653B\u76F801 < 0.76 ? Math.sin((\u653B\u76F801 - 0.28) / 0.48 * Math.PI) : 0;
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u653B\u76F801, 16739072, 3718648, 2.08, 1.58, -0.02);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
-      const \u6709\u6548\u901F = \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u6709\u6548\u901F > 0.5 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
+      const \u6709\u6548\u901F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u6709\u6548\u901F > 0.5 || \u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
       const \u6B65\u9891\u500D\u7387 = \u662F\u5927\u55B7 ? 1.85 : \u662F\u53CC\u55B7 ? 1.58 : \u662F\u5C0F\u55B7 ? 1.3 : 1;
-      const \u6B65\u9891 = (4.8 + \u6709\u6548\u901F / 36 * 9.8) * \u6B65\u9891\u500D\u7387;
+      const \u6B65\u9891 = \u662F\u884C\u8D70 ? 5.6 : (4.8 + \u6709\u6548\u901F / 36 * 9.8) * \u6B65\u9891\u500D\u7387;
       if (\u6B63\u5728\u8DD1\u52A8) {
         this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
       }
@@ -42236,25 +42622,29 @@ void main() {
       }
       const \u6F02\u6743 = this.\u6F02\u79FB\u6743\u91CD;
       const \u6F02\u5411 = this.\u5E73\u6ED1\u6F02\u79FB\u5411;
-      if (\u662F\u6B7B\u4EA1) {
-        \u603B\u9AD8Y = 0.46;
-        \u603B\u503EX = -1.48;
-        \u603B\u503EZ = 0.12;
-        \u5DE6\u817FX = -0.22;
-        \u5DE6\u817FZ = 0.24 * tk;
-        \u5DE6\u819DX = 0.48;
-        \u5DE6\u811AX = 0.25;
-        \u53F3\u817FX = -0.14;
-        \u53F3\u817FZ = -0.26 * tk;
-        \u53F3\u819DX = 0.36;
-        \u53F3\u811AX = 0.3;
-        \u76EE\u6807\u8EAB\u4EF0X = 0.04;
-        \u5DE6\u5927\u81C2X = -0.25;
-        \u5DE6\u5927\u81C2Z = 1.24;
-        \u5DE6\u5C0F\u81C2X = -0.12;
-        \u53F3\u5927\u81C2X = -0.18;
-        \u53F3\u5927\u81C2Z = -1.24;
-        \u53F3\u5C0F\u81C2X = -0.12;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u603B\u9AD8Y = 0.46 * d + b * 0.22;
+        \u603B\u503EX = 0.22 * hit - 1.48 * d + b * 0.14;
+        \u603B\u503EZ = -0.14 * hit + 0.12 * d + tw * 0.04;
+        \u5DE6\u817FX = -0.18 * hit - 0.22 * d + tw * 0.08;
+        \u5DE6\u817FZ = (0.08 + 0.16 * d) * tk;
+        \u5DE6\u819DX = 0.08 + 0.4 * d + 0.25 * hit;
+        \u5DE6\u811AX = -0.08 + 0.33 * d;
+        \u53F3\u817FX = 0.12 * hit - 0.14 * d - tw * 0.06;
+        \u53F3\u817FZ = -(0.08 + 0.18 * d) * tk;
+        \u53F3\u819DX = 0.08 + 0.28 * d + 0.18 * hit;
+        \u53F3\u811AX = -0.08 + 0.38 * d;
+        \u76EE\u6807\u8EAB\u4EF0X = -0.22 * hit + 0.04 * d;
+        \u5DE6\u5927\u81C2X = -0.85 * hit - 0.25 * d + tw * 0.1;
+        \u5DE6\u5927\u81C2Z = 0.22 + 0.65 * hit + 1.02 * d;
+        \u5DE6\u5C0F\u81C2X = -0.38 + 0.26 * d;
+        \u53F3\u5927\u81C2X = -0.85 * hit - 0.18 * d - tw * 0.1;
+        \u53F3\u5927\u81C2Z = -0.22 - 0.65 * hit - 1.02 * d;
+        \u53F3\u5C0F\u81C2X = -0.38 + 0.26 * d;
       } else if (\u662F\u541F\u5531) {
         \u603B\u9AD8Y = -0.06;
         \u603B\u503EX = -0.06;
@@ -42527,11 +42917,11 @@ void main() {
         \u5DE6\u5927\u817F\u9707\u98A4 = Math.sin(t * 40) * 0.08;
         \u53F3\u5927\u817F\u9707\u98A4 = Math.cos(t * 40) * 0.08;
       } else if (\u6B63\u5728\u8DD1\u52A8) {
-        const \u524D\u6446\u9AD8 = \u662F\u5927\u55B7 ? 1.56 : \u662F\u53CC\u55B7 ? 1.52 : \u662F\u5C0F\u55B7 ? 1.48 : Math.min(1.46, 1.36 + \u6709\u6548\u901F / 45 * 0.1);
-        const \u540E\u8E6C\u5E45 = \u662F\u5927\u55B7 ? 0.46 : \u662F\u53CC\u55B7 ? 0.42 : \u662F\u5C0F\u55B7 ? 0.39 : Math.min(0.37, 0.28 + \u6709\u6548\u901F / 45 * 0.09);
-        const \u6298\u819D\u5E45 = \u662F\u5927\u55B7 ? 1 : \u52A0\u901F\u4E2D ? 0.95 : 0.9;
-        const \u9707\u98A4\u5E45 = (\u52A0\u901F\u4E2D ? 0.115 : 0.055) + Math.min(0.065, \u6709\u6548\u901F / 45 * 0.06);
-        \u603B\u503EX = \u662F\u5927\u55B7 ? 0.16 : \u662F\u53CC\u55B7 ? 0.14 : \u662F\u5C0F\u55B7 ? 0.11 : 0.08;
+        const \u524D\u6446\u9AD8 = \u662F\u884C\u8D70 ? 0.72 : \u662F\u5927\u55B7 ? 1.56 : \u662F\u53CC\u55B7 ? 1.52 : \u662F\u5C0F\u55B7 ? 1.48 : Math.min(1.46, 1.36 + \u6709\u6548\u901F / 45 * 0.1);
+        const \u540E\u8E6C\u5E45 = \u662F\u884C\u8D70 ? 0.28 : \u662F\u5927\u55B7 ? 0.46 : \u662F\u53CC\u55B7 ? 0.42 : \u662F\u5C0F\u55B7 ? 0.39 : Math.min(0.37, 0.28 + \u6709\u6548\u901F / 45 * 0.09);
+        const \u6298\u819D\u5E45 = \u662F\u884C\u8D70 ? 0.5 : \u662F\u5927\u55B7 ? 1 : \u52A0\u901F\u4E2D ? 0.95 : 0.9;
+        const \u9707\u98A4\u5E45 = \u662F\u884C\u8D70 ? 0.018 : (\u52A0\u901F\u4E2D ? 0.115 : 0.055) + Math.min(0.065, \u6709\u6548\u901F / 45 * 0.06);
+        \u603B\u503EX = \u662F\u884C\u8D70 ? 0.04 : \u662F\u5927\u55B7 ? 0.16 : \u662F\u53CC\u55B7 ? 0.14 : \u662F\u5C0F\u55B7 ? 0.11 : 0.08;
         const \u8BA1\u7B97\u81EA\u7136\u817F = (\u76F8, \u7B26\u53F7) => {
           const s = Math.sin(\u76F8);
           const c = Math.cos(\u76F8);
@@ -42539,20 +42929,20 @@ void main() {
           const \u5927X = \u6446 >= 0 ? -(\u6446 * (1.22 - 0.22 * \u6446)) * \u524D\u6446\u9AD8 - 0.04 : -\u6446 * \u540E\u8E6C\u5E45 - 0.04;
           const \u6298\u819D\u671F = Math.pow(Math.max(0, Math.sin(\u76F8 + 0.5)), 0.85) * \u6298\u819D\u5E45;
           const \u843D\u5730\u7F13\u819D = Math.max(0, -c) * Math.exp(-Math.pow(s / 0.45, 2)) * 0.28;
-          const \u8E6C\u671F\u5FAE\u66F2 = \u6446 < -0.15 ? Math.pow((-\u6446 - 0.15) / 0.85, 1.05) * 0.56 : 0;
+          const \u8E6C\u671F\u5FAE\u66F2 = \u6446 < -0.15 ? Math.pow((-\u6446 - 0.15) / 0.85, 1.05) * (\u662F\u884C\u8D70 ? 0.34 : 0.56) : 0;
           const \u819DX = 0.14 + \u6298\u819D\u671F + \u843D\u5730\u7F13\u819D + \u8E6C\u671F\u5FAE\u66F2;
           const \u524D\u8FC8\u52FE\u6743 = \u5E73\u6ED1\u9636\u8DC3(-0.15, 0.42, \u6446);
           const \u540E\u4F38\u987A\u6743 = \u5E73\u6ED1\u9636\u8DC3(-0.3, -0.9, \u6446);
           const \u6491\u5730\u8D34\u6743 = Math.max(0, -c) * (1 - \u524D\u8FC8\u52FE\u6743) * (1 - \u540E\u4F38\u987A\u6743);
           const \u811AX_\u524D\u52FE = -0.24 - 0.14 * Math.max(0, \u6446);
-          const \u811AX_\u540E\u987A = 0.82;
+          const \u811AX_\u540E\u987A = \u662F\u884C\u8D70 ? 0.45 : 0.82;
           const \u811AX_\u6491\u5E73 = Math.max(-0.42, Math.min(-0.06, -(\u603B\u503EX + \u5927X + \u819DX) + 0.08));
           const \u811AX_\u57FA\u7840 = \u811AX_\u524D\u52FE * \u524D\u8FC8\u52FE\u6743 + \u811AX_\u540E\u987A * \u540E\u4F38\u987A\u6743 + -0.12 * Math.max(0, 1 - \u524D\u8FC8\u52FE\u6743 - \u540E\u4F38\u987A\u6743);
           const \u811AX = \u811AX_\u57FA\u7840 * (1 - \u6491\u5730\u8D34\u6743) + \u811AX_\u6491\u5E73 * \u6491\u5730\u8D34\u6743;
           const \u652F\u6491\u6743 = Math.max(0, Math.min(1, (-\u6446 + 0.28) * 1.45));
           const \u7838\u5730\u8109\u51B2 = Math.max(0, -c) * Math.exp(-Math.pow(s / 0.38, 2));
           const \u9AD8\u9891\u98A4 = (Math.sin(\u76F8 * 5) * 0.65 + Math.sin(\u76F8 * 9) * 0.35) * \u9707\u98A4\u5E45 * (0.45 + \u652F\u6491\u6743 * 0.75 + \u7838\u5730\u8109\u51B2 * 0.9);
-          const \u66B4\u6DA8 = \u7838\u5730\u8109\u51B2 * (\u52A0\u901F\u4E2D ? 0.22 : 0.14) + \u652F\u6491\u6743 * 0.06;
+          const \u66B4\u6DA8 = \u7838\u5730\u8109\u51B2 * (\u662F\u884C\u8D70 ? 0.06 : \u52A0\u901F\u4E2D ? 0.22 : 0.14) + \u652F\u6491\u6743 * 0.04;
           const \u5916\u5C55 = \u7B26\u53F7 * (0.09 * tk + Math.max(0, -\u5927X - 0.3) * 0.18 + Math.max(0, Math.abs(\u4FA7\u504F) * 0.08));
           return { \u5927X, \u819DX, \u811AX, \u817FZ: \u5916\u5C55, \u652F\u6491\u6743, \u66B4\u6DA8, \u9AD8\u9891\u98A4 };
         };
@@ -42573,33 +42963,38 @@ void main() {
         \u53F3\u817F\u66B4\u6DA8 = R.\u66B4\u6DA8;
         \u53F3\u5927\u817F\u9707\u98A4 = R.\u9AD8\u9891\u98A4;
         const \u5DE6\u53F3\u6491\u5DEE = \u5DE6\u652F\u6491\u6743 - \u53F3\u652F\u6491\u6743;
-        \u76EE\u6807\u91CD\u5FC3\u6A2A\u79FBX = \u5DE6\u53F3\u6491\u5DEE * (0.19 + Math.min(0.12, \u6709\u6548\u901F * 25e-4));
-        \u76EE\u6807\u80EF\u9AA8\u4FA7\u503EZ = -\u5DE6\u53F3\u6491\u5DEE * 0.13;
+        \u76EE\u6807\u91CD\u5FC3\u6A2A\u79FBX = \u5DE6\u53F3\u6491\u5DEE * (\u662F\u884C\u8D70 ? 0.12 : 0.19 + Math.min(0.12, \u6709\u6548\u901F * 25e-4));
+        \u76EE\u6807\u80EF\u9AA8\u4FA7\u503EZ = -\u5DE6\u53F3\u6491\u5DEE * (\u662F\u884C\u8D70 ? 0.08 : 0.13);
         const \u817E\u7A7A\u6CE2 = Math.pow(Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.12)), 0.78);
-        const \u6EDE\u7A7A\u9AD8 = \u662F\u5927\u55B7 ? 0.3 : \u662F\u53CC\u55B7 ? 0.26 : \u662F\u5C0F\u55B7 ? 0.23 : Math.min(0.22, 0.16 + \u6709\u6548\u901F / 45 * 0.06);
-        \u603B\u9AD8Y = -0.04 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8;
-        \u76EE\u6807\u8EAB\u4EF0X = \u662F\u5927\u55B7 ? 0.48 : \u662F\u53CC\u55B7 ? 0.42 : \u662F\u5C0F\u55B7 ? 0.36 : 0.3;
+        const \u6EDE\u7A7A\u9AD8 = \u662F\u884C\u8D70 ? 0.06 : \u662F\u5927\u55B7 ? 0.3 : \u662F\u53CC\u55B7 ? 0.26 : \u662F\u5C0F\u55B7 ? 0.23 : Math.min(0.22, 0.16 + \u6709\u6548\u901F / 45 * 0.06);
+        \u603B\u9AD8Y = -0.02 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8;
+        \u76EE\u6807\u8EAB\u4EF0X = \u662F\u884C\u8D70 ? 0.14 : \u662F\u5927\u55B7 ? 0.48 : \u662F\u53CC\u55B7 ? 0.42 : \u662F\u5C0F\u55B7 ? 0.36 : 0.3;
         \u76EE\u6807\u8EAB\u6B6AZ = -\u76EE\u6807\u80EF\u9AA8\u4FA7\u503EZ * 1.15;
-        \u5DE6\u5927\u81C2X = -0.18 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u52A0\u901F\u4E2D ? 1.05 : 0.72);
-        \u53F3\u5927\u81C2X = -0.18 - Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u52A0\u901F\u4E2D ? 1.05 : 0.72);
-        \u5DE6\u5C0F\u81C2X = -0.82 - Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D)) * 0.34;
-        \u53F3\u5C0F\u81C2X = -0.82 - Math.abs(Math.cos(this.\u6B65\u6001\u76F8\u4F4D)) * 0.34;
+        const \u81C2\u6446\u5E45 = \u662F\u884C\u8D70 ? 0.48 : \u52A0\u901F\u4E2D ? 1.05 : 0.72;
+        \u5DE6\u5927\u81C2X = -0.1 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * \u81C2\u6446\u5E45;
+        \u53F3\u5927\u81C2X = -0.1 - Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * \u81C2\u6446\u5E45;
+        \u5DE6\u5C0F\u81C2X = (\u662F\u884C\u8D70 ? -0.46 : -0.82) - Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D)) * (\u662F\u884C\u8D70 ? 0.18 : 0.34);
+        \u53F3\u5C0F\u81C2X = (\u662F\u884C\u8D70 ? -0.46 : -0.82) - Math.abs(Math.cos(this.\u6B65\u6001\u76F8\u4F4D)) * (\u662F\u884C\u8D70 ? 0.18 : 0.34);
       } else {
-        const \u95F2 = Math.sin(t * 2.2);
-        \u76EE\u6807\u91CD\u5FC3\u6A2A\u79FBX = \u95F2 * 0.045;
-        \u603B\u503EX = 0.03;
-        \u603B\u503EZ = \u95F2 * 0.025;
-        \u76EE\u6807\u8EAB\u4EF0X = 0.1;
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2.2);
+        \u76EE\u6807\u91CD\u5FC3\u6A2A\u79FBX = \u547C * 0.02;
+        \u603B\u503EX = 0.02;
+        \u603B\u503EZ = \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.08 : 0;
+        \u76EE\u6807\u8EAB\u4EF0X = 0.06 + \u547C * 0.02;
         \u5DE6\u817FX = -0.04;
-        \u5DE6\u817FZ = 0.075 * tk;
+        \u5DE6\u817FZ = 0.08 * tk;
         \u5DE6\u819DX = 0.08;
         \u5DE6\u811AX = -0.04;
-        \u53F3\u817FX = -0.1;
-        \u53F3\u817FZ = -0.075 * tk;
-        \u53F3\u819DX = 0.22;
-        \u53F3\u811AX = -0.12 + Math.max(0, Math.sin(t * 5.2)) * 0.14;
-        \u5DE6\u5927\u81C2X = 0.1 + \u95F2 * 0.06;
-        \u53F3\u5927\u81C2X = 0.1 - \u95F2 * 0.06;
+        \u53F3\u817FX = -0.04;
+        \u53F3\u817FZ = -0.08 * tk;
+        \u53F3\u819DX = 0.08;
+        \u53F3\u811AX = -0.04;
+        \u5DE6\u5927\u81C2X = 0.08 + \u547C * 0.03;
+        \u5DE6\u5927\u81C2Z = 0.24;
+        \u5DE6\u5C0F\u81C2X = -0.32;
+        \u53F3\u5927\u81C2X = 0.08 + \u547C * 0.03;
+        \u53F3\u5927\u81C2Z = -0.24;
+        \u53F3\u5C0F\u81C2X = -0.32;
       }
       if (\u6F02\u6743 > 0.01 && !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
         const w = \u6F02\u6743;
@@ -42827,7 +43222,7 @@ void main() {
         1 - (\u52A0\u901F\u4E2D ? 0.05 : 0),
         1 + (\u52A0\u901F\u4E2D ? 0.12 : 0) + Math.max(0, \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.1)
       );
-      const \u80F8\u6CF5 = \u52A0\u901F\u4E2D ? 1.1 + Math.abs(Math.sin(t * 16)) * 0.08 : 1 + Math.sin(t * 3.5) * 0.04;
+      const \u80F8\u6CF5 = \u662F\u6B7B\u4EA1 ? 1 : \u52A0\u901F\u4E2D ? 1.1 + Math.abs(Math.sin(t * 16)) * 0.08 : \u662F\u5F85\u673A && \u73AF\u89C6 ? 1 + \u73AF\u89C6.\u547C\u5438 * 0.035 : 1 + Math.sin(t * 3.5) * 0.04;
       this.\u5DE6\u80F8\u808C.scale.set(1.18 * \u80F8\u6CF5, 0.9 * \u80F8\u6CF5, 0.74 * \u80F8\u6CF5);
       this.\u53F3\u80F8\u808C.scale.set(1.18 * \u80F8\u6CF5, 0.9 * \u80F8\u6CF5, 0.74 * \u80F8\u6CF5);
       this.\u5DE6\u5927\u81C2\u67A2.rotation.set(\u5DE6\u5927\u81C2X, 0, \u5DE6\u5927\u81C2Z);
@@ -42835,12 +43230,27 @@ void main() {
       this.\u53F3\u5927\u81C2\u67A2.rotation.set(\u53F3\u5927\u81C2X, 0, \u53F3\u5927\u81C2Z);
       this.\u53F3\u5C0F\u81C2\u67A2.rotation.set(\u53F3\u5C0F\u81C2X, 0, 0);
       if (this.\u725B\u5C3E\u67A2) {
-        this.\u725B\u5C3E\u67A2.rotation.x = \u52A0\u901F\u4E2D ? 0.85 + Math.sin(t * 28) * 0.28 : 0.25 + Math.sin(t * 6) * 0.16;
-        this.\u725B\u5C3E\u67A2.rotation.z = \u79BB\u5FC3 * 0.45 + Math.sin(t * 7) * 0.32;
+        if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+          this.\u725B\u5C3E\u67A2.rotation.x = 0.18 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.35;
+          this.\u725B\u5C3E\u67A2.rotation.z = 0.22 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.15;
+        } else {
+          this.\u725B\u5C3E\u67A2.rotation.x = \u52A0\u901F\u4E2D ? 0.85 + Math.sin(t * 28) * 0.28 : 0.25 + Math.sin(t * (\u662F\u5F85\u673A ? 2.5 : 6)) * (\u662F\u5F85\u673A ? 0.08 : 0.16);
+          this.\u725B\u5C3E\u67A2.rotation.z = \u79BB\u5FC3 * 0.45 + Math.sin(t * (\u662F\u5F85\u673A ? 2.8 : 7)) * (\u662F\u5F85\u673A ? 0.16 : 0.32);
+        }
       }
       if (this.\u725B\u5934\u67A2) {
-        if (\u662F\u6B7B\u4EA1) {
-          this.\u725B\u5934\u67A2.rotation.set(0.25, 0.28, 0.32);
+        if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+          this.\u725B\u5934\u67A2.rotation.set(
+            -0.25 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.25 * \u6B7B\u6001.\u5012\u4E0B,
+            0.28 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.1,
+            0.32 * \u6B7B\u6001.\u5012\u4E0B
+          );
+        } else if (\u662F\u5F85\u673A && \u73AF\u89C6) {
+          this.\u725B\u5934\u67A2.rotation.set(
+            -(this.\u4E0A\u8EAB\u4EF0X * 0.5) + \u73AF\u89C6.\u62AC\u5934X * 0.55,
+            \u73AF\u89C6.\u8F6C\u5934Y * 0.85,
+            \u73AF\u89C6.\u6B6A\u5934Z * 0.5
+          );
         } else if (\u662F\u541F\u5531) {
           this.\u725B\u5934\u67A2.rotation.set(-0.46 + Math.sin(t * 2.8) * 0.08, Math.sin(t * 1.8) * 0.16, 0);
         } else if (\u662F\u666E\u653B) {
@@ -42857,25 +43267,25 @@ void main() {
           this.\u725B\u5934\u67A2.rotation.set(-0.2 + Math.sin(t * 12) * 0.16, Math.sin(t * 7) * 0.32, Math.cos(t * 10) * 0.16);
         } else {
           this.\u725B\u5934\u67A2.rotation.set(
-            -(this.\u4E0A\u8EAB\u4EF0X * 0.62) + (\u6B63\u5728\u8DD1\u52A8 ? Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.07 : Math.sin(t * 3.5) * 0.04),
+            -(this.\u4E0A\u8EAB\u4EF0X * 0.62) + (\u6B63\u5728\u8DD1\u52A8 ? Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * (\u662F\u884C\u8D70 ? 0.04 : 0.07) : Math.sin(t * 3.5) * 0.04),
             \u4FA7\u504F * 0.3,
             -\u79BB\u5FC3 * 0.2 - this.\u4E0A\u8EAB\u6B6AZ * 0.3
           );
         }
         if (this.\u725B\u4E0B\u5DF4) {
-          this.\u725B\u4E0B\u5DF4.position.y = \u662F\u6B7B\u4EA1 || \u91CD\u521B.\u6FC0\u6D3B ? -0.095 : \u662F\u541F\u5531 || \u662F\u7B11\u8BDD ? -0.068 - Math.abs(Math.sin(t * (\u662F\u7B11\u8BDD ? 16 : 3.5))) * 0.02 : \u52A0\u901F\u4E2D || \u662F\u51B2\u7EBF ? -0.058 : -0.04 - Math.abs(Math.sin(t * 4.5)) * 0.01;
+          this.\u725B\u4E0B\u5DF4.position.y = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? -0.04 - 0.055 * Math.max(\u6B7B\u6001.\u5012\u4E0B, \u6B7B\u6001.\u53D7\u51FB\u9707) : \u91CD\u521B.\u6FC0\u6D3B ? -0.095 : \u662F\u541F\u5531 || \u662F\u7B11\u8BDD ? -0.068 - Math.abs(Math.sin(t * (\u662F\u7B11\u8BDD ? 16 : 3.5))) * 0.02 : \u52A0\u901F\u4E2D || \u662F\u51B2\u7EBF ? -0.058 : \u662F\u5F85\u673A ? -0.042 : -0.04 - Math.abs(Math.sin(t * 4.5)) * 0.01;
         }
         if (this.\u9F3B\u73AF\u67A2) {
-          this.\u9F3B\u73AF\u67A2.rotation.x = \u662F\u6B7B\u4EA1 ? -0.25 : \u91CD\u521B.\u6FC0\u6D3B ? -0.82 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.45 : \u52A0\u901F\u4E2D ? -0.55 + Math.sin(t * 24) * 0.25 : Math.sin(t * 5) * 0.12;
-          this.\u9F3B\u73AF\u67A2.rotation.z = \u662F\u6B7B\u4EA1 ? 0.2 : \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.72 : Math.max(-0.55, Math.min(0.55, \u79BB\u5FC3 * 0.32 + \u9707 * 0.22));
+          this.\u9F3B\u73AF\u67A2.rotation.x = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? -0.25 * \u6B7B\u6001.\u5012\u4E0B - 0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u91CD\u521B.\u6FC0\u6D3B ? -0.82 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.45 : \u52A0\u901F\u4E2D ? -0.55 + Math.sin(t * 24) * 0.25 : \u662F\u5F85\u673A ? 0 : Math.sin(t * 5) * 0.1;
+          this.\u9F3B\u73AF\u67A2.rotation.z = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.2 * \u6B7B\u6001.\u5012\u4E0B : \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.72 : Math.max(-0.55, Math.min(0.55, \u79BB\u5FC3 * 0.32 + \u9707 * 0.22));
         }
         if (this.\u5DE6\u725B\u8033 && this.\u53F3\u725B\u8033) {
-          const \u8033\u6247 = \u662F\u6B7B\u4EA1 ? 0 : \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.65 : \u52A0\u901F\u4E2D ? Math.sin(t * 26) * 0.32 : Math.sin(t * 6) * 0.12;
+          const \u8033\u6247 = \u662F\u6B7B\u4EA1 ? 0 : \u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u9707\u6CE2 * 0.65 : \u52A0\u901F\u4E2D ? Math.sin(t * 26) * 0.32 : \u662F\u5F85\u673A ? Math.sin(t * 2.2) * 0.05 : Math.sin(t * 6) * 0.12;
           this.\u5DE6\u725B\u8033.rotation.z = -0.25 + \u8033\u6247 - (\u52A0\u901F\u4E2D ? 0.35 : 0);
           this.\u53F3\u725B\u8033.rotation.z = 0.25 - \u8033\u6247 + (\u52A0\u901F\u4E2D ? 0.35 : 0);
         }
         if (this.\u5DE6\u725B\u77B3 && this.\u53F3\u725B\u77B3) {
-          const \u773C\u504FX = \u91CD\u521B.\u6FC0\u6D3B ? 0.014 : Math.max(-0.014, Math.min(0.014, \u4FA7\u504F * 0.014));
+          const \u773C\u504FX = \u91CD\u521B.\u6FC0\u6D3B ? 0.014 : \u73AF\u89C6 ? Math.max(-0.012, Math.min(0.012, \u73AF\u89C6.\u8F6C\u5934Y * 0.016)) : Math.max(-0.014, Math.min(0.014, \u4FA7\u504F * 0.014));
           this.\u5DE6\u725B\u77B3.position.x = 0.073 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u773C\u504FX : \u773C\u504FX);
           this.\u53F3\u725B\u77B3.position.x = -0.073 + \u773C\u504FX;
         }
@@ -42935,15 +43345,15 @@ void main() {
           this.\u6F02\u79FB\u89E6\u70B9\u7EC4[1].\u8D34\u5730 = \u53F3\u7740\u5730;
         }
       }
-      if (!\u662F\u5426\u817E\u7A7A\u6700\u7EC8 && !\u662F\u51B2\u7EBF && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
+      if (!\u662F\u5426\u817E\u7A7A\u6700\u7EC8 && !\u662F\u51B2\u7EBF && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u5F85\u673A) {
         const \u6469\u64E6\u5F3A = \u662F\u5927\u55B7 ? 1.5 : \u5F3A\u6F02\u4E2D ? 1.45 : \u662F\u53CC\u55B7 ? 1.25 : \u662F\u5C0F\u55B7 ? 1 : \u662F\u6025\u5239 ? 1.35 : Math.abs(\u79BB\u5FC3) > 0.2 ? 1.1 : 0.72;
-        if (\u5DE6\u8E29\u77AC) {
+        if (\u5DE6\u8E29\u77AC && !\u662F\u884C\u8D70) {
           this.\u55B7\u53D1\u978B\u5E95\u706B\u82B1\u4E0E\u7070\u5C18(\u5DE6\u6D4B.\u978B\u5E95\u4E2D\u5FC3, \u52A0\u901F\u4E2D ? 8 : 5, \u52A0\u901F\u4E2D ? 5 : 3, \u6469\u64E6\u5F3A);
         }
-        if (\u53F3\u8E29\u77AC) {
+        if (\u53F3\u8E29\u77AC && !\u662F\u884C\u8D70) {
           this.\u55B7\u53D1\u978B\u5E95\u706B\u82B1\u4E0E\u7070\u5C18(\u53F3\u6D4B.\u978B\u5E95\u4E2D\u5FC3, \u52A0\u901F\u4E2D ? 8 : 5, \u52A0\u901F\u4E2D ? 5 : 3, \u6469\u64E6\u5F3A);
         }
-        const \u6301\u7EED\u78E8\u978B = \u52A0\u901F\u4E2D || \u662F\u6025\u5239 || \u5F3A\u6F02\u4E2D || \u6B63\u5728\u8DD1\u52A8 && (\u6709\u6548\u901F > 10 || Math.abs(\u79BB\u5FC3) > 0.2);
+        const \u6301\u7EED\u78E8\u978B = \u52A0\u901F\u4E2D || \u662F\u6025\u5239 || \u5F3A\u6F02\u4E2D || !\u662F\u884C\u8D70 && \u6B63\u5728\u8DD1\u52A8 && (\u6709\u6548\u901F > 10 || Math.abs(\u79BB\u5FC3) > 0.2);
         if (\u6301\u7EED\u78E8\u978B) {
           this.\u706B\u82B1\u8BA1\u65F6 += dt;
           const \u95F4\u9694 = \u662F\u5927\u55B7 || \u5F3A\u6F02\u4E2D ? 0.026 : \u52A0\u901F\u4E2D || \u662F\u6025\u5239 ? 0.042 : 0.075;
@@ -43090,29 +43500,33 @@ void main() {
     _\u82B1\u5C97\u5CA9\u77F3\u7EB9\u7406 = tex;
     return tex;
   }
-  var _\u91D1\u53D1\u4E1D\u7EB9\u7406 = null;
-  function \u83B7\u53D6\u91D1\u53D1\u4E1D\u7EB9\u7406() {
-    if (_\u91D1\u53D1\u4E1D\u7EB9\u7406) return _\u91D1\u53D1\u4E1D\u7EB9\u7406;
+  var _\u5B89\u5168\u5E3D\u7EB9\u7406 = null;
+  function \u83B7\u53D6\u5B89\u5168\u5E3D\u7EB9\u7406() {
+    if (_\u5B89\u5168\u5E3D\u7EB9\u7406) return _\u5B89\u5168\u5E3D\u7EB9\u7406;
     const canvas = document.createElement("canvas");
-    canvas.width = 128;
+    canvas.width = 256;
     canvas.height = 256;
     const ctx = canvas.getContext("2d");
     const grad = ctx.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, "#d97706");
-    grad.addColorStop(0.35, "#fbbf24");
-    grad.addColorStop(0.75, "#fde047");
-    grad.addColorStop(1, "#fef08a");
+    grad.addColorStop(0, "#fde047");
+    grad.addColorStop(0.45, "#facc15");
+    grad.addColorStop(1, "#eab308");
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 128, 256);
-    for (let i = 0; i < 64; i++) {
-      const x = i * 2;
-      ctx.fillStyle = i % 3 === 0 ? "rgba(255, 251, 210, 0.35)" : "rgba(180, 95, 10, 0.25)";
-      ctx.fillRect(x, 0, 1.2, 256);
+    ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 42; i++) {
+      const x = i * 53 % 240 + 8;
+      const y = i * 89 % 240 + 8;
+      ctx.strokeStyle = i % 2 === 0 ? "rgba(255, 255, 255, 0.16)" : "rgba(133, 77, 14, 0.12)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 12 + i % 9, y + (i % 3 - 1) * 5);
+      ctx.stroke();
     }
     const tex = new CanvasTexture(canvas);
     tex.colorSpace = SRGBColorSpace;
     tex.needsUpdate = true;
-    _\u91D1\u53D1\u4E1D\u7EB9\u7406 = tex;
+    _\u5B89\u5168\u5E3D\u7EB9\u7406 = tex;
     return tex;
   }
   var \u5C0F\u80A5\u77F3\u6A21\u578B = class extends \u57FA\u7C7B\u6A21\u578B {
@@ -43121,6 +43535,7 @@ void main() {
     \u8170\u9AA8;
     \u80F8\u80A9\u9AA8;
     \u77F3\u8111\u67A2;
+    \u5B89\u5168\u5E3D\u67A2;
     \u7EA2\u5507\u603B\u67A2;
     \u4E0A\u5507\u67A2;
     \u4E0B\u5507\u67A2;
@@ -43132,9 +43547,6 @@ void main() {
     \u5DE6\u7AF9\u7AFF\u5C0F\u817F;
     \u53F3\u7AF9\u7AFF\u5927\u817F;
     \u53F3\u7AF9\u7AFF\u5C0F\u817F;
-    \u91D1\u53D1\u675F\u7EC4 = [];
-    \u5DE6\u5218\u6D77\u67A2;
-    \u53F3\u5218\u6D77\u67A2;
     \u6B65\u6001\u76F8\u4F4D = 0;
     \u70ED\u8EAB\u8BA1\u65F6 = 0;
     \u4E0A\u5E27\u5DE6\u7740\u5730 = true;
@@ -43143,11 +43555,11 @@ void main() {
     \u5E73\u6ED1\u652F\u6491Y = 0;
     \u540E\u98D8\u6743 = 0;
     \u60EF\u6027 = new \u89D2\u8272\u60EF\u6027\u5668();
-    // 金色漂移长发二阶弹簧状态
-    \u91D1\u53D1\u4FA7\u7529Z = 0;
-    \u91D1\u53D1\u4FA7\u7529Z\u901F = 0;
-    \u91D1\u53D1\u98D8\u626CX = 0;
-    \u91D1\u53D1\u98D8\u626CX\u901F = 0;
+    // 安全帽受冲击与转弯二阶弹簧微晃状态
+    \u5E3D\u6643Z = 0;
+    \u5E3D\u6643Z\u901F = 0;
+    \u5E3D\u6643X = 0;
+    \u5E3D\u6643X\u901F = 0;
     \u6F02\u79FB\u6743\u91CD = 0;
     \u5E73\u6ED1\u6F02\u79FB\u5411 = 1;
     \u706B\u82B1\u6C60 = [];
@@ -43156,18 +43568,18 @@ void main() {
     \u6B8B\u5F71\u91C7\u6837\u8BA1\u65F6 = 0;
     constructor() {
       super("stone", "\u5C0F\u80A5\u77F3", "");
-      this.\u53C2\u6570 = { \u624B\u81C2\u5938\u5F20\u5EA6: 1.08, \u91D1\u53D1\u957F\u5EA6: 1 };
+      this.\u53C2\u6570 = { \u624B\u81C2\u5938\u5F20\u5EA6: 1.08, \u5B89\u5168\u5E3D\u5927\u5C0F: 1 };
       this.\u6784\u5EFA();
     }
     \u83B7\u53D6\u53C2\u6570\u5B9A\u4E49() {
       return [
         { \u952E: "\u624B\u81C2\u5938\u5F20\u5EA6", \u540D\u79F0: "\u5DE8\u81C2\u56F4\u5EA6", \u7C7B\u578B: "\u6570\u5B57", \u6700\u5C0F\u503C: 0.85, \u6700\u5927\u503C: 1.35, \u6B65\u957F: 0.05, \u9ED8\u8BA4\u503C: 1.08 },
-        { \u952E: "\u91D1\u53D1\u957F\u5EA6", \u540D\u79F0: "\u957F\u53D1\u957F\u5EA6", \u7C7B\u578B: "\u6570\u5B57", \u6700\u5C0F\u503C: 0.75, \u6700\u5927\u503C: 1.4, \u6B65\u957F: 0.05, \u9ED8\u8BA4\u503C: 1 }
+        { \u952E: "\u5B89\u5168\u5E3D\u5927\u5C0F", \u540D\u79F0: "\u5B89\u5168\u5E3D\u5927\u5C0F", \u7C7B\u578B: "\u6570\u5B57", \u6700\u5C0F\u503C: 0.85, \u6700\u5927\u503C: 1.3, \u6B65\u957F: 0.05, \u9ED8\u8BA4\u503C: 1 }
       ];
     }
     \u6784\u5EFA() {
       const ak = this.\u53C2\u6570.\u624B\u81C2\u5938\u5F20\u5EA6 || 1.08;
-      const hk = this.\u53C2\u6570.\u91D1\u53D1\u957F\u5EA6 || 1;
+      const hk = this.\u53C2\u6570.\u5B89\u5168\u5E3D\u5927\u5C0F || 1;
       this.\u603B\u67A2 = new Group();
       this.\u6A21\u578B\u7EC4.add(this.\u603B\u67A2);
       const \u77F3\u7EB9\u7406 = \u83B7\u53D6\u82B1\u5C97\u5CA9\u77F3\u7EB9\u7406();
@@ -43194,11 +43606,25 @@ void main() {
       const \u6307\u7532\u5149\u6750 = \u5149\u6ED1\u7740\u8272(3817030);
       const \u6DF1\u5CA9\u7F1D\u6750 = \u7C97\u7CD9\u7740\u8272(4606546);
       const \u840E\u7F29\u7070\u817F\u6750 = \u7C97\u7CD9\u7740\u8272(9738400);
-      const \u91D1\u53D1\u6750 = new MeshStandardMaterial({
-        map: \u83B7\u53D6\u91D1\u53D1\u4E1D\u7EB9\u7406(),
-        roughness: 0.34,
-        metalness: 0.18
+      const \u5B89\u5168\u5E3D\u6750 = new MeshStandardMaterial({
+        map: \u83B7\u53D6\u5B89\u5168\u5E3D\u7EB9\u7406(),
+        roughness: 0.24,
+        metalness: 0.08
       });
+      const \u5E3D\u6A90\u8FB9\u6750 = new MeshStandardMaterial({
+        color: 15381256,
+        roughness: 0.3,
+        metalness: 0.06
+      });
+      const \u5E3D\u5E26\u6750 = \u7C97\u7CD9\u7740\u8272(2042167);
+      const \u53CD\u5149\u6761\u6750 = new MeshStandardMaterial({
+        color: 16317180,
+        emissive: 9741240,
+        emissiveIntensity: 0.22,
+        roughness: 0.22,
+        metalness: 0.28
+      });
+      const \u5E3D\u5FBD\u7EA2\u6750 = \u5149\u6ED1\u7740\u8272(14427686);
       const \u7EA2\u5507\u6750 = new MeshStandardMaterial({
         color: 14753096,
         emissive: 4523284,
@@ -43457,62 +43883,97 @@ void main() {
       \u4E0B\u5507\u9AD8\u5149.position.set(0.02, 0.012, 0.044);
       this.\u4E0B\u5507\u67A2.add(\u4E0B\u5507\u9AD8\u5149);
       this.\u7EA2\u5507\u603B\u67A2.add(this.\u4E0B\u5507\u67A2);
-      const \u91D1\u53D1\u9876\u5E3D = new Mesh(new SphereGeometry(0.305, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.56), \u91D1\u53D1\u6750);
-      \u91D1\u53D1\u9876\u5E3D.scale.set(1.12, 0.92, 1.18);
-      \u91D1\u53D1\u9876\u5E3D.position.set(0, 0.24, 0.01);
-      \u91D1\u53D1\u9876\u5E3D.rotation.x = -0.22;
-      this.\u77F3\u8111\u67A2.add(\u91D1\u53D1\u9876\u5E3D);
-      const \u5EFA\u7529\u5218\u6D77 = (\u7B26\u53F7) => {
-        const \u67A2 = new Group();
-        \u67A2.position.set(\u7B26\u53F7 * 0.2, 0.34, 0.18);
-        const \u7247 = new Mesh(new ConeGeometry(0.085, 0.44 * hk, 5), \u91D1\u53D1\u6750);
-        \u7247.scale.set(1.2, 1, 0.45);
-        \u7247.position.set(\u7B26\u53F7 * 0.05, -0.18 * hk, -0.06);
-        \u7247.rotation.z = \u7B26\u53F7 * 0.32;
-        \u7247.rotation.x = 0.24;
-        \u67A2.add(\u7247);
-        this.\u77F3\u8111\u67A2.add(\u67A2);
-        return \u67A2;
-      };
-      this.\u5DE6\u5218\u6D77\u67A2 = \u5EFA\u7529\u5218\u6D77(1);
-      this.\u53F3\u5218\u6D77\u67A2 = \u5EFA\u7529\u5218\u6D77(-1);
-      this.\u91D1\u53D1\u675F\u7EC4 = [];
-      for (let hi = 0; hi < 7; hi++) {
-        const frac = (hi - 3) / 3;
-        const yaw = frac * 0.78;
-        const \u6BB5\u957F = (0.34 - Math.abs(frac) * 0.05) * hk;
-        const \u5BBD = 0.125 - Math.abs(frac) * 0.022;
-        const \u6839\u67A2 = new Group();
-        \u6839\u67A2.position.set(Math.sin(yaw) * 0.24, 0.31 - Math.abs(frac) * 0.05, -Math.cos(yaw) * 0.22);
-        \u6839\u67A2.rotation.y = yaw;
-        this.\u77F3\u8111\u67A2.add(\u6839\u67A2);
-        const \u6839\u7247 = new Mesh(new BoxGeometry(\u5BBD, \u6BB5\u957F, 0.058), \u91D1\u53D1\u6750);
-        \u6839\u7247.position.set(0, -\u6BB5\u957F * 0.48, -0.02);
-        \u6839\u7247.castShadow = true;
-        \u6839\u67A2.add(\u6839\u7247);
-        const \u4E2D\u67A2 = new Group();
-        \u4E2D\u67A2.position.set(0, -\u6BB5\u957F * 0.92, -0.02);
-        \u6839\u67A2.add(\u4E2D\u67A2);
-        const \u4E2D\u7247 = new Mesh(new BoxGeometry(\u5BBD * 0.88, \u6BB5\u957F * 0.95, 0.044), \u91D1\u53D1\u6750);
-        \u4E2D\u7247.position.set(0, -\u6BB5\u957F * 0.46, 0);
-        \u4E2D\u67A2.add(\u4E2D\u7247);
-        const \u68A2\u67A2 = new Group();
-        \u68A2\u67A2.position.set(0, -\u6BB5\u957F * 0.88, 0);
-        \u4E2D\u67A2.add(\u68A2\u67A2);
-        const \u68A2\u7247 = new Mesh(new ConeGeometry(\u5BBD * 0.56, \u6BB5\u957F * 0.92, 4), \u91D1\u53D1\u6750);
-        \u68A2\u7247.rotation.x = Math.PI;
-        \u68A2\u7247.scale.set(1.15, 1, 0.42);
-        \u68A2\u7247.position.set(0, -\u6BB5\u957F * 0.42, 0);
-        \u68A2\u67A2.add(\u68A2\u7247);
-        this.\u91D1\u53D1\u675F\u7EC4.push({
-          \u6839\u67A2,
-          \u4E2D\u67A2,
-          \u68A2\u67A2,
-          \u57FA\u7840Y: yaw * 0.35,
-          \u57FA\u7840Z: frac * 0.18,
-          \u76F8\u4F4D\u504F: hi * 0.85
-        });
+      this.\u5B89\u5168\u5E3D\u67A2 = new Group();
+      this.\u5B89\u5168\u5E3D\u67A2.position.set(0, 0.255, 0.032);
+      this.\u5B89\u5168\u5E3D\u67A2.scale.setScalar(hk);
+      this.\u77F3\u8111\u67A2.add(this.\u5B89\u5168\u5E3D\u67A2);
+      const \u5E3D\u58F3 = new Mesh(
+        new SphereGeometry(0.325, 22, 14, 0, Math.PI * 2, 0, Math.PI * 0.56),
+        \u5B89\u5168\u5E3D\u6750
+      );
+      \u5E3D\u58F3.scale.set(1.08, 0.9, 1.15);
+      \u5E3D\u58F3.position.set(0, -0.02, 0);
+      \u5E3D\u58F3.castShadow = true;
+      \u5E3D\u58F3.receiveShadow = true;
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u5E3D\u58F3);
+      const \u4E3B\u7B4B\u66F2\u7EBF = new CatmullRomCurve3([
+        new Vector3(0, 0.04, 0.345),
+        new Vector3(0, 0.23, 0.24),
+        new Vector3(0, 0.305, 0),
+        new Vector3(0, 0.23, -0.24),
+        new Vector3(0, 0.04, -0.345)
+      ]);
+      const \u4E3B\u52A0\u5F3A\u7B4B = new Mesh(new TubeGeometry(\u4E3B\u7B4B\u66F2\u7EBF, 18, 0.03, 8, false), \u5B89\u5168\u5E3D\u6750);
+      \u4E3B\u52A0\u5F3A\u7B4B.scale.set(1.35, 0.95, 1);
+      \u4E3B\u52A0\u5F3A\u7B4B.castShadow = true;
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u4E3B\u52A0\u5F3A\u7B4B);
+      for (const sx of [-1, 1]) {
+        const \u4FA7\u7B4B\u66F2\u7EBF = new CatmullRomCurve3([
+          new Vector3(sx * 0.13, 0.08, 0.29),
+          new Vector3(sx * 0.145, 0.225, 0.14),
+          new Vector3(sx * 0.145, 0.245, -0.05),
+          new Vector3(sx * 0.125, 0.16, -0.24)
+        ]);
+        const \u4FA7\u52A0\u5F3A\u7B4B = new Mesh(new TubeGeometry(\u4FA7\u7B4B\u66F2\u7EBF, 12, 0.017, 6, false), \u5E3D\u6A90\u8FB9\u6750);
+        this.\u5B89\u5168\u5E3D\u67A2.add(\u4FA7\u52A0\u5F3A\u7B4B);
       }
+      const \u5E3D\u5E95\u5708 = new Mesh(new TorusGeometry(0.332, 0.025, 8, 28), \u5E3D\u6A90\u8FB9\u6750);
+      \u5E3D\u5E95\u5708.rotation.x = Math.PI / 2;
+      \u5E3D\u5E95\u5708.scale.set(1.07, 1.14, 0.85);
+      \u5E3D\u5E95\u5708.position.set(0, -0.02, 0);
+      \u5E3D\u5E95\u5708.castShadow = true;
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u5E3D\u5E95\u5708);
+      const \u5E3D\u820C\u5F62 = new Shape();
+      \u5E3D\u820C\u5F62.moveTo(-0.28, 0);
+      \u5E3D\u820C\u5F62.quadraticCurveTo(-0.24, 0.15, -0.12, 0.21);
+      \u5E3D\u820C\u5F62.quadraticCurveTo(0, 0.245, 0.12, 0.21);
+      \u5E3D\u820C\u5F62.quadraticCurveTo(0.24, 0.15, 0.28, 0);
+      \u5E3D\u820C\u5F62.quadraticCurveTo(0, 0.04, -0.28, 0);
+      const \u5E3D\u820C\u51E0\u4F55 = new ExtrudeGeometry(\u5E3D\u820C\u5F62, {
+        depth: 0.022,
+        bevelEnabled: true,
+        bevelThickness: 8e-3,
+        bevelSize: 8e-3,
+        bevelSegments: 2,
+        curveSegments: 12
+      });
+      \u5E3D\u820C\u51E0\u4F55.rotateX(Math.PI / 2);
+      const \u5E3D\u820C = new Mesh(\u5E3D\u820C\u51E0\u4F55, \u5E3D\u6A90\u8FB9\u6750);
+      \u5E3D\u820C.position.set(0, -0.012, 0.295);
+      \u5E3D\u820C.rotation.x = 0.09;
+      \u5E3D\u820C.castShadow = true;
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u5E3D\u820C);
+      const \u6807\u724C\u5E95 = new Mesh(new BoxGeometry(0.14, 0.095, 0.024), \u53CD\u5149\u6761\u6750);
+      \u6807\u724C\u5E95.position.set(0, 0.105, 0.352);
+      \u6807\u724C\u5E95.rotation.x = -0.34;
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u6807\u724C\u5E95);
+      const \u7EA2\u6A2A\u6761 = new Mesh(new BoxGeometry(0.088, 0.024, 0.012), \u5E3D\u5FBD\u7EA2\u6750);
+      \u7EA2\u6A2A\u6761.position.set(0, 0.106, 0.362);
+      \u7EA2\u6A2A\u6761.rotation.x = -0.34;
+      const \u7EA2\u7AD6\u6761 = new Mesh(new BoxGeometry(0.024, 0.068, 0.012), \u5E3D\u5FBD\u7EA2\u6750);
+      \u7EA2\u7AD6\u6761.position.set(0, 0.106, 0.362);
+      \u7EA2\u7AD6\u6761.rotation.x = -0.34;
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u7EA2\u6A2A\u6761, \u7EA2\u7AD6\u6761);
+      for (const sx of [-1, 1]) {
+        const \u4FA7\u53CD\u5149 = new Mesh(new BoxGeometry(0.018, 0.044, 0.2), \u53CD\u5149\u6761\u6750);
+        \u4FA7\u53CD\u5149.position.set(sx * 0.346, 0.05, 0.01);
+        \u4FA7\u53CD\u5149.rotation.z = sx * 0.14;
+        this.\u5B89\u5168\u5E3D\u67A2.add(\u4FA7\u53CD\u5149);
+      }
+      const \u7CFB\u5E26\u66F2\u7EBF = new CatmullRomCurve3([
+        new Vector3(-0.295, -0.03, 0.04),
+        new Vector3(-0.275, -0.17, 0.09),
+        new Vector3(-0.15, -0.3, 0.12),
+        new Vector3(0, -0.34, 0.13),
+        new Vector3(0.15, -0.3, 0.12),
+        new Vector3(0.275, -0.17, 0.09),
+        new Vector3(0.295, -0.03, 0.04)
+      ]);
+      const \u4E0B\u5DF4\u7CFB\u5E26 = new Mesh(new TubeGeometry(\u7CFB\u5E26\u66F2\u7EBF, 20, 0.013, 6, false), \u5E3D\u5E26\u6750);
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u4E0B\u5DF4\u7CFB\u5E26);
+      const \u7CFB\u5E26\u6263 = new Mesh(new BoxGeometry(0.056, 0.034, 0.032), \u5E3D\u5E26\u6750);
+      \u7CFB\u5E26\u6263.position.set(0, -0.34, 0.135);
+      this.\u5B89\u5168\u5E3D\u67A2.add(\u7CFB\u5E26\u6263);
       const \u5EFA\u7CBE\u5DE7\u4E94\u6307\u77F3\u638C = (\u7B26\u53F7) => {
         const \u638C\u67A2 = new Group();
         \u638C\u67A2.rotation.order = "YXZ";
@@ -43879,8 +44340,8 @@ void main() {
       for (let i = 0; i < 8; i++) {
         const \u5F71\u7EC4 = new Group();
         const \u5F71\u77F3\u6750 = new MeshBasicMaterial({ color: 9741240, transparent: true, opacity: 0, depthWrite: false });
-        const \u5F71\u53D1\u6750 = new MeshBasicMaterial({ color: 16498468, transparent: true, opacity: 0, depthWrite: false });
-        const \u6750\u8D28\u7EC4 = [\u5F71\u77F3\u6750, \u5F71\u53D1\u6750];
+        const \u5F71\u5E3D\u6750 = new MeshBasicMaterial({ color: 16436245, transparent: true, opacity: 0, depthWrite: false });
+        const \u6750\u8D28\u7EC4 = [\u5F71\u77F3\u6750, \u5F71\u5E3D\u6750];
         const \u8EAB\u67A2 = new Group();
         \u8EAB\u67A2.position.set(0, 0.96, 0);
         \u5F71\u7EC4.add(\u8EAB\u67A2);
@@ -43901,14 +44362,13 @@ void main() {
         };
         const \u5F71\u5DE6\u81C2 = \u5EFA\u5F71\u5DE8\u81C2(1);
         const \u5F71\u53F3\u81C2 = \u5EFA\u5F71\u5DE8\u81C2(-1);
-        const \u5F71\u53D1\u7247 = new Group();
-        \u5F71\u53D1\u7247.position.set(0, 0.96, -0.14);
-        const \u53D1\u5C3E\u5757 = new Mesh(new ConeGeometry(0.32, 0.95 * hk, 5), \u5F71\u53D1\u6750);
-        \u53D1\u5C3E\u5757.rotation.x = Math.PI * 0.5;
-        \u53D1\u5C3E\u5757.scale.set(1.35, 1, 0.4);
-        \u53D1\u5C3E\u5757.position.set(0, 0, -0.45 * hk);
-        \u5F71\u53D1\u7247.add(\u53D1\u5C3E\u5757);
-        \u8EAB\u67A2.add(\u5F71\u53D1\u7247);
+        const \u5F71\u5E3D = new Group();
+        \u5F71\u5E3D.position.set(0, 0.9, 0.08);
+        \u5F71\u5E3D.scale.setScalar(hk);
+        const \u5F71\u5E3D\u58F3 = new Mesh(new SphereGeometry(0.32, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), \u5F71\u5E3D\u6750);
+        \u5F71\u5E3D\u58F3.scale.set(1.08, 0.9, 1.15);
+        \u5F71\u5E3D.add(\u5F71\u5E3D\u58F3);
+        \u8EAB\u67A2.add(\u5F71\u5E3D);
         \u5F71\u7EC4.visible = false;
         this.\u6807\u8BB0\u975E\u5BFC\u51FA\u7279\u6548(\u5F71\u7EC4);
         this.\u6A21\u578B\u7EC4.add(\u5F71\u7EC4);
@@ -43920,11 +44380,11 @@ void main() {
           \u5DE6\u81C2\u89D2Z: 0,
           \u53F3\u81C2\u89D2X: 0,
           \u53F3\u81C2\u89D2Z: 0,
-          \u53D1\u98D8\u89D2Z: 0,
+          \u5E3D\u6643\u89D2Z: 0,
           \u8EAB\u67A2,
           \u5DE6\u81C2: \u5F71\u5DE6\u81C2,
           \u53F3\u81C2: \u5F71\u53F3\u81C2,
-          \u53D1\u7247: \u5F71\u53D1\u7247,
+          \u5F71\u5E3D,
           \u4E16\u754C\u5750\u6807: new Vector3(),
           \u4E16\u754C\u56DB\u5143\u6570: new Quaternion(),
           \u540E\u79FB\u65B9\u5411: new Vector3(0, 0, -1),
@@ -44041,12 +44501,16 @@ void main() {
       const \u662F\u53F3\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u653B\u51FB = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u8F6C\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u5426\u817E\u7A7A\u6700\u7EC8 = \u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u653B\u76F801 = \u662F\u653B\u51FB || \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       let \u653B\u84C4\u529B = 0;
@@ -44062,11 +44526,11 @@ void main() {
       }
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u653B\u76F801, 16347926, 14870768, 2.08, 1.44, 0.04);
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
-      const \u6709\u6548\u901F = \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u6709\u6548\u901F > 0.5 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F || \u662F\u51B2\u7EBF);
+      const \u6709\u6548\u901F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u6709\u6548\u901F > 0.5 || \u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
       const \u6B65\u9891\u500D\u7387 = \u662F\u5927\u55B7 ? 1.8 : \u662F\u53CC\u55B7 ? 1.55 : \u662F\u5C0F\u55B7 ? 1.28 : 1;
-      const \u6B65\u9891 = (4.6 + \u6709\u6548\u901F / 36 * 9.2) * \u6B65\u9891\u500D\u7387;
+      const \u6B65\u9891 = \u662F\u884C\u8D70 ? 5.4 : (4.6 + \u6709\u6548\u901F / 36 * 9.2) * \u6B65\u9891\u500D\u7387;
       if (\u6B63\u5728\u8DD1\u52A8) {
         this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
       }
@@ -44081,7 +44545,7 @@ void main() {
       }
       const \u6F02\u6743 = this.\u6F02\u79FB\u6743\u91CD;
       const \u6F02\u5411 = this.\u5E73\u6ED1\u6F02\u79FB\u5411;
-      const \u76EE\u6807\u540E\u98D8 = !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 ? \u662F\u98DE\u5929 ? 0.65 : \u662F\u5927\u55B7 ? 1 : \u662F\u53CC\u55B7 ? 0.8 : \u662F\u5C0F\u55B7 ? 0.58 : \u6709\u6548\u901F > 24 ? Math.min(0.28, (\u6709\u6548\u901F - 24) / 22 * 0.28) : 0 : 0;
+      const \u76EE\u6807\u540E\u98D8 = !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 && !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 ? \u662F\u98DE\u5929 ? 0.65 : \u662F\u5927\u55B7 ? 1 : \u662F\u53CC\u55B7 ? 0.8 : \u662F\u5C0F\u55B7 ? 0.58 : \u6709\u6548\u901F > 24 ? Math.min(0.28, (\u6709\u6548\u901F - 24) / 22 * 0.28) : 0 : 0;
       this.\u540E\u98D8\u6743 += (\u76EE\u6807\u540E\u98D8 - this.\u540E\u98D8\u6743) * (1 - Math.exp(-9 * dt));
       const \u540E\u98D8 = this.\u540E\u98D8\u6743;
       let \u603B\u9AD8Y = 0;
@@ -44131,26 +44595,32 @@ void main() {
       let \u561F\u5634\u5EA6 = 0;
       let \u5F20\u5634\u5EA6 = 0;
       let \u590D\u6A2AX = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u603B\u9AD8Y = -0.56;
-        \u77F3\u8EAB\u503EX = 1.44;
-        \u77F3\u8EABZ = 0.06;
-        \u80F8\u4EF0X = 0.06;
-        \u5DE6\u81C2X = -1.35;
-        \u5DE6\u81C2Z = 0.72;
-        \u5DE6\u8098X = -0.16;
-        \u5DE6\u524D\u81C2\u65CB = 0.45;
-        \u5DE6\u8155X = 0.4;
-        \u53F3\u81C2X = -1.35;
-        \u53F3\u81C2Z = -0.72;
-        \u53F3\u8098X = -0.16;
-        \u53F3\u524D\u81C2\u65CB = -0.45;
-        \u53F3\u8155X = 0.4;
-        \u5DE6\u6307\u66F2 = 0.18;
-        \u5DE6\u6307\u5F20 = 0.25;
-        \u53F3\u6307\u66F2 = 0.18;
-        \u53F3\u6307\u5F20 = 0.25;
-        \u5F20\u5634\u5EA6 = 0.35;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u603B\u9AD8Y = -0.56 * d + b * 0.22;
+        \u77F3\u8EAB\u503EX = -0.26 * hit + 1.44 * d - b * 0.14;
+        \u77F3\u8EABZ = 0.06 * d;
+        \u80F8\u4EF0X = -0.18 * hit + 0.06 * d;
+        \u5DE6\u81C2X = -0.55 * hit - 1.35 * d + tw * 0.1;
+        \u5DE6\u81C2Z = 0.16 + 0.56 * d + 0.48 * hit;
+        \u5DE6\u8098X = -0.18 + 0.02 * d - 0.35 * hit;
+        \u5DE6\u524D\u81C2\u65CB = -1.42;
+        \u5DE6\u638CY = -1.52;
+        \u5DE6\u8155X = 0.26 * d;
+        \u53F3\u81C2X = -0.55 * hit - 1.35 * d - tw * 0.1;
+        \u53F3\u81C2Z = -0.16 - 0.56 * d - 0.48 * hit;
+        \u53F3\u8098X = -0.18 + 0.02 * d - 0.35 * hit;
+        \u53F3\u524D\u81C2\u65CB = 1.42;
+        \u53F3\u638CY = 1.52;
+        \u53F3\u8155X = 0.26 * d;
+        \u5DE6\u6307\u66F2 = 0.45 - 0.27 * d;
+        \u5DE6\u6307\u5F20 = 0.12 + 0.13 * d;
+        \u53F3\u6307\u66F2 = 0.45 - 0.27 * d;
+        \u53F3\u6307\u5F20 = 0.12 + 0.13 * d;
+        \u5F20\u5634\u5EA6 = Math.min(0.85, 0.65 * hit + 0.35 * d);
       } else if (\u662F\u541F\u5531) {
         \u603B\u9AD8Y = Math.sin(t * 2.8) * 0.04;
         \u77F3\u8EAB\u503EX = -0.16;
@@ -44263,24 +44733,35 @@ void main() {
         \u53F3\u62C7\u66F2 = 1.32;
         \u561F\u5634\u5EA6 = 0.55;
       } else if (\u662F\u666E\u653B) {
-        \u603B\u9AD8Y = -0.12 * \u653B\u84C4\u529B + 0.16 * \u653B\u51FA\u51FB;
-        \u77F3\u8EAB\u503EX = -0.18 * \u653B\u84C4\u529B + 0.34 * \u653B\u51FA\u51FB;
-        \u80F8\u4EF0X = -0.12 * \u653B\u84C4\u529B + 0.22 * \u653B\u51FA\u51FB;
-        \u5DE6\u81C2X = 0.42 * \u653B\u84C4\u529B - 1.44 * \u653B\u51FA\u51FB;
-        \u5DE6\u81C2Z = 0.56 * \u653B\u84C4\u529B + 0.18 * \u653B\u51FA\u51FB;
-        \u5DE6\u8098X = -1.42 * \u653B\u84C4\u529B - 0.12 * \u653B\u51FA\u51FB;
-        \u5DE6\u81C2\u6CF5 = 1.36 + 0.38 * \u653B\u51FA\u51FB;
+        \u603B\u9AD8Y = -0.1 * \u653B\u84C4\u529B + 0.12 * \u653B\u51FA\u51FB;
+        \u603B\u8F6CY = -0.18 * \u653B\u84C4\u529B + 0.16 * \u653B\u51FA\u51FB;
+        \u77F3\u8EAB\u503EX = -0.12 * \u653B\u84C4\u529B + 0.24 * \u653B\u51FA\u51FB;
+        \u80F8\u626DY = -0.52 * \u653B\u84C4\u529B + 0.56 * \u653B\u51FA\u51FB;
+        \u80F8\u4EF0X = -0.08 * \u653B\u84C4\u529B + 0.14 * \u653B\u51FA\u51FB;
+        \u5DE6\u81C2X = -0.74 - 0.1 * \u653B\u51FA\u51FB;
+        \u5DE6\u81C2Z = 0.36;
+        \u5DE6\u81C2Y = -0.34;
+        \u5DE6\u8098X = -1.62;
+        \u5DE6\u524D\u81C2\u65CB = -0.95;
+        \u5DE6\u638CY = -0.65;
+        \u5DE6\u8155X = -0.08;
+        \u5DE6\u81C2\u6CF5 = 1.24;
         \u5DE6\u6307\u66F2 = 1.48;
         \u5DE6\u6307\u5F20 = 0.02;
         \u5DE6\u62C7\u66F2 = 1.36;
-        \u53F3\u81C2X = 0.42 * \u653B\u84C4\u529B - 1.44 * \u653B\u51FA\u51FB;
-        \u53F3\u81C2Z = -0.56 * \u653B\u84C4\u529B - 0.18 * \u653B\u51FA\u51FB;
-        \u53F3\u8098X = -1.42 * \u653B\u84C4\u529B - 0.12 * \u653B\u51FA\u51FB;
-        \u53F3\u81C2\u6CF5 = 1.36 + 0.38 * \u653B\u51FA\u51FB;
-        \u53F3\u6307\u66F2 = 1.48;
+        const \u7A33\u5907 = Math.max(0, 1 - \u653B\u84C4\u529B - \u653B\u51FA\u51FB);
+        \u53F3\u81C2X = 0.62 * \u653B\u84C4\u529B - 1.56 * \u653B\u51FA\u51FB - 0.52 * \u7A33\u5907;
+        \u53F3\u81C2Z = -0.32 * \u653B\u84C4\u529B - 0.1 * \u653B\u51FA\u51FB - 0.28 * \u7A33\u5907;
+        \u53F3\u81C2Y = -0.22 * \u653B\u84C4\u529B + 0.16 * \u653B\u51FA\u51FB;
+        \u53F3\u8098X = -1.68 * \u653B\u84C4\u529B - 0.06 * \u653B\u51FA\u51FB - 1.25 * \u7A33\u5907;
+        \u53F3\u524D\u81C2\u65CB = 0.72 * (1 - \u653B\u51FA\u51FB) + 1.48 * \u653B\u51FA\u51FB;
+        \u53F3\u638CY = 0.65 * (1 - \u653B\u51FA\u51FB) + 1.56 * \u653B\u51FA\u51FB;
+        \u53F3\u8155X = 0.04;
+        \u53F3\u81C2\u6CF5 = 1.34 + 0.42 * \u653B\u51FA\u51FB;
+        \u53F3\u6307\u66F2 = 1.5;
         \u53F3\u6307\u5F20 = 0.02;
-        \u53F3\u62C7\u66F2 = 1.36;
-        \u5F20\u5634\u5EA6 = 0.72 * \u653B\u51FA\u51FB;
+        \u53F3\u62C7\u66F2 = 1.38;
+        \u5F20\u5634\u5EA6 = 0.76 * \u653B\u51FA\u51FB;
       } else if (\u662F\u51B2\u7EBF) {
         const \u8DF3 = Math.abs(Math.sin(t * 5.8));
         \u603B\u9AD8Y = 0.22 + \u8DF3 * 0.58;
@@ -44323,9 +44804,15 @@ void main() {
         \u5DE6\u81C2X = -1.15 + Math.sin(t * 13) * 0.55;
         \u5DE6\u81C2Z = 0.65 + Math.cos(t * 13) * 0.32;
         \u5DE6\u8098X = -0.35 - Math.abs(Math.sin(t * 13)) * 0.35;
+        \u5DE6\u524D\u81C2\u65CB = -1.42;
+        \u5DE6\u638CY = -1.48;
+        \u5DE6\u8155X = 0.16;
         \u53F3\u81C2X = -1.15 - Math.sin(t * 13) * 0.55;
         \u53F3\u81C2Z = -0.65 - Math.cos(t * 13) * 0.32;
         \u53F3\u8098X = -0.35 - Math.abs(Math.cos(t * 13)) * 0.35;
+        \u53F3\u524D\u81C2\u65CB = 1.42;
+        \u53F3\u638CY = 1.48;
+        \u53F3\u8155X = 0.16;
         \u5DE6\u6307\u66F2 = 0.38;
         \u5DE6\u6307\u5F20 = 0.24;
         \u53F3\u6307\u66F2 = 0.38;
@@ -44342,7 +44829,8 @@ void main() {
           \u5DE6\u81C2Z = -0.58 * \u653B\u84C4\u529B + 1.62 * \u653B\u51FA\u51FB;
           \u5DE6\u81C2Y = -0.42 * \u653B\u84C4\u529B - 0.18 * \u653B\u51FA\u51FB;
           \u5DE6\u8098X = -1.65 * \u653B\u84C4\u529B;
-          \u5DE6\u524D\u81C2\u65CB = 0;
+          \u5DE6\u524D\u81C2\u65CB = -1.45;
+          \u5DE6\u638CY = -1.5;
           \u5DE6\u81C2\u6CF5 = 1.36 + 0.36 * \u653B\u51FA\u51FB;
           \u5DE6\u6307\u66F2 = 1.48;
           \u5DE6\u6307\u5F20 = 0.02;
@@ -44350,13 +44838,16 @@ void main() {
           \u53F3\u81C2X = -0.35;
           \u53F3\u81C2Z = -0.52;
           \u53F3\u8098X = -1.25;
+          \u53F3\u524D\u81C2\u65CB = 0.95;
+          \u53F3\u638CY = 0.7;
           \u53F3\u8D34\u5730\u6743 = 0;
         } else {
           \u53F3\u81C2X = -0.25 * \u653B\u84C4\u529B;
           \u53F3\u81C2Z = 0.58 * \u653B\u84C4\u529B - 1.62 * \u653B\u51FA\u51FB;
           \u53F3\u81C2Y = 0.42 * \u653B\u84C4\u529B + 0.18 * \u653B\u51FA\u51FB;
           \u53F3\u8098X = -1.65 * \u653B\u84C4\u529B;
-          \u53F3\u524D\u81C2\u65CB = 0;
+          \u53F3\u524D\u81C2\u65CB = 1.45;
+          \u53F3\u638CY = 1.5;
           \u53F3\u81C2\u6CF5 = 1.36 + 0.36 * \u653B\u51FA\u51FB;
           \u53F3\u6307\u66F2 = 1.48;
           \u53F3\u6307\u5F20 = 0.02;
@@ -44364,6 +44855,8 @@ void main() {
           \u5DE6\u81C2X = -0.35;
           \u5DE6\u81C2Z = 0.52;
           \u5DE6\u8098X = -1.25;
+          \u5DE6\u524D\u81C2\u65CB = -0.95;
+          \u5DE6\u638CY = -0.7;
           \u5DE6\u8D34\u5730\u6743 = 0;
         }
         \u5F20\u5634\u5EA6 = 0.65 * \u653B\u51FA\u51FB;
@@ -44379,9 +44872,13 @@ void main() {
           \u5DE6\u81C2X = -1.25;
           \u5DE6\u81C2Z = 0.42;
           \u5DE6\u8098X = -0.3;
+          \u5DE6\u524D\u81C2\u65CB = -1.42;
+          \u5DE6\u638CY = -1.48;
           \u53F3\u81C2X = -1.25;
           \u53F3\u81C2Z = -0.42;
           \u53F3\u8098X = -0.3;
+          \u53F3\u524D\u81C2\u65CB = 1.42;
+          \u53F3\u638CY = 1.48;
           \u5F20\u5634\u5EA6 = 0.65;
         } else if (\u590D\u76F8 < 0.85) {
           const u = (\u590D\u76F8 - 0.68) / 0.17;
@@ -44393,14 +44890,14 @@ void main() {
           \u5DE6\u81C2X = -0.78 * \u7838 - 0.35 * \u6491\u8D77;
           \u5DE6\u81C2Z = 0.36;
           \u5DE6\u8098X = -0.18 * \u7838 - 1.15 * \u6491\u8D77;
-          \u5DE6\u524D\u81C2\u65CB = 0.85;
-          \u5DE6\u638CY = 2.05;
+          \u5DE6\u524D\u81C2\u65CB = -1.45;
+          \u5DE6\u638CY = -1.58;
           \u5DE6\u8D34\u5730\u6743 = 1;
           \u53F3\u81C2X = -0.78 * \u7838 - 0.35 * \u6491\u8D77;
           \u53F3\u81C2Z = -0.36;
           \u53F3\u8098X = -0.18 * \u7838 - 1.15 * \u6491\u8D77;
-          \u53F3\u524D\u81C2\u65CB = -0.85;
-          \u53F3\u638CY = -2.05;
+          \u53F3\u524D\u81C2\u65CB = 1.45;
+          \u53F3\u638CY = 1.58;
           \u53F3\u8D34\u5730\u6743 = 1;
           \u5DE6\u81C2\u6CF5 = 1.42;
           \u53F3\u81C2\u6CF5 = 1.42;
@@ -44421,9 +44918,13 @@ void main() {
           \u5DE6\u81C2X = -0.62 * \u543B;
           \u5DE6\u81C2Z = 0.88 * \u543B + 0.2;
           \u5DE6\u8098X = -1.45 * \u543B;
+          \u5DE6\u524D\u81C2\u65CB = -0.92;
+          \u5DE6\u638CY = -0.68;
           \u53F3\u81C2X = -0.62 * \u543B;
           \u53F3\u81C2Z = -0.88 * \u543B - 0.2;
           \u53F3\u8098X = -1.45 * \u543B;
+          \u53F3\u524D\u81C2\u65CB = 0.92;
+          \u53F3\u638CY = 0.68;
           \u5DE6\u81C2\u6CF5 = 1.32;
           \u53F3\u81C2\u6CF5 = 1.32;
           \u561F\u5634\u5EA6 = 0.95 * \u543B;
@@ -44435,14 +44936,14 @@ void main() {
         \u5DE6\u81C2X = -0.78;
         \u5DE6\u81C2Z = 0.22;
         \u5DE6\u8098X = -0.16;
-        \u5DE6\u524D\u81C2\u65CB = 0.85;
-        \u5DE6\u638CY = 2.05;
+        \u5DE6\u524D\u81C2\u65CB = -1.45;
+        \u5DE6\u638CY = -1.58;
         \u5DE6\u8D34\u5730\u6743 = 1;
         \u53F3\u81C2X = -0.78;
         \u53F3\u81C2Z = -0.22;
         \u53F3\u8098X = -0.16;
-        \u53F3\u524D\u81C2\u65CB = -0.85;
-        \u53F3\u638CY = -2.05;
+        \u53F3\u524D\u81C2\u65CB = 1.45;
+        \u53F3\u638CY = 1.58;
         \u53F3\u8D34\u5730\u6743 = 1;
         \u5DE6\u81C2\u6CF5 = 1.28;
         \u53F3\u81C2\u6CF5 = 1.28;
@@ -44462,37 +44963,41 @@ void main() {
         \u603B\u503EZ = Math.sin(t * 14) * 0.28;
         \u5DE6\u81C2X = Math.sin(t * 18) * 0.62;
         \u5DE6\u81C2Z = 0.55 + Math.sin(t * 14) * 0.22;
+        \u5DE6\u524D\u81C2\u65CB = -1.35;
+        \u5DE6\u638CY = -1.35;
         \u53F3\u81C2X = -Math.sin(t * 18) * 0.62;
         \u53F3\u81C2Z = -0.55 - Math.cos(t * 14) * 0.22;
+        \u53F3\u524D\u81C2\u65CB = 1.35;
+        \u53F3\u638CY = 1.35;
         \u5DE6\u6307\u66F2 = 0.38 + Math.abs(Math.sin(t * 15)) * 0.3;
         \u5DE6\u6307\u5F20 = 0.24;
         \u53F3\u6307\u66F2 = 0.38 + Math.abs(Math.cos(t * 15)) * 0.3;
         \u53F3\u6307\u5F20 = 0.24;
         \u5F20\u5634\u5EA6 = 0.75;
       } else if (\u6B63\u5728\u8DD1\u52A8) {
-        const \u6491\u6446 = \u52A0\u901F\u4E2D ? 0.92 : Math.min(0.88, 0.68 + \u6709\u6548\u901F / 45 * 0.2);
+        const \u6491\u6446 = \u662F\u884C\u8D70 ? 0.56 : \u52A0\u901F\u4E2D ? 0.92 : Math.min(0.88, 0.68 + \u6709\u6548\u901F / 45 * 0.2);
         const lSin = Math.sin(this.\u6B65\u6001\u76F8\u4F4D);
         const rSin = Math.sin(this.\u6B65\u6001\u76F8\u4F4D + Math.PI);
-        const \u673A\u8EAB\u6A2A\u98D8\u503EX = 0.16 + \u540E\u98D8 * 0.78;
+        const \u673A\u8EAB\u6A2A\u98D8\u503EX = (\u662F\u884C\u8D70 ? 0.1 : 0.16) + \u540E\u98D8 * 0.78;
         \u77F3\u8EAB\u503EX = \u673A\u8EAB\u6A2A\u98D8\u503EX;
         \u77F3\u8EABZ = -\u540E\u98D8 * 0.32;
         \u80F8\u4EF0X = -\u540E\u98D8 * 0.12;
-        \u5DE6\u81C2X = -lSin * \u6491\u6446 - 0.12 - \u540E\u98D8 * 0.76;
-        \u53F3\u81C2X = -rSin * \u6491\u6446 - 0.12 - \u540E\u98D8 * 0.76;
-        \u5DE6\u8098X = -0.14 - Math.max(0, lSin) * 0.44 - \u540E\u98D8 * 0.16;
-        \u53F3\u8098X = -0.14 - Math.max(0, rSin) * 0.44 - \u540E\u98D8 * 0.16;
-        \u5DE6\u81C2Z = 0.18 + Math.max(0, lSin) * 0.14 + \u540E\u98D8 * 0.1;
-        \u53F3\u81C2Z = -0.18 - Math.max(0, rSin) * 0.14 - \u540E\u98D8 * 0.1;
+        \u5DE6\u81C2X = -lSin * \u6491\u6446 - 0.1 - \u540E\u98D8 * 0.76;
+        \u53F3\u81C2X = -rSin * \u6491\u6446 - 0.1 - \u540E\u98D8 * 0.76;
+        \u5DE6\u8098X = -0.14 - Math.max(0, lSin) * (\u662F\u884C\u8D70 ? 0.28 : 0.44) - \u540E\u98D8 * 0.16;
+        \u53F3\u8098X = -0.14 - Math.max(0, rSin) * (\u662F\u884C\u8D70 ? 0.28 : 0.44) - \u540E\u98D8 * 0.16;
+        \u5DE6\u81C2Z = 0.18 + Math.max(0, lSin) * (\u662F\u884C\u8D70 ? 0.08 : 0.14) + \u540E\u98D8 * 0.1;
+        \u53F3\u81C2Z = -0.18 - Math.max(0, rSin) * (\u662F\u884C\u8D70 ? 0.08 : 0.14) - \u540E\u98D8 * 0.1;
         \u5DE6\u8D34\u5730\u6743 = \u5E73\u6ED1\u9636\u8DC3(0.28, -0.08, lSin);
         \u53F3\u8D34\u5730\u6743 = \u5E73\u6ED1\u9636\u8DC3(0.28, -0.08, rSin);
-        \u5DE6\u524D\u81C2\u65CB = 0.26 * (1 - \u5DE6\u8D34\u5730\u6743) + 0.85 * \u5DE6\u8D34\u5730\u6743;
-        \u53F3\u524D\u81C2\u65CB = -0.26 * (1 - \u53F3\u8D34\u5730\u6743) - 0.85 * \u53F3\u8D34\u5730\u6743;
-        \u5DE6\u638CY = 2.05 * \u5DE6\u8D34\u5730\u6743;
-        \u53F3\u638CY = -2.05 * \u53F3\u8D34\u5730\u6743;
-        \u5DE6\u8155X = -0.1 * (1 - \u5DE6\u8D34\u5730\u6743);
-        \u53F3\u8155X = -0.1 * (1 - \u53F3\u8D34\u5730\u6743);
-        \u5DE6\u81C2\u6CF5 = 1.1 + Math.max(0, -lSin) * 0.22 + \u540E\u98D8 * 0.1;
-        \u53F3\u81C2\u6CF5 = 1.1 + Math.max(0, -rSin) * 0.22 + \u540E\u98D8 * 0.1;
+        \u5DE6\u524D\u81C2\u65CB = -1.45;
+        \u53F3\u524D\u81C2\u65CB = 1.45;
+        \u5DE6\u638CY = -1.42 * (1 - \u5DE6\u8D34\u5730\u6743) - 1.58 * \u5DE6\u8D34\u5730\u6743;
+        \u53F3\u638CY = 1.42 * (1 - \u53F3\u8D34\u5730\u6743) + 1.58 * \u53F3\u8D34\u5730\u6743;
+        \u5DE6\u8155X = 0.24 * (1 - \u5DE6\u8D34\u5730\u6743);
+        \u53F3\u8155X = 0.24 * (1 - \u53F3\u8D34\u5730\u6743);
+        \u5DE6\u81C2\u6CF5 = 1.08 + Math.max(0, -lSin) * (\u662F\u884C\u8D70 ? 0.12 : 0.22) + \u540E\u98D8 * 0.1;
+        \u53F3\u81C2\u6CF5 = 1.08 + Math.max(0, -rSin) * (\u662F\u884C\u8D70 ? 0.12 : 0.22) + \u540E\u98D8 * 0.1;
         \u5DE6\u6307\u66F2 = 0.48 * (1 - \u5DE6\u8D34\u5730\u6743) + 0.03 * \u5DE6\u8D34\u5730\u6743;
         \u5DE6\u6307\u5F20 = 0.12 * (1 - \u5DE6\u8D34\u5730\u6743) + 0.36 * \u5DE6\u8D34\u5730\u6743;
         \u5DE6\u62C7\u66F2 = 0.4 * (1 - \u5DE6\u8D34\u5730\u6743) + 0.04 * \u5DE6\u8D34\u5730\u6743;
@@ -44502,58 +45007,51 @@ void main() {
         \u53F3\u62C7\u66F2 = 0.4 * (1 - \u53F3\u8D34\u5730\u6743) + 0.04 * \u53F3\u8D34\u5730\u6743;
         \u53F3\u62C7\u5F20 = 0.14 * (1 - \u53F3\u8D34\u5730\u6743) + 0.34 * \u53F3\u8D34\u5730\u6743;
         const \u817E\u7A7A\u6CE2 = Math.pow(Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.1)), 0.76);
-        const \u6EDE\u7A7A\u9AD8 = \u662F\u5927\u55B7 ? 0.3 : \u662F\u53CC\u55B7 ? 0.26 : \u662F\u5C0F\u55B7 ? 0.22 : Math.min(0.2, 0.13 + \u6709\u6548\u901F / 45 * 0.07);
+        const \u6EDE\u7A7A\u9AD8 = \u662F\u884C\u8D70 ? 0.06 : \u662F\u5927\u55B7 ? 0.3 : \u662F\u53CC\u55B7 ? 0.26 : \u662F\u5C0F\u55B7 ? 0.22 : Math.min(0.2, 0.13 + \u6709\u6548\u901F / 45 * 0.07);
         \u603B\u9AD8Y = -0.02 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8 + \u540E\u98D8 * 0.24;
-        \u603B\u503EZ = (lSin - rSin) * 0.1;
-        \u603B\u8F6CY = (rSin - lSin) * 0.11;
-        \u561F\u5634\u5EA6 = \u52A0\u901F\u4E2D ? 0.75 : 0.25;
+        \u603B\u503EZ = (lSin - rSin) * (\u662F\u884C\u8D70 ? 0.06 : 0.1);
+        \u603B\u8F6CY = (rSin - lSin) * (\u662F\u884C\u8D70 ? 0.06 : 0.11);
+        \u561F\u5634\u5EA6 = \u52A0\u901F\u4E2D ? 0.75 : \u662F\u884C\u8D70 ? 0.12 : 0.25;
       } else {
-        const poseCycle = t % 6;
-        const p1 = \u5E73\u6ED1\u9636\u8DC3(0, 0.45, poseCycle) * (1 - \u5E73\u6ED1\u9636\u8DC3(1.85, 2.25, poseCycle));
-        const p2 = \u5E73\u6ED1\u9636\u8DC3(1.95, 2.4, poseCycle) * (1 - \u5E73\u6ED1\u9636\u8DC3(3.95, 4.35, poseCycle));
-        const p3 = \u5E73\u6ED1\u9636\u8DC3(4.05, 4.45, poseCycle) * (1 - \u5E73\u6ED1\u9636\u8DC3(5.65, 6, poseCycle));
-        const pWrap = 1 - Math.min(1, p1 + p2 + p3);
-        const wA = p1 + pWrap * 0.5;
-        const wB = p2;
-        const wC = p3 + pWrap * 0.5;
-        const \u547C = Math.sin(t * 2.6);
-        \u603B\u9AD8Y = \u547C * 0.024;
-        \u77F3\u8EAB\u503EX = -0.06 * wA + 0.04 * wB + 0.16 * wC;
-        \u80F8\u4EF0X = -0.1 * wA - 0.04 * wB + 0.06 * wC;
-        \u80F8\u626DY = Math.sin(t * 1.4) * 0.12 * wA + 0.34 * wB;
-        \u5DE6\u81C2X = -0.35 * wA - 1.15 * wB - 0.58 * wC;
-        \u5DE6\u81C2Z = 1.18 * wA + 0.48 * wB + 0.32 * wC;
-        \u5DE6\u81C2Y = 0.24 * wA + 0.42 * wB + 0.56 * wC;
-        \u5DE6\u8098X = -1.74 * wA - 1.56 * wB - 1.48 * wC;
-        \u5DE6\u524D\u81C2\u65CB = 0.08 * wA + 0.32 * wB + 0.45 * wC;
-        \u5DE6\u8155X = -0.18 * wA + 0.35 * wB - 0.14 * wC;
-        \u53F3\u81C2X = -0.35 * wA - 0.22 * wB - 0.58 * wC;
-        \u53F3\u81C2Z = -1.18 * wA - 0.62 * wB - 0.32 * wC;
-        \u53F3\u81C2Y = -0.24 * wA - 0.18 * wB - 0.56 * wC;
-        \u53F3\u8098X = -1.74 * wA - 1.42 * wB - 1.48 * wC;
-        \u53F3\u524D\u81C2\u65CB = -0.08 * wA - 0.55 * wB - 0.45 * wC;
-        \u53F3\u8155X = -0.18 * wA - 0.12 * wB - 0.14 * wC;
-        const microPump = Math.abs(Math.sin(t * 7.5)) * 0.06;
-        \u5DE6\u81C2\u6CF5 = 1.32 + microPump + 0.08 * wC;
-        \u53F3\u81C2\u6CF5 = 1.32 + microPump + 0.08 * wC;
-        \u5DE6\u6307\u66F2 = 1.46 * wA + 0.18 * wB + 1.42 * wC;
-        \u5DE6\u6307\u5F20 = 0.02 * wA + 0.34 * wB + 0.02 * wC;
-        \u5DE6\u62C7\u66F2 = 1.32 * wA + 0.16 * wB + 1.28 * wC;
-        \u5DE6\u62C7\u5F20 = 0.02 * wA + 0.34 * wB + 0.02 * wC;
-        \u53F3\u6307\u66F2 = 1.46 * wA + 1.44 * wB + 1.42 * wC;
-        \u53F3\u6307\u5F20 = 0.02;
-        \u53F3\u62C7\u66F2 = 1.32;
-        \u53F3\u62C7\u5F20 = 0.02;
-        \u561F\u5634\u5EA6 = 0.28 + 0.85 * wB + Math.max(0, Math.sin(t * 3.8)) * 0.25;
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2.4);
+        \u603B\u9AD8Y = \u547C * 0.02;
+        \u77F3\u8EAB\u503EX = -0.04;
+        \u80F8\u4EF0X = -0.06 + \u547C * 0.02;
+        \u80F8\u626DY = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.22 : 0;
+        \u5DE6\u81C2X = -0.22 + \u547C * 0.04;
+        \u5DE6\u81C2Z = 0.82;
+        \u5DE6\u81C2Y = 0.16;
+        \u5DE6\u8098X = -1.36;
+        \u5DE6\u524D\u81C2\u65CB = -0.92;
+        \u5DE6\u638CY = -0.68;
+        \u5DE6\u8155X = -0.1;
+        \u53F3\u81C2X = -0.22 + \u547C * 0.04;
+        \u53F3\u81C2Z = -0.82;
+        \u53F3\u81C2Y = -0.16;
+        \u53F3\u8098X = -1.36;
+        \u53F3\u524D\u81C2\u65CB = 0.92;
+        \u53F3\u638CY = 0.68;
+        \u53F3\u8155X = -0.1;
+        \u5DE6\u81C2\u6CF5 = 1.24 + \u547C * 0.04;
+        \u53F3\u81C2\u6CF5 = 1.24 + \u547C * 0.04;
+        \u5DE6\u6307\u66F2 = 1.38;
+        \u5DE6\u6307\u5F20 = 0.04;
+        \u5DE6\u62C7\u66F2 = 1.24;
+        \u5DE6\u62C7\u5F20 = 0.04;
+        \u53F3\u6307\u66F2 = 1.38;
+        \u53F3\u6307\u5F20 = 0.04;
+        \u53F3\u62C7\u66F2 = 1.24;
+        \u53F3\u62C7\u5F20 = 0.04;
+        \u561F\u5634\u5EA6 = 0.18 + Math.max(0, \u547C) * 0.12;
       }
       if (\u6B63\u5728\u8DD1\u52A8 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && Math.abs(\u4FA7\u504F) > 0.08) {
         const turnK = Math.min(1, (Math.abs(\u4FA7\u504F) - 0.08) / 0.55);
         if (\u4FA7\u504F > 0 && \u5DE6\u8D34\u5730\u6743 < 0.35) {
-          \u5DE6\u8155Z -= 0.38 * turnK;
+          \u5DE6\u8155Z -= 0.26 * turnK;
           \u5DE6\u6307\u5F20 = Math.max(\u5DE6\u6307\u5F20, 0.22 * turnK);
           \u5DE6\u98DF\u6307\u76F4 = 0.1 * turnK + \u5DE6\u6307\u66F2 * (1 - turnK);
         } else if (\u4FA7\u504F < 0 && \u53F3\u8D34\u5730\u6743 < 0.35) {
-          \u53F3\u8155Z += 0.38 * turnK;
+          \u53F3\u8155Z += 0.26 * turnK;
           \u53F3\u6307\u5F20 = Math.max(\u53F3\u6307\u5F20, 0.22 * turnK);
           \u53F3\u98DF\u6307\u76F4 = 0.1 * turnK + \u53F3\u6307\u66F2 * (1 - turnK);
         }
@@ -44569,8 +45067,8 @@ void main() {
           \u53F3\u81C2X = \u53F3\u81C2X * (1 - w) + (-0.42 - \u540E\u98D8 * 0.42) * w;
           \u53F3\u81C2Z = \u53F3\u81C2Z * (1 - w) + -0.44 * w;
           \u53F3\u8098X = \u53F3\u8098X * (1 - w) + -0.18 * w;
-          \u53F3\u524D\u81C2\u65CB = \u53F3\u524D\u81C2\u65CB * (1 - w) + -0.85 * w;
-          \u53F3\u638CY = \u53F3\u638CY * (1 - w) + -2.05 * w;
+          \u53F3\u524D\u81C2\u65CB = \u53F3\u524D\u81C2\u65CB * (1 - w) + 1.45 * w;
+          \u53F3\u638CY = \u53F3\u638CY * (1 - w) + 1.58 * w;
           \u53F3\u8D34\u5730\u6743 = Math.max(\u53F3\u8D34\u5730\u6743, w);
           \u53F3\u8155Z = \u53F3\u8155Z * (1 - w) + 0.18 * w;
           \u53F3\u81C2\u6CF5 = Math.max(\u53F3\u81C2\u6CF5, 1.28 * w);
@@ -44581,8 +45079,9 @@ void main() {
           \u5DE6\u81C2X = \u5DE6\u81C2X * (1 - w) + -0.96 * w;
           \u5DE6\u81C2Z = \u5DE6\u81C2Z * (1 - w) + 0.98 * w;
           \u5DE6\u8098X = \u5DE6\u8098X * (1 - w) + -0.78 * w;
-          \u5DE6\u524D\u81C2\u65CB = \u5DE6\u524D\u81C2\u65CB * (1 - w) + 0.3 * w;
-          \u5DE6\u638CY = \u5DE6\u638CY * (1 - w);
+          \u5DE6\u524D\u81C2\u65CB = \u5DE6\u524D\u81C2\u65CB * (1 - w) - 1.42 * w;
+          \u5DE6\u638CY = \u5DE6\u638CY * (1 - w) - 1.52 * w;
+          \u5DE6\u8155X = \u5DE6\u8155X * (1 - w) + 0.18 * w;
           \u5DE6\u8D34\u5730\u6743 = \u5DE6\u8D34\u5730\u6743 * (1 - w);
           \u5DE6\u6307\u66F2 = \u5DE6\u6307\u66F2 * (1 - w) + 0.45 * w;
           \u5DE6\u6307\u5F20 = \u5DE6\u6307\u5F20 * (1 - w) + 0.14 * w;
@@ -44593,8 +45092,8 @@ void main() {
           \u5DE6\u81C2X = \u5DE6\u81C2X * (1 - w) + (-0.42 - \u540E\u98D8 * 0.42) * w;
           \u5DE6\u81C2Z = \u5DE6\u81C2Z * (1 - w) + 0.44 * w;
           \u5DE6\u8098X = \u5DE6\u8098X * (1 - w) + -0.18 * w;
-          \u5DE6\u524D\u81C2\u65CB = \u5DE6\u524D\u81C2\u65CB * (1 - w) + 0.85 * w;
-          \u5DE6\u638CY = \u5DE6\u638CY * (1 - w) + 2.05 * w;
+          \u5DE6\u524D\u81C2\u65CB = \u5DE6\u524D\u81C2\u65CB * (1 - w) - 1.45 * w;
+          \u5DE6\u638CY = \u5DE6\u638CY * (1 - w) - 1.58 * w;
           \u5DE6\u8D34\u5730\u6743 = Math.max(\u5DE6\u8D34\u5730\u6743, w);
           \u5DE6\u8155Z = \u5DE6\u8155Z * (1 - w) - 0.18 * w;
           \u5DE6\u81C2\u6CF5 = Math.max(\u5DE6\u81C2\u6CF5, 1.28 * w);
@@ -44605,8 +45104,9 @@ void main() {
           \u53F3\u81C2X = \u53F3\u81C2X * (1 - w) + -0.96 * w;
           \u53F3\u81C2Z = \u53F3\u81C2Z * (1 - w) + -0.98 * w;
           \u53F3\u8098X = \u53F3\u8098X * (1 - w) + -0.78 * w;
-          \u53F3\u524D\u81C2\u65CB = \u53F3\u524D\u81C2\u65CB * (1 - w) - 0.3 * w;
-          \u53F3\u638CY = \u53F3\u638CY * (1 - w);
+          \u53F3\u524D\u81C2\u65CB = \u53F3\u524D\u81C2\u65CB * (1 - w) + 1.42 * w;
+          \u53F3\u638CY = \u53F3\u638CY * (1 - w) + 1.52 * w;
+          \u53F3\u8155X = \u53F3\u8155X * (1 - w) + 0.18 * w;
           \u53F3\u8D34\u5730\u6743 = \u53F3\u8D34\u5730\u6743 * (1 - w);
           \u53F3\u6307\u66F2 = \u53F3\u6307\u66F2 * (1 - w) + 0.45 * w;
           \u53F3\u6307\u5F20 = \u53F3\u6307\u5F20 * (1 - w) + 0.14 * w;
@@ -44651,7 +45151,7 @@ void main() {
       this.\u603B\u67A2.rotation.set(\u603B\u503EX, \u603B\u8F6CY, \u603B\u503EZ);
       this.\u77F3\u8EAB\u67A2.position.set(0, 0.96 + \u540E\u98D8 * 0.08, \u77F3\u8EABZ);
       this.\u77F3\u8EAB\u67A2.rotation.set(\u77F3\u8EAB\u503EX, 0, 0);
-      const \u80F8\u6CF5 = \u52A0\u901F\u4E2D || \u662F\u8D77\u6B65 || \u662F\u51B2\u7EBF || !\u6B63\u5728\u8DD1\u52A8 ? 1.07 + Math.abs(Math.sin(t * 6.5)) * 0.05 : 1.02 + Math.sin(t * 3) * 0.03;
+      const \u80F8\u6CF5 = \u662F\u6B7B\u4EA1 ? 1 : \u662F\u5F85\u673A && \u73AF\u89C6 ? 1.05 + \u73AF\u89C6.\u547C\u5438 * 0.03 : \u52A0\u901F\u4E2D || \u662F\u8D77\u6B65 || \u662F\u51B2\u7EBF || !\u6B63\u5728\u8DD1\u52A8 ? 1.07 + Math.abs(Math.sin(t * 6.5)) * 0.05 : 1.02 + Math.sin(t * 3) * 0.03;
       this.\u80F8\u80A9\u9AA8.rotation.set(\u80F8\u4EF0X, \u80F8\u626DY, 0);
       this.\u80F8\u80A9\u9AA8.scale.set(\u80F8\u6CF5 * (\u91CD\u521B.\u6FC0\u6D3B ? 1 + \u91CD\u521B.\u6241\u538B * 0.18 : 1), \u80F8\u6CF5 * (\u91CD\u521B.\u6FC0\u6D3B ? 1 - \u91CD\u521B.\u6241\u538B * 0.12 : 1), \u80F8\u6CF5);
       const \u5199\u5DE8\u81C2 = (\u81C2, ax, ay, az, ex, fy, wx, wyPalm, wz, pump, fc, fs, tc, ts, idx, vib, fcArr, fsArr, \u653B\u62C9\u957F) => {
@@ -44661,9 +45161,9 @@ void main() {
         \u81C2.\u4E8C\u5934\u808C\u6CF5\u9AA8.scale.set(pump, 1, pump);
         \u81C2.\u5C0F\u81C2\u67A2.rotation.set(ex, 0, 0);
         \u81C2.\u524D\u81C2\u626D\u9AA8.rotation.set(0, fy, 0);
-        \u81C2.\u8155\u67A2.rotation.set(0, 0, 0);
+        \u81C2.\u8155\u67A2.rotation.set(0, wyPalm * 0.55, 0);
         \u81C2.\u624B\u638C.\u638C\u67A2.scale.setScalar(1 + 0.55 * \u62C9);
-        \u81C2.\u624B\u638C.\u638C\u67A2.rotation.set(wx, wyPalm, wz);
+        \u81C2.\u624B\u638C.\u638C\u67A2.rotation.set(wx, wyPalm * 0.45, wz);
         this.\u5199\u624B\u638C\u624B\u6307(\u81C2.\u624B\u638C, fc, fs, tc, ts, idx, vib, fcArr, fsArr);
       };
       \u5199\u5DE8\u81C2(
@@ -44685,7 +45185,7 @@ void main() {
         \u5DE6\u6307\u98A4,
         \u5DE6\u56DB\u6307\u66F2,
         \u5DE6\u56DB\u6307\u5916\u5C55,
-        \u662F\u5DE6\u653B ? \u653B\u51FA\u51FB : \u662F\u666E\u653B ? \u653B\u51FA\u51FB * 0.55 : 0
+        \u662F\u5DE6\u653B ? \u653B\u51FA\u51FB : 0
       );
       \u5199\u5DE8\u81C2(
         this.\u53F3\u5DE8\u81C2,
@@ -44706,18 +45206,38 @@ void main() {
         \u53F3\u6307\u98A4,
         \u53F3\u56DB\u6307\u66F2,
         \u53F3\u56DB\u6307\u5916\u5C55,
-        \u662F\u53F3\u653B ? \u653B\u51FA\u51FB : \u662F\u666E\u653B ? \u653B\u51FA\u51FB * 0.55 : 0
+        \u662F\u53F3\u653B ? \u653B\u51FA\u51FB : \u662F\u666E\u653B ? \u653B\u51FA\u51FB * 0.72 : 0
       );
-      const \u817F\u98D8\u9891 = \u6B63\u5728\u8DD1\u52A8 ? this.\u6B65\u6001\u76F8\u4F4D * 1.45 + \u540E\u98D8 * 6.5 : t * 3.8;
-      const \u98CE\u98D8\u62AC = \u662F\u6025\u5239 ? -0.82 : Math.min(0.65, \u6709\u6548\u901F * 0.015) + \u540E\u98D8 * 0.72;
+      const \u817F\u98D8\u9891 = \u6B63\u5728\u8DD1\u52A8 ? this.\u6B65\u6001\u76F8\u4F4D * 1.45 + \u540E\u98D8 * 6.5 : t * 2.4;
+      const \u98CE\u98D8\u62AC = \u662F\u6025\u5239 ? -0.82 : \u662F\u5F85\u673A ? -0.28 : Math.min(0.65, \u6709\u6548\u901F * 0.015) + \u540E\u98D8 * 0.72;
       const \u817F\u7529Z = Math.max(-0.85, Math.min(0.85, \u79BB\u5FC3 * 0.48 - \u4FA7\u504F * 0.25));
-      const \u817F\u6296\u5E45 = \u662F\u6B7B\u4EA1 || \u662F\u6025\u5239 ? 0 : 0.2 + \u540E\u98D8 * 0.24;
-      this.\u5DE6\u7AF9\u7AFF\u5927\u817F.rotation.set((\u662F\u6B7B\u4EA1 ? -1.1 : 0.28 + \u98CE\u98D8\u62AC) + Math.sin(\u817F\u98D8\u9891) * \u817F\u6296\u5E45, 0, (\u662F\u6B7B\u4EA1 ? 0.22 : \u817F\u7529Z + 0.12) + (\u662F\u6B7B\u4EA1 ? 0 : Math.cos(t * (7.2 + \u540E\u98D8 * 14)) * (0.1 + \u540E\u98D8 * 0.18)));
-      this.\u5DE6\u7AF9\u7AFF\u5C0F\u817F.rotation.set((\u662F\u6B7B\u4EA1 ? 0.18 : \u662F\u6025\u5239 ? 0.68 : 0.26 - \u540E\u98D8 * 0.16) + (\u662F\u6B7B\u4EA1 ? 0 : Math.cos(\u817F\u98D8\u9891) * (0.24 + \u540E\u98D8 * 0.18)), 0, \u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * (9.5 + \u540E\u98D8 * 16)) * (0.12 + \u540E\u98D8 * 0.2));
-      this.\u53F3\u7AF9\u7AFF\u5927\u817F.rotation.set((\u662F\u6B7B\u4EA1 ? -1.1 : 0.28 + \u98CE\u98D8\u62AC) + Math.cos(\u817F\u98D8\u9891) * \u817F\u6296\u5E45, 0, (\u662F\u6B7B\u4EA1 ? -0.22 : \u817F\u7529Z - 0.12) + (\u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * (7.2 + \u540E\u98D8 * 14)) * (0.1 + \u540E\u98D8 * 0.18)));
-      this.\u53F3\u7AF9\u7AFF\u5C0F\u817F.rotation.set((\u662F\u6B7B\u4EA1 ? 0.18 : \u662F\u6025\u5239 ? 0.68 : 0.26 - \u540E\u98D8 * 0.16) + (\u662F\u6B7B\u4EA1 ? 0 : Math.sin(\u817F\u98D8\u9891) * (0.24 + \u540E\u98D8 * 0.18)), 0, \u662F\u6B7B\u4EA1 ? 0 : Math.cos(t * (9.5 + \u540E\u98D8 * 16)) * (0.12 + \u540E\u98D8 * 0.2));
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u77F3\u8111\u67A2.rotation.set(-0.25, 0.35, 0.42);
+      const \u817F\u6296\u5E45 = \u662F\u6B7B\u4EA1 || \u662F\u6025\u5239 || \u662F\u5F85\u673A ? 0 : (\u662F\u884C\u8D70 ? 0.12 : 0.2) + \u540E\u98D8 * 0.24;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        this.\u5DE6\u7AF9\u7AFF\u5927\u817F.rotation.set(-1.1 * d + tw * 0.1, 0, 0.22 * d);
+        this.\u5DE6\u7AF9\u7AFF\u5C0F\u817F.rotation.set(0.18 * d, 0, 0);
+        this.\u53F3\u7AF9\u7AFF\u5927\u817F.rotation.set(-1.1 * d - tw * 0.08, 0, -0.22 * d);
+        this.\u53F3\u7AF9\u7AFF\u5C0F\u817F.rotation.set(0.18 * d, 0, 0);
+      } else if (\u662F\u5F85\u673A) {
+        this.\u5DE6\u7AF9\u7AFF\u5927\u817F.rotation.set(0, 0, 0.08);
+        this.\u5DE6\u7AF9\u7AFF\u5C0F\u817F.rotation.set(0.04, 0, 0);
+        this.\u53F3\u7AF9\u7AFF\u5927\u817F.rotation.set(0, 0, -0.08);
+        this.\u53F3\u7AF9\u7AFF\u5C0F\u817F.rotation.set(0.04, 0, 0);
+      } else {
+        this.\u5DE6\u7AF9\u7AFF\u5927\u817F.rotation.set(0.28 + \u98CE\u98D8\u62AC + Math.sin(\u817F\u98D8\u9891) * \u817F\u6296\u5E45, 0, \u817F\u7529Z + 0.12 + Math.cos(t * (7.2 + \u540E\u98D8 * 14)) * (0.1 + \u540E\u98D8 * 0.18));
+        this.\u5DE6\u7AF9\u7AFF\u5C0F\u817F.rotation.set((\u662F\u6025\u5239 ? 0.68 : 0.26 - \u540E\u98D8 * 0.16) + Math.cos(\u817F\u98D8\u9891) * (0.24 + \u540E\u98D8 * 0.18), 0, Math.sin(t * (9.5 + \u540E\u98D8 * 16)) * (0.12 + \u540E\u98D8 * 0.2));
+        this.\u53F3\u7AF9\u7AFF\u5927\u817F.rotation.set(0.28 + \u98CE\u98D8\u62AC + Math.cos(\u817F\u98D8\u9891) * \u817F\u6296\u5E45, 0, \u817F\u7529Z - 0.12 + Math.sin(t * (7.2 + \u540E\u98D8 * 14)) * (0.1 + \u540E\u98D8 * 0.18));
+        this.\u53F3\u7AF9\u7AFF\u5C0F\u817F.rotation.set((\u662F\u6025\u5239 ? 0.68 : 0.26 - \u540E\u98D8 * 0.16) + Math.sin(\u817F\u98D8\u9891) * (0.24 + \u540E\u98D8 * 0.18), 0, Math.cos(t * (9.5 + \u540E\u98D8 * 16)) * (0.12 + \u540E\u98D8 * 0.2));
+      }
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        this.\u77F3\u8111\u67A2.rotation.set(-0.25 * \u6B7B\u6001.\u5012\u4E0B - 0.2 * \u6B7B\u6001.\u53D7\u51FB\u9707, 0.35 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.08, 0.42 * \u6B7B\u6001.\u5012\u4E0B);
+      } else if (\u662F\u5F85\u673A && \u73AF\u89C6) {
+        this.\u77F3\u8111\u67A2.rotation.set(
+          -(\u603B\u503EX + \u77F3\u8EAB\u503EX * 0.78 + \u80F8\u4EF0X * 0.5) + \u73AF\u89C6.\u62AC\u5934X * 0.55,
+          \u73AF\u89C6.\u8F6C\u5934Y * 0.85,
+          \u73AF\u89C6.\u6B6A\u5934Z * 0.5
+        );
       } else if (\u662F\u541F\u5531) {
         this.\u77F3\u8111\u67A2.rotation.set(-0.42 + Math.sin(t * 2.8) * 0.08, Math.sin(t * 2) * 0.18, 0);
       } else if (\u91CD\u521B.\u6FC0\u6D3B) {
@@ -44730,12 +45250,12 @@ void main() {
         this.\u77F3\u8111\u67A2.rotation.set(Math.sin(t * 14) * 0.36, Math.sin(t * 9) * 0.62, Math.cos(t * 14) * 0.48);
       } else {
         this.\u77F3\u8111\u67A2.rotation.set(
-          -(\u603B\u503EX + \u77F3\u8EAB\u503EX * 0.78 + \u80F8\u4EF0X * 0.5) + (\u6B63\u5728\u8DD1\u52A8 ? Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.05 : 0),
+          -(\u603B\u503EX + \u77F3\u8EAB\u503EX * 0.78 + \u80F8\u4EF0X * 0.5) + (\u6B63\u5728\u8DD1\u52A8 ? Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * (\u662F\u884C\u8D70 ? 0.03 : 0.05) : 0),
           \u4FA7\u504F * 0.28 - \u80F8\u626DY * 0.45,
           -\u79BB\u5FC3 * 0.18
         );
       }
-      const \u773C\u504F = \u91CD\u521B.\u6FC0\u6D3B ? 0.015 : Math.max(-0.016, Math.min(0.016, \u4FA7\u504F * 0.015));
+      const \u773C\u504F = \u91CD\u521B.\u6FC0\u6D3B ? 0.015 : \u73AF\u89C6 ? Math.max(-0.014, Math.min(0.014, \u73AF\u89C6.\u8F6C\u5934Y * 0.018)) : Math.max(-0.016, Math.min(0.016, \u4FA7\u504F * 0.015));
       this.\u5DE6\u77F3\u773C.position.x = 0.102 + (\u91CD\u521B.\u6FC0\u6D3B ? -\u773C\u504F : \u773C\u504F);
       this.\u53F3\u77F3\u773C.position.x = -0.102 + \u773C\u504F;
       if (\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6B7B\u4EA1) {
@@ -44747,23 +45267,13 @@ void main() {
       }
       this.\u4E0A\u5507\u67A2.position.y = 0.028 + \u5F20\u5634\u5EA6 * 0.026;
       this.\u4E0B\u5507\u67A2.position.y = -0.032 - \u5F20\u5634\u5EA6 * 0.032;
-      const \u76EE\u6807\u53D1\u626CX = \u662F\u6B7B\u4EA1 ? -0.35 : \u662F\u541F\u5531 ? 0.55 : Math.min(1.48, \u6709\u6548\u901F / 36 * 0.82 + \u540E\u98D8 * 0.65 + (\u662F\u6025\u5239 ? -1.1 : 0) + \u6F02\u6743 * 0.35 + (\u662F\u590D\u4F4D && \u590D\u76F8 >= 0.64 ? 0.95 : 0));
-      const \u76EE\u6807\u53D1\u7529Z = \u662F\u6B7B\u4EA1 ? 0.15 : Math.max(-1.25, Math.min(1.25, \u79BB\u5FC3 * 0.68 - \u6F02\u6743 * \u6F02\u5411 * 0.72 + (\u662F\u6253\u6655 ? Math.sin(t * 16) * 0.8 : 0)));
-      [this.\u91D1\u53D1\u98D8\u626CX, this.\u91D1\u53D1\u98D8\u626CX\u901F] = this.\u6B65\u8FDB\u5F39\u7C27(this.\u91D1\u53D1\u98D8\u626CX, this.\u91D1\u53D1\u98D8\u626CX\u901F, \u76EE\u6807\u53D1\u626CX, 95, 9.5, dt);
-      [this.\u91D1\u53D1\u4FA7\u7529Z, this.\u91D1\u53D1\u4FA7\u7529Z\u901F] = this.\u6B65\u8FDB\u5F39\u7C27(this.\u91D1\u53D1\u4FA7\u7529Z, this.\u91D1\u53D1\u4FA7\u7529Z\u901F, \u76EE\u6807\u53D1\u7529Z, 105, 8.8, dt);
-      const \u6D6A\u9891 = 6.5 + Math.min(20, \u6709\u6548\u901F * 0.4 + \u540E\u98D8 * 8);
-      for (let hi = 0; hi < this.\u91D1\u53D1\u675F\u7EC4.length; hi++) {
-        const b = this.\u91D1\u53D1\u675F\u7EC4[hi];
-        const \u6CE2 = \u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * \u6D6A\u9891 + b.\u76F8\u4F4D\u504F) * (0.14 + \u6709\u6548\u901F / 45 * 0.22 + \u6F02\u6743 * 0.25 + \u540E\u98D8 * 0.18);
-        b.\u6839\u67A2.rotation.x = -(0.22 + this.\u91D1\u53D1\u98D8\u626CX * 0.72 + \u6CE2 * 0.35);
-        b.\u6839\u67A2.rotation.z = b.\u57FA\u7840Z + this.\u91D1\u53D1\u4FA7\u7529Z * 0.68 + \u6CE2 * 0.45 + (\u91CD\u521B.\u6FC0\u6D3B ? Math.sin(hi * 1.9) * 0.55 * \u91CD\u521B.\u5305\u7EDC : 0);
-        b.\u4E2D\u67A2.rotation.x = -(0.12 + this.\u91D1\u53D1\u98D8\u626CX * 0.36 + (\u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * \u6D6A\u9891 + b.\u76F8\u4F4D\u504F - 0.8) * 0.22)) - (\u91CD\u521B.\u6FC0\u6D3B ? 0.45 * \u91CD\u521B.\u5305\u7EDC : 0);
-        b.\u4E2D\u67A2.rotation.z = this.\u91D1\u53D1\u4FA7\u7529Z * 0.42 + (\u662F\u6B7B\u4EA1 ? 0 : Math.cos(t * \u6D6A\u9891 + b.\u76F8\u4F4D\u504F - 0.7) * 0.24);
-        b.\u68A2\u67A2.rotation.x = -(0.1 + (\u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * \u6D6A\u9891 + b.\u76F8\u4F4D\u504F - 1.6) * 0.32));
-        b.\u68A2\u67A2.rotation.z = this.\u91D1\u53D1\u4FA7\u7529Z * 0.3 + (\u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * \u6D6A\u9891 + b.\u76F8\u4F4D\u504F - 1.5) * 0.34);
-      }
-      this.\u5DE6\u5218\u6D77\u67A2.rotation.z = 0.32 + this.\u91D1\u53D1\u4FA7\u7529Z * 0.35 + (\u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * \u6D6A\u9891) * 0.12) + (\u91CD\u521B.\u6FC0\u6D3B ? 0.45 * \u91CD\u521B.\u5305\u7EDC : 0);
-      this.\u53F3\u5218\u6D77\u67A2.rotation.z = -0.32 + this.\u91D1\u53D1\u4FA7\u7529Z * 0.35 - (\u662F\u6B7B\u4EA1 ? 0 : Math.cos(t * \u6D6A\u9891) * 0.12) - (\u91CD\u521B.\u6FC0\u6D3B ? 0.45 * \u91CD\u521B.\u5305\u7EDC : 0);
+      const \u76EE\u6807\u5E3DX = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? -0.24 * \u6B7B\u6001.\u5012\u4E0B + 0.28 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u662F\u6025\u5239 ? 0.16 : \u662F\u666E\u653B ? -0.14 * \u653B\u51FA\u51FB : Math.max(-0.18, Math.min(0.18, -\u540E\u98D8 * 0.1 + (\u662F\u6253\u6655 || \u662F\u649E\u8F66 ? Math.sin(t * 18) * 0.16 : 0)));
+      const \u76EE\u6807\u5E3DZ = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.22 * \u6B7B\u6001.\u5012\u4E0B : Math.max(-0.24, Math.min(0.24, \u79BB\u5FC3 * 0.14 - \u6F02\u6743 * \u6F02\u5411 * 0.12 + (\u662F\u6253\u6655 || \u662F\u649E\u8F66 ? Math.cos(t * 16) * 0.2 : 0) + (\u91CD\u521B.\u6FC0\u6D3B ? \u91CD\u521B.\u63A8\u5411 * 0.26 * \u91CD\u521B.\u5305\u7EDC : 0)));
+      [this.\u5E3D\u6643X, this.\u5E3D\u6643X\u901F] = this.\u6B65\u8FDB\u5F39\u7C27(this.\u5E3D\u6643X, this.\u5E3D\u6643X\u901F, \u76EE\u6807\u5E3DX, 130, 12.5, dt);
+      [this.\u5E3D\u6643Z, this.\u5E3D\u6643Z\u901F] = this.\u6B65\u8FDB\u5F39\u7C27(this.\u5E3D\u6643Z, this.\u5E3D\u6643Z\u901F, \u76EE\u6807\u5E3DZ, 135, 11.8, dt);
+      const \u5E3D\u98A0\u9AD8 = \u91CD\u521B.\u6FC0\u6D3B ? 0.09 * \u91CD\u521B.\u5305\u7EDC : \u662F\u649E\u8F66 ? Math.abs(Math.sin(t * 18)) * 0.07 : \u662F\u51B2\u7EBF ? Math.abs(Math.sin(t * 5.8)) * 0.04 : 0;
+      this.\u5B89\u5168\u5E3D\u67A2.position.set(0, 0.255 + \u5E3D\u98A0\u9AD8, 0.032);
+      this.\u5B89\u5168\u5E3D\u67A2.rotation.set(this.\u5E3D\u6643X, 0, this.\u5E3D\u6643Z);
       this.\u5DE6\u5DE8\u81C2.\u6307\u5C16\u70B9.updateWorldMatrix(true, false);
       this.\u5DE6\u5DE8\u81C2.\u62F3\u5E95\u70B9.updateWorldMatrix(true, false);
       this.\u5DE6\u5DE8\u81C2.\u638C\u8DDF\u70B9.updateWorldMatrix(true, false);
@@ -44901,7 +45411,7 @@ void main() {
           g.\u8EAB\u67A2.rotation.x = g.\u8EAB\u503EX;
           g.\u5DE6\u81C2.rotation.set(g.\u5DE6\u81C2\u89D2X, 0, g.\u5DE6\u81C2\u89D2Z);
           g.\u53F3\u81C2.rotation.set(g.\u53F3\u81C2\u89D2X, 0, g.\u53F3\u81C2\u89D2Z);
-          g.\u53D1\u7247.rotation.z = g.\u53D1\u98D8\u89D2Z;
+          g.\u5F71\u5E3D.rotation.z = g.\u5E3D\u6643\u89D2Z;
           g.mesh.visible = true;
           for (const m of g.\u6750\u8D28\u7EC4) m.opacity = \u6E10\u9690 * g.\u521D\u59CB\u900F\u660E\u5EA6;
         } else {
@@ -44922,9 +45432,9 @@ void main() {
           \u53EF\u7528.\u5DE6\u81C2\u89D2Z = \u5DE6\u81C2Z;
           \u53EF\u7528.\u53F3\u81C2\u89D2X = \u53F3\u81C2X;
           \u53EF\u7528.\u53F3\u81C2\u89D2Z = \u53F3\u81C2Z;
-          \u53EF\u7528.\u53D1\u98D8\u89D2Z = this.\u91D1\u53D1\u4FA7\u7529Z;
+          \u53EF\u7528.\u5E3D\u6643\u89D2Z = this.\u5E3D\u6643Z;
           \u53EF\u7528.\u6750\u8D28\u7EC4[0].color.setHex(\u662F\u5927\u55B7 ? 16743168 : 9741240);
-          \u53EF\u7528.\u6750\u8D28\u7EC4[1].color.setHex(16638023);
+          \u53EF\u7528.\u6750\u8D28\u7EC4[1].color.setHex(16436245);
           \u53EF\u7528.\u521D\u59CB\u900F\u660E\u5EA6 = \u662F\u5927\u55B7 ? 0.38 : 0.28;
           \u53EF\u7528.\u5B58\u6D3B\u65F6\u95F4 = 0;
           \u53EF\u7528.\u5BFF\u547D = \u662F\u5927\u55B7 ? 0.22 : 0.17;
@@ -45503,16 +46013,20 @@ void main() {
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u4FA7\u653B = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
       const \u662F\u653B\u51FB = \u662F\u4FA7\u653B || \u662F\u666E\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u62D0\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F || \u662F\u51B2\u7EBF);
-      const \u8DD1\u52A8\u901F\u5EA6 = \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1 = !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u52A0\u901F\u4E2D || \u662F\u98DE\u5929);
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F || \u662F\u51B2\u7EBF);
+      const \u8DD1\u52A8\u901F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(26, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u98DE\u5929);
       const \u653B\u76F801 = \u662F\u653B\u51FB ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       let \u653B\u84C4\u529B = 0;
       let \u653B\u51FA\u51FB = 0;
@@ -45532,13 +46046,14 @@ void main() {
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u4FA7\u653B, \u653B\u5411, \u653B\u76F801, \u89C4.\u653B\u8F68\u8FF9\u4E3B\u8272, \u89C4.\u653B\u8F68\u8FF9\u526F\u8272, 2.35 * \u89C4.\u57FA\u7840\u5C3A\u5EA6, 1.18 * k, 0.08);
       const \u540E\u8F6E\u89D2\u901F = \u8DD1\u52A8\u901F\u5EA6 / Math.max(0.18, \u89C4.\u540E\u8F6E\u534A\u5F84 * k) * (\u662F\u5927\u55B7 ? 1.75 : \u52A0\u901F\u4E2D ? 1.42 : 1);
-      if (!\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
+      if (!\u662F\u5F85\u673A && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
         this.\u8F6E\u8F6C\u89D2 += dt * (\u662F\u8D77\u6B65 ? Math.sin(t * 28) * 1.8 : \u540E\u8F6E\u89D2\u901F);
       }
       this.\u540E\u8F6E\u65CB.rotation.x = this.\u8F6E\u8F6C\u89D2;
       this.\u524D\u8F6E\u65CB.rotation.x = this.\u8F6E\u8F6C\u89D2 * (\u89C4.\u540E\u8F6E\u534A\u5F84 / \u89C4.\u524D\u8F6E\u534A\u5F84) * (\u52A0\u901F\u4E2D ? 1.25 : 1);
       let \u76EE\u6807\u8F66\u5934\u89D2 = \u4FA7\u504F * 0.48 * \u62A2\u62D0\u500D + Math.max(-0.26, Math.min(0.26, \u60EF\u6027\u6001.\u8F6C\u5411\u53D8\u5316\u7387 * 0.042 * \u62A2\u62D0\u500D));
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u8F66\u5934\u89D2 = -0.34;
+      if (\u6B7B\u6001) \u76EE\u6807\u8F66\u5934\u89D2 = 0.42 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.34 * \u6B7B\u6001.\u5012\u4E0B;
+      else if (\u662F\u5F85\u673A) \u76EE\u6807\u8F66\u5934\u89D2 = 0;
       else if (\u662F\u541F\u5531) \u76EE\u6807\u8F66\u5934\u89D2 = Math.sin(t * 2.2) * 0.06;
       else if (\u662F\u6253\u6655) \u76EE\u6807\u8F66\u5934\u89D2 = Math.sin(t * 14) * 0.62;
       else if (\u662F\u649E\u8F66) \u76EE\u6807\u8F66\u5934\u89D2 = Math.sin(t * 22) * 0.78;
@@ -45551,7 +46066,8 @@ void main() {
       const \u8F66\u5934\u89D2 = this.\u8F66\u5934\u5F39\u7C27.\u66F4\u65B0(\u76EE\u6807\u8F66\u5934\u89D2, dt, 340, 22, 0.85);
       this.\u8F66\u5934\u8F6C\u5411\u67A2.rotation.y = \u8F66\u5934\u89D2;
       let \u76EE\u6807\u8F66\u8EAB\u6B6A = \u4FA7\u504F * 0.26 * \u4FA7\u503E\u500D + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.06;
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u8F66\u8EAB\u6B6A = 1.38;
+      if (\u6B7B\u6001) \u76EE\u6807\u8F66\u8EAB\u6B6A = -0.22 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 1.38 * \u6B7B\u6001.\u5012\u4E0B - \u6B7B\u6001.\u7838\u5730\u5F39 * 0.14 + \u6B7B\u6001.\u62BD\u6410 * 0.04;
+      else if (\u662F\u5F85\u673A) \u76EE\u6807\u8F66\u8EAB\u6B6A = 0;
       else if (\u662F\u541F\u5531) \u76EE\u6807\u8F66\u8EAB\u6B6A = Math.sin(t * 2.8) * 0.06;
       else if (\u662F\u649E\u8F66) \u76EE\u6807\u8F66\u8EAB\u6B6A = Math.cos(t * 20) * 0.28;
       else if (\u662F\u8DF3\u821E) \u76EE\u6807\u8F66\u8EAB\u6B6A = Math.sin(t * 8.4) * 0.16;
@@ -45560,10 +46076,11 @@ void main() {
       else if (\u662F\u4FA7\u653B) \u76EE\u6807\u8F66\u8EAB\u6B6A += -\u653B\u5411 * 0.16 * \u653B\u84C4\u529B + \u653B\u5411 * 0.34 * \u653B\u51FA\u51FB;
       if (\u91CD\u521B.\u6FC0\u6D3B) \u76EE\u6807\u8F66\u8EAB\u6B6A += -\u91CD\u521B.\u63A8\u5411 * 0.44 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.16;
       const \u6B6A\u89D2\u9650 = \u662F\u6B7B\u4EA1 ? 1.45 : 0.56;
-      const \u8F66\u8EAB\u6B6A\u89D2 = this.\u8F66\u8EAB\u6B6A\u5F39\u7C27.\u66F4\u65B0(Math.max(-\u6B6A\u89D2\u9650, Math.min(\u6B6A\u89D2\u9650, \u76EE\u6807\u8F66\u8EAB\u6B6A)), dt, 108, 13.5, 0.54);
+      const \u8F66\u8EAB\u6B6A\u89D2 = this.\u8F66\u8EAB\u6B6A\u5F39\u7C27.\u66F4\u65B0(Math.max(-\u6B6A\u89D2\u9650, Math.min(\u6B6A\u89D2\u9650, \u76EE\u6807\u8F66\u8EAB\u6B6A)), dt, 108, 13.5, \u6B6A\u89D2\u9650);
       const \u6709\u6C28\u6C14\u52A0\u901F = \u73AF\u5883?.\u662F\u5426\u6C28\u6C14 !== void 0 ? !!\u73AF\u5883.\u662F\u5426\u6C28\u6C14 : \u662F\u5927\u55B7 || \u662F\u53CC\u55B7;
       let \u76EE\u6807\u7FD8\u5934 = 0;
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u7FD8\u5934 = 0;
+      if (\u6B7B\u6001) \u76EE\u6807\u7FD8\u5934 = 0.28 * \u6B7B\u6001.\u53D7\u51FB\u9707 + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.08;
+      else if (\u662F\u5F85\u673A || \u662F\u884C\u8D70) \u76EE\u6807\u7FD8\u5934 = 0;
       else if (\u662F\u541F\u5531) \u76EE\u6807\u7FD8\u5934 = 0.1 + Math.sin(t * 2.8) * 0.04;
       else if (\u662F\u98DE\u5929) \u76EE\u6807\u7FD8\u5934 = 0.36 + Math.sin(t * 5) * 0.09;
       else if (\u662F\u590D\u4F4D) \u76EE\u6807\u7FD8\u5934 = \u590D\u76F8 < 0.45 ? 0.34 : Math.sin((\u590D\u76F8 - 0.45) / 0.55 * Math.PI * 2) * 0.38 * (1 - \u590D\u76F8);
@@ -45596,8 +46113,8 @@ void main() {
       if (\u7FD8\u5934\u89D2 > 0.72) {
         \u8F66\u9AD8Y += (\u7FD8\u5934\u89D2 - 0.72) * 0.16 * k;
       }
-      if (\u662F\u6B7B\u4EA1) {
-        \u8F66\u9AD8Y += Math.sin(Math.min(Math.PI * 0.5, Math.abs(\u8F66\u8EAB\u6B6A\u89D2))) * 0.44 * k;
+      if (\u6B7B\u6001) {
+        \u8F66\u9AD8Y += Math.sin(Math.min(Math.PI * 0.5, Math.abs(\u8F66\u8EAB\u6B6A\u89D2))) * 0.44 * k + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.18 * k;
       } else if (\u662F\u541F\u5531) {
         \u8F66\u9AD8Y += (0.28 + Math.sin(t * 3) * 0.06) * k;
       } else if (\u662F\u98DE\u5929) {
@@ -45659,8 +46176,8 @@ void main() {
         this.\u6F02\u79FB\u89E6\u70B9\u7EC4[0].\u8D34\u5730 = !\u662F\u5426\u817E\u7A7A && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
         this.\u6F02\u79FB\u89E6\u70B9\u7EC4[1].\u8D34\u5730 = !\u662F\u5426\u817E\u7A7A && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && \u7FD8\u5934\u89D2 < 0.14;
       }
-      const \u76EE\u6807\u6446X = \u662F\u6B7B\u4EA1 ? 0.65 : \u662F\u541F\u5531 ? -0.25 + Math.sin(t * 3) * 0.12 : Math.max(-1.08, Math.min(0.85, (\u52A0\u901F\u4E2D ? -0.82 : \u662F\u6025\u5239 ? 0.72 : -(\u8DD1\u52A8\u901F\u5EA6 / 55) * 0.45) + (\u73AF\u5883?.\u7EB5\u5411\u52A0\u901F\u5EA6 ?? 0) * -0.015));
-      const \u76EE\u6807\u6446Z = \u662F\u6B7B\u4EA1 ? 0.45 : Math.max(-0.85, Math.min(0.85, -\u8F66\u5934\u89D2 * 0.75 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.38));
+      const \u76EE\u6807\u6446X = \u6B7B\u6001 ? -0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.65 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u5F85\u673A ? 0 : \u662F\u541F\u5531 ? -0.25 + Math.sin(t * 3) * 0.12 : Math.max(-1.08, Math.min(0.85, (\u52A0\u901F\u4E2D ? -0.82 : \u662F\u6025\u5239 ? 0.72 : -(\u8DD1\u52A8\u901F\u5EA6 / 55) * 0.45) + (\u73AF\u5883?.\u7EB5\u5411\u52A0\u901F\u5EA6 ?? 0) * -0.015));
+      const \u76EE\u6807\u6446Z = \u6B7B\u6001 ? 0.45 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u5F85\u673A ? 0 : Math.max(-0.85, Math.min(0.85, -\u8F66\u5934\u89D2 * 0.75 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.38));
       const \u6446X = this.\u6302\u7269\u6446\u5F39\u7C27X.\u66F4\u65B0(\u76EE\u6807\u6446X, dt, 110, 7.2, 1.15);
       const \u6446Z = this.\u6302\u7269\u6446\u5F39\u7C27Z.\u66F4\u65B0(\u76EE\u6807\u6446Z, dt, 120, 7.8, 1.05);
       const \u8D77\u6B65\u6296Y = \u662F\u7B11\u8BDD ? Math.abs(Math.sin(t * 14)) * 0.04 * k : \u662F\u8DF3\u821E ? Math.abs(Math.sin(t * 8.4)) * 0.06 * k : \u662F\u5632\u8BBD ? Math.sin(t * 18) * 0.02 * k : 0;
@@ -45668,19 +46185,22 @@ void main() {
       const \u4FEF\u51B2\u7F29Z = \u662F\u5927\u55B7 ? 0.16 * k : \u662F\u53CC\u55B7 ? 0.1 * k : \u662F\u5C0F\u55B7 ? 0.06 * k : \u662F\u6025\u5239 ? -0.08 * k : \u662F\u666E\u653B ? 0.14 * \u653B\u51FA\u51FB * k : 0;
       this.\u9A91\u624B\u6839\u7EC4.position.set(
         \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.04 * k + (\u662F\u4FA7\u653B ? \u653B\u5411 * 0.16 * \u653B\u51FA\u51FB * k : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.06 * k : 0),
-        \u89C4.\u5EA7\u9AD8 * k + \u8D77\u6B65\u6296Y + \u7AD9\u8D77\u9AD8 - (\u662F\u5927\u55B7 ? 0.05 * k : 0) - (\u662F\u6B7B\u4EA1 ? 0.06 * k : 0),
+        \u89C4.\u5EA7\u9AD8 * k + \u8D77\u6B65\u6296Y + \u7AD9\u8D77\u9AD8 - (\u662F\u5927\u55B7 ? 0.05 * k : 0) - (\u6B7B\u6001 ? 0.06 * \u6B7B\u6001.\u5012\u4E0B * k : 0),
         \u89C4.\u5EA7Z * k + \u4FEF\u51B2\u7F29Z
       );
       this.\u9A91\u624B\u6839\u7EC4.rotation.set(
-        \u662F\u6B7B\u4EA1 ? 0.22 : \u662F\u51B2\u7EBF ? -0.1 : \u662F\u5927\u55B7 ? 0.24 : \u662F\u53CC\u55B7 ? 0.14 : \u662F\u666E\u653B ? 0.18 * \u653B\u51FA\u51FB : 0,
-        \u662F\u6B7B\u4EA1 ? 0.25 : \u8F66\u5934\u89D2 * 0.18 + (\u662F\u5632\u8BBD ? Math.sin(t * 5.2) * 0.16 : 0),
-        \u662F\u6B7B\u4EA1 ? 0.18 : \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.08 + \u4FA7\u504F * 0.12 + (\u662F\u4FA7\u653B ? -\u653B\u5411 * 0.22 * \u653B\u51FA\u51FB : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.18 : 0)
+        \u6B7B\u6001 ? -0.18 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.22 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u51B2\u7EBF ? -0.1 : \u662F\u5927\u55B7 ? 0.24 : \u662F\u53CC\u55B7 ? 0.14 : \u662F\u666E\u653B ? 0.18 * \u653B\u51FA\u51FB : 0,
+        \u6B7B\u6001 ? 0.25 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u5F85\u673A ? 0 : \u8F66\u5934\u89D2 * 0.18 + (\u662F\u5632\u8BBD ? Math.sin(t * 5.2) * 0.16 : 0),
+        \u6B7B\u6001 ? 0.18 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u5F85\u673A ? 0 : \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.08 + \u4FA7\u504F * 0.12 + (\u662F\u4FA7\u653B ? -\u653B\u5411 * 0.22 * \u653B\u51FA\u51FB : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.18 : 0)
       );
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u5DE6\u5927\u817F\u67A2.rotation.set(0.95, 0.45, 0.28);
-        this.\u5DE6\u5C0F\u817F\u67A2.rotation.set(-0.65, 0, 0);
-        this.\u53F3\u5927\u817F\u67A2.rotation.set(0.42, -0.35, -0.22);
-        this.\u53F3\u5C0F\u817F\u67A2.rotation.set(-0.35, 0, 0);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        this.\u5DE6\u5927\u817F\u67A2.rotation.set(0.18 + 0.77 * d - 0.12 * hit, 0.24 + 0.21 * d, 0.08 + 0.2 * d);
+        this.\u5DE6\u5C0F\u817F\u67A2.rotation.set(-0.14 - 0.51 * d + tw * 0.08, 0, 0);
+        this.\u53F3\u5927\u817F\u67A2.rotation.set(0.18 + 0.24 * d - 0.12 * hit, -0.24 - 0.11 * d, -0.08 - 0.14 * d);
+        this.\u53F3\u5C0F\u817F\u67A2.rotation.set(-0.14 - 0.21 * d - tw * 0.06, 0, 0);
       } else if (\u662F\u541F\u5531) {
         this.\u5DE6\u5927\u817F\u67A2.rotation.set(0.56, 0.22, 0.1);
         this.\u5DE6\u5C0F\u817F\u67A2.rotation.set(-0.56, 0, 0);
@@ -45717,15 +46237,24 @@ void main() {
         this.\u53F3\u5927\u817F\u67A2.rotation.set(0.18 - \u8DB4\u8E72\u819D, -0.24 - \u538B\u819D\u5185\u6263, -0.08 - \u538B\u819D\u5185\u6263 * 0.35);
         this.\u53F3\u5C0F\u817F\u67A2.rotation.set(-0.14 + \u8DB4\u8E72\u819D * 1.4, 0, 0);
       }
-      let \u4E0A\u8EABX = \u662F\u6B7B\u4EA1 ? 0.32 : \u662F\u541F\u5531 ? -0.22 + Math.sin(t * 3) * 0.06 : \u662F\u5927\u55B7 ? 0.72 : \u662F\u53CC\u55B7 ? 0.54 : \u662F\u5C0F\u55B7 ? 0.38 : \u662F\u6025\u5239 ? -0.3 : \u662F\u51B2\u7EBF ? -0.16 : \u662F\u7B11\u8BDD ? -0.32 + Math.sin(t * 14) * 0.16 : \u662F\u8DF3\u821E ? Math.sin(t * 16.8) * 0.14 : \u662F\u5632\u8BBD ? -0.12 + Math.sin(t * 5.2) * 0.08 : 0.16;
+      let \u4E0A\u8EABX = \u6B7B\u6001 ? -0.28 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.32 * \u6B7B\u6001.\u5012\u4E0B : \u73AF\u89C6 ? 0.08 + \u73AF\u89C6.\u547C\u5438 * 0.025 : \u662F\u541F\u5531 ? -0.22 + Math.sin(t * 3) * 0.06 : \u662F\u5927\u55B7 ? 0.72 : \u662F\u53CC\u55B7 ? 0.54 : \u662F\u5C0F\u55B7 ? 0.38 : \u662F\u884C\u8D70 ? 0.14 : \u662F\u6025\u5239 ? -0.3 : \u662F\u51B2\u7EBF ? -0.16 : \u662F\u7B11\u8BDD ? -0.32 + Math.sin(t * 14) * 0.16 : \u662F\u8DF3\u821E ? Math.sin(t * 16.8) * 0.14 : \u662F\u5632\u8BBD ? -0.12 + Math.sin(t * 5.2) * 0.08 : 0.16;
       if (\u662F\u4FA7\u653B) \u4E0A\u8EABX += -0.14 * \u653B\u84C4\u529B + 0.24 * \u653B\u51FA\u51FB;
       if (\u662F\u666E\u653B) \u4E0A\u8EABX += -0.24 * \u653B\u84C4\u529B + 0.52 * \u653B\u51FA\u51FB;
       if (\u91CD\u521B.\u6FC0\u6D3B) \u4E0A\u8EABX -= 0.4 * \u91CD\u521B.\u5305\u7EDC;
-      const \u4E0A\u8EABY = \u662F\u4FA7\u653B ? -\u653B\u5411 * 0.62 * \u653B\u84C4\u529B + \u653B\u5411 * (0.95 * \u626B\u8FDB - 0.15) * \u653B\u51FA\u51FB : \u662F\u666E\u653B ? 0.22 * \u653B\u84C4\u529B - 0.3 * \u653B\u51FA\u51FB : \u662F\u5632\u8BBD ? 0.35 + Math.sin(t * 5.2) * 0.22 : \u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.32 : \u8F66\u5934\u89D2 * 0.24;
-      const \u4E0A\u8EABZ = \u8F66\u8EAB\u6B6A\u89D2 * (\u662F\u6B7B\u4EA1 ? 0.15 : 0.45) + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.12 + (\u662F\u4FA7\u653B ? \u653B\u5411 * 0.22 * \u653B\u84C4\u529B - \u653B\u5411 * 0.22 * \u653B\u51FA\u51FB : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.22 : 0);
+      const \u4E0A\u8EABY = \u6B7B\u6001 ? -0.18 * \u6B7B\u6001.\u5012\u4E0B : \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.18 : \u662F\u4FA7\u653B ? -\u653B\u5411 * 0.62 * \u653B\u84C4\u529B + \u653B\u5411 * (0.95 * \u626B\u8FDB - 0.15) * \u653B\u51FA\u51FB : \u662F\u666E\u653B ? 0.22 * \u653B\u84C4\u529B - 0.3 * \u653B\u51FA\u51FB : \u662F\u5632\u8BBD ? 0.35 + Math.sin(t * 5.2) * 0.22 : \u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.32 : \u8F66\u5934\u89D2 * 0.24;
+      const \u4E0A\u8EABZ = \u6B7B\u6001 ? \u8F66\u8EAB\u6B6A\u89D2 * 0.15 : \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.1 : \u8F66\u8EAB\u6B6A\u89D2 * 0.45 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.12 + (\u662F\u4FA7\u653B ? \u653B\u5411 * 0.22 * \u653B\u84C4\u529B - \u653B\u5411 * 0.22 * \u653B\u51FA\u51FB : 0) + (\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.22 : 0);
       this.\u4E0A\u8EAB\u67A2.rotation.set(\u4E0A\u8EABX, \u4E0A\u8EABY, \u4E0A\u8EABZ);
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u5934\u90E8\u67A2.rotation.set(0.38, -0.45, 0.3);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        this.\u5934\u90E8\u67A2.rotation.set(-0.34 * hit + 0.38 * d, -0.45 * d + tw * 0.08, 0.3 * d);
+      } else if (\u73AF\u89C6) {
+        this.\u5934\u90E8\u67A2.rotation.set(
+          -\u4E0A\u8EABX * 0.5 + \u73AF\u89C6.\u62AC\u5934X * 0.45,
+          \u73AF\u89C6.\u8F6C\u5934Y * 0.85,
+          \u73AF\u89C6.\u6B6A\u5934Z * 0.45
+        );
       } else if (\u662F\u541F\u5531) {
         this.\u5934\u90E8\u67A2.rotation.set(-0.36 + Math.sin(t * 3) * 0.08, Math.sin(t * 2.2) * 0.12, 0);
       } else if (\u662F\u6253\u6655 || \u662F\u649E\u8F66) {
@@ -45749,11 +46278,14 @@ void main() {
       }
       const \u4E0A\u81C2 = \u89C4.\u4E0A\u81C2\u957F * k;
       const \u524D\u81C2 = \u89C4.\u524D\u81C2\u957F * k;
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u5DE6\u80A9\u67A2.rotation.set(0.55, 0.22, -0.62);
-        this.\u5DE6\u8098\u67A2.rotation.set(-0.35, 0, 0);
-        this.\u53F3\u80A9\u67A2.rotation.set(0.42, -0.18, 0.52);
-        this.\u53F3\u8098\u67A2.rotation.set(-0.28, 0, 0);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        this.\u5DE6\u80A9\u67A2.rotation.set(0.35 - 0.48 * hit + 0.2 * d, 0.22 * d, -0.18 - 0.58 * hit - 0.44 * d + tw * 0.08);
+        this.\u5DE6\u8098\u67A2.rotation.set(-0.6 + 0.25 * d, 0, 0);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.35 - 0.48 * hit + 0.07 * d, -0.18 * d, 0.18 + 0.58 * hit + 0.34 * d - tw * 0.06);
+        this.\u53F3\u8098\u67A2.rotation.set(-0.6 + 0.32 * d, 0, 0);
       } else if (\u662F\u541F\u5531) {
         const \u632F = Math.sin(t * 3.6) * 0.12;
         this.\u5DE6\u80A9\u67A2.rotation.set(-0.32, 0.15, -2.56 + \u632F);
@@ -45903,8 +46435,18 @@ void main() {
         \u653B\u51FA\u51FB,
         \u662F\u590D\u4F4D,
         \u590D\u76F8,
+        \u662F\u5F85\u673A,
+        \u662F\u884C\u8D70,
         \u662F\u6B7B\u4EA1,
+        \u6B7B\u6001,
         \u662F\u541F\u5531,
+        \u662F\u62D0\u5F2F,
+        \u626B\u8FDB,
+        \u4FA7\u504F,
+        \u5C3A\u5EA6: k,
+        \u4E0A\u81C2\u957F: \u4E0A\u81C2,
+        \u524D\u81C2\u957F: \u524D\u81C2,
+        \u73AF\u89C6,
         \u91CD\u521B
       });
     }
@@ -46450,37 +46992,50 @@ void main() {
       this.\u53F3\u624B\u9524\u888B\u67A2.rotation.z = Math.PI;
       this.\u5DE6\u624B\u9524\u888B\u67A2.scale.set(\u888B\u80C0, 1 + \u6001.\u653B\u51FA\u51FB * 0.25, \u888B\u80C0);
       this.\u53F3\u624B\u9524\u888B\u67A2.scale.set(\u888B\u80C0, 1 + \u6001.\u653B\u51FA\u51FB * 0.25, \u888B\u80C0);
-      if (\u6001.\u662F\u6B7B\u4EA1) {
-        this.\u5DE6\u888B\u9F20\u8033.rotation.set(-0.32, 0, -0.82);
-        this.\u53F3\u888B\u9F20\u8033.rotation.set(-0.32, 0, 0.82);
+      if (\u6001.\u6B7B\u6001) {
+        const d = \u6001.\u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6001.\u6B7B\u6001.\u53D7\u51FB\u9707;
+        const tw = \u6001.\u6B7B\u6001.\u62BD\u6410;
+        this.\u5DE6\u888B\u9F20\u8033.rotation.set(-0.08 + 0.28 * hit - 0.24 * d, 0, -0.22 - 0.6 * d + tw * 0.1);
+        this.\u53F3\u888B\u9F20\u8033.rotation.set(-0.08 + 0.28 * hit - 0.24 * d, 0, 0.22 + 0.6 * d - tw * 0.1);
+      } else if (\u6001.\u662F\u5F85\u673A) {
+        const \u8F7B\u52A8 = Math.sin(t * 2.2) * 0.04;
+        this.\u5DE6\u888B\u9F20\u8033.rotation.set(-0.06 + \u8F7B\u52A8, 0, -0.2);
+        this.\u53F3\u888B\u9F20\u8033.rotation.set(-0.06 - \u8F7B\u52A8 * 0.7, 0, 0.2);
       } else if (\u6001.\u662F\u541F\u5531) {
         const \u632F = Math.sin(t * 3.6) * 0.12;
         this.\u5DE6\u888B\u9F20\u8033.rotation.set(0.24 + \u632F, 0, -0.1);
         this.\u53F3\u888B\u9F20\u8033.rotation.set(0.24 + \u632F, 0, 0.1);
       } else {
         const \u8033\u80CC\u503E = \u6001.\u662F\u5927\u55B7 ? -1.18 : \u6001.\u662F\u53CC\u55B7 ? -0.88 : \u6001.\u52A0\u901F\u4E2D ? -0.58 : -0.14;
-        const \u8033\u6296 = \u6001.\u662F\u51B2\u7EBF ? Math.sin(t * 20) * 0.3 : \u6001.\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.28 : \u6001.\u662F\u7B11\u8BDD ? Math.sin(t * 14) * 0.24 : \u6001.\u662F\u5632\u8BBD ? Math.sin(t * 10) * 0.16 : Math.sin(t * 11) * 0.07;
+        const \u8033\u6296 = \u6001.\u662F\u51B2\u7EBF ? Math.sin(t * 20) * 0.3 : \u6001.\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.28 : \u6001.\u662F\u7B11\u8BDD ? Math.sin(t * 14) * 0.24 : \u6001.\u662F\u5632\u8BBD ? Math.sin(t * 10) * 0.16 : Math.sin(t * (\u6001.\u662F\u884C\u8D70 ? 7.5 : 11)) * 0.07;
         this.\u5DE6\u888B\u9F20\u8033.rotation.set(\u8033\u80CC\u503E + \u8033\u6296, 0, -0.22 + (\u6001.\u91CD\u521B.\u6FC0\u6D3B ? \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.45 : 0));
         this.\u53F3\u888B\u9F20\u8033.rotation.set(\u8033\u80CC\u503E - \u8033\u6296, 0, 0.22 - (\u6001.\u91CD\u521B.\u6FC0\u6D3B ? \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.45 : 0));
       }
-      if (\u6001.\u662F\u6B7B\u4EA1) {
-        this.\u50AC\u5355\u5C0F\u65D7\u67A2.rotation.set(0.18, 0, 0.22);
+      if (\u6001.\u6B7B\u6001) {
+        const d = \u6001.\u6B7B\u6001.\u5012\u4E0B;
+        this.\u50AC\u5355\u5C0F\u65D7\u67A2.rotation.set(0.18 * d, 0, 0.22 * d);
+      } else if (\u6001.\u662F\u5F85\u673A) {
+        this.\u50AC\u5355\u5C0F\u65D7\u67A2.rotation.set(-0.04, Math.sin(t * 2.4) * 0.06, Math.cos(t * 2) * 0.03);
       } else if (\u6001.\u662F\u541F\u5531) {
         this.\u50AC\u5355\u5C0F\u65D7\u67A2.rotation.set(-0.1, Math.sin(t * 4.5) * 0.28, Math.cos(t * 3.8) * 0.12);
       } else {
-        this.\u50AC\u5355\u5C0F\u65D7\u67A2.rotation.set(\u6001.\u662F\u5927\u55B7 ? -0.78 : \u6001.\u52A0\u901F\u4E2D ? -0.48 : -0.14, Math.sin(t * 22) * 0.24, Math.cos(t * 17) * 0.14);
+        this.\u50AC\u5355\u5C0F\u65D7\u67A2.rotation.set(\u6001.\u662F\u5927\u55B7 ? -0.78 : \u6001.\u52A0\u901F\u4E2D ? -0.48 : -0.14, Math.sin(t * (\u6001.\u662F\u884C\u8D70 ? 12 : 22)) * (\u6001.\u662F\u884C\u8D70 ? 0.14 : 0.24), Math.cos(t * (\u6001.\u662F\u884C\u8D70 ? 10 : 17)) * (\u6001.\u662F\u884C\u8D70 ? 0.08 : 0.14));
       }
       for (let i = 0; i < this.\u888B\u9F20\u5C3E\u6BB5.length; i++) {
         const \u5C3E = this.\u888B\u9F20\u5C3E\u6BB5[i];
-        if (\u6001.\u662F\u6B7B\u4EA1) {
-          \u5C3E.rotation.set(0.08, 0.12, 0);
+        if (\u6001.\u6B7B\u6001) {
+          const d = \u6001.\u6B7B\u6001.\u5012\u4E0B;
+          \u5C3E.rotation.set(0.08 * d, 0.12 * d + \u6001.\u6B7B\u6001.\u62BD\u6410 * 0.04, 0);
+        } else if (\u6001.\u662F\u5F85\u673A) {
+          \u5C3E.rotation.set(0.12, Math.sin(t * 2.4 - i * 0.5) * 0.07, 0);
         } else if (\u6001.\u662F\u541F\u5531) {
           \u5C3E.rotation.set(0.08 + Math.sin(t * 3 + i * 0.5) * 0.1, Math.sin(t * 2.5 - i * 0.4) * 0.1, 0);
         } else {
           const \u5782 = \u6001.\u662F\u5927\u55B7 ? -0.06 : 0.16;
           \u5C3E.rotation.set(
             \u5782 + (\u6001.\u662F\u51B2\u7EBF ? Math.sin(t * 18 + i) * 0.24 : 0),
-            Math.sin(t * 8 - i * 0.6) * (\u6001.\u52A0\u901F\u4E2D || \u6001.\u662F\u8DF3\u821E ? 0.24 : 0.16),
+            Math.sin(t * (\u6001.\u662F\u884C\u8D70 ? 5.5 : 8) - i * 0.6) * (\u6001.\u52A0\u901F\u4E2D || \u6001.\u662F\u8DF3\u821E ? 0.24 : 0.14),
             0
           );
         }
@@ -46537,6 +47092,29 @@ void main() {
     \u7F13\u5B58\u8B66\u7528\u7BB1\u7EB9\u7406.colorSpace = SRGBColorSpace;
     return \u7F13\u5B58\u8B66\u7528\u7BB1\u7EB9\u7406;
   }
+  var \u7F13\u5B58\u505C\u5B57\u724C\u7EB9\u7406 = null;
+  function \u83B7\u53D6\u505C\u5B57\u724C\u8D34\u82B1\u7EB9\u7406() {
+    if (\u7F13\u5B58\u505C\u5B57\u724C\u7EB9\u7406) return \u7F13\u5B58\u505C\u5B57\u724C\u7EB9\u7406;
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 16;
+    ctx.beginPath();
+    ctx.arc(128, 128, 110, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = 'bold 148px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillText("\u505C", 128, 134);
+    \u7F13\u5B58\u505C\u5B57\u724C\u7EB9\u7406 = new CanvasTexture(canvas);
+    \u7F13\u5B58\u505C\u5B57\u724C\u7EB9\u7406.colorSpace = SRGBColorSpace;
+    return \u7F13\u5B58\u505C\u5B57\u724C\u7EB9\u7406;
+  }
   var \u8B66\u7528\u9A91\u624B\u57FA\u7C7B\u6A21\u578B = class extends \u7535\u9A74\u9A91\u624B\u6A21\u578B {
     \u7EA2\u8B66\u706F\u5934\u6750 = null;
     \u84DD\u8B66\u706F\u5934\u6750 = null;
@@ -46547,50 +47125,13 @@ void main() {
     \u84DD\u706F\u65CB\u8F6C\u82AF = new Group();
     \u7EA2\u5149\u6655\u7403 = null;
     \u84DD\u5149\u6655\u7403 = null;
-    \u8170\u95F4\u6302\u68CD = new Group();
-    \u5DE6\u8B66\u68CD = new Group();
-    \u53F3\u8B66\u68CD = new Group();
-    \u5927\u5564\u9152\u809A = null;
-    \u5634\u53FC\u8B66\u54E8 = new Group();
     \u5DE6\u52A8\u7269\u8033 = null;
     \u53F3\u52A8\u7269\u8033 = null;
-    \u83B7\u53D6\u7535\u9A74\u89C4\u683C() {
-      const \u914D\u8272 = this.\u83B7\u53D6\u8B66\u5B98\u914D\u8272();
-      return {
-        // 比袋鼠单王大一号的警用重装小电驴
-        \u57FA\u7840\u5C3A\u5EA6: 1.24,
-        \u540E\u8F6E\u534A\u5F84: 0.28,
-        \u524D\u8F6E\u534A\u5F84: 0.27,
-        \u8F6E\u5BBD: 0.16,
-        \u540E\u8F74Z: -0.72,
-        \u524D\u8F74Z: 0.76,
-        \u524D\u53C9\u503E\u89D2: 0.26,
-        \u628A\u7ACB\u9AD8: 0.6,
-        \u8F66\u628A\u534A\u5BBD: 0.39,
-        \u628A\u9AD8: 0.64,
-        \u5EA7\u9AD8: 0.82,
-        \u5EA7Z: -0.14,
-        \u8E0F\u677F\u9AD8: 0.33,
-        \u8E0F\u677FZ: 0.36,
-        \u4E0A\u81C2\u957F: 0.42,
-        \u524D\u81C2\u957F: 0.42,
-        \u5927\u817F\u957F: 0.34,
-        \u5C0F\u817F\u957F: 0.38,
-        \u653B\u8F68\u8FF9\u4E3B\u8272: 3900150,
-        \u653B\u8F68\u8FF9\u526F\u8272: 16719416,
-        \u6B8B\u5F71\u4E3B\u8272: 2460159,
-        \u6B8B\u5F71\u51B2\u523A\u8272: 16721989,
-        \u6B8B\u5F71\u526F\u8272: 16721989,
-        \u7EA2\u84DD\u8B66\u706F\u6B8B\u5F71: true,
-        \u6F02\u79FB\u952E\u524D\u7F00: \u914D\u8272.\u6F02\u79FB\u952E\u524D\u7F00,
-        \u8F68\u8272: [0.1, 0.11, 0.14],
-        \u70DF\u8272: [0.84, 0.9, 0.98]
-      };
-    }
     \u6784\u5EFA\u8F66\u8EAB\u4E0E\u9A91\u624B\u5916\u89C2(\u89C4, k, \u6750\u5E93) {
-      const \u914D\u8272 = this.\u83B7\u53D6\u8B66\u5B98\u914D\u8272();
+      const \u91CD\u88C5 = this.\u662F\u91CD\u88C5\u8B66\u8F66();
       const \u8B66\u767D\u6750 = new MeshStandardMaterial({ color: 16317180, roughness: 0.22, metalness: 0.15 });
       const \u8B66\u84DD\u6750 = new MeshStandardMaterial({ color: 1981066, roughness: 0.34, metalness: 0.24 });
+      const \u6DF1\u84DD\u670D\u6750 = new MeshStandardMaterial({ color: 1516884, roughness: 0.42, metalness: 0.18 });
       const \u53CD\u5149\u9EC4\u6750 = new MeshStandardMaterial({
         color: 15398834,
         emissive: 10741301,
@@ -46599,15 +47140,6 @@ void main() {
         metalness: 0.5
       });
       const \u91D1\u661F\u6750 = new MeshStandardMaterial({ color: 16436245, roughness: 0.22, metalness: 0.85 });
-      const \u4F53\u6BDB\u6750 = new MeshStandardMaterial({ color: \u914D\u8272.\u4F53\u6BDB\u8272, roughness: 0.88, metalness: 0.02 });
-      const \u80A2\u4F53\u6BDB\u6750 = new MeshStandardMaterial({ color: \u914D\u8272.\u80A2\u4F53\u6BDB\u8272, roughness: 0.8, metalness: 0.04 });
-      const \u5634\u515C\u6750 = new MeshStandardMaterial({ color: \u914D\u8272.\u5634\u515C\u8272, roughness: 0.86, metalness: 0.02 });
-      const \u6D53\u7709\u6750 = new MeshStandardMaterial({ color: \u914D\u8272.\u7709\u8272, roughness: 0.78, metalness: 0.04 });
-      const \u8033\u5185\u6750 = new MeshStandardMaterial({ color: \u914D\u8272.\u8033\u5185\u8272, roughness: 0.86, metalness: 0.02 });
-      const \u9ED1\u9F3B\u6750 = new MeshStandardMaterial({ color: 1118999, roughness: 0.68, metalness: 0.06 });
-      const \u816E\u7EA2\u7C89\u6750 = new MeshStandardMaterial({ color: 16622767, roughness: 0.82, metalness: 0.02 });
-      const \u8C46\u8C46\u773C\u6750 = new MeshStandardMaterial({ color: 328967, roughness: 0.14, metalness: 0.15 });
-      const \u9AD8\u5149\u767D\u6750 = new MeshStandardMaterial({ color: 16777215, emissive: 16777215, emissiveIntensity: 0.6, roughness: 0.1 });
       const \u6321\u98CE\u73BB\u6750 = new MeshStandardMaterial({
         color: 12576511,
         transparent: true,
@@ -46618,7 +47150,10 @@ void main() {
       const \u5927\u706F\u767D\u6750 = new MeshStandardMaterial({ color: 16777215, emissive: 14742270, emissiveIntensity: 3.2 });
       const \u5C3E\u706F\u7EA2\u6750 = new MeshStandardMaterial({ color: 16720435, emissive: 16719405, emissiveIntensity: 2.6 });
       const \u8B66\u7BB1\u8D34\u82B1\u6750 = new MeshStandardMaterial({ map: \u83B7\u53D6\u8B66\u7528\u7BB1\u8D34\u82B1\u7EB9\u7406(), roughness: 0.38, metalness: 0.1 });
-      const \u84DD\u8F66\u724C\u6750 = new MeshStandardMaterial({ map: \u83B7\u53D6\u8F66\u724C\u8D34\u82B1\u7EB9\u7406("#1e3a8a", "#f8fafc", \u914D\u8272.\u8F66\u724C\u6587\u5B57), roughness: 0.32 });
+      const \u84DD\u8F66\u724C\u6750 = new MeshStandardMaterial({
+        map: \u83B7\u53D6\u8F66\u724C\u8D34\u82B1\u7EB9\u7406("#1e3a8a", "#f8fafc", this.\u83B7\u53D6\u8F66\u724C\u6587\u5B57()),
+        roughness: 0.32
+      });
       this.\u7EA2\u8B66\u706F\u5934\u6750 = new MeshStandardMaterial({ color: 16719416, emissive: 16716075, emissiveIntensity: 4.6, roughness: 0.15 });
       this.\u84DD\u8B66\u706F\u5934\u6750 = new MeshStandardMaterial({ color: 1932287, emissive: 26367, emissiveIntensity: 4.6, roughness: 0.15 });
       this.\u7EA2\u8B66\u706F\u67F1\u6750 = new MeshStandardMaterial({
@@ -46654,89 +47189,114 @@ void main() {
         depthWrite: false,
         toneMapped: false
       });
-      const \u5BBD\u5E95\u76D8 = new Mesh(new BoxGeometry(0.5 * k, 0.12 * k, 1.02 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
+      const \u5BBD\u500D = \u91CD\u88C5 ? 1.18 : 0.94;
+      const \u5BBD\u5E95\u76D8 = new Mesh(new BoxGeometry(0.5 * \u5BBD\u500D * k, 0.12 * k, 1.04 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
       \u5BBD\u5E95\u76D8.position.set(0, 0.29 * k, 0.12 * k);
       \u5BBD\u5E95\u76D8.castShadow = true;
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u5BBD\u5E95\u76D8);
-      const \u7535\u6C60\u8179\u7BB1 = new Mesh(new BoxGeometry(0.4 * k, 0.13 * k, 0.62 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
+      const \u7535\u6C60\u8179\u7BB1 = new Mesh(new BoxGeometry(0.4 * \u5BBD\u500D * k, 0.13 * k, 0.62 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
       \u7535\u6C60\u8179\u7BB1.position.set(0, 0.2 * k, 0.08 * k);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u7535\u6C60\u8179\u7BB1);
       for (let i = -2; i <= 2; i++) {
-        const \u8E29\u8E0F\u7EB9 = new Mesh(new BoxGeometry(0.42 * k, 0.016 * k, 0.032 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
+        const \u8E29\u8E0F\u7EB9 = new Mesh(new BoxGeometry(0.42 * \u5BBD\u500D * k, 0.016 * k, 0.032 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
         \u8E29\u8E0F\u7EB9.position.set(0, 0.358 * k, (0.2 + i * 0.11) * k);
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8E29\u8E0F\u7EB9);
       }
-      const \u540E\u767D\u8F66\u58F3 = new Mesh(new BoxGeometry(0.46 * k, 0.4 * k, 0.8 * k), \u8B66\u767D\u6750);
+      const \u540E\u767D\u8F66\u58F3 = new Mesh(new BoxGeometry(0.46 * \u5BBD\u500D * k, 0.4 * k, 0.8 * k), \u91CD\u88C5 ? \u6DF1\u84DD\u670D\u6750 : \u8B66\u767D\u6750);
       \u540E\u767D\u8F66\u58F3.position.set(0, 0.54 * k, -0.34 * k);
       \u540E\u767D\u8F66\u58F3.castShadow = true;
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u540E\u767D\u8F66\u58F3);
       for (const sx of [-1, 1]) {
-        const \u84DD\u6761 = new Mesh(new BoxGeometry(0.025 * k, 0.11 * k, 0.72 * k), \u8B66\u84DD\u6750);
-        \u84DD\u6761.position.set(sx * 0.24 * k, 0.56 * k, -0.34 * k);
-        this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u84DD\u6761);
+        const \u4FA7\u6761 = new Mesh(new BoxGeometry(0.025 * k, 0.11 * k, 0.72 * k), \u91CD\u88C5 ? \u8B66\u767D\u6750 : \u8B66\u84DD\u6750);
+        \u4FA7\u6761.position.set(sx * (0.24 * \u5BBD\u500D) * k, 0.56 * k, -0.34 * k);
+        this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u4FA7\u6761);
         const \u9EC4\u8B66\u793A\u6761 = new Mesh(new BoxGeometry(0.028 * k, 0.038 * k, 0.64 * k), \u53CD\u5149\u9EC4\u6750);
-        \u9EC4\u8B66\u793A\u6761.position.set(sx * 0.242 * k, 0.47 * k, -0.34 * k);
+        \u9EC4\u8B66\u793A\u6761.position.set(sx * (0.242 * \u5BBD\u500D) * k, 0.47 * k, -0.34 * k);
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u9EC4\u8B66\u793A\u6761);
-        const \u4FA7\u62A4\u6760 = new Mesh(new CylinderGeometry(0.018 * k, 0.018 * k, 0.56 * k, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
+        const \u4FA7\u62A4\u6760 = new Mesh(
+          new CylinderGeometry((\u91CD\u88C5 ? 0.024 : 0.016) * k, (\u91CD\u88C5 ? 0.024 : 0.016) * k, 0.58 * k, 8),
+          \u6750\u5E93.\u4EAE\u94F6\u6750
+        );
         \u4FA7\u62A4\u6760.rotation.x = Math.PI / 2;
-        \u4FA7\u62A4\u6760.position.set(sx * 0.41 * k, 0.44 * k, -0.58 * k);
+        \u4FA7\u62A4\u6760.position.set(sx * (0.41 * \u5BBD\u500D) * k, 0.44 * k, -0.58 * k);
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u4FA7\u62A4\u6760);
       }
-      const \u8B66\u7528\u539A\u5750\u57AB = new Mesh(new BoxGeometry(0.4 * k, 0.13 * k, 0.58 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
-      \u8B66\u7528\u539A\u5750\u57AB.position.set(0, 0.77 * k, -0.22 * k);
+      const \u8B66\u7528\u539A\u5750\u57AB = new Mesh(new BoxGeometry(0.4 * \u5BBD\u500D * k, 0.13 * k, 0.58 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
+      \u8B66\u7528\u539A\u5750\u57AB.position.set(0, \u89C4.\u5EA7\u9AD8 * k - 0.05 * k, -0.22 * k);
       \u8B66\u7528\u539A\u5750\u57AB.castShadow = true;
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8B66\u7528\u539A\u5750\u57AB);
-      const \u540E\u6321\u6CE5\u677F = new Mesh(new CylinderGeometry(0.32 * k, 0.32 * k, 0.2 * k, 12, 1, false, -0.4, 2.2), \u6750\u5E93.\u54D1\u9ED1\u6750);
+      const \u540E\u6321\u6CE5\u677F = new Mesh(
+        new CylinderGeometry((\u89C4.\u540E\u8F6E\u534A\u5F84 + 0.04) * k, (\u89C4.\u540E\u8F6E\u534A\u5F84 + 0.04) * k, (\u89C4.\u8F6E\u5BBD + 0.04) * k, 12, 1, false, -0.4, 2.2),
+        \u6750\u5E93.\u54D1\u9ED1\u6750
+      );
       \u540E\u6321\u6CE5\u677F.rotation.z = Math.PI / 2;
-      \u540E\u6321\u6CE5\u677F.position.set(0, 0.29 * k, \u89C4.\u540E\u8F74Z * k);
+      \u540E\u6321\u6CE5\u677F.position.set(0, \u89C4.\u540E\u8F6E\u534A\u5F84 * k, \u89C4.\u540E\u8F74Z * k);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u540E\u6321\u6CE5\u677F);
       const \u84DD\u724C\u7167 = new Mesh(new BoxGeometry(0.24 * k, 0.11 * k, 0.02 * k), \u84DD\u8F66\u724C\u6750);
       \u84DD\u724C\u7167.position.set(0, 0.41 * k, -0.98 * k);
       \u84DD\u724C\u7167.rotation.x = 0.22;
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u84DD\u724C\u7167);
-      const \u5C3E\u7EA2\u5239\u8F66\u706F = new Mesh(new BoxGeometry(0.22 * k, 0.08 * k, 0.06 * k), \u5C3E\u706F\u7EA2\u6750);
+      const \u5C3E\u7EA2\u5239\u8F66\u706F = new Mesh(new BoxGeometry(0.22 * \u5BBD\u500D * k, 0.08 * k, 0.06 * k), \u5C3E\u706F\u7EA2\u6750);
       \u5C3E\u7EA2\u5239\u8F66\u706F.position.set(0, 0.54 * k, -0.78 * k);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u5C3E\u7EA2\u5239\u8F66\u706F);
       for (const sx of [-1, 1]) {
-        const \u8FB9\u7BB1 = new Mesh(new BoxGeometry(0.16 * k, 0.3 * k, 0.48 * k), \u8B66\u767D\u6750);
-        \u8FB9\u7BB1.position.set(sx * 0.31 * k, 0.52 * k, -0.64 * k);
+        const \u8FB9\u7BB1 = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.19 : 0.13) * k, (\u91CD\u88C5 ? 0.34 : 0.26) * k, (\u91CD\u88C5 ? 0.52 : 0.42) * k), \u8B66\u767D\u6750);
+        \u8FB9\u7BB1.position.set(sx * (0.31 * \u5BBD\u500D) * k, 0.52 * k, -0.64 * k);
         \u8FB9\u7BB1.castShadow = true;
-        const \u8FB9\u7BB1\u76D6\u84DD = new Mesh(new BoxGeometry(0.17 * k, 0.08 * k, 0.49 * k), \u8B66\u84DD\u6750);
-        \u8FB9\u7BB1\u76D6\u84DD.position.set(sx * 0.31 * k, 0.65 * k, -0.64 * k);
+        const \u8FB9\u7BB1\u76D6\u84DD = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.2 : 0.14) * k, 0.08 * k, (\u91CD\u88C5 ? 0.53 : 0.43) * k), \u8B66\u84DD\u6750);
+        \u8FB9\u7BB1\u76D6\u84DD.position.set(sx * (0.31 * \u5BBD\u500D) * k, (\u91CD\u88C5 ? 0.67 : 0.63) * k, -0.64 * k);
         const \u94F6\u9501\u6263 = new Mesh(new BoxGeometry(0.03 * k, 0.06 * k, 0.08 * k), \u6750\u5E93.\u4EAE\u94F6\u6750);
-        \u94F6\u9501\u6263.position.set(sx * 0.395 * k, 0.58 * k, -0.64 * k);
+        \u94F6\u9501\u6263.position.set(sx * (0.395 * \u5BBD\u500D) * k, 0.58 * k, -0.64 * k);
         const \u8FB9\u7BB1\u95EA\u706F = new Mesh(
           new BoxGeometry(0.06 * k, 0.065 * k, 0.04 * k),
           sx > 0 ? this.\u7EA2\u8B66\u706F\u5934\u6750 : this.\u84DD\u8B66\u706F\u5934\u6750
         );
-        \u8FB9\u7BB1\u95EA\u706F.position.set(sx * 0.31 * k, 0.55 * k, -0.89 * k);
+        \u8FB9\u7BB1\u95EA\u706F.position.set(sx * (0.31 * \u5BBD\u500D) * k, 0.55 * k, -0.89 * k);
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8FB9\u7BB1, \u8FB9\u7BB1\u76D6\u84DD, \u94F6\u9501\u6263, \u8FB9\u7BB1\u95EA\u706F);
       }
-      const \u8B66\u7528\u5C3E\u7BB1 = new Mesh(new BoxGeometry(0.48 * k, 0.38 * k, 0.42 * k), \u8B66\u7BB1\u8D34\u82B1\u6750);
+      const \u8B66\u7528\u5C3E\u7BB1 = new Mesh(
+        new BoxGeometry((\u91CD\u88C5 ? 0.56 : 0.44) * k, (\u91CD\u88C5 ? 0.4 : 0.34) * k, (\u91CD\u88C5 ? 0.46 : 0.38) * k),
+        \u8B66\u7BB1\u8D34\u82B1\u6750
+      );
       \u8B66\u7528\u5C3E\u7BB1.position.set(0, 0.96 * k, -0.74 * k);
       \u8B66\u7528\u5C3E\u7BB1.castShadow = true;
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8B66\u7528\u5C3E\u7BB1);
-      const \u5C3E\u7BB1\u94F6\u62A4\u680F = new Mesh(new BoxGeometry(0.44 * k, 0.04 * k, 0.38 * k), \u6750\u5E93.\u4EAE\u94F6\u6750);
-      \u5C3E\u7BB1\u94F6\u62A4\u680F.position.set(0, 1.17 * k, -0.74 * k);
+      const \u5C3E\u7BB1\u94F6\u62A4\u680F = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.52 : 0.4) * k, 0.04 * k, (\u91CD\u88C5 ? 0.42 : 0.34) * k), \u6750\u5E93.\u4EAE\u94F6\u6750);
+      \u5C3E\u7BB1\u94F6\u62A4\u680F.position.set(0, (\u91CD\u88C5 ? 1.18 : 1.15) * k, -0.74 * k);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u5C3E\u7BB1\u94F6\u62A4\u680F);
-      const \u8B66\u706F\u7ACB\u6746 = new Mesh(new CylinderGeometry(0.026 * k, 0.032 * k, 0.58 * k, 10), \u6750\u5E93.\u4EAE\u94F6\u6750);
-      \u8B66\u706F\u7ACB\u6746.position.set(0, 1.32 * k, -0.84 * k);
-      this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8B66\u706F\u7ACB\u6746);
-      const \u8B66\u7B1B\u5587\u53ED = new Mesh(new CylinderGeometry(0.082 * k, 0.04 * k, 0.16 * k, 10), \u6750\u5E93.\u54D1\u9ED1\u6750);
-      \u8B66\u7B1B\u5587\u53ED.rotation.x = Math.PI / 2;
-      \u8B66\u7B1B\u5587\u53ED.position.set(0, 1.36 * k, -0.76 * k);
-      this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8B66\u7B1B\u5587\u53ED);
-      const \u706F\u5EA7\u6A2A\u6881 = new Mesh(new BoxGeometry(0.48 * k, 0.055 * k, 0.12 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
-      \u706F\u5EA7\u6A2A\u6881.position.set(0, 1.58 * k, -0.84 * k);
+      if (\u91CD\u88C5) {
+        for (const sx of [-1, 1]) {
+          const \u7C97\u67F1 = new Mesh(new CylinderGeometry(0.026 * k, 0.03 * k, 0.6 * k, 10), \u6750\u5E93.\u4EAE\u94F6\u6750);
+          \u7C97\u67F1.position.set(sx * 0.19 * k, 1.35 * k, -0.86 * k);
+          this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u7C97\u67F1);
+        }
+        const \u53CC\u5587\u53ED = new Mesh(new CylinderGeometry(0.095 * k, 0.045 * k, 0.18 * k, 10), \u6750\u5E93.\u54D1\u9ED1\u6750);
+        \u53CC\u5587\u53ED.rotation.x = Math.PI / 2;
+        \u53CC\u5587\u53ED.position.set(0, 1.38 * k, -0.76 * k);
+        this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u53CC\u5587\u53ED);
+      } else {
+        const \u8B66\u706F\u7ACB\u6746 = new Mesh(new CylinderGeometry(0.024 * k, 0.03 * k, 0.56 * k, 10), \u6750\u5E93.\u4EAE\u94F6\u6750);
+        \u8B66\u706F\u7ACB\u6746.position.set(0, 1.3 * k, -0.82 * k);
+        this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8B66\u706F\u7ACB\u6746);
+        const \u8B66\u7B1B\u5587\u53ED = new Mesh(new CylinderGeometry(0.075 * k, 0.036 * k, 0.14 * k, 10), \u6750\u5E93.\u54D1\u9ED1\u6750);
+        \u8B66\u7B1B\u5587\u53ED.rotation.x = Math.PI / 2;
+        \u8B66\u7B1B\u5587\u53ED.position.set(0, 1.34 * k, -0.74 * k);
+        this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u8B66\u7B1B\u5587\u53ED);
+      }
+      const \u706F\u5EA7\u9AD8 = (\u91CD\u88C5 ? 1.63 : 1.56) * k;
+      const \u706F\u5EA7Z = (\u91CD\u88C5 ? -0.86 : -0.82) * k;
+      const \u706F\u5EA7\u6A2A\u6881 = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.58 : 0.44) * k, 0.055 * k, 0.12 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
+      \u706F\u5EA7\u6A2A\u6881.position.set(0, \u706F\u5EA7\u9AD8, \u706F\u5EA7Z);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u706F\u5EA7\u6A2A\u6881);
       const \u4E2D\u767D\u95EA\u6761 = new Mesh(new BoxGeometry(0.11 * k, 0.095 * k, 0.1 * k), this.\u767D\u7206\u95EA\u6750);
-      \u4E2D\u767D\u95EA\u6761.position.set(0, 1.65 * k, -0.84 * k);
+      \u4E2D\u767D\u95EA\u6761.position.set(0, \u706F\u5EA7\u9AD8 + 0.07 * k, \u706F\u5EA7Z);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u4E2D\u767D\u95EA\u6761);
+      const \u706F\u504FX = (\u91CD\u88C5 ? 0.19 : 0.14) * k;
       const \u5DE6\u7EA2\u67F1\u706F = new Mesh(new CylinderGeometry(0.078 * k, 0.078 * k, 0.17 * k, 12), this.\u7EA2\u8B66\u706F\u67F1\u6750);
-      \u5DE6\u7EA2\u67F1\u706F.position.set(0.15 * k, 1.67 * k, -0.84 * k);
+      \u5DE6\u7EA2\u67F1\u706F.position.set(\u706F\u504FX, \u706F\u5EA7\u9AD8 + 0.09 * k, \u706F\u5EA7Z);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u5DE6\u7EA2\u67F1\u706F);
       const \u53F3\u84DD\u67F1\u706F = new Mesh(new CylinderGeometry(0.078 * k, 0.078 * k, 0.17 * k, 12), this.\u84DD\u8B66\u706F\u67F1\u6750);
-      \u53F3\u84DD\u67F1\u706F.position.set(-0.15 * k, 1.67 * k, -0.84 * k);
+      \u53F3\u84DD\u67F1\u706F.position.set(-\u706F\u504FX, \u706F\u5EA7\u9AD8 + 0.09 * k, \u706F\u5EA7Z);
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u53F3\u84DD\u67F1\u706F);
       this.\u7EA2\u706F\u65CB\u8F6C\u82AF = new Group();
       this.\u7EA2\u706F\u65CB\u8F6C\u82AF.position.copy(\u5DE6\u7EA2\u67F1\u706F.position);
@@ -46756,61 +47316,78 @@ void main() {
       this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(this.\u84DD\u5149\u6655\u7403);
       this.\u5C3E\u6C14\u6302\u70B9\u7EC4 = [];
       for (const sx of [-1, 1]) {
-        const \u7BA1 = new Mesh(new CylinderGeometry(0.046 * k, 0.058 * k, 0.48 * k, 10), \u6750\u5E93.\u4EAE\u94F6\u6750);
+        const \u7BA1 = new Mesh(
+          new CylinderGeometry((\u91CD\u88C5 ? 0.056 : 0.042) * k, (\u91CD\u88C5 ? 0.068 : 0.052) * k, 0.5 * k, 10),
+          \u6750\u5E93.\u4EAE\u94F6\u6750
+        );
         \u7BA1.rotation.x = Math.PI / 2 - 0.1;
-        \u7BA1.position.set(sx * 0.25 * k, 0.3 * k, -0.78 * k);
+        \u7BA1.position.set(sx * (0.25 * \u5BBD\u500D) * k, 0.3 * k, -0.78 * k);
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u7BA1);
         const \u9632\u70EB\u7F69 = new Mesh(new BoxGeometry(0.024 * k, 0.075 * k, 0.28 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
-        \u9632\u70EB\u7F69.position.set(sx * 0.305 * k, 0.31 * k, -0.77 * k);
+        \u9632\u70EB\u7F69.position.set(sx * (0.305 * \u5BBD\u500D) * k, 0.31 * k, -0.77 * k);
         \u9632\u70EB\u7F69.rotation.x = -0.1;
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u9632\u70EB\u7F69);
         const \u6302 = new Object3D();
-        \u6302.position.set(sx * 0.25 * k, 0.33 * k, -1.06 * k);
+        \u6302.position.set(sx * (0.25 * \u5BBD\u500D) * k, 0.33 * k, -1.06 * k);
         this.\u8F66\u8EAB\u9AA8\u67B6\u7EC4.add(\u6302);
         this.\u5C3E\u6C14\u6302\u70B9\u7EC4.push(\u6302);
       }
-      const \u524D\u6321\u6CE5\u677F = new Mesh(new CylinderGeometry(0.3 * k, 0.3 * k, 0.18 * k, 12, 1, false, -0.6, 2.2), \u8B66\u767D\u6750);
+      const \u524D\u6321\u6CE5\u677F = new Mesh(
+        new CylinderGeometry((\u89C4.\u524D\u8F6E\u534A\u5F84 + 0.03) * k, (\u89C4.\u524D\u8F6E\u534A\u5F84 + 0.03) * k, (\u89C4.\u8F6E\u5BBD + 0.03) * k, 12, 1, false, -0.6, 2.2),
+        \u91CD\u88C5 ? \u8B66\u84DD\u6750 : \u8B66\u767D\u6750
+      );
       \u524D\u6321\u6CE5\u677F.rotation.z = Math.PI / 2;
       this.\u524D\u53C9\u51CF\u9707\u7EC4.add(\u524D\u6321\u6CE5\u677F);
-      const \u8F66\u5934\u5927\u5305\u56F4 = new Mesh(new BoxGeometry(0.46 * k, 0.52 * k, 0.28 * k), \u8B66\u767D\u6750);
+      const \u8F66\u5934\u5927\u5305\u56F4 = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.54 : 0.43) * k, (\u91CD\u88C5 ? 0.56 : 0.48) * k, 0.28 * k), \u91CD\u88C5 ? \u6DF1\u84DD\u670D\u6750 : \u8B66\u767D\u6750);
       \u8F66\u5934\u5927\u5305\u56F4.position.set(0, 0.56 * k, 0.09 * k);
       \u8F66\u5934\u5927\u5305\u56F4.castShadow = true;
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u8F66\u5934\u5927\u5305\u56F4);
-      const \u8F66\u5934\u84DD\u6761 = new Mesh(new BoxGeometry(0.47 * k, 0.12 * k, 0.29 * k), \u8B66\u84DD\u6750);
-      \u8F66\u5934\u84DD\u6761.position.set(0, 0.48 * k, 0.09 * k);
-      this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u8F66\u5934\u84DD\u6761);
+      const \u8F66\u5934\u649E\u8272\u6761 = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.55 : 0.44) * k, 0.12 * k, 0.29 * k), \u91CD\u88C5 ? \u8B66\u767D\u6750 : \u8B66\u84DD\u6750);
+      \u8F66\u5934\u649E\u8272\u6761.position.set(0, 0.48 * k, 0.09 * k);
+      this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u8F66\u5934\u649E\u8272\u6761);
       const \u8F66\u5934\u91D1\u76FE\u7AE0 = new Mesh(new CylinderGeometry(0.062 * k, 0.05 * k, 0.025 * k, 6), \u91D1\u661F\u6750);
       \u8F66\u5934\u91D1\u76FE\u7AE0.rotation.x = Math.PI / 2;
       \u8F66\u5934\u91D1\u76FE\u7AE0.position.set(0, 0.5 * k, 0.24 * k);
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u8F66\u5934\u91D1\u76FE\u7AE0);
-      const \u524D\u6A2A\u62A4\u6760 = new Mesh(new CylinderGeometry(0.025 * k, 0.025 * k, 0.62 * k, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
+      const \u524D\u6A2A\u62A4\u6760 = new Mesh(new CylinderGeometry((\u91CD\u88C5 ? 0.034 : 0.022) * k, (\u91CD\u88C5 ? 0.034 : 0.022) * k, (\u91CD\u88C5 ? 0.74 : 0.56) * k, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
       \u524D\u6A2A\u62A4\u6760.rotation.z = Math.PI / 2;
       \u524D\u6A2A\u62A4\u6760.position.set(0, 0.42 * k, 0.29 * k);
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u524D\u6A2A\u62A4\u6760);
-      const \u900F\u660E\u6321\u98CE = new Mesh(new BoxGeometry(0.4 * k, 0.36 * k, 0.03 * k), \u6321\u98CE\u73BB\u6750);
-      \u900F\u660E\u6321\u98CE.position.set(0, 0.96 * k, 0.12 * k);
-      \u900F\u660E\u6321\u98CE.rotation.x = -0.32;
+      if (\u91CD\u88C5) {
+        const \u4E0A\u62A4\u6760 = new Mesh(new CylinderGeometry(0.028 * k, 0.028 * k, 0.68 * k, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
+        \u4E0A\u62A4\u6760.rotation.z = Math.PI / 2;
+        \u4E0A\u62A4\u6760.position.set(0, 0.68 * k, 0.3 * k);
+        this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u4E0A\u62A4\u6760);
+        for (const sx of [-1, 1]) {
+          const \u725B\u680F\u7AD6 = new Mesh(new CylinderGeometry(0.024 * k, 0.024 * k, 0.3 * k, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
+          \u725B\u680F\u7AD6.position.set(sx * 0.29 * k, 0.55 * k, 0.3 * k);
+          this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u725B\u680F\u7AD6);
+        }
+      }
+      const \u900F\u660E\u6321\u98CE = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.46 : 0.38) * k, (\u91CD\u88C5 ? 0.32 : 0.36) * k, 0.03 * k), \u6321\u98CE\u73BB\u6750);
+      \u900F\u660E\u6321\u98CE.position.set(0, (\u91CD\u88C5 ? 0.94 : 0.95) * k, 0.12 * k);
+      \u900F\u660E\u6321\u98CE.rotation.x = \u91CD\u88C5 ? -0.22 : -0.34;
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u900F\u660E\u6321\u98CE);
-      const \u98CE\u6321\u9ED1\u6846\u9876 = new Mesh(new BoxGeometry(0.42 * k, 0.03 * k, 0.042 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
-      \u98CE\u6321\u9ED1\u6846\u9876.position.set(0, 1.13 * k, 0.065 * k);
-      \u98CE\u6321\u9ED1\u6846\u9876.rotation.x = -0.32;
+      const \u98CE\u6321\u9ED1\u6846\u9876 = new Mesh(new BoxGeometry((\u91CD\u88C5 ? 0.48 : 0.4) * k, 0.03 * k, 0.042 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
+      \u98CE\u6321\u9ED1\u6846\u9876.position.set(0, (\u91CD\u88C5 ? 1.1 : 1.12) * k, 0.075 * k);
+      \u98CE\u6321\u9ED1\u6846\u9876.rotation.x = \u91CD\u88C5 ? -0.22 : -0.34;
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u98CE\u6321\u9ED1\u6846\u9876);
       for (const sx of [-1, 1]) {
-        const \u524D\u5927\u706F = new Mesh(new CylinderGeometry(0.068 * k, 0.068 * k, 0.06 * k, 12), \u5927\u706F\u767D\u6750);
+        const \u524D\u5927\u706F = new Mesh(new CylinderGeometry((\u91CD\u88C5 ? 0.082 : 0.064) * k, (\u91CD\u88C5 ? 0.082 : 0.064) * k, 0.06 * k, 12), \u5927\u706F\u767D\u6750);
         \u524D\u5927\u706F.rotation.x = Math.PI / 2;
-        \u524D\u5927\u706F.position.set(sx * 0.11 * k, 0.64 * k, 0.23 * k);
+        \u524D\u5927\u706F.position.set(sx * (\u91CD\u88C5 ? 0.14 : 0.1) * k, 0.63 * k, 0.23 * k);
         this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u524D\u5927\u706F);
-        const \u62A4\u817F\u7FFC\u677F = new Mesh(new BoxGeometry(0.06 * k, 0.44 * k, 0.18 * k), \u8B66\u767D\u6750);
-        \u62A4\u817F\u7FFC\u677F.position.set(sx * 0.26 * k, 0.5 * k, 0.02 * k);
+        const \u62A4\u817F\u7FFC\u677F = new Mesh(new BoxGeometry(0.06 * k, 0.44 * k, 0.18 * k), \u91CD\u88C5 ? \u8B66\u84DD\u6750 : \u8B66\u767D\u6750);
+        \u62A4\u817F\u7FFC\u677F.position.set(sx * (\u91CD\u88C5 ? 0.3 : 0.24) * k, 0.5 * k, 0.02 * k);
         \u62A4\u817F\u7FFC\u677F.rotation.y = sx * 0.28;
         this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u62A4\u817F\u7FFC\u677F);
         const \u526F\u5C04\u706F = new Mesh(new CylinderGeometry(0.046 * k, 0.046 * k, 0.055 * k, 10), \u5927\u706F\u767D\u6750);
         \u526F\u5C04\u706F.rotation.x = Math.PI / 2;
-        \u526F\u5C04\u706F.position.set(sx * 0.22 * k, 0.46 * k, 0.29 * k);
+        \u526F\u5C04\u706F.position.set(sx * (\u91CD\u88C5 ? 0.25 : 0.21) * k, 0.46 * k, 0.29 * k);
         this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u526F\u5C04\u706F);
         const \u98CE\u6321\u6491\u6746 = new Mesh(new CylinderGeometry(0.012 * k, 0.012 * k, 0.24 * k, 6), \u6750\u5E93.\u4EAE\u94F6\u6750);
-        \u98CE\u6321\u6491\u6746.position.set(sx * 0.14 * k, 0.84 * k, 0.06 * k);
-        \u98CE\u6321\u6491\u6746.rotation.x = -0.32;
+        \u98CE\u6321\u6491\u6746.position.set(sx * 0.15 * k, 0.84 * k, 0.06 * k);
+        \u98CE\u6321\u6491\u6746.rotation.x = -0.3;
         this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u98CE\u6321\u6491\u6746);
       }
       const \u7535\u53F0\u8BDD\u7B52 = new Mesh(new BoxGeometry(0.055 * k, 0.095 * k, 0.036 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
@@ -46818,235 +47395,34 @@ void main() {
       \u7535\u53F0\u8BDD\u7B52.rotation.x = -0.3;
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u7535\u53F0\u8BDD\u7B52);
       const \u8F66\u5934\u5DE6\u7EA2\u706F = new Mesh(new BoxGeometry(0.12 * k, 0.1 * k, 0.11 * k), this.\u7EA2\u8B66\u706F\u5934\u6750);
-      \u8F66\u5934\u5DE6\u7EA2\u706F.position.set(0.24 * k, 0.72 * k, 0.12 * k);
+      \u8F66\u5934\u5DE6\u7EA2\u706F.position.set((\u91CD\u88C5 ? 0.28 : 0.23) * k, 0.72 * k, 0.12 * k);
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u8F66\u5934\u5DE6\u7EA2\u706F);
       const \u8F66\u5934\u53F3\u84DD\u706F = new Mesh(new BoxGeometry(0.12 * k, 0.1 * k, 0.11 * k), this.\u84DD\u8B66\u706F\u5934\u6750);
-      \u8F66\u5934\u53F3\u84DD\u706F.position.set(-0.24 * k, 0.72 * k, 0.12 * k);
+      \u8F66\u5934\u53F3\u84DD\u706F.position.set(-(\u91CD\u88C5 ? 0.28 : 0.23) * k, 0.72 * k, 0.12 * k);
       this.\u8F66\u5934\u8F6C\u5411\u67A2.add(\u8F66\u5934\u53F3\u84DD\u706F);
-      const \u81C0 = new Mesh(new SphereGeometry(0.24 * k, 12, 10), \u80A2\u4F53\u6BDB\u6750);
-      \u81C0.scale.set(1.22, 0.88, 1.05);
-      this.\u9A91\u624B\u6839\u7EC4.add(\u81C0);
-      const \u5706\u5C3E = new Mesh(new SphereGeometry(0.088 * k, 8, 8), \u80A2\u4F53\u6BDB\u6750);
-      \u5706\u5C3E.position.set(0, 0.06 * k, -0.24 * k);
-      this.\u9A91\u624B\u6839\u7EC4.add(\u5706\u5C3E);
-      const \u8B66\u670D\u80F8 = new Mesh(new CapsuleGeometry(0.22 * k, 0.25 * k, 6, 12), \u8B66\u84DD\u6750);
-      \u8B66\u670D\u80F8.scale.set(1.14, 1, 0.98);
-      \u8B66\u670D\u80F8.position.set(0, 0.25 * k, 0);
-      \u8B66\u670D\u80F8.castShadow = true;
-      this.\u4E0A\u8EAB\u67A2.add(\u8B66\u670D\u80F8);
-      this.\u5927\u5564\u9152\u809A = new Mesh(new SphereGeometry(0.22 * k, 12, 10), \u8B66\u84DD\u6750);
-      this.\u5927\u5564\u9152\u809A.scale.set(1.06, 0.86, 1.04);
-      this.\u5927\u5564\u9152\u809A.position.set(0, 0.19 * k, 0.1 * k);
-      this.\u4E0A\u8EAB\u67A2.add(this.\u5927\u5564\u9152\u809A);
-      const \u767D\u886C\u9886 = new Mesh(new CylinderGeometry(0.12 * k, 0.145 * k, 0.065 * k, 12), \u8B66\u767D\u6750);
-      \u767D\u886C\u9886.position.set(0, 0.49 * k, 0.01 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u767D\u886C\u9886);
-      const \u8367\u5149\u80A9\u659C\u5E26 = new Mesh(new BoxGeometry(0.068 * k, 0.46 * k, 0.42 * k), \u53CD\u5149\u9EC4\u6750);
-      \u8367\u5149\u80A9\u659C\u5E26.position.set(0.04 * k, 0.27 * k, 0.02 * k);
-      \u8367\u5149\u80A9\u659C\u5E26.rotation.z = -0.38;
-      this.\u4E0A\u8EAB\u67A2.add(\u8367\u5149\u80A9\u659C\u5E26);
-      const \u8367\u5149\u8170\u5E26\u7EB9 = new Mesh(new CylinderGeometry(0.23 * k, 0.23 * k, 0.04 * k, 14), \u53CD\u5149\u9EC4\u6750);
-      \u8367\u5149\u8170\u5E26\u7EB9.scale.set(1.12, 1, 1.06);
-      \u8367\u5149\u8170\u5E26\u7EB9.position.set(0, 0.17 * k, 0.02 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u8367\u5149\u8170\u5E26\u7EB9);
-      for (const sx of [-1, 1]) {
-        const \u80A9\u7AE0\u7247 = new Mesh(new BoxGeometry(0.11 * k, 0.03 * k, 0.065 * k), \u8B66\u84DD\u6750);
-        \u80A9\u7AE0\u7247.position.set(sx * 0.17 * k, 0.47 * k, 0);
-        \u80A9\u7AE0\u7247.rotation.z = -sx * 0.22;
-        this.\u4E0A\u8EAB\u67A2.add(\u80A9\u7AE0\u7247);
-        const \u80A9\u7AE0\u91D1\u661F = new Mesh(new CylinderGeometry(0.018 * k, 0.018 * k, 0.015 * k, 5), \u91D1\u661F\u6750);
-        \u80A9\u7AE0\u91D1\u661F.position.set(sx * 0.18 * k, 0.488 * k, 0);
-        this.\u4E0A\u8EAB\u67A2.add(\u80A9\u7AE0\u91D1\u661F);
-      }
-      const \u80A9\u4E0A\u5BF9\u8BB2\u673A = new Mesh(new BoxGeometry(0.055 * k, 0.105 * k, 0.045 * k), \u6750\u5E93.\u54D1\u9ED1\u6750);
-      \u80A9\u4E0A\u5BF9\u8BB2\u673A.position.set(0.21 * k, 0.41 * k, 0.12 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u80A9\u4E0A\u5BF9\u8BB2\u673A);
-      const \u5BF9\u8BB2\u5929\u7EBF = new Mesh(new CylinderGeometry(5e-3 * k, 7e-3 * k, 0.16 * k, 6), \u6750\u5E93.\u54D1\u9ED1\u6750);
-      \u5BF9\u8BB2\u5929\u7EBF.position.set(0.015 * k, 0.12 * k, 0);
-      \u80A9\u4E0A\u5BF9\u8BB2\u673A.add(\u5BF9\u8BB2\u5929\u7EBF);
-      const \u9ED1\u8170\u5E26 = new Mesh(new CylinderGeometry(0.235 * k, 0.235 * k, 0.062 * k, 14), \u6750\u5E93.\u54D1\u9ED1\u6750);
-      \u9ED1\u8170\u5E26.scale.set(1.08, 1, 1.08);
-      \u9ED1\u8170\u5E26.position.set(0, 0.1 * k, 0.02 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u9ED1\u8170\u5E26);
-      const \u91D1\u8B66\u6263 = new Mesh(new BoxGeometry(0.1 * k, 0.072 * k, 0.045 * k), \u91D1\u661F\u6750);
-      \u91D1\u8B66\u6263.position.set(0, 0.1 * k, 0.26 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u91D1\u8B66\u6263);
-      const \u624B\u94D0\u5305 = new Mesh(new BoxGeometry(0.095 * k, 0.085 * k, 0.06 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
-      \u624B\u94D0\u5305.position.set(-0.23 * k, 0.1 * k, 0.08 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u624B\u94D0\u5305);
-      const \u80F8\u8B66\u7AE0 = new Mesh(new CylinderGeometry(0.048 * k, 0.038 * k, 0.03 * k, 6), \u91D1\u661F\u6750);
-      \u80F8\u8B66\u7AE0.rotation.x = Math.PI / 2;
-      \u80F8\u8B66\u7AE0.position.set(0.12 * k, 0.34 * k, 0.215 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u80F8\u8B66\u7AE0);
-      const \u5927\u5934 = new Mesh(new SphereGeometry(0.22 * k, 16, 14), \u4F53\u6BDB\u6750);
-      \u5927\u5934.scale.set(1.16, 0.94, 1.02);
-      \u5927\u5934.position.set(0, 0.17 * k, 0);
-      \u5927\u5934.castShadow = true;
-      this.\u5934\u90E8\u67A2.add(\u5927\u5934);
-      const \u5634\u515C = new Mesh(new SphereGeometry(0.092 * k, 10, 8), \u5634\u515C\u6750);
-      \u5634\u515C.scale.set(1.28, 0.86, 0.92);
-      \u5634\u515C.position.set(0, 0.115 * k, 0.182 * k);
-      this.\u5934\u90E8\u67A2.add(\u5634\u515C);
-      const \u9ED1\u9F3B = new Mesh(new SphereGeometry(0.044 * k, 8, 8), \u9ED1\u9F3B\u6750);
-      \u9ED1\u9F3B.scale.set(1.28, 0.82, 0.85);
-      \u9ED1\u9F3B.position.set(0, 0.135 * k, 0.244 * k);
-      this.\u5934\u90E8\u67A2.add(\u9ED1\u9F3B);
-      const \u7B11\u5634 = new Mesh(new TorusGeometry(0.038 * k, 8e-3 * k, 6, 10, Math.PI * 0.7), \u8C46\u8C46\u773C\u6750);
-      \u7B11\u5634.rotation.set(0.25, 0, Math.PI * 1.15);
-      \u7B11\u5634.position.set(0, 0.098 * k, 0.228 * k);
-      this.\u5934\u90E8\u67A2.add(\u7B11\u5634);
-      this.\u5634\u53FC\u8B66\u54E8 = new Group();
-      this.\u5634\u53FC\u8B66\u54E8.position.set(0.025 * k, 0.095 * k, 0.255 * k);
-      this.\u5634\u53FC\u8B66\u54E8.rotation.set(0.15, -0.35, -0.18);
-      const \u54E8\u7BA1 = new Mesh(new CylinderGeometry(0.015 * k, 0.015 * k, 0.068 * k, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
-      \u54E8\u7BA1.rotation.x = Math.PI / 2;
-      \u54E8\u7BA1.position.z = 0.02 * k;
-      const \u54E8\u9F13 = new Mesh(new SphereGeometry(0.022 * k, 8, 8), \u6750\u5E93.\u4EAE\u94F6\u6750);
-      \u54E8\u9F13.position.set(0, -5e-3 * k, 0.042 * k);
-      this.\u5634\u53FC\u8B66\u54E8.add(\u54E8\u7BA1, \u54E8\u9F13);
-      this.\u5934\u90E8\u67A2.add(this.\u5634\u53FC\u8B66\u54E8);
-      for (const sx of [-1, 1]) {
-        if (\u914D\u8272.\u5E26\u9ED1\u773C\u5708) {
-          const \u9ED1\u773C\u5708 = new Mesh(new SphereGeometry(0.072 * k, 10, 8), \u9ED1\u9F3B\u6750);
-          \u9ED1\u773C\u5708.scale.set(1.08, 1.28, 0.42);
-          \u9ED1\u773C\u5708.rotation.z = sx * 0.26;
-          \u9ED1\u773C\u5708.position.set(sx * 0.084 * k, 0.19 * k, 0.195 * k);
-          this.\u5934\u90E8\u67A2.add(\u9ED1\u773C\u5708);
-        }
-        const \u7C97\u6D53\u7709 = new Mesh(new BoxGeometry(0.084 * k, 0.024 * k, 0.024 * k), \u6D53\u7709\u6750);
-        \u7C97\u6D53\u7709.position.set(sx * 0.084 * k, 0.258 * k, 0.215 * k);
-        \u7C97\u6D53\u7709.rotation.z = sx * 0.34;
-        this.\u5934\u90E8\u67A2.add(\u7C97\u6D53\u7709);
-        const \u8C46\u773C = new Mesh(new SphereGeometry(0.028 * k, 8, 8), \u8C46\u8C46\u773C\u6750);
-        \u8C46\u773C.position.set(sx * 0.084 * k, 0.192 * k, 0.218 * k);
-        this.\u5934\u90E8\u67A2.add(\u8C46\u773C);
-        const \u773C\u9AD8\u5149 = new Mesh(new SphereGeometry(0.01 * k, 6, 6), \u9AD8\u5149\u767D\u6750);
-        \u773C\u9AD8\u5149.position.set(sx * 0.092 * k, 0.203 * k, 0.236 * k);
-        this.\u5934\u90E8\u67A2.add(\u773C\u9AD8\u5149);
-        const \u7C89\u816E\u7EA2 = new Mesh(new SphereGeometry(0.04 * k, 8, 8), \u816E\u7EA2\u7C89\u6750);
-        \u7C89\u816E\u7EA2.scale.set(1.25, 0.72, 0.5);
-        \u7C89\u816E\u7EA2.position.set(sx * 0.148 * k, 0.13 * k, 0.172 * k);
-        this.\u5934\u90E8\u67A2.add(\u7C89\u816E\u7EA2);
-      }
-      const \u8B66\u76D4 = new Mesh(new SphereGeometry(0.24 * k, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.56), \u8B66\u767D\u6750);
-      \u8B66\u76D4.scale.set(1.08, 1, 1);
-      \u8B66\u76D4.position.set(0, 0.19 * k, 0);
-      \u8B66\u76D4.rotation.x = -0.1;
-      \u8B66\u76D4.castShadow = true;
-      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4);
-      const \u8B66\u76D4\u84DD\u56F4\u5E26 = new Mesh(new CylinderGeometry(0.244 * k, 0.244 * k, 0.038 * k, 16, 1, true), \u8B66\u84DD\u6750);
-      \u8B66\u76D4\u84DD\u56F4\u5E26.scale.set(1.08, 1, 1);
-      \u8B66\u76D4\u84DD\u56F4\u5E26.position.set(0, 0.215 * k, 0);
-      \u8B66\u76D4\u84DD\u56F4\u5E26.rotation.x = -0.1;
-      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4\u84DD\u56F4\u5E26);
-      const \u8B66\u76D4\u900F\u660E\u955C = new Mesh(
-        new CylinderGeometry(0.248 * k, 0.248 * k, 0.088 * k, 14, 1, true, -Math.PI * 0.34, Math.PI * 0.68),
-        \u6321\u98CE\u73BB\u6750
-      );
-      \u8B66\u76D4\u900F\u660E\u955C.scale.set(1.08, 1, 1);
-      \u8B66\u76D4\u900F\u660E\u955C.position.set(0, 0.205 * k, 0.01 * k);
-      \u8B66\u76D4\u900F\u660E\u955C.rotation.x = -0.22;
-      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4\u900F\u660E\u955C);
-      const \u8B66\u76D4\u5E3D\u6A90 = new Mesh(new BoxGeometry(0.3 * k, 0.028 * k, 0.14 * k), \u8B66\u84DD\u6750);
-      \u8B66\u76D4\u5E3D\u6A90.position.set(0, 0.24 * k, 0.2 * k);
-      \u8B66\u76D4\u5E3D\u6A90.rotation.x = 0.22;
-      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4\u5E3D\u6A90);
-      const \u5E3D\u5FBD\u91D1\u76FE = new Mesh(new CylinderGeometry(0.048 * k, 0.038 * k, 0.03 * k, 6), \u91D1\u661F\u6750);
-      \u5E3D\u5FBD\u91D1\u76FE.rotation.x = Math.PI / 2;
-      \u5E3D\u5FBD\u91D1\u76FE.position.set(0, 0.31 * k, 0.21 * k);
-      this.\u5934\u90E8\u67A2.add(\u5E3D\u5FBD\u91D1\u76FE);
-      const \u9020\u8033 = (sx) => {
-        const \u8033\u7EC4 = new Group();
-        \u8033\u7EC4.position.set(sx * 0.18 * k, 0.37 * k, -0.01 * k);
-        const \u5916\u8033 = new Mesh(new SphereGeometry(0.074 * k, 10, 8), \u80A2\u4F53\u6BDB\u6750);
-        \u5916\u8033.scale.set(1, 1, 0.65);
-        \u8033\u7EC4.add(\u5916\u8033);
-        if (!\u914D\u8272.\u5E26\u9ED1\u773C\u5708) {
-          const \u5185\u8033 = new Mesh(new SphereGeometry(0.044 * k, 8, 6), \u8033\u5185\u6750);
-          \u5185\u8033.scale.set(1, 1, 0.45);
-          \u5185\u8033.position.set(0, 0, 0.03 * k);
-          \u8033\u7EC4.add(\u5185\u8033);
-        }
-        this.\u5934\u90E8\u67A2.add(\u8033\u7EC4);
-        return \u8033\u7EC4;
-      };
-      this.\u5DE6\u52A8\u7269\u8033 = \u9020\u8033(1);
-      this.\u53F3\u52A8\u7269\u8033 = \u9020\u8033(-1);
-      const \u88C5\u8B66\u81C2 = (\u80A9, \u8098, \u624B) => {
-        const \u4E0A\u81C2\u67F1 = new Mesh(new CapsuleGeometry(0.06 * k, \u89C4.\u4E0A\u81C2\u957F * 0.85 * k, 5, 8), \u8B66\u84DD\u6750);
-        \u4E0A\u81C2\u67F1.position.y = \u89C4.\u4E0A\u81C2\u957F * 0.5 * k;
-        \u80A9.add(\u4E0A\u81C2\u67F1);
-        const \u524D\u81C2\u67F1 = new Mesh(new CapsuleGeometry(0.052 * k, \u89C4.\u524D\u81C2\u957F * 0.85 * k, 5, 8), \u8B66\u84DD\u6750);
-        \u524D\u81C2\u67F1.position.y = \u89C4.\u524D\u81C2\u957F * 0.5 * k;
-        \u8098.add(\u524D\u81C2\u67F1);
-        const \u767D\u8896\u53E3 = new Mesh(new CylinderGeometry(0.056 * k, 0.056 * k, 0.055 * k, 8), \u8B66\u767D\u6750);
-        \u767D\u8896\u53E3.position.y = -0.02 * k;
-        \u624B.add(\u767D\u8896\u53E3);
-        const \u767D\u624B\u5957 = new Mesh(new SphereGeometry(0.066 * k, 8, 8), \u8B66\u767D\u6750);
-        \u767D\u624B\u5957.position.y = 0.02 * k;
-        \u624B.add(\u767D\u624B\u5957);
-      };
-      \u88C5\u8B66\u81C2(this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u638C);
-      \u88C5\u8B66\u81C2(this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u638C);
-      const \u9020\u8B66\u68CD = (\u7F29\u653E = 1) => {
-        const \u68CD\u7EC4 = new Group();
-        const \u68CD\u8EAB = new Mesh(new CylinderGeometry(0.032 * k * \u7F29\u653E, 0.036 * k * \u7F29\u653E, 0.72 * k * \u7F29\u653E, 10), \u6750\u5E93.\u54D1\u9ED1\u6750);
-        \u68CD\u8EAB.position.y = 0.32 * k * \u7F29\u653E;
-        \u68CD\u8EAB.castShadow = true;
-        const \u94F6\u5934\u7B8D = new Mesh(new CylinderGeometry(0.042 * k * \u7F29\u653E, 0.04 * k * \u7F29\u653E, 0.1 * k * \u7F29\u653E, 10), \u6750\u5E93.\u4EAE\u94F6\u6750);
-        \u94F6\u5934\u7B8D.position.y = 0.62 * k * \u7F29\u653E;
-        const \u68CD\u5934\u7EA2\u706F = new Mesh(new CylinderGeometry(0.046 * k * \u7F29\u653E, 0.046 * k * \u7F29\u653E, 0.065 * k * \u7F29\u653E, 10), this.\u7EA2\u8B66\u706F\u5934\u6750);
-        \u68CD\u5934\u7EA2\u706F.position.y = 0.7 * k * \u7F29\u653E;
-        const \u68CD\u5934\u84DD\u706F = new Mesh(new CylinderGeometry(0.044 * k * \u7F29\u653E, 0.046 * k * \u7F29\u653E, 0.065 * k * \u7F29\u653E, 10), this.\u84DD\u8B66\u706F\u5934\u6750);
-        \u68CD\u5934\u84DD\u706F.position.y = 0.76 * k * \u7F29\u653E;
-        const \u4E01\u5B57\u6A2A\u67C4 = new Mesh(new CylinderGeometry(0.022 * k * \u7F29\u653E, 0.022 * k * \u7F29\u653E, 0.18 * k * \u7F29\u653E, 8), \u6750\u5E93.\u54D1\u9ED1\u6750);
-        \u4E01\u5B57\u6A2A\u67C4.rotation.z = Math.PI / 2;
-        \u4E01\u5B57\u6A2A\u67C4.position.set(0.06 * k * \u7F29\u653E, 0.1 * k * \u7F29\u653E, 0);
-        \u68CD\u7EC4.add(\u68CD\u8EAB, \u94F6\u5934\u7B8D, \u68CD\u5934\u7EA2\u706F, \u68CD\u5934\u84DD\u706F, \u4E01\u5B57\u6A2A\u67C4);
-        return \u68CD\u7EC4;
-      };
-      const \u8170\u68CD\u5957\u73AF = new Mesh(new CylinderGeometry(0.046 * k, 0.046 * k, 0.08 * k, 10), \u6750\u5E93.\u8F6E\u80CE\u6750);
-      \u8170\u68CD\u5957\u73AF.position.set(0.24 * k, 0.1 * k, 0.02 * k);
-      this.\u4E0A\u8EAB\u67A2.add(\u8170\u68CD\u5957\u73AF);
-      this.\u8170\u95F4\u6302\u68CD = \u9020\u8B66\u68CD(0.56);
-      this.\u8170\u95F4\u6302\u68CD.position.set(0.24 * k, 0.12 * k, 0.02 * k);
-      this.\u8170\u95F4\u6302\u68CD.rotation.set(-2.6, 0, -0.25);
-      this.\u4E0A\u8EAB\u67A2.add(this.\u8170\u95F4\u6302\u68CD);
-      this.\u5DE6\u8B66\u68CD = \u9020\u8B66\u68CD();
-      this.\u5DE6\u8B66\u68CD.visible = false;
-      this.\u5DE6\u624B\u638C.add(this.\u5DE6\u8B66\u68CD);
-      this.\u53F3\u8B66\u68CD = \u9020\u8B66\u68CD();
-      this.\u53F3\u8B66\u68CD.visible = false;
-      this.\u53F3\u624B\u638C.add(this.\u53F3\u8B66\u68CD);
-      const \u88C5\u8B66\u817F = (\u817F, \u819D) => {
-        const \u5927\u817F\u8089 = new Mesh(new CapsuleGeometry(0.082 * k, \u89C4.\u5927\u817F\u957F * 0.76 * k, 5, 8), \u80A2\u4F53\u6BDB\u6750);
-        \u5927\u817F\u8089.rotation.x = Math.PI / 2;
-        \u5927\u817F\u8089.position.z = \u89C4.\u5927\u817F\u957F * 0.48 * k;
-        \u817F.add(\u5927\u817F\u8089);
-        const \u62A4\u819D\u58F3 = new Mesh(new SphereGeometry(0.082 * k, 8, 8), \u6750\u5E93.\u54D1\u9ED1\u6750);
-        \u62A4\u819D\u58F3.position.set(0, 0, \u89C4.\u5927\u817F\u957F * 0.9 * k);
-        \u817F.add(\u62A4\u819D\u58F3);
-        const \u5C0F\u817F\u8089 = new Mesh(new CapsuleGeometry(0.064 * k, \u89C4.\u5C0F\u817F\u957F * 0.76 * k, 5, 8), \u80A2\u4F53\u6BDB\u6750);
-        \u5C0F\u817F\u8089.position.y = -\u89C4.\u5C0F\u817F\u957F * 0.48 * k;
-        \u819D.add(\u5C0F\u817F\u8089);
-        const \u9ED1\u8B66\u9774 = new Mesh(new BoxGeometry(0.13 * k, 0.075 * k, 0.21 * k), \u6750\u5E93.\u8F6E\u80CE\u6750);
-        \u9ED1\u8B66\u9774.position.set(0, -\u89C4.\u5C0F\u817F\u957F * k, 0.04 * k);
-        \u819D.add(\u9ED1\u8B66\u9774);
-        const \u94F6\u9774\u6263 = new Mesh(new BoxGeometry(0.136 * k, 0.022 * k, 0.04 * k), \u6750\u5E93.\u4EAE\u94F6\u6750);
-        \u94F6\u9774\u6263.position.set(0, (-\u89C4.\u5C0F\u817F\u957F + 0.03) * k, 0.03 * k);
-        \u819D.add(\u94F6\u9774\u6263);
-      };
-      \u88C5\u8B66\u817F(this.\u5DE6\u5927\u817F\u67A2, this.\u5DE6\u5C0F\u817F\u67A2);
-      \u88C5\u8B66\u817F(this.\u53F3\u5927\u817F\u67A2, this.\u53F3\u5C0F\u817F\u67A2);
+      this.\u6784\u5EFA\u4E13\u5C5E\u9A91\u624B\u4E0E\u88C5\u5907(\u89C4, k, {
+        \u8B66\u767D\u6750,
+        \u8B66\u84DD\u6750,
+        \u6DF1\u84DD\u670D\u6750,
+        \u53CD\u5149\u9EC4\u6750,
+        \u91D1\u661F\u6750,
+        \u6321\u98CE\u73BB\u6750,
+        \u8F6E\u80CE\u6750: \u6750\u5E93.\u8F6E\u80CE\u6750,
+        \u4EAE\u94F6\u6750: \u6750\u5E93.\u4EAE\u94F6\u6750,
+        \u54D1\u9ED1\u6750: \u6750\u5E93.\u54D1\u9ED1\u6750,
+        \u7EA2\u8B66\u706F\u5934\u6750: this.\u7EA2\u8B66\u706F\u5934\u6750,
+        \u84DD\u8B66\u706F\u5934\u6750: this.\u84DD\u8B66\u706F\u5934\u6750
+      });
     }
     \u66F4\u65B0\u4E13\u5C5E\u7EC6\u8282(\u6001) {
       const t = \u6001.\u65F6\u95F4;
-      const \u95EA\u9891 = \u6001.\u662F\u51B2\u7EBF || \u6001.\u662F\u5927\u55B7 || \u6001.\u662F\u653B\u51FB ? 36 : \u6001.\u52A0\u901F\u4E2D ? 26 : \u6001.\u662F\u8D77\u6B65 ? 20 : \u6001.\u662F\u541F\u5531 ? 8 : 14;
+      const \u6B7B\u4F59 = \u6001.\u6B7B\u6001 ? Math.max(0, 1 - \u6001.\u6B7B\u6001.\u5012\u4E0B) : 1;
+      const \u95EA\u9891 = \u6001.\u662F\u51B2\u7EBF || \u6001.\u662F\u5927\u55B7 || \u6001.\u662F\u653B\u51FB ? 36 : \u6001.\u52A0\u901F\u4E2D ? 26 : \u6001.\u662F\u8D77\u6B65 ? 20 : \u6001.\u662F\u541F\u5531 ? 8 : \u6001.\u662F\u5F85\u673A ? 5 : 14;
       const \u95EA\u62CD = Math.sin(t * \u95EA\u9891);
-      const \u7EA2\u4EAE = !\u6001.\u662F\u6B7B\u4EA1 && \u95EA\u62CD >= 0;
-      const \u767D\u7206 = !\u6001.\u662F\u6B7B\u4EA1 && Math.sin(t * \u95EA\u9891 * 2) > 0.65;
-      const \u7EA2\u5F3A = \u6001.\u662F\u6B7B\u4EA1 ? 0.08 : \u6001.\u662F\u541F\u5531 ? 3.2 + Math.sin(t * 4) * 1.4 : \u7EA2\u4EAE ? 7.2 : 0.4;
-      const \u84DD\u5F3A = \u6001.\u662F\u6B7B\u4EA1 ? 0.08 : \u6001.\u662F\u541F\u5531 ? 3.2 + Math.cos(t * 4) * 1.4 : !\u7EA2\u4EAE ? 7.2 : 0.4;
+      const \u7EA2\u4EAE = (!\u6001.\u662F\u6B7B\u4EA1 || \u6B7B\u4F59 > 0.25) && \u95EA\u62CD >= 0;
+      const \u767D\u7206 = !\u6001.\u662F\u6B7B\u4EA1 && !\u6001.\u662F\u5F85\u673A && Math.sin(t * \u95EA\u9891 * 2) > 0.65;
+      const \u7EA2\u5F3A = \u6001.\u6B7B\u6001 ? 0.08 + \u6B7B\u4F59 * (\u7EA2\u4EAE ? 5 : 0.3) : \u6001.\u662F\u5F85\u673A ? 1.4 + (\u7EA2\u4EAE ? 1.8 : 0) : \u6001.\u662F\u541F\u5531 ? 3.2 + Math.sin(t * 4) * 1.4 : \u7EA2\u4EAE ? 7.2 : 0.4;
+      const \u84DD\u5F3A = \u6001.\u6B7B\u6001 ? 0.08 + \u6B7B\u4F59 * (!\u7EA2\u4EAE ? 5 : 0.3) : \u6001.\u662F\u5F85\u673A ? 1.4 + (!\u7EA2\u4EAE ? 1.8 : 0) : \u6001.\u662F\u541F\u5531 ? 3.2 + Math.cos(t * 4) * 1.4 : !\u7EA2\u4EAE ? 7.2 : 0.4;
       if (this.\u7EA2\u8B66\u706F\u5934\u6750 && this.\u84DD\u8B66\u706F\u5934\u6750 && this.\u7EA2\u8B66\u706F\u67F1\u6750 && this.\u84DD\u8B66\u706F\u67F1\u6750) {
         this.\u7EA2\u8B66\u706F\u5934\u6750.emissiveIntensity = \u7EA2\u5F3A;
         this.\u7EA2\u8B66\u706F\u67F1\u6750.emissiveIntensity = \u7EA2\u5F3A;
@@ -47057,71 +47433,771 @@ void main() {
         this.\u767D\u7206\u95EA\u6750.emissiveIntensity = \u6001.\u662F\u6B7B\u4EA1 ? 0.08 : \u767D\u7206 ? 6.4 : 0.6;
       }
       if (!\u6001.\u662F\u6B7B\u4EA1) {
-        this.\u7EA2\u706F\u65CB\u8F6C\u82AF.rotation.y = t * (\u6001.\u662F\u541F\u5531 ? 6 : 22);
-        this.\u84DD\u706F\u65CB\u8F6C\u82AF.rotation.y = -t * (\u6001.\u662F\u541F\u5531 ? 6 : 22);
+        this.\u7EA2\u706F\u65CB\u8F6C\u82AF.rotation.y = t * (\u6001.\u662F\u5F85\u673A ? 4 : \u6001.\u662F\u541F\u5531 ? 6 : 22);
+        this.\u84DD\u706F\u65CB\u8F6C\u82AF.rotation.y = -t * (\u6001.\u662F\u5F85\u673A ? 4 : \u6001.\u662F\u541F\u5531 ? 6 : 22);
       }
       if (this.\u7EA2\u5149\u6655\u7403 && this.\u84DD\u5149\u6655\u7403) {
-        this.\u7EA2\u5149\u6655\u7403.visible = !\u6001.\u662F\u6B7B\u4EA1 && \u7EA2\u4EAE;
-        this.\u84DD\u5149\u6655\u7403.visible = !\u6001.\u662F\u6B7B\u4EA1 && !\u7EA2\u4EAE;
-        const \u6655\u5C3A = 0.96 + Math.abs(\u95EA\u62CD) * 0.56;
+        this.\u7EA2\u5149\u6655\u7403.visible = (!\u6001.\u662F\u6B7B\u4EA1 || \u6B7B\u4F59 > 0.35) && \u7EA2\u4EAE;
+        this.\u84DD\u5149\u6655\u7403.visible = (!\u6001.\u662F\u6B7B\u4EA1 || \u6B7B\u4F59 > 0.35) && !\u7EA2\u4EAE;
+        const \u6655\u5C3A = (\u6001.\u662F\u5F85\u673A ? 0.72 : 0.96 + Math.abs(\u95EA\u62CD) * 0.56) * \u6B7B\u4F59;
         this.\u7EA2\u5149\u6655\u7403.scale.setScalar(\u6655\u5C3A);
         this.\u84DD\u5149\u6655\u7403.scale.setScalar(\u6655\u5C3A);
       }
-      const \u51FA\u68CD = (\u6001.\u662F\u5DE6\u653B || \u6001.\u662F\u53F3\u653B || \u6001.\u662F\u666E\u653B) && \u6001.\u653B\u76F801 > 0.03 && \u6001.\u653B\u76F801 < 0.97;
-      this.\u8170\u95F4\u6302\u68CD.visible = !\u51FA\u68CD && !\u6001.\u662F\u51B2\u7EBF;
-      this.\u5DE6\u8B66\u68CD.visible = \u51FA\u68CD && \u6001.\u653B\u5411 > 0 || \u6001.\u662F\u51B2\u7EBF;
-      this.\u53F3\u8B66\u68CD.visible = \u51FA\u68CD && (\u6001.\u653B\u5411 < 0 || \u6001.\u662F\u666E\u653B);
-      const \u68CD\u957F\u500D = \u6001.\u662F\u51B2\u7EBF ? 1.25 : 1 + \u6001.\u653B\u51FA\u51FB * 1.45;
-      const \u68CD\u7C97\u500D = \u6001.\u662F\u51B2\u7EBF ? 1.15 : 1 + \u6001.\u653B\u51FA\u51FB * 0.38;
-      this.\u5DE6\u8B66\u68CD.rotation.set(0, 0, \u6001.\u662F\u51B2\u7EBF ? 0.25 : 0);
-      this.\u53F3\u8B66\u68CD.rotation.set(0, 0, 0);
-      this.\u5DE6\u8B66\u68CD.scale.set(\u68CD\u7C97\u500D, \u68CD\u957F\u500D, \u68CD\u7C97\u500D);
-      this.\u53F3\u8B66\u68CD.scale.set(\u68CD\u7C97\u500D, \u68CD\u957F\u500D, \u68CD\u7C97\u500D);
-      if (this.\u5927\u5564\u9152\u809A) {
-        const \u809A\u6296 = \u6001.\u662F\u6B7B\u4EA1 ? 0 : \u6001.\u662F\u51B2\u7EBF || \u6001.\u662F\u7B11\u8BDD ? Math.sin(t * 16) * 0.09 : \u6001.\u662F\u8DF3\u821E ? Math.sin(t * 8.4) * 0.07 : \u6001.\u52A0\u901F\u4E2D ? Math.sin(t * 24) * 0.05 : Math.sin(t * 7) * 0.02;
-        this.\u5927\u5564\u9152\u809A.scale.set(1.06 - \u809A\u6296 * 0.5, 0.86 + \u809A\u6296, 1.04 + \u809A\u6296);
-      }
-      this.\u5634\u53FC\u8B66\u54E8.rotation.z = -0.18 + (\u6001.\u662F\u6B7B\u4EA1 ? 0.12 : \u6001.\u52A0\u901F\u4E2D || \u6001.\u662F\u51B2\u7EBF || \u6001.\u662F\u5632\u8BBD ? Math.sin(t * 32) * 0.22 : Math.sin(t * 8) * 0.05);
-      if (this.\u5DE6\u52A8\u7269\u8033 && this.\u53F3\u52A8\u7269\u8033 && \u6001.\u91CD\u521B.\u6FC0\u6D3B) {
-        this.\u5DE6\u52A8\u7269\u8033.position.y = (0.37 + \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.04) * 1.24;
-        this.\u53F3\u52A8\u7269\u8033.position.y = (0.37 - \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.04) * 1.24;
-      }
+      this.\u66F4\u65B0\u4E13\u5C5E\u89D2\u8272\u52A8\u4F5C(\u6001);
     }
   };
   var \u718A\u732B\u8B66\u5BDF\u6A21\u578B = class extends \u8B66\u7528\u9A91\u624B\u57FA\u7C7B\u6A21\u578B {
+    \u5927\u5706\u809A = null;
+    \u5634\u53FC\u7AF9\u679D = new Group();
+    \u8170\u95F4\u6302\u68CD = new Group();
+    \u5DE6\u8B66\u68CD = new Group();
+    \u53F3\u8B66\u68CD = new Group();
     constructor() {
       super("panda", "\u718A\u732B\u8B66\u5BDF", "");
       this.\u6784\u5EFA();
     }
-    \u83B7\u53D6\u8B66\u5B98\u914D\u8272() {
+    \u83B7\u53D6\u8F66\u724C\u6587\u5B57() {
+      return "\u8B66\u5DE1\u4E00\u53F7";
+    }
+    \u662F\u91CD\u88C5\u8B66\u8F66() {
+      return false;
+    }
+    \u83B7\u53D6\u7535\u9A74\u89C4\u683C() {
       return {
+        // 比狗熊更紧凑圆润轻快的巡逻电驴
+        \u57FA\u7840\u5C3A\u5EA6: 1.18,
+        \u540E\u8F6E\u534A\u5F84: 0.26,
+        \u524D\u8F6E\u534A\u5F84: 0.25,
+        \u8F6E\u5BBD: 0.15,
+        \u540E\u8F74Z: -0.7,
+        \u524D\u8F74Z: 0.74,
+        \u524D\u53C9\u503E\u89D2: 0.26,
+        \u628A\u7ACB\u9AD8: 0.58,
+        \u8F66\u628A\u534A\u5BBD: 0.37,
+        \u628A\u9AD8: 0.62,
+        \u5EA7\u9AD8: 0.79,
+        \u5EA7Z: -0.14,
+        \u8E0F\u677F\u9AD8: 0.32,
+        \u8E0F\u677FZ: 0.35,
+        \u4E0A\u81C2\u957F: 0.39,
+        \u524D\u81C2\u957F: 0.38,
+        \u5927\u817F\u957F: 0.31,
+        \u5C0F\u817F\u957F: 0.35,
+        \u653B\u8F68\u8FF9\u4E3B\u8272: 3900150,
+        \u653B\u8F68\u8FF9\u526F\u8272: 16719416,
+        \u6B8B\u5F71\u4E3B\u8272: 2460159,
+        \u6B8B\u5F71\u51B2\u523A\u8272: 16721989,
+        \u6B8B\u5F71\u526F\u8272: 16721989,
+        \u7EA2\u84DD\u8B66\u706F\u6B8B\u5F71: true,
         \u6F02\u79FB\u952E\u524D\u7F00: "panda",
-        \u8F66\u724C\u6587\u5B57: "\u8B66\u5DE1\u4E00\u53F7",
-        \u4F53\u6BDB\u8272: 16448249,
-        \u80A2\u4F53\u6BDB\u8272: 1118999,
-        \u5634\u515C\u8272: 16448249,
-        \u7709\u8272: 1118999,
-        \u8033\u5185\u8272: 1118999,
-        \u5E26\u9ED1\u773C\u5708: true
+        \u8F68\u8272: [0.1, 0.11, 0.14],
+        \u70DF\u8272: [0.84, 0.9, 0.98]
       };
+    }
+    \u6784\u5EFA\u4E13\u5C5E\u9A91\u624B\u4E0E\u88C5\u5907(\u89C4, k, \u6750) {
+      this.\u5934\u90E8\u67A2.position.set(0, 0.51 * k, 0.03 * k);
+      this.\u5DE6\u80A9\u67A2.position.set(0.23 * k, 0.41 * k, 0.02 * k);
+      this.\u53F3\u80A9\u67A2.position.set(-0.23 * k, 0.41 * k, 0.02 * k);
+      this.\u5DE6\u5927\u817F\u67A2.position.set(0.17 * k, -0.02 * k, 0.06 * k);
+      this.\u53F3\u5927\u817F\u67A2.position.set(-0.17 * k, -0.02 * k, 0.06 * k);
+      const \u718A\u732B\u767D\u6750 = new MeshStandardMaterial({ color: 16448249, roughness: 0.88, metalness: 0.02 });
+      const \u718A\u732B\u9ED1\u6750 = new MeshStandardMaterial({ color: 1118999, roughness: 0.8, metalness: 0.04 });
+      const \u816E\u7EA2\u7C89\u6750 = new MeshStandardMaterial({ color: 16622767, roughness: 0.82, metalness: 0.02 });
+      const \u8C46\u8C46\u773C\u6750 = new MeshStandardMaterial({ color: 328967, roughness: 0.14, metalness: 0.15 });
+      const \u9AD8\u5149\u767D\u6750 = new MeshStandardMaterial({ color: 16777215, emissive: 16777215, emissiveIntensity: 0.6, roughness: 0.1 });
+      const \u7AF9\u7AFF\u7EFF\u6750 = new MeshStandardMaterial({ color: 6660877, roughness: 0.65, metalness: 0.04 });
+      const \u7AF9\u53F6\u7EFF\u6750 = new MeshStandardMaterial({ color: 2278750, roughness: 0.58, metalness: 0.02 });
+      const \u81C0 = new Mesh(new SphereGeometry(0.25 * k, 14, 12), \u718A\u732B\u9ED1\u6750);
+      \u81C0.scale.set(1.26, 0.88, 1.12);
+      this.\u9A91\u624B\u6839\u7EC4.add(\u81C0);
+      const \u5706\u5C3E = new Mesh(new SphereGeometry(0.095 * k, 10, 8), \u718A\u732B\u767D\u6750);
+      \u5706\u5C3E.position.set(0, 0.06 * k, -0.26 * k);
+      this.\u9A91\u624B\u6839\u7EC4.add(\u5706\u5C3E);
+      const \u5706\u8B66\u670D = new Mesh(new SphereGeometry(0.25 * k, 16, 14), \u6750.\u8B66\u84DD\u6750);
+      \u5706\u8B66\u670D.scale.set(1.04, 1.12, 1.04);
+      \u5706\u8B66\u670D.position.set(0, 0.24 * k, 0.01 * k);
+      \u5706\u8B66\u670D.castShadow = true;
+      this.\u4E0A\u8EAB\u67A2.add(\u5706\u8B66\u670D);
+      this.\u5927\u5706\u809A = new Mesh(new SphereGeometry(0.25 * k, 16, 14), \u6750.\u8B66\u84DD\u6750);
+      this.\u5927\u5706\u809A.scale.set(1.12, 0.9, 1.14);
+      this.\u5927\u5706\u809A.position.set(0, 0.17 * k, 0.11 * k);
+      this.\u4E0A\u8EAB\u67A2.add(this.\u5927\u5706\u809A);
+      const \u767D\u809A\u515C\u886C = new Mesh(new SphereGeometry(0.16 * k, 12, 10), \u718A\u732B\u767D\u6750);
+      \u767D\u809A\u515C\u886C.scale.set(0.86, 0.78, 0.36);
+      \u767D\u809A\u515C\u886C.position.set(0, 0.2 * k, 0.33 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u767D\u809A\u515C\u886C);
+      const \u767D\u886C\u9886 = new Mesh(new CylinderGeometry(0.125 * k, 0.155 * k, 0.06 * k, 12), \u6750.\u8B66\u767D\u6750);
+      \u767D\u886C\u9886.position.set(0, 0.45 * k, 0.01 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u767D\u886C\u9886);
+      const \u8367\u5149\u80A9\u659C\u5E26 = new Mesh(new BoxGeometry(0.062 * k, 0.42 * k, 0.45 * k), \u6750.\u53CD\u5149\u9EC4\u6750);
+      \u8367\u5149\u80A9\u659C\u5E26.position.set(0.03 * k, 0.25 * k, 0.03 * k);
+      \u8367\u5149\u80A9\u659C\u5E26.rotation.z = -0.34;
+      this.\u4E0A\u8EAB\u67A2.add(\u8367\u5149\u80A9\u659C\u5E26);
+      const \u8367\u5149\u8170\u5E26\u7EB9 = new Mesh(new CylinderGeometry(0.25 * k, 0.25 * k, 0.04 * k, 16), \u6750.\u53CD\u5149\u9EC4\u6750);
+      \u8367\u5149\u8170\u5E26\u7EB9.scale.set(1.12, 1, 1.12);
+      \u8367\u5149\u8170\u5E26\u7EB9.position.set(0, 0.14 * k, 0.04 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u8367\u5149\u8170\u5E26\u7EB9);
+      const \u9ED1\u8170\u5E26 = new Mesh(new CylinderGeometry(0.255 * k, 0.255 * k, 0.056 * k, 16), \u6750.\u54D1\u9ED1\u6750);
+      \u9ED1\u8170\u5E26.scale.set(1.1, 1, 1.12);
+      \u9ED1\u8170\u5E26.position.set(0, 0.08 * k, 0.04 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u9ED1\u8170\u5E26);
+      const \u91D1\u8B66\u6263 = new Mesh(new BoxGeometry(0.092 * k, 0.066 * k, 0.042 * k), \u6750.\u91D1\u661F\u6750);
+      \u91D1\u8B66\u6263.position.set(0, 0.08 * k, 0.3 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u91D1\u8B66\u6263);
+      const \u80F8\u8B66\u7AE0 = new Mesh(new CylinderGeometry(0.046 * k, 0.038 * k, 0.03 * k, 6), \u6750.\u91D1\u661F\u6750);
+      \u80F8\u8B66\u7AE0.rotation.x = Math.PI / 2;
+      \u80F8\u8B66\u7AE0.position.set(0.11 * k, 0.32 * k, 0.24 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u80F8\u8B66\u7AE0);
+      const \u5927\u5706\u5934 = new Mesh(new SphereGeometry(0.245 * k, 18, 16), \u718A\u732B\u767D\u6750);
+      \u5927\u5706\u5934.scale.set(1.2, 0.92, 1.02);
+      \u5927\u5706\u5934.position.set(0, 0.18 * k, 0);
+      \u5927\u5706\u5934.castShadow = true;
+      this.\u5934\u90E8\u67A2.add(\u5927\u5706\u5934);
+      const \u5C0F\u77ED\u5634\u515C = new Mesh(new SphereGeometry(0.082 * k, 10, 8), \u718A\u732B\u767D\u6750);
+      \u5C0F\u77ED\u5634\u515C.scale.set(1.22, 0.78, 0.74);
+      \u5C0F\u77ED\u5634\u515C.position.set(0, 0.12 * k, 0.195 * k);
+      this.\u5934\u90E8\u67A2.add(\u5C0F\u77ED\u5634\u515C);
+      const \u9ED1\u5706\u9F3B = new Mesh(new SphereGeometry(0.042 * k, 10, 8), \u718A\u732B\u9ED1\u6750);
+      \u9ED1\u5706\u9F3B.scale.set(1.32, 0.78, 0.78);
+      \u9ED1\u5706\u9F3B.position.set(0, 0.14 * k, 0.252 * k);
+      this.\u5934\u90E8\u67A2.add(\u9ED1\u5706\u9F3B);
+      const \u61A8\u7B11\u5634 = new Mesh(new TorusGeometry(0.036 * k, 8e-3 * k, 6, 10, Math.PI * 0.75), \u8C46\u8C46\u773C\u6750);
+      \u61A8\u7B11\u5634.rotation.set(0.22, 0, Math.PI * 1.12);
+      \u61A8\u7B11\u5634.position.set(0, 0.102 * k, 0.238 * k);
+      this.\u5934\u90E8\u67A2.add(\u61A8\u7B11\u5634);
+      this.\u5634\u53FC\u7AF9\u679D = new Group();
+      this.\u5634\u53FC\u7AF9\u679D.position.set(-0.045 * k, 0.1 * k, 0.24 * k);
+      this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18, -0.52, -0.3);
+      const \u7AF9\u7AFF = new Mesh(new CylinderGeometry(0.012 * k, 0.014 * k, 0.3 * k, 8), \u7AF9\u7AFF\u7EFF\u6750);
+      \u7AF9\u7AFF.rotation.x = Math.PI / 2;
+      \u7AF9\u7AFF.position.z = 0.13 * k;
+      this.\u5634\u53FC\u7AF9\u679D.add(\u7AF9\u7AFF);
+      for (const lz of [0.16, 0.24]) {
+        const \u7AF9\u8282 = new Mesh(new TorusGeometry(0.014 * k, 4e-3 * k, 6, 10), \u7AF9\u53F6\u7EFF\u6750);
+        \u7AF9\u8282.position.z = lz * k;
+        this.\u5634\u53FC\u7AF9\u679D.add(\u7AF9\u8282);
+      }
+      const \u53F61 = new Mesh(new SphereGeometry(0.034 * k, 8, 6), \u7AF9\u53F6\u7EFF\u6750);
+      \u53F61.scale.set(0.42, 0.16, 1.85);
+      \u53F61.position.set(-0.028 * k, 0.025 * k, 0.27 * k);
+      \u53F61.rotation.set(0.3, -0.45, 0.28);
+      const \u53F62 = new Mesh(new SphereGeometry(0.03 * k, 8, 6), \u7AF9\u53F6\u7EFF\u6750);
+      \u53F62.scale.set(0.42, 0.16, 1.65);
+      \u53F62.position.set(0.024 * k, 0.014 * k, 0.25 * k);
+      \u53F62.rotation.set(0.22, 0.55, -0.25);
+      this.\u5634\u53FC\u7AF9\u679D.add(\u53F61, \u53F62);
+      this.\u5934\u90E8\u67A2.add(this.\u5634\u53FC\u7AF9\u679D);
+      for (const sx of [-1, 1]) {
+        const \u9ED1\u773C\u5708 = new Mesh(new SphereGeometry(0.082 * k, 12, 10), \u718A\u732B\u9ED1\u6750);
+        \u9ED1\u773C\u5708.scale.set(1.06, 1.3, 0.4);
+        \u9ED1\u773C\u5708.rotation.z = sx * 0.28;
+        \u9ED1\u773C\u5708.position.set(sx * 0.095 * k, 0.196 * k, 0.212 * k);
+        this.\u5934\u90E8\u67A2.add(\u9ED1\u773C\u5708);
+        const \u8C46\u773C = new Mesh(new SphereGeometry(0.029 * k, 8, 8), \u8C46\u8C46\u773C\u6750);
+        \u8C46\u773C.position.set(sx * 0.094 * k, 0.198 * k, 0.236 * k);
+        this.\u5934\u90E8\u67A2.add(\u8C46\u773C);
+        const \u773C\u9AD8\u5149 = new Mesh(new SphereGeometry(0.012 * k, 6, 6), \u9AD8\u5149\u767D\u6750);
+        \u773C\u9AD8\u5149.position.set(sx * 0.102 * k, 0.209 * k, 0.254 * k);
+        this.\u5934\u90E8\u67A2.add(\u773C\u9AD8\u5149);
+        const \u7C89\u816E\u7EA2 = new Mesh(new SphereGeometry(0.048 * k, 8, 8), \u816E\u7EA2\u7C89\u6750);
+        \u7C89\u816E\u7EA2.scale.set(1.28, 0.72, 0.45);
+        \u7C89\u816E\u7EA2.position.set(sx * 0.172 * k, 0.132 * k, 0.184 * k);
+        this.\u5934\u90E8\u67A2.add(\u7C89\u816E\u7EA2);
+      }
+      const \u8B66\u76D4 = new Mesh(new SphereGeometry(0.268 * k, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.54), \u6750.\u8B66\u767D\u6750);
+      \u8B66\u76D4.scale.set(1.12, 0.96, 1.02);
+      \u8B66\u76D4.position.set(0, 0.2 * k, 0);
+      \u8B66\u76D4.rotation.x = -0.1;
+      \u8B66\u76D4.castShadow = true;
+      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4);
+      const \u8B66\u76D4\u84DD\u56F4\u5E26 = new Mesh(new CylinderGeometry(0.272 * k, 0.272 * k, 0.036 * k, 18, 1, true), \u6750.\u8B66\u84DD\u6750);
+      \u8B66\u76D4\u84DD\u56F4\u5E26.scale.set(1.12, 1, 1.02);
+      \u8B66\u76D4\u84DD\u56F4\u5E26.position.set(0, 0.222 * k, 0);
+      \u8B66\u76D4\u84DD\u56F4\u5E26.rotation.x = -0.1;
+      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4\u84DD\u56F4\u5E26);
+      const \u8B66\u76D4\u900F\u660E\u955C = new Mesh(
+        new CylinderGeometry(0.278 * k, 0.278 * k, 0.086 * k, 14, 1, true, -Math.PI * 0.34, Math.PI * 0.68),
+        \u6750.\u6321\u98CE\u73BB\u6750
+      );
+      \u8B66\u76D4\u900F\u660E\u955C.scale.set(1.12, 1, 1.02);
+      \u8B66\u76D4\u900F\u660E\u955C.position.set(0, 0.212 * k, 0.01 * k);
+      \u8B66\u76D4\u900F\u660E\u955C.rotation.x = -0.22;
+      this.\u5934\u90E8\u67A2.add(\u8B66\u76D4\u900F\u660E\u955C);
+      const \u5E3D\u5FBD\u91D1\u76FE = new Mesh(new CylinderGeometry(0.048 * k, 0.038 * k, 0.03 * k, 6), \u6750.\u91D1\u661F\u6750);
+      \u5E3D\u5FBD\u91D1\u76FE.rotation.x = Math.PI / 2;
+      \u5E3D\u5FBD\u91D1\u76FE.position.set(0, 0.32 * k, 0.24 * k);
+      this.\u5934\u90E8\u67A2.add(\u5E3D\u5FBD\u91D1\u76FE);
+      const \u9020\u5706\u9ED1\u8033 = (sx) => {
+        const \u8033\u7EC4 = new Group();
+        \u8033\u7EC4.position.set(sx * 0.22 * k, 0.39 * k, -0.01 * k);
+        const \u5916\u8033 = new Mesh(new SphereGeometry(0.088 * k, 12, 10), \u718A\u732B\u9ED1\u6750);
+        \u5916\u8033.scale.set(1.06, 1.04, 0.62);
+        \u8033\u7EC4.add(\u5916\u8033);
+        this.\u5934\u90E8\u67A2.add(\u8033\u7EC4);
+        return \u8033\u7EC4;
+      };
+      this.\u5DE6\u52A8\u7269\u8033 = \u9020\u5706\u9ED1\u8033(1);
+      this.\u53F3\u52A8\u7269\u8033 = \u9020\u5706\u9ED1\u8033(-1);
+      const \u88C5\u718A\u732B\u81C2 = (\u80A9, \u8098, \u624B) => {
+        const \u4E0A\u81C2 = new Mesh(new CapsuleGeometry(0.064 * k, \u89C4.\u4E0A\u81C2\u957F * 0.8 * k, 6, 10), \u6750.\u8B66\u84DD\u6750);
+        \u4E0A\u81C2.position.y = \u89C4.\u4E0A\u81C2\u957F * 0.5 * k;
+        \u80A9.add(\u4E0A\u81C2);
+        const \u524D\u81C2 = new Mesh(new CapsuleGeometry(0.056 * k, \u89C4.\u524D\u81C2\u957F * 0.8 * k, 6, 10), \u718A\u732B\u9ED1\u6750);
+        \u524D\u81C2.position.y = \u89C4.\u524D\u81C2\u957F * 0.5 * k;
+        \u8098.add(\u524D\u81C2);
+        const \u767D\u8896\u53E3 = new Mesh(new CylinderGeometry(0.058 * k, 0.058 * k, 0.048 * k, 10), \u6750.\u8B66\u767D\u6750);
+        \u767D\u8896\u53E3.position.y = -0.02 * k;
+        \u624B.add(\u767D\u8896\u53E3);
+        const \u5706\u767D\u624B\u5957 = new Mesh(new SphereGeometry(0.07 * k, 10, 10), \u6750.\u8B66\u767D\u6750);
+        \u5706\u767D\u624B\u5957.position.y = 0.02 * k;
+        \u624B.add(\u5706\u767D\u624B\u5957);
+      };
+      \u88C5\u718A\u732B\u81C2(this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u638C);
+      \u88C5\u718A\u732B\u81C2(this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u638C);
+      const \u9020\u8B66\u68CD = (\u7F29\u653E = 1) => {
+        const \u68CD\u7EC4 = new Group();
+        const \u68CD\u8EAB = new Mesh(new CylinderGeometry(0.03 * k * \u7F29\u653E, 0.034 * k * \u7F29\u653E, 0.76 * k * \u7F29\u653E, 10), \u6750.\u54D1\u9ED1\u6750);
+        \u68CD\u8EAB.position.y = 0.34 * k * \u7F29\u653E;
+        \u68CD\u8EAB.castShadow = true;
+        const \u94F6\u5934\u7B8D = new Mesh(new CylinderGeometry(0.04 * k * \u7F29\u653E, 0.038 * k * \u7F29\u653E, 0.1 * k * \u7F29\u653E, 10), \u6750.\u4EAE\u94F6\u6750);
+        \u94F6\u5934\u7B8D.position.y = 0.66 * k * \u7F29\u653E;
+        const \u68CD\u5934\u7EA2\u706F = new Mesh(new CylinderGeometry(0.044 * k * \u7F29\u653E, 0.044 * k * \u7F29\u653E, 0.068 * k * \u7F29\u653E, 10), \u6750.\u7EA2\u8B66\u706F\u5934\u6750);
+        \u68CD\u5934\u7EA2\u706F.position.y = 0.74 * k * \u7F29\u653E;
+        const \u68CD\u5934\u84DD\u706F = new Mesh(new CylinderGeometry(0.042 * k * \u7F29\u653E, 0.044 * k * \u7F29\u653E, 0.068 * k * \u7F29\u653E, 10), \u6750.\u84DD\u8B66\u706F\u5934\u6750);
+        \u68CD\u5934\u84DD\u706F.position.y = 0.8 * k * \u7F29\u653E;
+        const \u4E01\u5B57\u6A2A\u67C4 = new Mesh(new CylinderGeometry(0.02 * k * \u7F29\u653E, 0.02 * k * \u7F29\u653E, 0.18 * k * \u7F29\u653E, 8), \u6750.\u54D1\u9ED1\u6750);
+        \u4E01\u5B57\u6A2A\u67C4.rotation.z = Math.PI / 2;
+        \u4E01\u5B57\u6A2A\u67C4.position.set(0.06 * k * \u7F29\u653E, 0.1 * k * \u7F29\u653E, 0);
+        \u68CD\u7EC4.add(\u68CD\u8EAB, \u94F6\u5934\u7B8D, \u68CD\u5934\u7EA2\u706F, \u68CD\u5934\u84DD\u706F, \u4E01\u5B57\u6A2A\u67C4);
+        return \u68CD\u7EC4;
+      };
+      const \u8170\u68CD\u5957\u73AF = new Mesh(new CylinderGeometry(0.044 * k, 0.044 * k, 0.08 * k, 10), \u6750.\u8F6E\u80CE\u6750);
+      \u8170\u68CD\u5957\u73AF.position.set(0.25 * k, 0.08 * k, 0.03 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u8170\u68CD\u5957\u73AF);
+      this.\u8170\u95F4\u6302\u68CD = \u9020\u8B66\u68CD(0.56);
+      this.\u8170\u95F4\u6302\u68CD.position.set(0.25 * k, 0.1 * k, 0.03 * k);
+      this.\u8170\u95F4\u6302\u68CD.rotation.set(-2.6, 0, -0.25);
+      this.\u4E0A\u8EAB\u67A2.add(this.\u8170\u95F4\u6302\u68CD);
+      this.\u5DE6\u8B66\u68CD = \u9020\u8B66\u68CD();
+      this.\u5DE6\u8B66\u68CD.visible = false;
+      this.\u5DE6\u624B\u638C.add(this.\u5DE6\u8B66\u68CD);
+      this.\u53F3\u8B66\u68CD = \u9020\u8B66\u68CD();
+      this.\u53F3\u8B66\u68CD.visible = false;
+      this.\u53F3\u624B\u638C.add(this.\u53F3\u8B66\u68CD);
+      const \u88C5\u718A\u732B\u817F = (\u817F, \u819D) => {
+        const \u5927\u817F\u8089 = new Mesh(new CapsuleGeometry(0.086 * k, \u89C4.\u5927\u817F\u957F * 0.7 * k, 6, 10), \u718A\u732B\u9ED1\u6750);
+        \u5927\u817F\u8089.rotation.x = Math.PI / 2;
+        \u5927\u817F\u8089.position.z = \u89C4.\u5927\u817F\u957F * 0.48 * k;
+        \u817F.add(\u5927\u817F\u8089);
+        const \u5C0F\u817F\u8089 = new Mesh(new CapsuleGeometry(0.068 * k, \u89C4.\u5C0F\u817F\u957F * 0.72 * k, 6, 10), \u718A\u732B\u9ED1\u6750);
+        \u5C0F\u817F\u8089.position.y = -\u89C4.\u5C0F\u817F\u957F * 0.48 * k;
+        \u819D.add(\u5C0F\u817F\u8089);
+        const \u9ED1\u8B66\u9774 = new Mesh(new BoxGeometry(0.13 * k, 0.072 * k, 0.19 * k), \u6750.\u8F6E\u80CE\u6750);
+        \u9ED1\u8B66\u9774.position.set(0, -\u89C4.\u5C0F\u817F\u957F * k, 0.04 * k);
+        \u819D.add(\u9ED1\u8B66\u9774);
+      };
+      \u88C5\u718A\u732B\u817F(this.\u5DE6\u5927\u817F\u67A2, this.\u5DE6\u5C0F\u817F\u67A2);
+      \u88C5\u718A\u732B\u817F(this.\u53F3\u5927\u817F\u67A2, this.\u53F3\u5C0F\u817F\u67A2);
+    }
+    \u66F4\u65B0\u4E13\u5C5E\u89D2\u8272\u52A8\u4F5C(\u6001) {
+      const t = \u6001.\u65F6\u95F4;
+      const k = \u6001.\u5C3A\u5EA6;
+      const \u4E0A\u81C2 = \u6001.\u4E0A\u81C2\u957F;
+      const \u524D\u81C2 = \u6001.\u524D\u81C2\u957F;
+      const \u51FA\u68CD = (\u6001.\u662F\u5DE6\u653B || \u6001.\u662F\u53F3\u653B || \u6001.\u662F\u666E\u653B) && \u6001.\u653B\u76F801 > 0.03 && \u6001.\u653B\u76F801 < 0.97;
+      this.\u8170\u95F4\u6302\u68CD.visible = !\u51FA\u68CD && !\u6001.\u662F\u51B2\u7EBF;
+      this.\u5DE6\u8B66\u68CD.visible = \u51FA\u68CD && \u6001.\u653B\u5411 > 0 || \u6001.\u662F\u51B2\u7EBF;
+      this.\u53F3\u8B66\u68CD.visible = \u51FA\u68CD && (\u6001.\u653B\u5411 < 0 || \u6001.\u662F\u666E\u653B);
+      const \u68CD\u957F\u500D = \u6001.\u662F\u51B2\u7EBF ? 1.28 : 1 + \u6001.\u653B\u51FA\u51FB * 1.55;
+      const \u68CD\u7C97\u500D = \u6001.\u662F\u51B2\u7EBF ? 1.15 : 1 + \u6001.\u653B\u51FA\u51FB * 0.36;
+      const \u8FDE\u62BD\u6296 = \u51FA\u68CD && \u6001.\u653B\u51FA\u51FB > 0.15 ? Math.sin(t * 48) * 0.32 : 0;
+      this.\u5DE6\u8B66\u68CD.rotation.set(\u8FDE\u62BD\u6296, 0, \u6001.\u662F\u51B2\u7EBF ? 0.25 : 0);
+      this.\u53F3\u8B66\u68CD.rotation.set(\u8FDE\u62BD\u6296, 0, 0);
+      this.\u5DE6\u8B66\u68CD.scale.set(\u68CD\u7C97\u500D, \u68CD\u957F\u500D, \u68CD\u7C97\u500D);
+      this.\u53F3\u8B66\u68CD.scale.set(\u68CD\u7C97\u500D, \u68CD\u957F\u500D, \u68CD\u7C97\u500D);
+      if (\u6001.\u6B7B\u6001) {
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.65 * \u6001.\u6B7B\u6001.\u5012\u4E0B, -0.52, -0.85 * \u6001.\u6B7B\u6001.\u5012\u4E0B);
+      } else if (\u6001.\u662F\u5F85\u673A) {
+        const \u72AF\u56F0\u6CE2 = Math.sin(t * 1.5);
+        const \u6FC0\u7075 = Math.pow(Math.max(0, Math.sin(t * 0.72)), 8);
+        this.\u4E0A\u8EAB\u67A2.rotation.x += 0.06 + Math.max(0, \u72AF\u56F0\u6CE2) * 0.06 - \u6FC0\u7075 * 0.12;
+        this.\u5934\u90E8\u67A2.rotation.x += Math.max(0, \u72AF\u56F0\u6CE2) * 0.14 - \u6FC0\u7075 * 0.24;
+        this.\u5934\u90E8\u67A2.rotation.z += Math.sin(t * 1.1) * 0.1;
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        const \u63C9\u809A = Math.sin(t * 3.4);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.38 + \u63C9\u809A * 0.06, 0.12, 2.28);
+        this.\u53F3\u8098\u67A2.rotation.set(0.45 + \u63C9\u809A * 0.12, 0, -1.55);
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18 + Math.sin(t * 4.5) * 0.14, -0.52, -0.3 + Math.cos(t * 2.8) * 0.1);
+      } else if (\u6001.\u662F\u884C\u8D70) {
+        const \u6643 = Math.sin(t * 6.8);
+        this.\u4E0A\u8EAB\u67A2.rotation.z += \u6643 * 0.1;
+        this.\u5934\u90E8\u67A2.rotation.z -= \u6643 * 0.14;
+        this.\u5934\u90E8\u67A2.rotation.y += Math.sin(t * 2.2) * 0.18;
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18 + Math.sin(t * 10) * 0.1, -0.52, -0.3 + \u6643 * 0.12);
+      } else if (\u6001.\u52A0\u901F\u4E2D) {
+        this.\u7FD8\u5934\u67A2\u7EC4.rotation.x -= \u6001.\u662F\u5927\u55B7 ? 0.14 : 0.08;
+        this.\u4E0A\u8EAB\u67A2.rotation.x += \u6001.\u662F\u5927\u55B7 ? 0.24 : 0.15;
+        this.\u5934\u90E8\u67A2.rotation.x -= 0.1;
+        this.\u9A91\u624B\u6839\u7EC4.position.y += \u6001.\u662F\u5927\u55B7 ? 0.06 * k : 0.02 * k;
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.02 + Math.sin(t * 32) * 0.18, -0.52, -0.15 + Math.cos(t * 28) * 0.2);
+      } else if (\u6001.\u662F\u62D0\u5F2F) {
+        this.\u9A91\u624B\u6839\u7EC4.position.x += \u6001.\u4FA7\u504F * 0.1 * k;
+        this.\u4E0A\u8EAB\u67A2.rotation.z += \u6001.\u4FA7\u504F * 0.18;
+        this.\u5934\u90E8\u67A2.rotation.z += \u6001.\u4FA7\u504F * 0.16;
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18, -0.52, -0.3 + \u6001.\u4FA7\u504F * 0.26);
+      } else if (\u6001.\u662F\u5632\u8BBD) {
+        this.\u4E0A\u8EAB\u67A2.rotation.x = -0.18 + Math.sin(t * 10) * 0.08;
+        this.\u4E0A\u8EAB\u67A2.rotation.y = Math.sin(t * 5.2) * 0.26;
+        this.\u5934\u90E8\u67A2.rotation.set(0.08, Math.sin(t * 5.2) * 0.34, Math.cos(t * 10.4) * 0.22);
+        const \u62CD = Math.sin(t * 15);
+        this.\u5DE6\u80A9\u67A2.rotation.set(0.55 + \u62CD * 0.24, -0.18, -2.05);
+        this.\u5DE6\u8098\u67A2.rotation.set(0.65 - \u62CD * 0.3, 0, 1.48);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.55 - \u62CD * 0.24, 0.18, 2.05);
+        this.\u53F3\u8098\u67A2.rotation.set(0.65 + \u62CD * 0.3, 0, -1.48);
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18 + Math.sin(t * 24) * 0.25, -0.52, -0.3);
+      } else if (\u6001.\u662F\u8DF3\u821E) {
+        const \u626D = Math.sin(t * 7.6);
+        this.\u9A91\u624B\u6839\u7EC4.position.x += \u626D * 0.09 * k;
+        this.\u4E0A\u8EAB\u67A2.rotation.set(0.06, \u626D * 0.38, \u626D * 0.26);
+        this.\u5934\u90E8\u67A2.rotation.set(-0.08, -\u626D * 0.32, -\u626D * 0.28);
+        this.\u5DE6\u80A9\u67A2.rotation.set(0.85 + Math.sin(t * 15.2) * 0.26, -0.25, -0.85 - \u626D * 0.35);
+        this.\u5DE6\u8098\u67A2.rotation.set(-1.15, 0, 0.45);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.85 - Math.sin(t * 15.2) * 0.26, 0.25, 0.85 - \u626D * 0.35);
+        this.\u53F3\u8098\u67A2.rotation.set(-1.15, 0, -0.45);
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18 + Math.sin(t * 15.2) * 0.18, -0.52, -0.3 + \u626D * 0.22);
+      } else if (\u6001.\u662F\u5DE6\u653B || \u6001.\u662F\u53F3\u653B) {
+        const \u9AD8\u9891\u8155 = \u6001.\u653B\u51FA\u51FB > 0.15 ? Math.sin(t * 42) * 0.42 : 0;
+        if (\u6001.\u662F\u5DE6\u653B) {
+          this.\u5DE6\u8098\u67A2.rotation.x += \u9AD8\u9891\u8155;
+        } else {
+          this.\u53F3\u8098\u67A2.rotation.x += \u9AD8\u9891\u8155;
+        }
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.15 + Math.abs(\u9AD8\u9891\u8155) * 0.3, -0.52, -0.3);
+      } else if (\u6001.\u662F\u666E\u653B) {
+        const \u8FDE\u6345 = \u6001.\u653B\u51FA\u51FB > 0.1 ? Math.sin(t * 36) * 0.28 : 0;
+        this.\u53F3\u80A9\u67A2.rotation.x += \u8FDE\u6345 * 0.6;
+        this.\u53F3\u8098\u67A2.rotation.x += \u8FDE\u6345;
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(0.18 + \u8FDE\u6345 * 0.3, -0.52, -0.3);
+      } else {
+        this.\u5634\u53FC\u7AF9\u679D.rotation.set(
+          0.18 + Math.sin(t * (\u6001.\u662F\u51B2\u7EBF ? 22 : 9)) * (\u6001.\u662F\u51B2\u7EBF ? 0.24 : 0.08),
+          -0.52,
+          -0.3
+        );
+      }
+      if (this.\u5927\u5706\u809A) {
+        const \u809A\u6296 = \u6001.\u662F\u6B7B\u4EA1 ? 0 : \u6001.\u662F\u5F85\u673A ? Math.sin(t * 2.2) * 0.025 : \u6001.\u662F\u51B2\u7EBF || \u6001.\u662F\u7B11\u8BDD || \u6001.\u662F\u5632\u8BBD ? Math.sin(t * 16) * 0.12 : \u6001.\u662F\u8DF3\u821E ? Math.sin(t * 15.2) * 0.09 : \u6001.\u52A0\u901F\u4E2D ? Math.sin(t * 24) * 0.06 : Math.sin(t * 7) * 0.03;
+        this.\u5927\u5706\u809A.scale.set(1.12 - \u809A\u6296 * 0.5, 0.9 + \u809A\u6296, 1.14 + \u809A\u6296 * 1.15);
+      }
+      if (this.\u5DE6\u52A8\u7269\u8033 && this.\u53F3\u52A8\u7269\u8033) {
+        const \u8033\u6296 = \u6001.\u6B7B\u6001 ? -0.35 * \u6001.\u6B7B\u6001.\u5012\u4E0B : \u6001.\u91CD\u521B.\u6FC0\u6D3B ? \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.45 : \u6001.\u52A0\u901F\u4E2D ? -0.28 + Math.sin(t * 26) * 0.12 : \u6001.\u662F\u5F85\u673A ? Math.sin(t * 2.8) * 0.08 : Math.sin(t * 12) * 0.14;
+        this.\u5DE6\u52A8\u7269\u8033.rotation.set(\u8033\u6296 * 0.6, 0, \u8033\u6296);
+        this.\u53F3\u52A8\u7269\u8033.rotation.set(\u8033\u6296 * 0.6, 0, -\u8033\u6296);
+      }
     }
   };
   var \u72D7\u718A\u8B66\u5B98\u6A21\u578B = class extends \u8B66\u7528\u9A91\u624B\u57FA\u7C7B\u6A21\u578B {
+    \u5927\u6A90\u5E3D\u7EC4 = new Group();
+    \u9ED1\u58A8\u955C\u7EC4 = new Group();
+    \u5634\u53FC\u8B66\u54E8 = new Group();
+    \u5BBD\u80F8\u808C = null;
+    \u80CC\u6302\u505C\u724C = new Group();
+    \u5DE6\u624B\u505C\u724C = new Group();
+    \u53F3\u624B\u505C\u724C = new Group();
     constructor() {
       super("bear", "\u72D7\u718A\u8B66\u5B98", "");
       this.\u6784\u5EFA();
     }
-    \u83B7\u53D6\u8B66\u5B98\u914D\u8272() {
+    \u83B7\u53D6\u8F66\u724C\u6587\u5B57() {
+      return "\u8B66\u5DE1\u4E8C\u53F7";
+    }
+    \u662F\u91CD\u88C5\u8B66\u8F66() {
+      return true;
+    }
+    \u83B7\u53D6\u7535\u9A74\u89C4\u683C() {
       return {
+        // 比熊猫高大威猛宽厚一圈的重装大号警用巡逻车
+        \u57FA\u7840\u5C3A\u5EA6: 1.36,
+        \u540E\u8F6E\u534A\u5F84: 0.3,
+        \u524D\u8F6E\u534A\u5F84: 0.28,
+        \u8F6E\u5BBD: 0.19,
+        \u540E\u8F74Z: -0.76,
+        \u524D\u8F74Z: 0.8,
+        \u524D\u53C9\u503E\u89D2: 0.24,
+        \u628A\u7ACB\u9AD8: 0.62,
+        \u8F66\u628A\u534A\u5BBD: 0.44,
+        \u628A\u9AD8: 0.66,
+        \u5EA7\u9AD8: 0.86,
+        \u5EA7Z: -0.15,
+        \u8E0F\u677F\u9AD8: 0.34,
+        \u8E0F\u677FZ: 0.38,
+        \u4E0A\u81C2\u957F: 0.46,
+        \u524D\u81C2\u957F: 0.45,
+        \u5927\u817F\u957F: 0.37,
+        \u5C0F\u817F\u957F: 0.41,
+        \u653B\u8F68\u8FF9\u4E3B\u8272: 14427686,
+        \u653B\u8F68\u8FF9\u526F\u8272: 16436245,
+        \u6B8B\u5F71\u4E3B\u8272: 1920728,
+        \u6B8B\u5F71\u51B2\u523A\u8272: 15680580,
+        \u6B8B\u5F71\u526F\u8272: 16436245,
+        \u7EA2\u84DD\u8B66\u706F\u6B8B\u5F71: true,
         \u6F02\u79FB\u952E\u524D\u7F00: "bear",
-        \u8F66\u724C\u6587\u5B57: "\u8B66\u5DE1\u4E8C\u53F7",
-        \u4F53\u6BDB\u8272: 7554338,
-        \u80A2\u4F53\u6BDB\u8272: 6042648,
-        \u5634\u515C\u8272: 14267266,
-        \u7709\u8272: 3349259,
-        \u8033\u5185\u8272: 14267266,
-        \u5E26\u9ED1\u773C\u5708: false
+        \u8F68\u8272: [0.08, 0.09, 0.12],
+        \u70DF\u8272: [0.8, 0.86, 0.96]
       };
+    }
+    \u6784\u5EFA\u4E13\u5C5E\u9A91\u624B\u4E0E\u88C5\u5907(\u89C4, k, \u6750) {
+      this.\u5934\u90E8\u67A2.position.set(0, 0.6 * k, 0.02 * k);
+      this.\u5DE6\u80A9\u67A2.position.set(0.33 * k, 0.5 * k, 0.02 * k);
+      this.\u53F3\u80A9\u67A2.position.set(-0.33 * k, 0.5 * k, 0.02 * k);
+      this.\u5DE6\u5927\u817F\u67A2.position.set(0.22 * k, -0.02 * k, 0.06 * k);
+      this.\u53F3\u5927\u817F\u67A2.position.set(-0.22 * k, -0.02 * k, 0.06 * k);
+      const \u718A\u68D5\u6750 = new MeshStandardMaterial({ color: 7225117, roughness: 0.88, metalness: 0.02 });
+      const \u718A\u6697\u68D5\u6750 = new MeshStandardMaterial({ color: 4925712, roughness: 0.84, metalness: 0.03 });
+      const \u718A\u5634\u68D5\u9EC4\u6750 = new MeshStandardMaterial({ color: 14267266, roughness: 0.86, metalness: 0.02 });
+      const \u6D53\u80E1\u9ED1\u68D5\u6750 = new MeshStandardMaterial({ color: 2823431, roughness: 0.78, metalness: 0.04 });
+      const \u9ED1\u9F3B\u6750 = new MeshStandardMaterial({ color: 1118999, roughness: 0.55, metalness: 0.08 });
+      const \u58A8\u955C\u9ED1\u6750 = new MeshStandardMaterial({ color: 592656, roughness: 0.08, metalness: 0.88 });
+      const \u6B66\u88C5\u76AE\u6750 = new MeshStandardMaterial({ color: 4137741, roughness: 0.52, metalness: 0.16 });
+      const \u505C\u724C\u7EA2\u6750 = new MeshStandardMaterial({ color: 14427686, roughness: 0.3, metalness: 0.25 });
+      const \u505C\u724C\u8D34\u82B1\u6750 = new MeshStandardMaterial({ map: \u83B7\u53D6\u505C\u5B57\u724C\u8D34\u82B1\u7EB9\u7406(), roughness: 0.28, metalness: 0.18 });
+      const \u81C0 = new Mesh(new BoxGeometry(0.46 * k, 0.22 * k, 0.38 * k), \u6750.\u6DF1\u84DD\u670D\u6750);
+      \u81C0.position.set(0, 0.02 * k, 0);
+      this.\u9A91\u624B\u6839\u7EC4.add(\u81C0);
+      const \u5C0F\u718A\u5C3E = new Mesh(new SphereGeometry(0.072 * k, 8, 8), \u718A\u68D5\u6750);
+      \u5C0F\u718A\u5C3E.position.set(0, 0.04 * k, -0.22 * k);
+      this.\u9A91\u624B\u6839\u7EC4.add(\u5C0F\u718A\u5C3E);
+      const \u58EE\u8170\u8179 = new Mesh(new CylinderGeometry(0.24 * k, 0.21 * k, 0.28 * k, 12), \u6750.\u6DF1\u84DD\u670D\u6750);
+      \u58EE\u8170\u8179.scale.set(1.16, 1, 0.92);
+      \u58EE\u8170\u8179.position.set(0, 0.18 * k, 0);
+      \u58EE\u8170\u8179.castShadow = true;
+      this.\u4E0A\u8EAB\u67A2.add(\u58EE\u8170\u8179);
+      this.\u5BBD\u80F8\u808C = new Mesh(new BoxGeometry(0.58 * k, 0.3 * k, 0.38 * k), \u6750.\u6DF1\u84DD\u670D\u6750);
+      this.\u5BBD\u80F8\u808C.position.set(0, 0.4 * k, 0.02 * k);
+      this.\u5BBD\u80F8\u808C.castShadow = true;
+      this.\u4E0A\u8EAB\u67A2.add(this.\u5BBD\u80F8\u808C);
+      const \u7C97\u718A\u8116 = new Mesh(new CylinderGeometry(0.145 * k, 0.185 * k, 0.13 * k, 12), \u718A\u68D5\u6750);
+      \u7C97\u718A\u8116.position.set(0, 0.56 * k, 0.01 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u7C97\u718A\u8116);
+      const \u8B66\u5B98\u9886 = new Mesh(new CylinderGeometry(0.155 * k, 0.19 * k, 0.06 * k, 12), \u6750.\u8B66\u767D\u6750);
+      \u8B66\u5B98\u9886.position.set(0, 0.54 * k, 0.01 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u8B66\u5B98\u9886);
+      const \u8B66\u84DD\u9886\u5E26 = new Mesh(new BoxGeometry(0.056 * k, 0.24 * k, 0.025 * k), \u6750.\u8B66\u84DD\u6750);
+      \u8B66\u84DD\u9886\u5E26.position.set(0, 0.4 * k, 0.215 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u8B66\u84DD\u9886\u5E26);
+      const \u6B66\u88C5\u659C\u5E26 = new Mesh(new BoxGeometry(0.072 * k, 0.54 * k, 0.42 * k), \u6B66\u88C5\u76AE\u6750);
+      \u6B66\u88C5\u659C\u5E26.position.set(-0.02 * k, 0.31 * k, 0.02 * k);
+      \u6B66\u88C5\u659C\u5E26.rotation.z = 0.44;
+      this.\u4E0A\u8EAB\u67A2.add(\u6B66\u88C5\u659C\u5E26);
+      const \u6B66\u88C5\u8170\u5E26 = new Mesh(new BoxGeometry(0.54 * k, 0.08 * k, 0.4 * k), \u6B66\u88C5\u76AE\u6750);
+      \u6B66\u88C5\u8170\u5E26.position.set(0, 0.1 * k, 0.01 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u6B66\u88C5\u8170\u5E26);
+      const \u91D1\u5927\u8170\u6263 = new Mesh(new BoxGeometry(0.115 * k, 0.088 * k, 0.045 * k), \u6750.\u91D1\u661F\u6750);
+      \u91D1\u5927\u8170\u6263.position.set(0, 0.1 * k, 0.21 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u91D1\u5927\u8170\u6263);
+      for (const sx of [-1, 1]) {
+        const \u5927\u80A9\u7AE0 = new Mesh(new BoxGeometry(0.16 * k, 0.036 * k, 0.095 * k), \u6750.\u91D1\u661F\u6750);
+        \u5927\u80A9\u7AE0.position.set(sx * 0.24 * k, 0.555 * k, 0.01 * k);
+        \u5927\u80A9\u7AE0.rotation.z = -sx * 0.08;
+        this.\u4E0A\u8EAB\u67A2.add(\u5927\u80A9\u7AE0);
+        const \u80F8\u888B = new Mesh(new BoxGeometry(0.14 * k, 0.12 * k, 0.032 * k), \u6750.\u8B66\u84DD\u6750);
+        \u80F8\u888B.position.set(sx * 0.14 * k, 0.38 * k, 0.205 * k);
+        this.\u4E0A\u8EAB\u67A2.add(\u80F8\u888B);
+      }
+      const \u961F\u957F\u5927\u76FE\u7AE0 = new Mesh(new CylinderGeometry(0.056 * k, 0.044 * k, 0.032 * k, 6), \u6750.\u91D1\u661F\u6750);
+      \u961F\u957F\u5927\u76FE\u7AE0.rotation.x = Math.PI / 2;
+      \u961F\u957F\u5927\u76FE\u7AE0.position.set(0.14 * k, 0.42 * k, 0.22 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u961F\u957F\u5927\u76FE\u7AE0);
+      const \u52CB\u7AE0\u6392 = new Mesh(new BoxGeometry(0.12 * k, 0.032 * k, 0.022 * k), \u6750.\u53CD\u5149\u9EC4\u6750);
+      \u52CB\u7AE0\u6392.position.set(-0.14 * k, 0.455 * k, 0.215 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u52CB\u7AE0\u6392);
+      const \u80A9\u4E0A\u5BF9\u8BB2\u673A = new Mesh(new BoxGeometry(0.062 * k, 0.115 * k, 0.048 * k), \u6750.\u54D1\u9ED1\u6750);
+      \u80A9\u4E0A\u5BF9\u8BB2\u673A.position.set(0.28 * k, 0.46 * k, 0.14 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u80A9\u4E0A\u5BF9\u8BB2\u673A);
+      const \u5BF9\u8BB2\u5929\u7EBF = new Mesh(new CylinderGeometry(6e-3 * k, 8e-3 * k, 0.18 * k, 6), \u6750.\u54D1\u9ED1\u6750);
+      \u5BF9\u8BB2\u5929\u7EBF.position.set(0.015 * k, 0.13 * k, 0);
+      \u80A9\u4E0A\u5BF9\u8BB2\u673A.add(\u5BF9\u8BB2\u5929\u7EBF);
+      const \u718A\u8111\u888B = new Mesh(new BoxGeometry(0.38 * k, 0.34 * k, 0.36 * k), \u718A\u68D5\u6750);
+      \u718A\u8111\u888B.position.set(0, 0.18 * k, 0);
+      \u718A\u8111\u888B.castShadow = true;
+      this.\u5934\u90E8\u67A2.add(\u718A\u8111\u888B);
+      const \u718A\u5934\u5706\u9876 = new Mesh(new SphereGeometry(0.205 * k, 14, 12), \u718A\u68D5\u6750);
+      \u718A\u5934\u5706\u9876.scale.set(1.06, 0.88, 1);
+      \u718A\u5934\u5706\u9876.position.set(0, 0.24 * k, 0);
+      this.\u5934\u90E8\u67A2.add(\u718A\u5934\u5706\u9876);
+      const \u5927\u718A\u543B = new Mesh(new BoxGeometry(0.2 * k, 0.15 * k, 0.19 * k), \u718A\u5634\u68D5\u9EC4\u6750);
+      \u5927\u718A\u543B.position.set(0, 0.125 * k, 0.22 * k);
+      this.\u5934\u90E8\u67A2.add(\u5927\u718A\u543B);
+      const \u5BBD\u4E0B\u5DF4 = new Mesh(new BoxGeometry(0.22 * k, 0.095 * k, 0.16 * k), \u718A\u6697\u68D5\u6750);
+      \u5BBD\u4E0B\u5DF4.position.set(0, 0.045 * k, 0.17 * k);
+      this.\u5934\u90E8\u67A2.add(\u5BBD\u4E0B\u5DF4);
+      const \u5927\u9ED1\u718A\u9F3B = new Mesh(new BoxGeometry(0.11 * k, 0.068 * k, 0.072 * k), \u9ED1\u9F3B\u6750);
+      \u5927\u9ED1\u718A\u9F3B.position.set(0, 0.17 * k, 0.315 * k);
+      this.\u5934\u90E8\u67A2.add(\u5927\u9ED1\u718A\u9F3B);
+      for (const sx of [-1, 1]) {
+        const \u7C97\u80E1\u987B = new Mesh(new BoxGeometry(0.125 * k, 0.042 * k, 0.045 * k), \u6D53\u80E1\u9ED1\u68D5\u6750);
+        \u7C97\u80E1\u987B.position.set(sx * 0.068 * k, 0.11 * k, 0.312 * k);
+        \u7C97\u80E1\u987B.rotation.z = -sx * 0.24;
+        \u7C97\u80E1\u987B.rotation.y = -sx * 0.18;
+        this.\u5934\u90E8\u67A2.add(\u7C97\u80E1\u987B);
+        const \u51F6\u6D53\u7709 = new Mesh(new BoxGeometry(0.11 * k, 0.032 * k, 0.036 * k), \u6D53\u80E1\u9ED1\u68D5\u6750);
+        \u51F6\u6D53\u7709.position.set(sx * 0.092 * k, 0.278 * k, 0.195 * k);
+        \u51F6\u6D53\u7709.rotation.z = sx * 0.22;
+        this.\u5934\u90E8\u67A2.add(\u51F6\u6D53\u7709);
+      }
+      this.\u9ED1\u58A8\u955C\u7EC4 = new Group();
+      this.\u9ED1\u58A8\u955C\u7EC4.position.set(0, 0.225 * k, 0.205 * k);
+      const \u955C\u6881 = new Mesh(new BoxGeometry(0.32 * k, 0.018 * k, 0.02 * k), \u6750.\u91D1\u661F\u6750);
+      \u955C\u6881.position.set(0, 0.025 * k, 0);
+      this.\u9ED1\u58A8\u955C\u7EC4.add(\u955C\u6881);
+      for (const sx of [-1, 1]) {
+        const \u58A8\u955C\u7247 = new Mesh(new BoxGeometry(0.135 * k, 0.085 * k, 0.024 * k), \u58A8\u955C\u9ED1\u6750);
+        \u58A8\u955C\u7247.position.set(sx * 0.092 * k, 0, 6e-3 * k);
+        \u58A8\u955C\u7247.rotation.z = -sx * 0.06;
+        const \u91D1\u8FB9 = new Mesh(new BoxGeometry(0.144 * k, 0.092 * k, 0.016 * k), \u6750.\u91D1\u661F\u6750);
+        \u91D1\u8FB9.position.set(sx * 0.092 * k, 0, 0);
+        \u91D1\u8FB9.rotation.z = -sx * 0.06;
+        this.\u9ED1\u58A8\u955C\u7EC4.add(\u58A8\u955C\u7247, \u91D1\u8FB9);
+      }
+      this.\u5934\u90E8\u67A2.add(this.\u9ED1\u58A8\u955C\u7EC4);
+      this.\u5634\u53FC\u8B66\u54E8 = new Group();
+      this.\u5634\u53FC\u8B66\u54E8.position.set(0.055 * k, 0.085 * k, 0.315 * k);
+      this.\u5634\u53FC\u8B66\u54E8.rotation.set(0.1, -0.28, -0.14);
+      const \u54E8\u7BA1 = new Mesh(new CylinderGeometry(0.017 * k, 0.017 * k, 0.075 * k, 8), \u6750.\u4EAE\u94F6\u6750);
+      \u54E8\u7BA1.rotation.x = Math.PI / 2;
+      \u54E8\u7BA1.position.z = 0.025 * k;
+      const \u54E8\u9F13 = new Mesh(new SphereGeometry(0.026 * k, 8, 8), \u6750.\u4EAE\u94F6\u6750);
+      \u54E8\u9F13.position.set(0, -5e-3 * k, 0.05 * k);
+      this.\u5634\u53FC\u8B66\u54E8.add(\u54E8\u7BA1, \u54E8\u9F13);
+      this.\u5934\u90E8\u67A2.add(this.\u5634\u53FC\u8B66\u54E8);
+      this.\u5927\u6A90\u5E3D\u7EC4 = new Group();
+      this.\u5927\u6A90\u5E3D\u7EC4.position.set(0, 0.34 * k, 0.01 * k);
+      const \u5E3D\u5899 = new Mesh(new CylinderGeometry(0.215 * k, 0.215 * k, 0.11 * k, 16), \u6750.\u6DF1\u84DD\u670D\u6750);
+      \u5E3D\u5899.position.y = 0.03 * k;
+      const \u5927\u5BBD\u5E3D\u9876 = new Mesh(new CylinderGeometry(0.285 * k, 0.22 * k, 0.095 * k, 16), \u6750.\u6DF1\u84DD\u670D\u6750);
+      \u5927\u5BBD\u5E3D\u9876.scale.set(1.06, 1, 1.14);
+      \u5927\u5BBD\u5E3D\u9876.position.set(0, 0.115 * k, 0.02 * k);
+      \u5927\u5BBD\u5E3D\u9876.rotation.x = -0.1;
+      \u5927\u5BBD\u5E3D\u9876.castShadow = true;
+      const \u5E3D\u9876\u767D\u8FB9 = new Mesh(new TorusGeometry(0.278 * k, 0.012 * k, 8, 22), \u6750.\u8B66\u767D\u6750);
+      \u5E3D\u9876\u767D\u8FB9.rotation.x = Math.PI / 2 - 0.1;
+      \u5E3D\u9876\u767D\u8FB9.scale.set(1.06, 1.14, 1);
+      \u5E3D\u9876\u767D\u8FB9.position.set(0, 0.155 * k, 0.02 * k);
+      const \u91D1\u98CE\u5E26 = new Mesh(new CylinderGeometry(0.222 * k, 0.222 * k, 0.028 * k, 16), \u6750.\u91D1\u661F\u6750);
+      \u91D1\u98CE\u5E26.position.y = 5e-3 * k;
+      const \u6F06\u9ED1\u5927\u5E3D\u6A90 = new Mesh(new BoxGeometry(0.36 * k, 0.026 * k, 0.21 * k), \u6750.\u54D1\u9ED1\u6750);
+      \u6F06\u9ED1\u5927\u5E3D\u6A90.position.set(0, -0.012 * k, 0.21 * k);
+      \u6F06\u9ED1\u5927\u5E3D\u6A90.rotation.x = 0.14;
+      const \u961F\u957F\u5E3D\u5FBD = new Mesh(new CylinderGeometry(0.058 * k, 0.046 * k, 0.034 * k, 6), \u6750.\u91D1\u661F\u6750);
+      \u961F\u957F\u5E3D\u5FBD.rotation.x = Math.PI / 2;
+      \u961F\u957F\u5E3D\u5FBD.position.set(0, 0.095 * k, 0.245 * k);
+      this.\u5927\u6A90\u5E3D\u7EC4.add(\u5E3D\u5899, \u5927\u5BBD\u5E3D\u9876, \u5E3D\u9876\u767D\u8FB9, \u91D1\u98CE\u5E26, \u6F06\u9ED1\u5927\u5E3D\u6A90, \u961F\u957F\u5E3D\u5FBD);
+      this.\u5934\u90E8\u67A2.add(this.\u5927\u6A90\u5E3D\u7EC4);
+      const \u9020\u718A\u8033 = (sx) => {
+        const \u8033\u7EC4 = new Group();
+        \u8033\u7EC4.position.set(sx * 0.21 * k, 0.32 * k, -0.02 * k);
+        const \u5916\u8033 = new Mesh(new SphereGeometry(0.068 * k, 10, 8), \u718A\u68D5\u6750);
+        \u5916\u8033.scale.set(0.95, 0.92, 0.58);
+        const \u5185\u8033 = new Mesh(new SphereGeometry(0.04 * k, 8, 6), \u718A\u5634\u68D5\u9EC4\u6750);
+        \u5185\u8033.scale.set(0.9, 0.9, 0.42);
+        \u5185\u8033.position.set(0, 0, 0.026 * k);
+        \u8033\u7EC4.add(\u5916\u8033, \u5185\u8033);
+        this.\u5934\u90E8\u67A2.add(\u8033\u7EC4);
+        return \u8033\u7EC4;
+      };
+      this.\u5DE6\u52A8\u7269\u8033 = \u9020\u718A\u8033(1);
+      this.\u53F3\u52A8\u7269\u8033 = \u9020\u718A\u8033(-1);
+      const \u88C5\u718A\u81C2 = (\u80A9, \u8098, \u624B) => {
+        const \u5BBD\u80A9\u7403 = new Mesh(new SphereGeometry(0.092 * k, 10, 8), \u6750.\u6DF1\u84DD\u670D\u6750);
+        \u80A9.add(\u5BBD\u80A9\u7403);
+        const \u7C97\u4E0A\u81C2 = new Mesh(new CapsuleGeometry(0.078 * k, \u89C4.\u4E0A\u81C2\u957F * 0.8 * k, 6, 10), \u6750.\u6DF1\u84DD\u670D\u6750);
+        \u7C97\u4E0A\u81C2.position.y = \u89C4.\u4E0A\u81C2\u957F * 0.5 * k;
+        \u7C97\u4E0A\u81C2.castShadow = true;
+        \u80A9.add(\u7C97\u4E0A\u81C2);
+        const \u7C97\u524D\u81C2 = new Mesh(new CapsuleGeometry(0.068 * k, \u89C4.\u524D\u81C2\u957F * 0.8 * k, 6, 10), \u718A\u68D5\u6750);
+        \u7C97\u524D\u81C2.position.y = \u89C4.\u524D\u81C2\u957F * 0.5 * k;
+        \u7C97\u524D\u81C2.castShadow = true;
+        \u8098.add(\u7C97\u524D\u81C2);
+        const \u6218\u672F\u62A4\u8155 = new Mesh(new CylinderGeometry(0.072 * k, 0.07 * k, 0.075 * k, 10), \u6B66\u88C5\u76AE\u6750);
+        \u6218\u672F\u62A4\u8155.position.y = -0.02 * k;
+        \u624B.add(\u6218\u672F\u62A4\u8155);
+        const \u5927\u718A\u9ED1\u624B\u5957 = new Mesh(new BoxGeometry(0.13 * k, 0.13 * k, 0.14 * k), \u6750.\u54D1\u9ED1\u6750);
+        \u5927\u718A\u9ED1\u624B\u5957.position.y = 0.03 * k;
+        \u624B.add(\u5927\u718A\u9ED1\u624B\u5957);
+      };
+      \u88C5\u718A\u81C2(this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u638C);
+      \u88C5\u718A\u81C2(this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u638C);
+      const \u9020\u505C\u5B57\u5927\u724C = (\u7F29\u653E = 1) => {
+        const \u724C\u7EC4 = new Group();
+        const \u94C1\u6746 = new Mesh(new CylinderGeometry(0.026 * k * \u7F29\u653E, 0.03 * k * \u7F29\u653E, 0.68 * k * \u7F29\u653E, 10), \u6750.\u4EAE\u94F6\u6750);
+        \u94C1\u6746.position.y = 0.34 * k * \u7F29\u653E;
+        \u94C1\u6746.castShadow = true;
+        const \u9632\u6ED1\u63E1\u67C4 = new Mesh(new CylinderGeometry(0.034 * k * \u7F29\u653E, 0.034 * k * \u7F29\u653E, 0.22 * k * \u7F29\u653E, 10), \u6750.\u8F6E\u80CE\u6750);
+        \u9632\u6ED1\u63E1\u67C4.position.y = 0.08 * k * \u7F29\u653E;
+        const \u724C\u4F53 = new Mesh(new CylinderGeometry(0.25 * k * \u7F29\u653E, 0.25 * k * \u7F29\u653E, 0.042 * k * \u7F29\u653E, 8), \u505C\u724C\u7EA2\u6750);
+        \u724C\u4F53.rotation.x = Math.PI / 2;
+        \u724C\u4F53.position.y = 0.78 * k * \u7F29\u653E;
+        \u724C\u4F53.castShadow = true;
+        const \u524D\u724C\u9762 = new Mesh(new CircleGeometry(0.23 * k * \u7F29\u653E, 18), \u505C\u724C\u8D34\u82B1\u6750);
+        \u524D\u724C\u9762.position.set(0, 0.78 * k * \u7F29\u653E, 0.023 * k * \u7F29\u653E);
+        const \u540E\u724C\u9762 = new Mesh(new CircleGeometry(0.23 * k * \u7F29\u653E, 18), \u505C\u724C\u8D34\u82B1\u6750);
+        \u540E\u724C\u9762.rotation.y = Math.PI;
+        \u540E\u724C\u9762.position.set(0, 0.78 * k * \u7F29\u653E, -0.023 * k * \u7F29\u653E);
+        const \u9876\u7EA2\u95EA\u706F = new Mesh(new SphereGeometry(0.044 * k * \u7F29\u653E, 8, 8), \u6750.\u7EA2\u8B66\u706F\u5934\u6750);
+        \u9876\u7EA2\u95EA\u706F.position.set(0, 1.03 * k * \u7F29\u653E, 0);
+        \u724C\u7EC4.add(\u94C1\u6746, \u9632\u6ED1\u63E1\u67C4, \u724C\u4F53, \u524D\u724C\u9762, \u540E\u724C\u9762, \u9876\u7EA2\u95EA\u706F);
+        return \u724C\u7EC4;
+      };
+      this.\u80CC\u6302\u505C\u724C = \u9020\u505C\u5B57\u5927\u724C(0.82);
+      this.\u80CC\u6302\u505C\u724C.position.set(0.08 * k, 0.16 * k, -0.23 * k);
+      this.\u80CC\u6302\u505C\u724C.rotation.set(-0.12, 0, 0.42);
+      this.\u4E0A\u8EAB\u67A2.add(this.\u80CC\u6302\u505C\u724C);
+      this.\u5DE6\u624B\u505C\u724C = \u9020\u505C\u5B57\u5927\u724C(1.06);
+      this.\u5DE6\u624B\u505C\u724C.visible = false;
+      this.\u5DE6\u624B\u638C.add(this.\u5DE6\u624B\u505C\u724C);
+      this.\u53F3\u624B\u505C\u724C = \u9020\u505C\u5B57\u5927\u724C(1.06);
+      this.\u53F3\u624B\u505C\u724C.visible = false;
+      this.\u53F3\u624B\u638C.add(this.\u53F3\u624B\u505C\u724C);
+      const \u88C5\u718A\u817F = (\u817F, \u819D) => {
+        const \u7C97\u5927\u817F = new Mesh(new CapsuleGeometry(0.098 * k, \u89C4.\u5927\u817F\u957F * 0.74 * k, 6, 10), \u6750.\u6DF1\u84DD\u670D\u6750);
+        \u7C97\u5927\u817F.rotation.x = Math.PI / 2;
+        \u7C97\u5927\u817F.position.z = \u89C4.\u5927\u817F\u957F * 0.48 * k;
+        \u817F.add(\u7C97\u5927\u817F);
+        const \u62A4\u819D\u58F3 = new Mesh(new BoxGeometry(0.14 * k, 0.14 * k, 0.11 * k), \u6750.\u54D1\u9ED1\u6750);
+        \u62A4\u819D\u58F3.position.set(0, 0, \u89C4.\u5927\u817F\u957F * 0.9 * k);
+        \u817F.add(\u62A4\u819D\u58F3);
+        const \u7C97\u5C0F\u817F = new Mesh(new CapsuleGeometry(0.08 * k, \u89C4.\u5C0F\u817F\u957F * 0.72 * k, 6, 10), \u6750.\u54D1\u9ED1\u6750);
+        \u7C97\u5C0F\u817F.position.y = -\u89C4.\u5C0F\u817F\u957F * 0.48 * k;
+        \u819D.add(\u7C97\u5C0F\u817F);
+        const \u91CD\u578B\u9AD8\u7B52\u9774 = new Mesh(new BoxGeometry(0.16 * k, 0.095 * k, 0.24 * k), \u6750.\u8F6E\u80CE\u6750);
+        \u91CD\u578B\u9AD8\u7B52\u9774.position.set(0, -\u89C4.\u5C0F\u817F\u957F * k, 0.05 * k);
+        \u819D.add(\u91CD\u578B\u9AD8\u7B52\u9774);
+        const \u94F6\u9774\u6263 = new Mesh(new BoxGeometry(0.168 * k, 0.026 * k, 0.048 * k), \u6750.\u4EAE\u94F6\u6750);
+        \u94F6\u9774\u6263.position.set(0, (-\u89C4.\u5C0F\u817F\u957F + 0.04) * k, 0.04 * k);
+        \u819D.add(\u94F6\u9774\u6263);
+      };
+      \u88C5\u718A\u817F(this.\u5DE6\u5927\u817F\u67A2, this.\u5DE6\u5C0F\u817F\u67A2);
+      \u88C5\u718A\u817F(this.\u53F3\u5927\u817F\u67A2, this.\u53F3\u5C0F\u817F\u67A2);
+    }
+    \u66F4\u65B0\u4E13\u5C5E\u89D2\u8272\u52A8\u4F5C(\u6001) {
+      const t = \u6001.\u65F6\u95F4;
+      const k = \u6001.\u5C3A\u5EA6;
+      const \u4E0A\u81C2 = \u6001.\u4E0A\u81C2\u957F;
+      const \u524D\u81C2 = \u6001.\u524D\u81C2\u957F;
+      const \u51FA\u724C\u653B = (\u6001.\u662F\u5DE6\u653B || \u6001.\u662F\u53F3\u653B || \u6001.\u662F\u666E\u653B) && \u6001.\u653B\u76F801 > 0.03 && \u6001.\u653B\u76F801 < 0.97;
+      const \u4E3E\u5DE6\u724C = \u51FA\u724C\u653B && \u6001.\u653B\u5411 > 0 || \u6001.\u662F\u51B2\u7EBF;
+      const \u4E3E\u53F3\u724C = \u51FA\u724C\u653B && (\u6001.\u653B\u5411 < 0 || \u6001.\u662F\u666E\u653B) || \u6001.\u662F\u5632\u8BBD;
+      this.\u80CC\u6302\u505C\u724C.visible = !\u4E3E\u5DE6\u724C && !\u4E3E\u53F3\u724C;
+      this.\u5DE6\u624B\u505C\u724C.visible = \u4E3E\u5DE6\u724C;
+      this.\u53F3\u624B\u505C\u724C.visible = \u4E3E\u53F3\u724C;
+      const \u724C\u653E = \u6001.\u662F\u51B2\u7EBF ? 1.18 : \u6001.\u662F\u5632\u8BBD ? 1.12 : 1 + \u6001.\u653B\u51FA\u51FB * 0.58;
+      this.\u5DE6\u624B\u505C\u724C.scale.setScalar(\u724C\u653E);
+      this.\u53F3\u624B\u505C\u724C.scale.setScalar(\u724C\u653E);
+      this.\u5DE6\u624B\u505C\u724C.rotation.set(0, \u6001.\u662F\u5DE6\u653B ? Math.PI * 0.5 : 0, 0);
+      this.\u53F3\u624B\u505C\u724C.rotation.set(0, \u6001.\u662F\u53F3\u653B ? Math.PI * 0.5 : 0, 0);
+      if (\u6001.\u6B7B\u6001) {
+        const d = \u6001.\u6B7B\u6001.\u5012\u4E0B;
+        this.\u5927\u6A90\u5E3D\u7EC4.position.set(0.08 * d * k, (0.34 - 0.04 * d) * k, (0.01 + 0.05 * d) * k);
+        this.\u5927\u6A90\u5E3D\u7EC4.rotation.set(0.28 * d, 0, -0.52 * d);
+        this.\u9ED1\u58A8\u955C\u7EC4.rotation.set(0.22 * d, 0, 0.34 * d);
+      } else {
+        this.\u5927\u6A90\u5E3D\u7EC4.position.set(0, 0.34 * k, 0.01 * k);
+        this.\u5927\u6A90\u5E3D\u7EC4.rotation.set(\u6001.\u91CD\u521B.\u6FC0\u6D3B ? -0.35 * \u6001.\u91CD\u521B.\u5305\u7EDC : 0, 0, \u6001.\u91CD\u521B.\u6FC0\u6D3B ? \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.35 : 0);
+        this.\u9ED1\u58A8\u955C\u7EC4.rotation.set(0, 0, \u6001.\u91CD\u521B.\u6FC0\u6D3B ? -\u6001.\u91CD\u521B.\u9707\u6CE2 * 0.25 : 0);
+      }
+      if (\u6001.\u662F\u5F85\u673A) {
+        const r = \u6001.\u73AF\u89C6;
+        this.\u4E0A\u8EAB\u67A2.rotation.set(-0.08 + (r ? r.\u547C\u5438 * 0.018 : 0), r ? r.\u8F6C\u5934Y * 0.14 : 0, 0);
+        this.\u5934\u90E8\u67A2.rotation.set(
+          -0.06 + (r ? r.\u62AC\u5934X * 0.35 : 0),
+          r ? r.\u8F6C\u5934Y * 0.78 : 0,
+          r ? r.\u6B6A\u5934Z * 0.22 : 0
+        );
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.1, -0.1, 2.18);
+        this.\u53F3\u8098\u67A2.rotation.set(0.16, 0, -1.52);
+      } else if (\u6001.\u662F\u884C\u8D70) {
+        this.\u4E0A\u8EAB\u67A2.rotation.set(-0.04, \u6001.\u8F66\u5934\u89D2 * 0.18, \u6001.\u8F66\u8EAB\u6B6A\u89D2 * 0.25);
+        this.\u5934\u90E8\u67A2.rotation.set(0.02, \u6001.\u8F66\u5934\u89D2 * 0.42 + Math.sin(t * 1.4) * 0.12, 0);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+      } else if (\u6001.\u52A0\u901F\u4E2D) {
+        this.\u7FD8\u5934\u67A2\u7EC4.rotation.x *= 0.62;
+        this.\u4E0A\u8EAB\u67A2.rotation.x = \u6001.\u662F\u5927\u55B7 ? 0.34 : 0.24;
+        this.\u5934\u90E8\u67A2.rotation.x = -0.24;
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+      } else if (\u6001.\u662F\u62D0\u5F2F) {
+        const \u5F2F\u5DE6 = Math.max(0, \u6001.\u4FA7\u504F);
+        const \u5F2F\u53F3 = Math.max(0, -\u6001.\u4FA7\u504F);
+        this.\u5DE6\u5927\u817F\u67A2.rotation.y += \u5F2F\u5DE6 * 0.45;
+        this.\u53F3\u5927\u817F\u67A2.rotation.y -= \u5F2F\u53F3 * 0.45;
+        this.\u4E0A\u8EAB\u67A2.rotation.z *= 0.72;
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+      } else if (\u6001.\u662F\u5DE6\u653B) {
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(-1, this.\u53F3\u80A9\u67A2, this.\u53F3\u8098\u67A2, this.\u53F3\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        const \u91CD\u62CD\u5F27 = \u6001.\u653B\u51FA\u51FB > 0 ? -(1.25 - 2.35 * Math.pow(\u6001.\u626B\u8FDB, 0.72)) : 0.75 * \u6001.\u653B\u84C4\u529B;
+        this.\u5DE6\u80A9\u67A2.rotation.set(-0.48 * \u6001.\u653B\u84C4\u529B + 0.32 * \u6001.\u653B\u51FA\u51FB, \u91CD\u62CD\u5F27, 0.42 * \u6001.\u653B\u84C4\u529B - 1.38 * \u6001.\u653B\u51FA\u51FB);
+        this.\u5DE6\u8098\u67A2.rotation.set(-0.78 * \u6001.\u653B\u84C4\u529B - 0.1 * \u6001.\u653B\u51FA\u51FB, 0, 0);
+      } else if (\u6001.\u662F\u53F3\u653B) {
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        const \u91CD\u62CD\u5F27 = \u6001.\u653B\u51FA\u51FB > 0 ? 1.25 - 2.35 * Math.pow(\u6001.\u626B\u8FDB, 0.72) : -0.75 * \u6001.\u653B\u84C4\u529B;
+        this.\u53F3\u80A9\u67A2.rotation.set(-0.48 * \u6001.\u653B\u84C4\u529B + 0.32 * \u6001.\u653B\u51FA\u51FB, \u91CD\u62CD\u5F27, -0.42 * \u6001.\u653B\u84C4\u529B + 1.38 * \u6001.\u653B\u51FA\u51FB);
+        this.\u53F3\u8098\u67A2.rotation.set(-0.78 * \u6001.\u653B\u84C4\u529B - 0.1 * \u6001.\u653B\u51FA\u51FB, 0, 0);
+      } else if (\u6001.\u662F\u666E\u653B) {
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        this.\u4E0A\u8EAB\u67A2.rotation.x = -0.35 * \u6001.\u653B\u84C4\u529B + 0.58 * \u6001.\u653B\u51FA\u51FB;
+        this.\u53F3\u80A9\u67A2.rotation.set(-0.35 * \u6001.\u653B\u84C4\u529B + 1.88 * \u6001.\u653B\u51FA\u51FB, 0.08, 0.16);
+        this.\u53F3\u8098\u67A2.rotation.set(-0.85 * \u6001.\u653B\u84C4\u529B - 0.12 * \u6001.\u653B\u51FA\u51FB, 0, 0);
+      } else if (\u6001.\u662F\u5632\u8BBD) {
+        this.\u4E0A\u8EAB\u67A2.rotation.set(-0.14, 0.24, 0.04);
+        this.\u5934\u90E8\u67A2.rotation.set(-0.08, -0.22, 0.06);
+        this.\u6C42\u89E3\u63E1\u628A\u624B\u81C2(1, this.\u5DE6\u80A9\u67A2, this.\u5DE6\u8098\u67A2, this.\u5DE6\u624B\u628A\u6302\u70B9, \u4E0A\u81C2, \u524D\u81C2);
+        const \u4EAE\u724C\u6643 = Math.sin(t * 7.5);
+        this.\u53F3\u80A9\u67A2.rotation.set(1.12 + \u4EAE\u724C\u6643 * 0.18, -0.1, 0.24);
+        this.\u53F3\u8098\u67A2.rotation.set(-0.28 + \u4EAE\u724C\u6643 * 0.16, 0, 0);
+      } else if (\u6001.\u662F\u7B11\u8BDD) {
+        const \u8C6A\u7B11 = Math.sin(t * 11);
+        this.\u4E0A\u8EAB\u67A2.rotation.set(-0.34 + \u8C6A\u7B11 * 0.12, 0, 0);
+        this.\u5934\u90E8\u67A2.rotation.set(-0.38 + \u8C6A\u7B11 * 0.16, Math.sin(t * 5.5) * 0.14, 0);
+        this.\u5DE6\u80A9\u67A2.rotation.set(0.14, 0.1, -2.18);
+        this.\u5DE6\u8098\u67A2.rotation.set(0.18, 0, 1.52);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.14, -0.1, 2.18);
+        this.\u53F3\u8098\u67A2.rotation.set(0.18, 0, -1.52);
+      } else if (\u6001.\u662F\u8DF3\u821E) {
+        const \u62CD = Math.sin(t * 6.4);
+        const \u5207 = \u62CD >= 0 ? 1 : -1;
+        this.\u4E0A\u8EAB\u67A2.rotation.set(0, \u5207 * 0.2, -\u5207 * 0.1);
+        this.\u5934\u90E8\u67A2.rotation.set(Math.abs(\u62CD) * 0.14 - 0.06, -\u5207 * 0.22, 0);
+        this.\u5DE6\u80A9\u67A2.rotation.set(\u62CD >= 0 ? 0.15 : 1.35, 0, \u62CD >= 0 ? -0.35 : -1.42);
+        this.\u5DE6\u8098\u67A2.rotation.set(\u62CD >= 0 ? -0.15 : -0.85, 0, 0);
+        this.\u53F3\u80A9\u67A2.rotation.set(\u62CD < 0 ? 0.15 : 1.35, 0, \u62CD < 0 ? 0.35 : 1.42);
+        this.\u53F3\u8098\u67A2.rotation.set(\u62CD < 0 ? -0.15 : -0.85, 0, 0);
+      } else if (\u6001.\u662F\u51B2\u7EBF) {
+        this.\u4E0A\u8EAB\u67A2.rotation.set(-0.08, Math.sin(t * 4.2) * 0.16, 0);
+        this.\u5934\u90E8\u67A2.rotation.set(-0.1, Math.sin(t * 4.2) * 0.12, 0);
+        this.\u5DE6\u80A9\u67A2.rotation.set(0.1, 0.12, -0.36 + Math.sin(t * 10.5) * 0.24);
+        this.\u5DE6\u8098\u67A2.rotation.set(-0.18, 0, 0);
+        this.\u53F3\u80A9\u67A2.rotation.set(0.32, 0, 1.32);
+        this.\u53F3\u8098\u67A2.rotation.set(0.18, 0, -2.02);
+      }
+      if (this.\u5BBD\u80F8\u808C) {
+        const \u80F8\u9F13 = \u6001.\u662F\u6B7B\u4EA1 ? 0 : \u6001.\u662F\u5F85\u673A ? Math.sin(t * 1.9) * 0.018 : \u6001.\u662F\u7B11\u8BDD ? Math.sin(t * 11) * 0.07 : \u6001.\u52A0\u901F\u4E2D || \u6001.\u662F\u653B\u51FB ? Math.sin(t * 20) * 0.04 : Math.sin(t * 6) * 0.015;
+        this.\u5BBD\u80F8\u808C.scale.set(1 + \u80F8\u9F13, 1 + \u80F8\u9F13 * 0.8, 1 + \u80F8\u9F13 * 1.1);
+      }
+      this.\u5634\u53FC\u8B66\u54E8.rotation.z = -0.14 + (\u6001.\u6B7B\u6001 ? 0.14 * \u6001.\u6B7B\u6001.\u5012\u4E0B : \u6001.\u662F\u5F85\u673A ? 0 : \u6001.\u52A0\u901F\u4E2D || \u6001.\u662F\u51B2\u7EBF || \u6001.\u662F\u5632\u8BBD || \u6001.\u662F\u653B\u51FB ? Math.sin(t * 36) * 0.24 : Math.sin(t * 8) * 0.05);
+      if (this.\u5DE6\u52A8\u7269\u8033 && this.\u53F3\u52A8\u7269\u8033) {
+        const \u9707 = \u6001.\u91CD\u521B.\u6FC0\u6D3B ? \u6001.\u91CD\u521B.\u9707\u6CE2 * 0.04 * k : 0;
+        this.\u5DE6\u52A8\u7269\u8033.position.y = 0.32 * k + \u9707;
+        this.\u53F3\u52A8\u7269\u8033.position.y = 0.32 * k - \u9707;
+      }
     }
   };
 
@@ -47773,18 +48849,22 @@ void main() {
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u4FA7\u653B = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
       const \u662F\u653B\u51FB = \u662F\u4FA7\u653B || \u662F\u666E\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u62D0\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u6709\u6C28\u6C14\u52A0\u901F = \u73AF\u5883?.\u662F\u5426\u6C28\u6C14 !== void 0 ? !!\u73AF\u5883.\u662F\u5426\u6C28\u6C14 : \u662F\u5927\u55B7 || \u662F\u53CC\u55B7;
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F || \u662F\u51B2\u7EBF);
-      const \u8DD1\u52A8\u901F\u5EA6 = \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1 = !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u52A0\u901F\u4E2D || \u662F\u98DE\u5929);
-      const \u662F\u7B49\u5019 = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" && !\u6B63\u5728\u8DD1 && !\u52A0\u901F\u4E2D && !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F || \u662F\u51B2\u7EBF);
+      const \u8DD1\u52A8\u901F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(26, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u98DE\u5929);
+      const \u662F\u7B49\u5019 = \u662F\u5F85\u673A;
       const \u653B\u76F801 = \u662F\u653B\u51FB ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       let \u653B\u84C4\u529B = 0;
       let \u653B\u51FA\u51FB = 0;
@@ -47808,9 +48888,9 @@ void main() {
       this.\u540E\u5DE6\u8F6E\u65CB.rotation.x = this.\u8F6E\u8F6C\u89D2;
       this.\u540E\u53F3\u8F6E\u65CB.rotation.x = this.\u8F6E\u8F6C\u89D2;
       let \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = \u4FA7\u504F * 0.55 + Math.max(-0.28, Math.min(0.28, \u60EF\u6027\u6001.\u8F6C\u5411\u53D8\u5316\u7387 * 0.045));
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = 0.28;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = -0.42 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.28 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.14;
       else if (\u662F\u541F\u5531) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = Math.sin(t * 2.2) * 0.1;
-      else if (\u662F\u7B49\u5019) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = Math.sin(t * 0.9) * 0.08;
+      else if (\u662F\u7B49\u5019 && \u73AF\u89C6) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = \u73AF\u89C6.\u8F6C\u5934Y * 0.85;
       else if (\u662F\u6253\u6655) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = Math.sin(t * 14) * 0.75;
       else if (\u662F\u649E\u8F66) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = Math.cos(t * 20) * 0.85;
       else if (\u662F\u51B2\u7EBF) \u76EE\u6807\u78C1\u94C1\u504F\u89D2 = Math.sin(t * 7.5) * 0.36;
@@ -47822,9 +48902,9 @@ void main() {
       const \u524D\u8F6E\u8F6C\u5411 = \u662F\u7B49\u5019 || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 ? 0 : Math.max(-0.55, Math.min(0.55, \u78C1\u94C1\u504F\u89D2 * 0.68));
       this.\u524D\u5DE6\u8F6E\u8F6C\u5411\u67A2.rotation.y = \u524D\u8F6E\u8F6C\u5411;
       this.\u524D\u53F3\u8F6E\u8F6C\u5411\u67A2.rotation.y = \u524D\u8F6E\u8F6C\u5411;
-      this.\u7A7A\u65B9\u5411\u76D8\u67A2.rotation.z = \u662F\u6B7B\u4EA1 ? 0.22 : \u662F\u541F\u5531 ? Math.sin(t * 2.5) * 0.24 : \u662F\u51B2\u7EBF ? t * 14 : \u662F\u6253\u6655 ? Math.sin(t * 18) * 1.8 : \u662F\u7B49\u5019 ? Math.sin(t * 1.2) * 0.12 : -\u524D\u8F6E\u8F6C\u5411 * 2.4 + (\u662F\u8D77\u6B65 ? Math.sin(t * 28) * 0.25 : 0);
-      let \u76EE\u6807\u540A\u5854\u89D2 = \u662F\u7B49\u5019 || \u662F\u541F\u5531 ? 0 : \u4FA7\u504F * 0.36;
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u540A\u5854\u89D2 = 0.24;
+      this.\u7A7A\u65B9\u5411\u76D8\u67A2.rotation.z = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.22 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.45 : \u662F\u541F\u5531 ? Math.sin(t * 2.5) * 0.24 : \u662F\u51B2\u7EBF ? t * 14 : \u662F\u6253\u6655 ? Math.sin(t * 18) * 1.8 : \u662F\u7B49\u5019 ? 0 : -\u524D\u8F6E\u8F6C\u5411 * 2.4 + (\u662F\u8D77\u6B65 ? Math.sin(t * 28) * 0.25 : 0);
+      let \u76EE\u6807\u540A\u5854\u89D2 = \u662F\u7B49\u5019 || \u662F\u541F\u5531 ? \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.25 : 0 : \u4FA7\u504F * 0.36;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) \u76EE\u6807\u540A\u5854\u89D2 = -0.28 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.24 * \u6B7B\u6001.\u5012\u4E0B;
       else if (\u662F\u4FA7\u653B) \u76EE\u6807\u540A\u5854\u89D2 = -\u653B\u5411 * 0.45 * \u653B\u84C4\u529B + \u653B\u5411 * 1.32 * \u653B\u51FA\u51FB;
       else if (\u662F\u6253\u6655) \u76EE\u6807\u540A\u5854\u89D2 = Math.sin(t * 11) * 0.48;
       else if (\u662F\u8DF3\u821E) \u76EE\u6807\u540A\u5854\u89D2 = Math.sin(t * 8.4) * 0.34;
@@ -47846,15 +48926,18 @@ void main() {
       this.\u540A\u5854\u8F6C\u53F0\u67A2.rotation.y = \u540A\u5854\u603B\u89D2;
       let \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = 0.08 + Math.sin(t * 2.4) * 0.015;
       let \u81C2\u4F38\u51FA = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = -0.06;
-        \u81C2\u4F38\u51FA = -0.18 * \u81C2\u500D * k;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = -0.34 * \u6B7B\u6001.\u53D7\u51FB\u9707 + -0.06 * \u6B7B\u6001.\u5012\u4E0B - \u6B7B\u6001.\u7838\u5730\u5F39 * 0.14;
+        \u81C2\u4F38\u51FA = -0.18 * \u6B7B\u6001.\u5012\u4E0B * \u81C2\u500D * k;
       } else if (\u662F\u541F\u5531) {
         \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = -0.48 + Math.sin(t * 2.8) * 0.04;
         \u81C2\u4F38\u51FA = 0.16 * \u81C2\u500D * k;
       } else if (\u662F\u7B49\u5019) {
-        \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = -0.58 + Math.sin(t * 1.4) * 0.025;
+        \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = -0.58 + (\u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 * 0.022 : 0);
         \u81C2\u4F38\u51FA = -0.08 * \u81C2\u500D * k;
+      } else if (\u662F\u884C\u8D70) {
+        \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = 0.06 + Math.sin(t * 2.2) * 0.012;
+        \u81C2\u4F38\u51FA = 0.02 * \u81C2\u500D * k;
       } else if (\u662F\u6025\u5239) {
         \u76EE\u6807\u540A\u81C2\u4EF0\u89D2 = -0.52;
         \u81C2\u4F38\u51FA = -0.18 * \u81C2\u500D * k;
@@ -47894,15 +48977,15 @@ void main() {
       if (this.\u7EDE\u76D8\u8F6E && !\u662F\u6B7B\u4EA1) this.\u7EDE\u76D8\u8F6E.rotation.x = \u81C2\u4F38\u51FA * 3.5 + (\u6B63\u5728\u8DD1 ? t * 4 : 0);
       let \u76EE\u6807\u7EF3\u524D\u6446 = \u52A0\u901F\u4E2D ? 0.24 : \u662F\u6025\u5239 ? -0.42 : \u662F\u98DE\u5929 ? -0.28 : -(\u8DD1\u52A8\u901F\u5EA6 / 65) * 0.12;
       let \u76EE\u6807\u7EF3\u4FA7\u6446 = -\u4FA7\u504F * 0.22 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.18;
-      if (\u662F\u6B7B\u4EA1) {
-        \u76EE\u6807\u7EF3\u524D\u6446 = 0.04;
-        \u76EE\u6807\u7EF3\u4FA7\u6446 = 0.12;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u76EE\u6807\u7EF3\u524D\u6446 = -0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.04 * \u6B7B\u6001.\u5012\u4E0B;
+        \u76EE\u6807\u7EF3\u4FA7\u6446 = 0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.12 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.08;
       } else if (\u662F\u541F\u5531) {
         \u76EE\u6807\u7EF3\u524D\u6446 = Math.sin(t * 2.8) * 0.04;
         \u76EE\u6807\u7EF3\u4FA7\u6446 = Math.cos(t * 2.4) * 0.05;
       } else if (\u662F\u7B49\u5019) {
-        \u76EE\u6807\u7EF3\u524D\u6446 = Math.sin(t * 1.5) * 0.045;
-        \u76EE\u6807\u7EF3\u4FA7\u6446 = Math.cos(t * 1.15) * 0.055;
+        \u76EE\u6807\u7EF3\u524D\u6446 = (\u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 1.5)) * 0.03;
+        \u76EE\u6807\u7EF3\u4FA7\u6446 = \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.2 : 0;
       } else if (\u662F\u51B2\u7EBF) {
         \u76EE\u6807\u7EF3\u524D\u6446 = 0.08 + Math.sin(t * 4.8) * 0.1;
         \u76EE\u6807\u7EF3\u4FA7\u6446 = Math.cos(t * 4.4) * 0.18;
@@ -47933,18 +49016,18 @@ void main() {
       let \u78C1\u94C1\u7F29\u653E = 1;
       let \u78C1\u94C1\u6296X = 0;
       let \u78C1\u94C1\u6296Y = Math.sin(t * 3.2) * 0.03 * k;
-      if (\u662F\u6B7B\u4EA1) {
-        \u76EE\u6807\u78C1\u94C1\u4FEF\u4EF0 = -1.25;
-        \u78C1\u94C1\u6B6A\u5934 = 0.45;
-        \u78C1\u94C1\u6296Y = 0;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u76EE\u6807\u78C1\u94C1\u4FEF\u4EF0 = 0.35 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 1.25 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.18;
+        \u78C1\u94C1\u6B6A\u5934 = -0.3 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.45 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.12;
+        \u78C1\u94C1\u6296Y = \u6B7B\u6001.\u7838\u5730\u5F39 * 0.08 * k;
       } else if (\u662F\u541F\u5531) {
         \u76EE\u6807\u78C1\u94C1\u4FEF\u4EF0 = -0.58 + Math.sin(t * 2.8) * 0.06;
         \u78C1\u94C1\u6B6A\u5934 = Math.sin(t * 2.4) * 0.08;
         \u78C1\u94C1\u6296Y = Math.sin(t * 3) * 0.05 * k;
-      } else if (\u662F\u7B49\u5019) {
-        \u76EE\u6807\u78C1\u94C1\u4FEF\u4EF0 = -1.18 + Math.sin(t * 1.5 - 0.5) * 0.07;
-        \u78C1\u94C1\u6B6A\u5934 = Math.sin(t * 1.15) * 0.09;
-        \u78C1\u94C1\u6296Y = Math.sin(t * 1.5) * 0.02 * k;
+      } else if (\u662F\u7B49\u5019 && \u73AF\u89C6) {
+        \u76EE\u6807\u78C1\u94C1\u4FEF\u4EF0 = -0.22 + \u73AF\u89C6.\u62AC\u5934X * 0.48;
+        \u78C1\u94C1\u6B6A\u5934 = \u73AF\u89C6.\u6B6A\u5934Z * 0.65;
+        \u78C1\u94C1\u6296Y = \u73AF\u89C6.\u547C\u5438 * 0.024 * k;
       } else if (\u662F\u6025\u5239) {
         \u76EE\u6807\u78C1\u94C1\u4FEF\u4EF0 = -0.82;
         \u78C1\u94C1\u6B6A\u5934 = 0.55;
@@ -47991,11 +49074,14 @@ void main() {
       let \u53F3\u81C2Z = -0.24;
       let \u5DE6\u81C2X = 0;
       let \u53F3\u81C2X = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u5DE6\u81C2Z = 0.08;
-        \u53F3\u81C2Z = -0.08;
-        \u5DE6\u81C2X = 0.35;
-        \u53F3\u81C2X = 0.35;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u5DE6\u81C2Z = 0.24 + 1.15 * hit - 0.16 * d + tw * 0.16;
+        \u53F3\u81C2Z = -0.24 - 1.15 * hit + 0.16 * d - tw * 0.16;
+        \u5DE6\u81C2X = -0.32 * hit + 0.35 * d;
+        \u53F3\u81C2X = -0.32 * hit + 0.35 * d;
       } else if (\u662F\u541F\u5531) {
         \u5DE6\u81C2Z = 2.66 + Math.sin(t * 3.4) * 0.16;
         \u53F3\u81C2Z = -2.66 - Math.sin(t * 3.4) * 0.16;
@@ -48007,10 +49093,11 @@ void main() {
         \u5DE6\u81C2X = -0.28 + Math.cos(t * 14) * 0.24;
         \u53F3\u81C2X = -0.28 + Math.cos(t * 14 + 0.45) * 0.24;
       } else if (\u662F\u7B49\u5019) {
-        \u5DE6\u81C2Z = 0.15 + Math.sin(t * 1.5) * 0.04;
-        \u53F3\u81C2Z = -0.15 - Math.sin(t * 1.5) * 0.04;
-        \u5DE6\u81C2X = 0.1;
-        \u53F3\u81C2X = 0.1;
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 1.5);
+        \u5DE6\u81C2Z = 0.18 + \u547C * 0.04;
+        \u53F3\u81C2Z = -0.18 - \u547C * 0.04;
+        \u5DE6\u81C2X = 0.08;
+        \u53F3\u81C2X = 0.08;
       } else if (\u662F\u5632\u8BBD) {
         \u5DE6\u81C2Z = 0.35;
         \u53F3\u81C2Z = -1.65 + Math.sin(t * 10) * 0.38;
@@ -48057,12 +49144,12 @@ void main() {
       const \u7728\u773C\u7F29 = \u7728\u671F > 3.42 && !\u662F\u6253\u6655 && !\u52A0\u901F\u4E2D && !\u662F\u6B7B\u4EA1 ? Math.max(0.12, 1 - Math.sin((\u7728\u671F - 3.42) / 0.18 * Math.PI) * 0.88) : 1;
       if (this.\u78C1\u94C1\u5DE6\u773C && this.\u78C1\u94C1\u53F3\u773C) {
         const \u773C\u5BBD = \u662F\u6253\u6655 ? 1.2 : 1;
-        const \u773C\u9AD8 = \u662F\u6B7B\u4EA1 ? 0.14 : 1.12 * \u7728\u773C\u7F29 * (\u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD ? 0.65 : \u662F\u6253\u6655 ? 1.25 : 1);
+        const \u773C\u9AD8 = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? Math.max(0.12, 1.12 * (1 - \u6B7B\u6001.\u5012\u4E0B * 0.88) + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.35) : 1.12 * \u7728\u773C\u7F29 * (\u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD ? 0.65 : \u662F\u6253\u6655 ? 1.25 : 1);
         this.\u78C1\u94C1\u5DE6\u773C.scale.set(\u773C\u5BBD, \u773C\u9AD8, 0.45);
         this.\u78C1\u94C1\u53F3\u773C.scale.set(\u773C\u5BBD, \u773C\u9AD8, 0.45);
       }
       if (this.\u78C1\u94C1\u5DE6\u7709 && this.\u78C1\u94C1\u53F3\u7709) {
-        const \u6012\u7709\u89D2 = \u662F\u6B7B\u4EA1 ? -0.28 : \u662F\u541F\u5531 ? 0.24 : \u52A0\u901F\u4E2D || \u662F\u5632\u8BBD || \u662F\u653B\u51FB ? 0.34 : \u662F\u6253\u6655 ? -0.35 : \u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD ? -0.22 : \u662F\u7B49\u5019 ? 0.04 : 0.12;
+        const \u6012\u7709\u89D2 = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? -0.28 * \u6B7B\u6001.\u5012\u4E0B - 0.18 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u662F\u541F\u5531 ? 0.24 : \u52A0\u901F\u4E2D || \u662F\u5632\u8BBD || \u662F\u653B\u51FB ? 0.34 : \u662F\u6253\u6655 ? -0.35 : \u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD ? -0.22 : \u662F\u7B49\u5019 ? 0.04 : 0.12;
         const \u7709\u62AC = \u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD || \u662F\u541F\u5531 ? 0.03 * k : \u662F\u6253\u6655 ? Math.sin(t * 14) * 0.02 * k : 0;
         const \u78C1\u500D2 = Number(this.\u53C2\u6570.\u78C1\u94C1\u5927\u5C0F) || 1.05;
         this.\u78C1\u94C1\u5DE6\u7709.rotation.z = \u6012\u7709\u89D2;
@@ -48070,7 +49157,7 @@ void main() {
         this.\u78C1\u94C1\u5DE6\u7709.position.y = 0.092 * \u78C1\u500D2 * k + \u7709\u62AC;
         this.\u78C1\u94C1\u53F3\u7709.position.y = 0.092 * \u78C1\u500D2 * k - \u7709\u62AC * (\u662F\u6253\u6655 ? 1 : -1);
       }
-      const \u78C1\u529B\u5F3A = \u662F\u6025\u5239 || \u662F\u7B49\u5019 || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 1 : \u52A0\u901F\u4E2D || \u662F\u541F\u5531 ? 0.88 : \u662F\u98DE\u5929 ? 0.9 : \u6B63\u5728\u8DD1 ? 0.62 : 0.36;
+      const \u78C1\u529B\u5F3A = \u662F\u6025\u5239 || \u662F\u7B49\u5019 ? 0 : \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? Math.max(0, (1 - \u6B7B\u6001.\u5012\u4E0B * 1.4) * 0.5) : \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 1 : \u52A0\u901F\u4E2D || \u662F\u541F\u5531 ? 0.88 : \u662F\u98DE\u5929 ? 0.9 : \u662F\u884C\u8D70 ? 0.48 : \u6B63\u5728\u8DD1 ? 0.62 : 0.36;
       const \u6CE2\u901F = \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 9.5 : \u52A0\u901F\u4E2D ? 6.5 : \u662F\u541F\u5531 ? 4.4 : 3.2;
       const \u78C1\u500D = Number(this.\u53C2\u6570.\u78C1\u94C1\u5927\u5C0F) || 1.05;
       for (let i = 0; i < this.\u78C1\u529B\u6CE2\u7EB9\u7EC4.length; i++) {
@@ -48084,12 +49171,13 @@ void main() {
         \u7F51.visible = \u6750.opacity > 0.03;
       }
       if (this.\u94C1\u5757\u78C1\u70ED\u6750) {
+        const \u6B7B\u7184 = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? Math.max(0, 1 - \u6B7B\u6001.\u5012\u4E0B * 1.5) : 1;
         this.\u94C1\u5757\u78C1\u70ED\u6750.emissive.setHex(\u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 16347926 : 3718648);
-        this.\u94C1\u5757\u78C1\u70ED\u6750.emissiveIntensity = \u662F\u7B49\u5019 || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 1.45 : \u52A0\u901F\u4E2D || \u662F\u541F\u5531 ? 0.95 : \u662F\u6025\u5239 ? 0.02 : 0.28;
-        this.\u94C1\u5757\u78C1\u70ED\u6750.opacity = \u662F\u7B49\u5019 || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u6025\u5239 ? 0.06 : \u52A0\u901F\u4E2D || \u662F\u541F\u5531 ? 0.68 : 0.28;
+        this.\u94C1\u5757\u78C1\u70ED\u6750.emissiveIntensity = \u662F\u7B49\u5019 ? 0 : \u662F\u6B7B\u4EA1 ? 0.35 * \u6B7B\u7184 : \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 1.45 : \u52A0\u901F\u4E2D || \u662F\u541F\u5531 ? 0.95 : \u662F\u6025\u5239 ? 0.02 : 0.28;
+        this.\u94C1\u5757\u78C1\u70ED\u6750.opacity = \u662F\u7B49\u5019 ? 0 : \u662F\u6B7B\u4EA1 ? 0.28 * \u6B7B\u7184 : \u662F\u6025\u5239 ? 0.06 : \u52A0\u901F\u4E2D || \u662F\u541F\u5531 ? 0.68 : 0.28;
       }
       let \u76EE\u6807\u8F66\u8EAB\u6B6A = \u4FA7\u504F * 0.24 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.065;
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u8F66\u8EAB\u6B6A = 0.22;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) \u76EE\u6807\u8F66\u8EAB\u6B6A = -0.18 * \u6B7B\u6001.\u53D7\u51FB\u9707 + 0.22 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.08 + \u6B7B\u6001.\u62BD\u6410 * 0.03;
       else if (\u662F\u541F\u5531) \u76EE\u6807\u8F66\u8EAB\u6B6A = Math.sin(t * 2.8) * 0.05;
       else if (\u662F\u649E\u8F66) \u76EE\u6807\u8F66\u8EAB\u6B6A = Math.cos(t * 20) * 0.28;
       else if (\u662F\u8DF3\u821E) \u76EE\u6807\u8F66\u8EAB\u6B6A = Math.sin(t * 8.4) * 0.14;
@@ -48097,7 +49185,7 @@ void main() {
       if (\u91CD\u521B.\u6FC0\u6D3B) \u76EE\u6807\u8F66\u8EAB\u6B6A += -\u91CD\u521B.\u63A8\u5411 * 0.38 * \u91CD\u521B.\u5305\u7EDC + \u91CD\u521B.\u9707\u6CE2 * 0.14;
       const \u8F66\u8EAB\u6B6A\u89D2 = this.\u8F66\u8EAB\u6B6A\u5F39\u7C27.\u66F4\u65B0(Math.max(-0.52, Math.min(0.52, \u76EE\u6807\u8F66\u8EAB\u6B6A)), dt, 115, 13, 0.56);
       let \u76EE\u6807\u7FD8\u5934 = 0;
-      if (\u662F\u6B7B\u4EA1) \u76EE\u6807\u7FD8\u5934 = -0.04;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) \u76EE\u6807\u7FD8\u5934 = 0.24 * \u6B7B\u6001.\u53D7\u51FB\u9707 - 0.04 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.08;
       else if (\u662F\u541F\u5531) \u76EE\u6807\u7FD8\u5934 = 0.08 + Math.sin(t * 2.8) * 0.04;
       else if (\u662F\u98DE\u5929) \u76EE\u6807\u7FD8\u5934 = 0.18 + Math.sin(t * 5.2) * 0.06;
       else if (\u662F\u590D\u4F4D) \u76EE\u6807\u7FD8\u5934 = \u590D\u76F8 < 0.45 ? 0.22 : Math.sin((\u590D\u76F8 - 0.45) / 0.55 * Math.PI * 2) * 0.26 * (1 - \u590D\u76F8);
@@ -48124,8 +49212,8 @@ void main() {
       let \u8F66\u9AD8Y = \u540E\u5730\u9AD8;
       let \u590D\u6A2AX = 0;
       let \u590D\u8F6CY = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u8F66\u9AD8Y += Math.sin(Math.abs(\u8F66\u8EAB\u6B6A\u89D2)) * 0.22 * k;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        \u8F66\u9AD8Y += Math.sin(Math.abs(\u8F66\u8EAB\u6B6A\u89D2)) * 0.22 * k + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.14 * k;
       } else if (\u662F\u541F\u5531) {
         \u8F66\u9AD8Y += (0.24 + Math.sin(t * 3) * 0.05) * k;
       } else if (\u662F\u98DE\u5929) {
@@ -49166,8 +50254,12 @@ void main() {
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u4FA7\u653B = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
       const \u662F\u653B\u51FB = \u662F\u4FA7\u653B || \u662F\u666E\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u62D0\u5F2F = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0" || this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
@@ -49175,17 +50267,17 @@ void main() {
       const \u662F\u5426\u817E\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
       const \u662F\u7A7A\u4E2D\u6EDE\u7A7A = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A && !\u662F\u98DE\u5929 && !\u662F\u590D\u4F4D && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u653B\u51FB && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       const \u6709\u6C28\u6C14\u52A0\u901F = \u73AF\u5883?.\u662F\u5426\u6C28\u6C14 !== void 0 ? !!\u73AF\u5883.\u662F\u5426\u6C28\u6C14 : \u662F\u5927\u55B7 || \u662F\u53CC\u55B7;
-      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u52A0\u901F\u4E2D;
+      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u5F85\u673A && !\u52A0\u901F\u4E2D;
       const \u6F02\u79FB\u89D2\u91CF = Math.abs(\u73AF\u5883?.\u6F02\u79FB\u4FA7\u6ED1\u89D2 ?? 0);
-      const \u6F02\u79FB\u6743 = !\u662F\u7A7A\u4E2D\u6EDE\u7A7A && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u5012\u8F66 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 ? \u73AF\u5883?.\u662F\u5426\u6F02\u79FB ? 1 : \u6F02\u79FB\u89D2\u91CF > 0.14 ? Math.min(1, (\u6F02\u79FB\u89D2\u91CF - 0.1) / 0.28) : !\u73AF\u5883 && \u662F\u62D0\u5F2F ? Math.min(1, Math.max(0, (Math.abs(\u4FA7\u504F) - 0.14) / 0.34)) : 0 : 0;
+      const \u6F02\u79FB\u6743 = !\u662F\u7A7A\u4E2D\u6EDE\u7A7A && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u5012\u8F66 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u5F85\u673A ? \u73AF\u5883?.\u662F\u5426\u6F02\u79FB ? 1 : \u6F02\u79FB\u89D2\u91CF > 0.14 ? Math.min(1, (\u6F02\u79FB\u89D2\u91CF - 0.1) / 0.28) : !\u73AF\u5883 && \u662F\u62D0\u5F2F ? Math.min(1, Math.max(0, (Math.abs(\u4FA7\u504F) - 0.14) / 0.34)) : 0 : 0;
       const \u662F\u6F02\u79FB\u6001 = \u6F02\u79FB\u6743 > 0.25;
       const \u6F02\u79FB\u5411 = Math.abs(\u4FA7\u504F) > 0.05 ? Math.sign(\u4FA7\u504F) : sideS;
-      const \u51B2\u523A\u524D\u503E = !\u662F\u6025\u5239 && !\u662F\u5012\u8F66 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 ? \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 1 : \u662F\u53CC\u55B7 ? 0.85 : \u662F\u5C0F\u55B7 ? 0.58 : 0 : 0;
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F || \u662F\u51B2\u7EBF);
+      const \u51B2\u523A\u524D\u503E = !\u662F\u6025\u5239 && !\u662F\u5012\u8F66 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 ? \u662F\u5927\u55B7 || \u6709\u6C28\u6C14\u52A0\u901F ? 1 : \u662F\u53CC\u55B7 ? 0.85 : \u662F\u5C0F\u55B7 ? 0.58 : 0 : 0;
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F || \u662F\u51B2\u7EBF);
       const \u5012\u8F66\u901F = \u662F\u5012\u8F66 ? Math.max(8, Math.abs(\u901F\u5EA6)) : 0;
-      const \u8DD1\u52A8\u901F\u5EA6 = \u662F\u5012\u8F66 ? \u5012\u8F66\u901F : \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
-      const \u6B63\u5728\u8DD1 = !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u662F\u5012\u8F66 || \u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F);
-      const \u662F\u7B49\u5019 = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" && !\u6B63\u5728\u8DD1 && !\u662F\u7A7A\u4E2D\u6EDE\u7A7A && !\u662F\u5012\u8F66 && !\u52A0\u901F\u4E2D && !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u8DD1\u52A8\u901F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5012\u8F66 ? \u5012\u8F66\u901F : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(26, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
+      const \u6B63\u5728\u8DD1 = !\u662F\u5F85\u673A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u662F\u5012\u8F66 || \u8DD1\u52A8\u901F\u5EA6 > 0.6 || \u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u62D0\u5F2F);
+      const \u662F\u7B49\u5019 = \u662F\u5F85\u673A;
       const \u653B\u76F801 = \u662F\u653B\u51FB ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
       let \u653B\u84C4\u529B = 0;
       let \u653B\u51FA\u51FB = 0;
@@ -49223,8 +50315,8 @@ void main() {
         0.02
       );
       const \u901F\u5EA6\u6BD4 = Math.min(2, \u8DD1\u52A8\u901F\u5EA6 / 36);
-      const \u52A0\u901F\u500D = \u662F\u5927\u55B7 ? 1.28 : \u662F\u53CC\u55B7 ? 1.2 : \u662F\u5C0F\u55B7 ? 1.12 : \u6709\u6C28\u6C14\u52A0\u901F ? 1.24 : \u662F\u5012\u8F66 ? 0.9 : 1;
-      const \u6398\u5730\u9891 = (10.2 + \u901F\u5EA6\u6BD4 * 6.9) * \u52A0\u901F\u500D;
+      const \u52A0\u901F\u500D = \u662F\u5927\u55B7 ? 1.28 : \u662F\u53CC\u55B7 ? 1.2 : \u662F\u5C0F\u55B7 ? 1.12 : \u6709\u6C28\u6C14\u52A0\u901F ? 1.24 : \u662F\u5012\u8F66 ? 0.9 : \u662F\u884C\u8D70 ? 0.72 : 1;
+      const \u6398\u5730\u9891 = (\u662F\u884C\u8D70 ? 7.6 : 10.2 + \u901F\u5EA6\u6BD4 * 6.9) * \u52A0\u901F\u500D;
       if (\u6B63\u5728\u8DD1 && !\u662F\u7A7A\u4E2D\u6EDE\u7A7A && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u590D\u4F4D) {
         this.\u6398\u5730\u76F8\u4F4D += dt * \u6398\u5730\u9891;
       }
@@ -49235,8 +50327,9 @@ void main() {
       const \u7AD9\u59FF\u63E1\u957F = Math.min(1.36 * k, \u6709\u6548\u6491\u957F * 0.96);
       const \u8D77\u624B\u7AD6\u9AD8 = \u9524\u5E95\u8D34\u5730\u9AD8 + Math.sqrt(Math.max(0.2 * k * k, \u6709\u6548\u6491\u957F * \u6709\u6548\u6491\u957F - 0.08 * k * k));
       const \u6700\u9AD8\u53EF\u884C\u6491\u9AD8 = Math.max(0.76 * k, \u8D77\u624B\u7AD6\u9AD8 - 0.52 * k);
-      const \u6491\u8D77\u5CF0\u9AD8 = Math.min(\u6700\u9AD8\u53EF\u884C\u6491\u9AD8, (0.86 + \u901F\u5EA6\u6BD4 * 0.04 + (\u52A0\u901F\u500D - 1) * 0.03) * k);
-      const \u76C6\u8DE8\u5E45 = Math.min(1.62, 1.36 + \u901F\u5EA6\u6BD4 * 0.12 + (\u52A0\u901F\u500D - 1) * 0.08) * k;
+      const \u6B65\u5E45\u6536 = \u662F\u884C\u8D70 ? 0.68 : 1;
+      const \u6491\u8D77\u5CF0\u9AD8 = Math.min(\u6700\u9AD8\u53EF\u884C\u6491\u9AD8, (0.86 + \u901F\u5EA6\u6BD4 * 0.04 + (\u52A0\u901F\u500D - 1) * 0.03) * k) * \u6B65\u5E45\u6536;
+      const \u76C6\u8DE8\u5E45 = Math.min(1.62, 1.36 + \u901F\u5EA6\u6BD4 * 0.12 + (\u52A0\u901F\u500D - 1) * 0.08) * k * (\u662F\u884C\u8D70 ? 0.74 : 1);
       const \u5012\u8DE8\u5E45 = Math.min(0.96, 0.68 + \u901F\u5EA6\u6BD4 * 0.16) * k;
       const \u5012\u5CF0\u9AD8 = Math.min(\u6700\u9AD8\u53EF\u884C\u6491\u9AD8 * 0.66, (0.46 + \u901F\u5EA6\u6BD4 * 0.14) * k);
       const \u521D\u951AZ = 0.26 * k;
@@ -49335,12 +50428,16 @@ void main() {
       const \u8D77\u6B65\u62AC\u9524\u6743 = \u662F\u5632\u8BBD ? \u5E73\u6ED1\u9636\u8DC3(0.06, 0.22, \u8D77\u6B65\u76F8) * (1 - \u5E73\u6ED1\u9636\u8DC3(0.46, 0.62, \u8D77\u6B65\u76F8)) : 0;
       let \u76EE\u6807\u76C6\u6B6AZ = -\u4FA7\u504F * (0.18 + 0.12 * \u6F02\u79FB\u6743) + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.05 - sideS * 0.03;
       let \u76EE\u6807\u8170\u6B6AZ = -\u4FA7\u504F * (0.1 + 0.1 * \u6F02\u79FB\u6743) + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.04;
-      if (\u662F\u6B7B\u4EA1) {
-        \u76EE\u6807\u76C6\u503EX = 1.24;
-        \u76EE\u6807\u76C6\u6B6AZ = 0.28;
-        \u76EE\u6807\u8170\u503EX = 0.22;
-        \u76EE\u6807\u8170\u6B6AZ = 0.1;
-        \u76EE\u6807\u8170\u8F6CY = -0.25;
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u76EE\u6807\u76C6\u503EX = -0.24 * hit + 1.24 * d - b * 0.14;
+        \u76EE\u6807\u76C6\u6B6AZ = 0.28 * d + tw * 0.04;
+        \u76EE\u6807\u8170\u503EX = -0.18 * hit + 0.22 * d;
+        \u76EE\u6807\u8170\u6B6AZ = 0.1 * d;
+        \u76EE\u6807\u8170\u8F6CY = -0.25 * d;
       } else if (\u662F\u541F\u5531) {
         \u76EE\u6807\u76C6\u503EX = -0.06 + Math.sin(t * 2.6) * 0.04;
         \u76EE\u6807\u76C6\u6B6AZ = Math.sin(t * 2.4) * 0.05;
@@ -49354,12 +50451,12 @@ void main() {
         \u76EE\u6807\u8170\u503EX = -0.14 + Math.sin(t * 9) * 0.1;
         \u76EE\u6807\u8170\u6B6AZ = -\u4FA7\u504F * 0.14;
         \u76EE\u6807\u8170\u8F6CY = sideS * 0.44 + \u4FA7\u504F * 0.34;
-      } else if (\u662F\u7B49\u5019) {
-        \u76EE\u6807\u76C6\u6B6AZ = Math.sin(t * 1.5) * 0.045;
-        \u76EE\u6807\u8170\u6B6AZ = Math.sin(t * 1.5 + 0.4) * 0.03;
-        \u76EE\u6807\u76C6\u503EX = Math.sin(t * 2.1) * 0.03;
-        \u76EE\u6807\u8170\u503EX = 0.05 + Math.sin(t * 2.1) * 0.04;
-        \u76EE\u6807\u8170\u8F6CY = sideS * 0.36 + Math.sin(t * 1.15) * 0.28;
+      } else if (\u662F\u7B49\u5019 && \u73AF\u89C6) {
+        \u76EE\u6807\u76C6\u6B6AZ = 0;
+        \u76EE\u6807\u76C6\u503EX = 0;
+        \u76EE\u6807\u8170\u6B6AZ = \u73AF\u89C6.\u6B6A\u5934Z * 0.24;
+        \u76EE\u6807\u8170\u503EX = 0.04 + \u73AF\u89C6.\u547C\u5438 * 0.025 + \u73AF\u89C6.\u62AC\u5934X * 0.2;
+        \u76EE\u6807\u8170\u8F6CY = sideS * 0.22 + \u73AF\u89C6.\u8F6C\u5934Y * 0.72;
         \u9524\u6491\u7740\u5730 = true;
       } else if (\u662F\u5632\u8BBD) {
         const \u70ED\u8EAB\u8F6C = Math.sin(t * 7.2) * 0.5;
@@ -49432,7 +50529,7 @@ void main() {
       }
       const \u76C6\u503E\u9650 = \u662F\u6B7B\u4EA1 ? 1.35 : 0.55;
       const \u76C6\u6B6AZ = this.\u76C6\u6B6A\u5F39\u7C27.\u66F4\u65B0(Math.max(-0.55, Math.min(0.55, \u76EE\u6807\u76C6\u6B6AZ)), dt, 620, 32, 0.65);
-      const \u76C6\u503EX = this.\u76C6\u503E\u5F39\u7C27.\u66F4\u65B0(Math.max(-\u76C6\u503E\u9650, Math.min(\u76C6\u503E\u9650, \u76EE\u6807\u76C6\u503EX)), dt, 1500, 48, 0.65);
+      const \u76C6\u503EX = this.\u76C6\u503E\u5F39\u7C27.\u66F4\u65B0(Math.max(-\u76C6\u503E\u9650, Math.min(\u76C6\u503E\u9650, \u76EE\u6807\u76C6\u503EX)), dt, 1500, 48, \u76C6\u503E\u9650);
       const \u8170\u503EX = this.\u8170\u503E\u5F39\u7C27.\u66F4\u65B0(Math.max(-0.7, Math.min(0.76, \u76EE\u6807\u8170\u503EX)), dt, 1500, 48, 0.85);
       const \u8170\u6B6AZ = this.\u8170\u6B6A\u5F39\u7C27.\u66F4\u65B0(Math.max(-0.45, Math.min(0.45, \u76EE\u6807\u8170\u6B6AZ)), dt, 720, 34, 0.7);
       const \u8170\u8F6CY = this.\u8170\u8F6C\u5F39\u7C27.\u66F4\u65B0(Math.max(-1.45, Math.min(1.45, \u76EE\u6807\u8170\u8F6CY)), dt, 1600, 50, 1.45);
@@ -49449,9 +50546,28 @@ void main() {
         _\u6811\u76EE\u6807\u9524\u5934_\u76C6.set(gx + dx, hy, gz + dz);
       };
       const \u7279\u5199\u52A8\u4F5C\u4E2D = \u662F\u7A7A\u4E2D\u6EDE\u7A7A || \u662F\u6253\u6655 || \u662F\u649E\u8F66 || \u662F\u51B2\u7EBF || \u662F\u98DE\u5929 || \u662F\u653B\u51FB || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531 || \u662F\u7B11\u8BDD || \u662F\u8DF3\u821E || \u662F\u5632\u8BBD && \u8D77\u6B65\u62AC\u9524\u6743 > 0.05;
-      if (\u662F\u6B7B\u4EA1) {
-        _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.set(0.45 * k, 0.44 * k, 1.05 * k);
-        _\u6811\u76EE\u6807\u9524\u5934_\u76C6.set(0.68 * k, 0.24 * k, 2.35 * k);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u7531\u63E1\u7B97\u9524_\u659C\u6491(
+          sideS * 0.48 * \u76C6\u5BBD\u8865 * k,
+          0.48 * \u76C6\u5BBD\u8865 * k,
+          sideS * 0.06 * k,
+          0.08 * k,
+          \u9524\u5E95\u8D34\u5730\u9AD8,
+          \u7AD9\u59FF\u63E1\u957F
+        );
+        _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.set(
+          _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.x + (0.45 * k - _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.x) * d,
+          _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.y + (0.44 * k - _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.y) * d + b * 0.14 * k,
+          _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.z + (1.05 * k - _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.z) * d
+        );
+        _\u6811\u76EE\u6807\u9524\u5934_\u76C6.set(
+          _\u6811\u76EE\u6807\u9524\u5934_\u76C6.x + (0.68 * k - _\u6811\u76EE\u6807\u9524\u5934_\u76C6.x) * d + tw * 0.04 * k,
+          _\u6811\u76EE\u6807\u9524\u5934_\u76C6.y + (0.24 * k - _\u6811\u76EE\u6807\u9524\u5934_\u76C6.y) * d + b * 0.22 * k,
+          _\u6811\u76EE\u6807\u9524\u5934_\u76C6.z + (2.35 * k - _\u6811\u76EE\u6807\u9524\u5934_\u76C6.z) * d
+        );
       } else if (\u662F\u541F\u5531) {
         _\u6811\u76EE\u6807\u63E1\u70B9_\u76C6.set(0, (1.62 + Math.sin(t * 3) * 0.06) * k, 0.44 * k);
         _\u6811\u76EE\u6807\u9524\u5934_\u76C6.set(Math.sin(t * 2.2) * 0.08 * k, (3.16 + Math.sin(t * 3) * 0.08) * k, 0.48 * k);
@@ -49463,13 +50579,11 @@ void main() {
           1.18 * k
         );
       } else if (\u662F\u7B49\u5019) {
-        const \u95F2\u6643X = Math.sin(t * 1.15) * 0.05 * k;
-        const \u95F2\u6643Z = Math.sin(t * 2.1) * 0.04 * k;
         \u7531\u63E1\u7B97\u9524_\u659C\u6491(
-          sideS * 0.48 * \u76C6\u5BBD\u8865 * k + \u95F2\u6643X,
-          0.48 * \u76C6\u5BBD\u8865 * k + \u95F2\u6643Z,
-          sideS * 0.06 * k - \u95F2\u6643X * 0.5,
-          0.08 * k - \u95F2\u6643Z * 0.5,
+          sideS * 0.48 * \u76C6\u5BBD\u8865 * k,
+          0.48 * \u76C6\u5BBD\u8865 * k,
+          sideS * 0.06 * k,
+          0.08 * k,
           \u9524\u5E95\u8D34\u5730\u9AD8,
           \u7AD9\u59FF\u63E1\u957F
         );
@@ -49793,7 +50907,21 @@ void main() {
       }
       const \u98CE\u538B = (\u662F\u7A7A\u4E2D\u6EDE\u7A7A ? 0.62 : Math.min(0.56, \u8DD1\u52A8\u901F\u5EA6 / 55)) + (\u52A0\u901F\u4E2D || \u6709\u6C28\u6C14\u52A0\u901F || \u662F\u98DE\u5929 ? 0.34 : 0);
       const \u51A0\u547C\u5438 = Math.sin(t * 2.8) * 0.028;
-      if (\u662F\u51B2\u7EBF) {
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        this.\u96EA\u677E\u51A0\u603B\u67A2.rotation.set(0.1 * d - b * 0.12, 0, 0.08 * d);
+        this.\u96EA\u677E\u51A0\u603B\u67A2.scale.set(1, 1, 1);
+        this.\u51A0\u4E0B\u5C42\u67A2.rotation.set(0.04 * d, 0, 0);
+        this.\u51A0\u4E2D\u5C42\u67A2.rotation.set(0.06 * d, 0, 0);
+        this.\u51A0\u9876\u5C42\u67A2.rotation.set(0.1 * d, 0, 0);
+      } else if (\u662F\u7B49\u5019 && \u73AF\u89C6) {
+        this.\u96EA\u677E\u51A0\u603B\u67A2.rotation.set(\u73AF\u89C6.\u62AC\u5934X * 0.28 + \u73AF\u89C6.\u547C\u5438 * 0.02, \u73AF\u89C6.\u8F6C\u5934Y * 0.25, \u73AF\u89C6.\u6B6A\u5934Z * 0.18);
+        this.\u96EA\u677E\u51A0\u603B\u67A2.scale.set(1, 1, 1);
+        this.\u51A0\u4E0B\u5C42\u67A2.rotation.set(\u73AF\u89C6.\u547C\u5438 * 0.015, 0, 0);
+        this.\u51A0\u4E2D\u5C42\u67A2.rotation.set(\u73AF\u89C6.\u547C\u5438 * 0.022, 0, 0);
+        this.\u51A0\u9876\u5C42\u67A2.rotation.set(\u73AF\u89C6.\u547C\u5438 * 0.03, 0, 0);
+      } else if (\u662F\u51B2\u7EBF) {
         const \u5F39\u6CE2 = Math.abs(Math.sin(t * 9.5));
         this.\u96EA\u677E\u51A0\u603B\u67A2.rotation.set(0.06 - \u5F39\u6CE2 * 0.14, Math.sin(t * 4.2) * 0.14, Math.sin(t * 9.5) * 0.12);
         this.\u96EA\u677E\u51A0\u603B\u67A2.scale.set(1 + \u5F39\u6CE2 * 0.06, 1 - \u5F39\u6CE2 * 0.05, 1 + \u5F39\u6CE2 * 0.06);
@@ -49810,15 +50938,15 @@ void main() {
         this.\u51A0\u9876\u5C42\u67A2.rotation.set(-\u98CE\u538B * 0.15 + Math.cos(t * 6.8) * (0.04 + \u98CE\u538B * 0.07), 0, -\u4FA7\u504F * 0.13);
       }
       const \u7728\u671F = t % 3.4;
-      const \u7728\u773C\u7F29 = \u7728\u671F > 3.22 && !\u662F\u6253\u6655 && !\u662F\u51B2\u7EBF ? Math.max(0.12, 1 - Math.sin((\u7728\u671F - 3.22) / 0.18 * Math.PI) * 0.88) : 1;
+      const \u7728\u773C\u7F29 = \u7728\u671F > 3.22 && !\u662F\u6253\u6655 && !\u662F\u51B2\u7EBF && !\u662F\u6B7B\u4EA1 ? Math.max(0.12, 1 - Math.sin((\u7728\u671F - 3.22) / 0.18 * Math.PI) * 0.88) : 1;
       if (this.\u5DE6\u773C && this.\u53F3\u773C) {
         const \u773C\u5BBD = \u662F\u6253\u6655 || \u662F\u7A7A\u4E2D\u6EDE\u7A7A ? 1.18 : 1;
-        const \u773C\u9AD8 = 1.12 * \u7728\u773C\u7F29 * (\u662F\u51B2\u7EBF ? 0.62 : digU < 0.42 && \u6B63\u5728\u8DD1 && !\u662F\u7A7A\u4E2D\u6EDE\u7A7A ? 0.78 : 1);
+        const \u773C\u9AD8 = \u6B7B\u6001 ? Math.max(0.1, 1.12 * (1 - \u6B7B\u6001.\u5012\u4E0B * 0.9) + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.28) : 1.12 * \u7728\u773C\u7F29 * (\u662F\u51B2\u7EBF ? 0.62 : digU < 0.42 && \u6B63\u5728\u8DD1 && !\u662F\u7A7A\u4E2D\u6EDE\u7A7A ? 0.78 : 1);
         this.\u5DE6\u773C.scale.set(\u773C\u5BBD, \u773C\u9AD8, 0.58);
         this.\u53F3\u773C.scale.set(\u773C\u5BBD, \u773C\u9AD8, 0.58);
       }
       if (this.\u5DE6\u7709 && this.\u53F3\u7709) {
-        const \u6012\u89D2 = \u52A0\u901F\u4E2D || \u6709\u6C28\u6C14\u52A0\u901F || \u662F\u653B\u51FB || \u6B63\u5728\u8DD1 || \u662F\u8D77\u6B65 ? 0.4 : \u662F\u6253\u6655 || \u662F\u7A7A\u4E2D\u6EDE\u7A7A ? -0.3 : \u662F\u51B2\u7EBF ? -0.22 : 0.18;
+        const \u6012\u89D2 = \u6B7B\u6001 ? -0.18 * \u6B7B\u6001.\u5012\u4E0B : \u52A0\u901F\u4E2D || \u6709\u6C28\u6C14\u52A0\u901F || \u662F\u653B\u51FB || \u6B63\u5728\u8DD1 || \u662F\u8D77\u6B65 ? 0.4 : \u662F\u6253\u6655 || \u662F\u7A7A\u4E2D\u6EDE\u7A7A ? -0.3 : \u662F\u51B2\u7EBF ? -0.22 : 0.18;
         this.\u5DE6\u7709.rotation.z = \u6012\u89D2;
         this.\u53F3\u7709.rotation.z = -\u6012\u89D2;
       }
@@ -49826,8 +50954,8 @@ void main() {
       let \u603B\u9AD8Y = \u76C6\u5E95\u5730\u9AD8 + \u7A9C\u8DC3Y;
       let \u590D\u6A2AX = 0;
       let \u590D\u8F6CY = 0;
-      if (\u662F\u6B7B\u4EA1) {
-        \u603B\u9AD8Y = \u76C6\u5E95\u5730\u9AD8 + Math.sin(Math.min(Math.PI * 0.5, Math.abs(\u76C6\u503EX))) * 0.46 * k;
+      if (\u6B7B\u6001) {
+        \u603B\u9AD8Y = \u76C6\u5E95\u5730\u9AD8 + Math.sin(Math.min(Math.PI * 0.5, Math.abs(\u76C6\u503EX))) * 0.46 * k + \u6B7B\u6001.\u7838\u5730\u5F39 * 0.18 * k;
       } else if (\u662F\u541F\u5531) {
         \u603B\u9AD8Y += (0.28 + Math.sin(t * 3) * 0.06) * k;
       } else if (\u662F\u98DE\u5929) {
@@ -50935,8 +52063,12 @@ void main() {
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u4FA7\u653B = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
       const \u662F\u653B\u51FB = \u662F\u4FA7\u653B || \u662F\u666E\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u5DE6\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0";
       const \u662F\u53F3\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
@@ -51006,7 +52138,7 @@ void main() {
           \u653B\u7B11\u5BBD = 1.24;
         }
       }
-      const \u662F\u9759\u6B62\u7B49\u5019 = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" && Math.abs(\u6709\u6548\u901F\u5EA6) <= 2.5 || \u662F\u8D77\u6B65;
+      const \u662F\u9759\u6B62\u7B49\u5019 = \u662F\u5F85\u673A || \u662F\u8D77\u6B65;
       if (\u662F\u9759\u6B62\u7B49\u5019 && !this.\u4E0A\u5E27\u9759\u6B62\u7B49\u5019) {
         this.\u7728\u773C\u8BA1\u65F6 = Math.min(this.\u7728\u773C\u8BA1\u65F6, 0.24);
         this.\u8FDE\u7728\u4F59\u6B21 = 1;
@@ -51088,24 +52220,28 @@ void main() {
         \u9F3B\u7EA2\u5EA6 = 0.72;
         \u5934\u4EF0X = -0.24 * \u91CD\u521B.\u5305\u7EDC;
         \u5934\u6B6AZ = \u91CD\u521B.\u63A8\u5411 * 0.38 * \u91CD\u521B.\u5305\u7EDC;
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u4E0A\u7751\u95ED = 0.28;
-        \u4E0B\u7751\u62AC = 0.22;
-        \u773C\u76AE\u503E = -0.26;
-        \u7709\u9AD8 = -0.04;
-        \u7709\u503E = 0.32;
-        \u4E0B\u5DF4\u5F20 = 0.32;
-        \u4E0B\u5DF4\u6B6AZ = 0.22;
-        \u5634\u7B11\u5BBD = 0.82;
-        \u820C\u4F38 = 0.65;
-        \u820C\u6B6A = 0.56;
-        \u7EA2\u6655\u5EA6 = 0.05;
-        \u9F3B\u7EA2\u5EA6 = 0.06;
-        \u5934\u770B\u504FY = 0.32;
-        \u5934\u4EF0X = 0.28;
-        \u5934\u6B6AZ = 1.38;
-        \u5DE6\u7728\u95ED = 1;
-        \u53F3\u7728\u95ED = 1;
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u4E0A\u7751\u95ED = -0.7 + (0.28 + 0.7) * d - 0.22 * hit;
+        \u4E0B\u7751\u62AC = -0.45 + (0.22 + 0.45) * d;
+        \u773C\u76AE\u503E = -0.26 * d;
+        \u7709\u9AD8 = 0.06 * hit - 0.04 * d;
+        \u7709\u503E = 0.32 * d;
+        \u4E0B\u5DF4\u5F20 = 0.04 + 0.42 * hit + 0.28 * d;
+        \u4E0B\u5DF4\u6B6AZ = 0.22 * d + tw * 0.08;
+        \u5634\u7B11\u5BBD = 1 - 0.18 * d;
+        \u820C\u4F38 = 0.65 * d;
+        \u820C\u6B6A = 0.56 * d;
+        \u7EA2\u6655\u5EA6 = 0.18 * (1 - d * 0.72);
+        \u9F3B\u7EA2\u5EA6 = 0.12 * (1 - d * 0.5);
+        \u5934\u770B\u504FY = 0.32 * d;
+        \u5934\u4EF0X = -0.32 * hit + 0.28 * d;
+        \u5934\u6B6AZ = -0.2 * hit + 1.38 * d - 0.16 * b + tw * 0.06;
+        \u5DE6\u7728\u95ED = d;
+        \u53F3\u7728\u95ED = d;
       } else if (\u662F\u541F\u5531) {
         \u4E0A\u7751\u95ED = -0.18;
         \u4E0B\u7751\u62AC = 0.02;
@@ -51346,25 +52482,24 @@ void main() {
         \u7EA2\u6655\u5EA6 = 0.38;
         \u5934\u770B\u504FY = \u5F2F\u5411 * (0.48 + \u6F02\u79FB\u5EA6 * 0.28);
         \u5934\u6B6AZ = -\u5F2F\u5411 * (0.24 + \u6F02\u79FB\u5EA6 * 0.18);
-      } else if (\u6709\u6548\u901F\u5EA6 > 2.5) {
+      } else if (\u662F\u884C\u8D70 || !\u662F\u5F85\u673A && \u6709\u6548\u901F\u5EA6 > 2.5) {
         \u4E0A\u7751\u95ED = -0.72;
         \u4E0B\u7751\u62AC = -0.46;
-        \u7709\u503E = -0.14;
-        \u4E0B\u5DF4\u5F20 = 0.08 + Math.sin(t * 6.5) * 0.03;
+        \u7709\u503E = -0.1;
+        \u4E0B\u5DF4\u5F20 = 0.06 + Math.sin(t * 5.2) * 0.025;
         \u5934\u770B\u504FY = \u4FA7\u504F * 0.36;
-        \u5934\u4EF0X = Math.min(0.16, \u901F\u5EA6\u6BD4 * 0.08);
-      } else {
-        const \u73AF\u987E = Math.sin(t * 1.15);
+        \u5934\u4EF0X = Math.min(0.14, \u901F\u5EA6\u6BD4 * 0.07);
+      } else if (\u73AF\u89C6) {
         \u4E0A\u7751\u95ED = -0.72;
         \u4E0B\u7751\u62AC = -0.46;
-        \u7709\u9AD8 = Math.sin(t * 1.7) * 0.018;
-        \u7709\u503E = Math.sin(t * 1.3) * 0.12;
-        \u77B3\u770BX = \u73AF\u987E * 0.4;
-        \u77B3\u770BY = Math.sin(t * 2.1) * 0.12;
-        \u4E0B\u5DF4\u5F20 = 0.04 + Math.max(0, Math.sin(t * 1.8)) * 0.05;
-        \u5634\u6485 = Math.max(0, Math.sin(t * 0.9)) * 0.26;
-        \u5934\u770B\u504FY = \u73AF\u987E * 0.52;
-        \u5934\u6B6AZ = Math.sin(t * 1.15) * 0.09;
+        \u7709\u9AD8 = \u73AF\u89C6.\u62AC\u5934X * 0.04;
+        \u7709\u503E = \u73AF\u89C6.\u6B6A\u5934Z * 0.25;
+        \u77B3\u770BX = \u73AF\u89C6.\u8F6C\u5934Y * 0.55;
+        \u77B3\u770BY = \u73AF\u89C6.\u62AC\u5934X * 0.45;
+        \u4E0B\u5DF4\u5F20 = 0.04 + Math.max(0, \u73AF\u89C6.\u547C\u5438) * 0.02;
+        \u5934\u770B\u504FY = \u73AF\u89C6.\u8F6C\u5934Y * 0.8;
+        \u5934\u4EF0X = \u73AF\u89C6.\u62AC\u5934X * 0.45;
+        \u5934\u6B6AZ = \u73AF\u89C6.\u6B6A\u5934Z * 0.45;
       }
       \u7709\u9AD8 *= \u5938\u5F20;
       \u7709\u503E *= \u5938\u5F20;
@@ -51403,18 +52538,19 @@ void main() {
       \u6001.\u5DE6\u7728\u95ED = \u5DE6\u7728\u95ED;
       \u6001.\u53F3\u7728\u95ED = \u53F3\u7728\u95ED;
       const \u5730\u9762Y = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0, 0, \u73AF\u5883);
-      const \u98D8\u6CE2 = \u662F\u6B7B\u4EA1 ? 0 : \u662F\u51B2\u7EBF ? Math.abs(Math.sin(t * 8.4)) * 0.62 * k : \u662F\u8DF3\u821E ? Math.abs(Math.sin(t * 5.6)) * 0.26 * k : \u662F\u7B11\u8BDD ? Math.abs(Math.sin(t * 8.5)) * 0.16 * k : \u662F\u541F\u5531 ? Math.sin(t * 2.6) * 0.16 * k : Math.sin(t * (\u52A0\u901F\u4E2D ? 6.8 : 3.1)) * (\u52A0\u901F\u4E2D ? 0.08 : 0.11) * k;
+      const \u98D8\u6CE2 = \u6B7B\u6001 ? \u6B7B\u6001.\u7838\u5730\u5F39 * 0.26 * k + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.16 * k : \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 * 0.055 * k : \u662F\u51B2\u7EBF ? Math.abs(Math.sin(t * 8.4)) * 0.62 * k : \u662F\u8DF3\u821E ? Math.abs(Math.sin(t * 5.6)) * 0.26 * k : \u662F\u7B11\u8BDD ? Math.abs(Math.sin(t * 8.5)) * 0.16 * k : \u662F\u541F\u5531 ? Math.sin(t * 2.6) * 0.16 * k : Math.sin(t * (\u52A0\u901F\u4E2D ? 6.8 : \u662F\u884C\u8D70 ? 3.8 : 3.1)) * (\u52A0\u901F\u4E2D ? 0.08 : 0.1) * k;
       const \u649E\u9707\u504F\u79FBX = \u662F\u649E\u8F66 ? Math.sin(t * 28) * 0.14 * k : 0;
       const \u649E\u9707\u504F\u79FBY = \u662F\u649E\u8F66 ? Math.abs(Math.sin(t * 22)) * 0.24 * k : 0;
       const \u590D\u9AD8\u4F4E = \u662F\u590D\u4F4D ? Math.sin(Math.min(1, \u590D\u76F8 / 0.72) * Math.PI) * 1.15 * k : 0;
-      const \u57FA\u7840\u79BB\u5730 = \u662F\u6B7B\u4EA1 ? 0.88 * k : (1.44 * \u6D6E\u9AD8 + (\u662F\u98DE\u5929 ? 0.42 : \u662F\u541F\u5531 ? 0.34 : 0)) * k;
+      const \u60AC\u9AD8 = 1.44 * \u6D6E\u9AD8;
+      const \u57FA\u7840\u79BB\u5730 = \u6B7B\u6001 ? (\u60AC\u9AD8 + (0.88 - \u60AC\u9AD8) * \u6B7B\u6001.\u5012\u4E0B) * k : (\u60AC\u9AD8 + (\u662F\u98DE\u5929 ? 0.42 : \u662F\u541F\u5531 ? 0.34 : 0)) * k;
       this.\u5934\u98D8\u67A2.position.set(
         (\u662F\u6B7B\u4EA1 ? 0 : \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.1 + \u653B\u6A2A\u79FB) * k + \u649E\u9707\u504F\u79FBX,
         \u5730\u9762Y + \u57FA\u7840\u79BB\u5730 + \u98D8\u6CE2 + \u649E\u9707\u504F\u79FBY + \u590D\u9AD8\u4F4E + (\u662F\u6B7B\u4EA1 ? 0 : \u60EF\u6027\u6001.\u5782\u538B * 0.16 * k),
         (\u662F\u6B7B\u4EA1 ? 0 : \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.1 + \u653B\u524D\u79FBZ) * k
       );
       const \u51B2\u7EBF\u5F39\u7F29 = \u662F\u51B2\u7EBF ? Math.sin(t * 16.8 - 0.65) * 0.08 : 0;
-      const \u5F39\u538BY = \u662F\u6B7B\u4EA1 ? 0.94 : Math.max(0.84, Math.min(1.2, 1 + \u60EF\u6027\u6001.\u5782\u538B * 0.12 - \u91CD\u521B.\u6241\u538B * 0.22 + \u51B2\u7EBF\u5F39\u7F29));
+      const \u5F39\u538BY = \u6B7B\u6001 ? 1 - \u6B7B\u6001.\u7838\u5730\u5F39 * 0.18 - 0.06 * \u6B7B\u6001.\u5012\u4E0B : Math.max(0.84, Math.min(1.2, 1 + \u60EF\u6027\u6001.\u5782\u538B * 0.12 - \u91CD\u521B.\u6241\u538B * 0.22 + \u51B2\u7EBF\u5F39\u7F29));
       const \u5F39\u80C0XZ = 1 / Math.sqrt(\u5F39\u538BY);
       this.\u5934\u98D8\u67A2.scale.set(
         \u5F39\u80C0XZ * (1 + \u91CD\u521B.\u6241\u538B * 0.16),
@@ -51545,13 +52681,19 @@ void main() {
         this.\u55B7\u6C14\u98CE\u73AF.scale.set(rs, rs, 1);
         this.\u55B7\u6C14\u98CE\u6750.opacity = (1 - f) * \u5439\u6C14\u611F * 0.68;
       }
-      const \u8033\u6247 = \u662F\u51B2\u7EBF ? Math.sin(t * 18) * 0.34 : Math.sin(t * 5.2) * 0.06;
-      const \u8033\u8D34 = Math.min(0.35, \u901F\u5EA6\u6BD4 * 0.18);
+      const \u8033\u6247 = \u6B7B\u6001 ? 0 : \u662F\u5F85\u673A ? Math.sin(t * 2.4) * 0.02 : \u662F\u51B2\u7EBF ? Math.sin(t * 18) * 0.34 : Math.sin(t * 5.2) * 0.06;
+      const \u8033\u8D34 = \u6B7B\u6001 || \u662F\u5F85\u673A ? 0 : Math.min(0.35, \u901F\u5EA6\u6BD4 * 0.18);
       this.\u5DE6\u8033\u67A2.rotation.y = -0.28 - \u8033\u8D34 + \u8033\u6247;
       this.\u53F3\u8033\u67A2.rotation.y = 0.28 + \u8033\u8D34 - \u8033\u6247;
-      const \u98CE\u538B = Math.min(0.62, \u901F\u5EA6\u6BD4 * 0.28 + (\u662F\u5927\u55B7 ? 0.26 : 0));
-      this.\u9876\u98CE\u53D1\u67A2.rotation.x = -\u98CE\u538B + Math.sin(t * (\u662F\u51B2\u7EBF ? 16.8 : 9 + \u901F\u5EA6\u6BD4 * 11)) * (\u662F\u51B2\u7EBF ? 0.24 : 0.08 + \u98CE\u538B * 0.16);
-      this.\u9876\u98CE\u53D1\u67A2.rotation.z = -\u4FA7\u504F * 0.22 + Math.cos(t * 8.5) * 0.05;
+      if (\u6B7B\u6001) {
+        this.\u9876\u98CE\u53D1\u67A2.rotation.set(0.18 * \u6B7B\u6001.\u5012\u4E0B, 0, 0.22 * \u6B7B\u6001.\u5012\u4E0B);
+      } else if (\u662F\u5F85\u673A) {
+        this.\u9876\u98CE\u53D1\u67A2.rotation.set(Math.sin(t * 2.2) * 0.03, 0, Math.cos(t * 1.8) * 0.02);
+      } else {
+        const \u98CE\u538B = Math.min(0.62, \u901F\u5EA6\u6BD4 * 0.28 + (\u662F\u5927\u55B7 ? 0.26 : 0));
+        this.\u9876\u98CE\u53D1\u67A2.rotation.x = -\u98CE\u538B + Math.sin(t * (\u662F\u51B2\u7EBF ? 16.8 : 9 + \u901F\u5EA6\u6BD4 * 11)) * (\u662F\u51B2\u7EBF ? 0.24 : 0.08 + \u98CE\u538B * 0.16);
+        this.\u9876\u98CE\u53D1\u67A2.rotation.z = -\u4FA7\u504F * 0.22 + Math.cos(t * 8.5) * 0.05;
+      }
       const \u663E\u9752\u7B4B = \u6001.\u9752\u7B4B\u663E > 0.35;
       this.\u5DE6\u9752\u7B4B.visible = \u663E\u9752\u7B4B;
       this.\u53F3\u9752\u7B4B.visible = \u663E\u9752\u7B4B;
@@ -52791,8 +53933,12 @@ void main() {
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u4FA7\u653B = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
       const \u662F\u653B\u51FB = \u662F\u4FA7\u653B || \u662F\u666E\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u5DE6\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0";
       const \u662F\u53F3\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
@@ -52863,7 +54009,7 @@ void main() {
           \u653B\u7B11\u5BBD = 1.32;
         }
       }
-      const \u662F\u9759\u6B62\u7B49\u5019 = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" && Math.abs(\u6709\u6548\u901F\u5EA6) <= 2.5 || \u662F\u8D77\u6B65;
+      const \u662F\u9759\u6B62\u7B49\u5019 = \u662F\u5F85\u673A || \u662F\u8D77\u6B65;
       if (\u662F\u9759\u6B62\u7B49\u5019 && !this.\u4E0A\u5E27\u9759\u6B62\u7B49\u5019) {
         this.\u7728\u773C\u8BA1\u65F6 = Math.min(this.\u7728\u773C\u8BA1\u65F6, 0.22);
         this.\u8FDE\u7728\u4F59\u6B21 = 1;
@@ -52945,21 +54091,25 @@ void main() {
         \u9F3B\u7EA2\u5EA6 = 0.72;
         \u5934\u4EF0X = -0.22 * \u91CD\u521B.\u5305\u7EDC;
         \u5934\u6B6AZ = \u91CD\u521B.\u63A8\u5411 * 0.42 * \u91CD\u521B.\u5305\u7EDC;
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u4E0A\u7751\u95ED = 0.28;
-        \u4E0B\u7751\u62AC = 0.22;
-        \u773C\u76AE\u503E = -0.3;
-        \u7709\u9AD8 = 0.02;
-        \u7709\u503E = 0.36;
-        \u4E0B\u5DF4\u5F20 = 0.14;
-        \u5634\u6485 = 0.32;
-        \u7EA2\u6655\u5EA6 = 0.15;
-        \u9F3B\u7EA2\u5EA6 = 0.08;
-        \u5934\u770B\u504FY = 0.28;
-        \u5934\u4EF0X = 0.26;
-        \u5934\u6B6AZ = 1.28;
-        \u5DE6\u7728\u95ED = 1;
-        \u53F3\u7728\u95ED = 1;
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u4E0A\u7751\u95ED = -0.74 + (0.28 + 0.74) * d - 0.2 * hit;
+        \u4E0B\u7751\u62AC = -0.44 + (0.22 + 0.44) * d;
+        \u773C\u76AE\u503E = -0.3 * d;
+        \u7709\u9AD8 = 0.01 + 0.06 * hit + 0.01 * d;
+        \u7709\u503E = 0.04 + 0.32 * d;
+        \u4E0B\u5DF4\u5F20 = 0.03 + 0.36 * hit + 0.11 * d;
+        \u5634\u6485 = 0.32 * d;
+        \u7EA2\u6655\u5EA6 = 0.52 - 0.37 * d;
+        \u9F3B\u7EA2\u5EA6 = 0.16 - 0.08 * d;
+        \u5934\u770B\u504FY = 0.28 * d;
+        \u5934\u4EF0X = -0.28 * hit + 0.26 * d;
+        \u5934\u6B6AZ = -0.18 * hit + 1.28 * d - 0.14 * b + tw * 0.05;
+        \u5DE6\u7728\u95ED = d;
+        \u53F3\u7728\u95ED = d;
       } else if (\u662F\u541F\u5531) {
         \u4E0A\u7751\u95ED = -0.14;
         \u4E0B\u7751\u62AC = 0.04;
@@ -53188,29 +54338,29 @@ void main() {
         else \u53F3\u7728\u95ED = 0.88;
         \u5934\u770B\u504FY = \u5F2F\u5411 * (0.44 + \u6F02\u79FB\u5EA6 * 0.24);
         \u5934\u6B6AZ = -\u5F2F\u5411 * (0.28 + \u6F02\u79FB\u5EA6 * 0.16);
-      } else if (\u6709\u6548\u901F\u5EA6 > 2.5) {
+      } else if (\u662F\u884C\u8D70 || !\u662F\u5F85\u673A && \u6709\u6548\u901F\u5EA6 > 2.5) {
         \u4E0A\u7751\u95ED = -0.78;
         \u4E0B\u7751\u62AC = -0.44;
         \u7709\u9AD8 = 0.02;
         \u7709\u503E = 0.08;
-        \u4E0B\u5DF4\u5F20 = 0.1 + Math.sin(t * 6.5) * 0.03;
+        \u4E0B\u5DF4\u5F20 = 0.08 + Math.sin(t * 5.2) * 0.025;
         \u5634\u7B11\u5BBD = 1.16;
         \u7EA2\u6655\u5EA6 = 0.62;
         \u5934\u770B\u504FY = \u4FA7\u504F * 0.32;
-        \u5934\u4EF0X = Math.min(0.12, \u901F\u5EA6\u6BD4 * 0.06);
-      } else {
-        const \u73AF\u987E = Math.sin(t * 1.1);
+        \u5934\u4EF0X = Math.min(0.11, \u901F\u5EA6\u6BD4 * 0.055);
+      } else if (\u73AF\u89C6) {
         \u4E0A\u7751\u95ED = -0.76;
         \u4E0B\u7751\u62AC = -0.44;
-        \u7709\u9AD8 = 0.02 + Math.sin(t * 1.8) * 0.015;
-        \u7709\u503E = 0.1 + Math.sin(t * 1.3) * 0.08;
-        \u77B3\u770BX = \u73AF\u987E * 0.36;
-        \u77B3\u770BY = Math.sin(t * 2) * 0.1;
-        \u4E0B\u5DF4\u5F20 = 0.05 + Math.max(0, Math.sin(t * 1.7)) * 0.05;
+        \u7709\u9AD8 = 0.02 + \u73AF\u89C6.\u62AC\u5934X * 0.03;
+        \u7709\u503E = 0.1 + \u73AF\u89C6.\u6B6A\u5934Z * 0.18;
+        \u77B3\u770BX = \u73AF\u89C6.\u8F6C\u5934Y * 0.48;
+        \u77B3\u770BY = \u73AF\u89C6.\u62AC\u5934X * 0.4;
+        \u4E0B\u5DF4\u5F20 = 0.05 + Math.max(0, \u73AF\u89C6.\u547C\u5438) * 0.02;
         \u5634\u7B11\u5BBD = 1.16;
         \u7EA2\u6655\u5EA6 = 0.64;
-        \u5934\u770B\u504FY = \u73AF\u987E * 0.42;
-        \u5934\u6B6AZ = 0.12 * Math.sin(t * 1.45 + 0.6);
+        \u5934\u770B\u504FY = \u73AF\u89C6.\u8F6C\u5934Y * 0.72;
+        \u5934\u4EF0X = \u73AF\u89C6.\u62AC\u5934X * 0.42;
+        \u5934\u6B6AZ = \u73AF\u89C6.\u6B6A\u5934Z * 0.55;
       }
       \u7709\u9AD8 *= \u5938\u5F20;
       \u7709\u503E *= \u5938\u5F20;
@@ -53249,18 +54399,19 @@ void main() {
       \u6001.\u5DE6\u7728\u95ED = \u5DE6\u7728\u95ED;
       \u6001.\u53F3\u7728\u95ED = \u53F3\u7728\u95ED;
       const \u5730\u9762Y = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0, 0, \u73AF\u5883);
-      const \u98D8\u6CE2 = \u662F\u6B7B\u4EA1 ? 0 : \u662F\u51B2\u7EBF ? Math.abs(Math.sin(t * 8.4)) * 0.64 * k : \u662F\u8DF3\u821E ? Math.abs(Math.sin(t * 5.6)) * 0.24 * k : \u662F\u7B11\u8BDD ? Math.abs(Math.sin(t * 8.5)) * 0.14 * k : \u662F\u541F\u5531 ? Math.sin(t * 2.6) * 0.16 * k : Math.sin(t * (\u52A0\u901F\u4E2D ? 7 : 3.3)) * (\u52A0\u901F\u4E2D ? 0.08 : 0.11) * k;
+      const \u98D8\u6CE2 = \u6B7B\u6001 ? \u6B7B\u6001.\u7838\u5730\u5F39 * 0.26 * k + \u6B7B\u6001.\u53D7\u51FB\u9707 * 0.16 * k : \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 * 0.055 * k : \u662F\u51B2\u7EBF ? Math.abs(Math.sin(t * 8.4)) * 0.64 * k : \u662F\u8DF3\u821E ? Math.abs(Math.sin(t * 5.6)) * 0.24 * k : \u662F\u7B11\u8BDD ? Math.abs(Math.sin(t * 8.5)) * 0.14 * k : \u662F\u541F\u5531 ? Math.sin(t * 2.6) * 0.16 * k : Math.sin(t * (\u52A0\u901F\u4E2D ? 7 : \u662F\u884C\u8D70 ? 3.8 : 3.3)) * (\u52A0\u901F\u4E2D ? 0.08 : 0.1) * k;
       const \u649E\u9707\u504F\u79FBX = \u662F\u649E\u8F66 ? Math.sin(t * 28) * 0.13 * k : 0;
       const \u649E\u9707\u504F\u79FBY = \u662F\u649E\u8F66 ? Math.abs(Math.sin(t * 22)) * 0.22 * k : 0;
       const \u590D\u9AD8\u4F4E = \u662F\u590D\u4F4D ? Math.sin(Math.min(1, \u590D\u76F8 / 0.72) * Math.PI) * 1.15 * k : 0;
-      const \u57FA\u7840\u79BB\u5730 = \u662F\u6B7B\u4EA1 ? 0.92 * k : (1.44 * \u6D6E\u9AD8 + (\u662F\u98DE\u5929 ? 0.42 : \u662F\u541F\u5531 ? 0.34 : 0)) * k;
+      const \u60AC\u9AD8 = 1.44 * \u6D6E\u9AD8;
+      const \u57FA\u7840\u79BB\u5730 = \u6B7B\u6001 ? (\u60AC\u9AD8 + (0.92 - \u60AC\u9AD8) * \u6B7B\u6001.\u5012\u4E0B) * k : (\u60AC\u9AD8 + (\u662F\u98DE\u5929 ? 0.42 : \u662F\u541F\u5531 ? 0.34 : 0)) * k;
       this.\u5934\u98D8\u67A2.position.set(
         (\u662F\u6B7B\u4EA1 ? 0 : \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.1 + \u653B\u6A2A\u79FB) * k + \u649E\u9707\u504F\u79FBX,
         \u5730\u9762Y + \u57FA\u7840\u79BB\u5730 + \u98D8\u6CE2 + \u649E\u9707\u504F\u79FBY + \u590D\u9AD8\u4F4E + (\u662F\u6B7B\u4EA1 ? 0 : \u60EF\u6027\u6001.\u5782\u538B * 0.16 * k),
         (\u662F\u6B7B\u4EA1 ? 0 : \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.1 + \u653B\u524D\u79FBZ) * k
       );
       const \u51B2\u7EBF\u5F39\u7F29 = \u662F\u51B2\u7EBF ? Math.sin(t * 16.8 - 0.65) * 0.08 : 0;
-      const \u5F39\u538BY = \u662F\u6B7B\u4EA1 ? 0.94 : Math.max(0.84, Math.min(1.2, 1 + \u60EF\u6027\u6001.\u5782\u538B * 0.12 - \u91CD\u521B.\u6241\u538B * 0.22 + \u51B2\u7EBF\u5F39\u7F29));
+      const \u5F39\u538BY = \u6B7B\u6001 ? 1 - \u6B7B\u6001.\u7838\u5730\u5F39 * 0.18 - 0.06 * \u6B7B\u6001.\u5012\u4E0B : Math.max(0.84, Math.min(1.2, 1 + \u60EF\u6027\u6001.\u5782\u538B * 0.12 - \u91CD\u521B.\u6241\u538B * 0.22 + \u51B2\u7EBF\u5F39\u7F29));
       const \u5F39\u80C0XZ = 1 / Math.sqrt(\u5F39\u538BY);
       this.\u5934\u98D8\u67A2.scale.set(
         \u5F39\u80C0XZ * (1 + \u91CD\u521B.\u6241\u538B * 0.16),
@@ -53397,7 +54548,7 @@ void main() {
       this.\u4E0B\u5507\u67A2.visible = !\u663E\u561F\u5634;
       if (\u663E\u561F\u5634) {
         const p = 0.58 + \u6001.\u5634\u6485 * 0.52;
-        this.\u561F\u5634\u73AF.scale.set(p, p * (0.95 + Math.sin(t * 18) * 0.08), 1.15);
+        this.\u561F\u5634\u73AF.scale.set(p, p * (\u662F\u6B7B\u4EA1 ? 1 : 0.95 + Math.sin(t * 18) * 0.08), 1.15);
         this.\u5634\u8154\u7247.scale.set(0.4 * p, 0.34 * p, 0.22);
         this.\u4E0A\u7259\u6392.visible = false;
         this.\u4E0B\u7259\u6392.visible = false;
@@ -53424,18 +54575,25 @@ void main() {
         this.\u55B7\u6C14\u98CE\u73AF.scale.set(rs, rs, 1);
         this.\u55B7\u6C14\u98CE\u6750.opacity = (1 - f) * \u5439\u6C14\u611F * 0.68;
       }
-      const \u8033\u6247 = \u662F\u51B2\u7EBF ? Math.sin(t * 18) * 0.32 : \u662F\u6B7B\u4EA1 ? 0 : Math.sin(t * 5.2) * 0.05;
-      const \u8033\u8D34 = \u662F\u6B7B\u4EA1 ? 0 : Math.min(0.32, \u901F\u5EA6\u6BD4 * 0.16);
+      const \u8033\u6247 = \u662F\u51B2\u7EBF ? Math.sin(t * 18) * 0.32 : \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5F85\u673A ? Math.sin(t * 2.2) * 0.02 : Math.sin(t * 5.2) * 0.05;
+      const \u8033\u8D34 = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.min(0.32, \u901F\u5EA6\u6BD4 * 0.16);
       this.\u5DE6\u8033\u67A2.rotation.y = -0.26 - \u8033\u8D34 + \u8033\u6247;
       this.\u53F3\u8033\u67A2.rotation.y = 0.26 + \u8033\u8D34 - \u8033\u6247;
-      const \u8033\u5760\u6446Z = \u662F\u6B7B\u4EA1 ? 0 : -\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.36 + Math.sin(t * 6.5) * 0.12 + (\u662F\u51B2\u7EBF ? 0.55 : 0);
-      const \u8033\u5760\u6446X = \u662F\u6B7B\u4EA1 ? 0 : Math.min(0.45, \u901F\u5EA6\u6BD4 * 0.22 + \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.24);
+      const \u8033\u5760\u6446Z = \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5F85\u673A ? Math.sin(t * 2.2) * 0.04 : -\u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.36 + Math.sin(t * 6.5) * 0.12 + (\u662F\u51B2\u7EBF ? 0.55 : 0);
+      const \u8033\u5760\u6446X = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.min(0.45, \u901F\u5EA6\u6BD4 * 0.22 + \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.24);
       this.\u5DE6\u8033\u5760\u67A2.rotation.set(\u8033\u5760\u6446X, 0, \u8033\u5760\u6446Z);
       this.\u53F3\u8033\u5760\u67A2.rotation.set(\u8033\u5760\u6446X, 0, \u8033\u5760\u6446Z);
-      if (\u662F\u6B7B\u4EA1) {
-        this.\u5DE6\u8FAB\u67A2.rotation.set(1.32, -0.22, 0.55);
-        this.\u53F3\u8FAB\u67A2.rotation.set(1.42, 0.22, -0.22);
-        this.\u9876\u5446\u6BDB\u67A2.rotation.set(0.25, 0, 0.35);
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        this.\u5DE6\u8FAB\u67A2.rotation.set(1.32 * d - b * 0.18, -0.22 * d, 0.08 + 0.47 * d);
+        this.\u53F3\u8FAB\u67A2.rotation.set(1.42 * d - b * 0.18, 0.22 * d, -0.08 - 0.14 * d);
+        this.\u9876\u5446\u6BDB\u67A2.rotation.set(0.25 * d, 0, 0.35 * d);
+      } else if (\u662F\u5F85\u673A) {
+        const \u8F7B\u98D8 = Math.sin(t * 2.2) * 0.035;
+        this.\u5DE6\u8FAB\u67A2.rotation.set(\u8F7B\u98D8, 0, 0.08 + \u8F7B\u98D8 * 0.8);
+        this.\u53F3\u8FAB\u67A2.rotation.set(-\u8F7B\u98D8, 0, -0.08 - \u8F7B\u98D8 * 0.8);
+        this.\u9876\u5446\u6BDB\u67A2.rotation.set(Math.sin(t * 2.4) * 0.04, 0, Math.cos(t * 1.9) * 0.03);
       } else if (\u662F\u541F\u5531) {
         const \u98D8 = Math.sin(t * 3.5) * 0.14;
         this.\u5DE6\u8FAB\u67A2.rotation.set(0.18 + Math.sin(t * 2.8) * 0.08, 0, 0.72 + \u98D8);
@@ -53585,6 +54743,46 @@ void main() {
     \u7F13\u5B58\u77ED\u88E4\u7EB9\u7406.colorSpace = SRGBColorSpace;
     return \u7F13\u5B58\u77ED\u88E4\u7EB9\u7406;
   }
+  var \u7F13\u5B58\u638C\u8DD6\u7EB9\u7406 = null;
+  function \u83B7\u53D6\u638C\u8DD6\u7EB9\u7406() {
+    if (\u7F13\u5B58\u638C\u8DD6\u7EB9\u7406) return \u7F13\u5B58\u638C\u8DD6\u7EB9\u7406;
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    const grad = ctx.createRadialGradient(128, 132, 22, 128, 128, 150);
+    grad.addColorStop(0, "#f0b89b");
+    grad.addColorStop(0.55, "#e8a888");
+    grad.addColorStop(1, "#dc9877");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.strokeStyle = "rgba(138, 74, 52, 0.24)";
+    ctx.lineWidth = 3.2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(46, 98);
+    ctx.quadraticCurveTo(126, 114, 210, 92);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(52, 132);
+    ctx.quadraticCurveTo(132, 148, 202, 162);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(112, 64);
+    ctx.quadraticCurveTo(86, 140, 124, 218);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(138, 74, 52, 0.14)";
+    ctx.lineWidth = 1.8;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(40 + i * 32, 48);
+      ctx.lineTo(54 + i * 30, 80);
+      ctx.stroke();
+    }
+    \u7F13\u5B58\u638C\u8DD6\u7EB9\u7406 = new CanvasTexture(canvas);
+    \u7F13\u5B58\u638C\u8DD6\u7EB9\u7406.colorSpace = SRGBColorSpace;
+    return \u7F13\u5B58\u638C\u8DD6\u7EB9\u7406;
+  }
   var _\u80A2\u5411\u91CF = new Vector3();
   var _\u6781\u5411 = new Vector3();
   var _\u4FA7\u8F74 = new Vector3();
@@ -53595,9 +54793,14 @@ void main() {
   var _\u65CB\u8F6C\u77E9\u9635 = new Matrix4();
   var _\u56DB\u5143\u6570A = new Quaternion();
   var _\u56DB\u5143\u6570B = new Quaternion();
+  var _\u56DB\u5143\u6570\u672C\u5730 = new Quaternion();
+  var _\u56DB\u5143\u6570\u8D34\u5730 = new Quaternion();
+  var _\u6B27\u62C9\u4E34\u65F6 = new Euler(0, 0, 0, "YXZ");
   var _\u5C40\u90E8\u6302\u70B9 = new Vector3();
-  var _\u8098\u6781\u5411 = new Vector3(0, 0.15, -1).normalize();
-  var _\u819D\u6781\u5411 = new Vector3(0, 0.15, 1).normalize();
+  var _\u5DE6\u8098\u6781\u5411 = new Vector3(0.24, 0.14, -1).normalize();
+  var _\u53F3\u8098\u6781\u5411 = new Vector3(-0.24, 0.14, -1).normalize();
+  var _\u5DE6\u819D\u6781\u5411 = new Vector3(0.08, 0.12, 1).normalize();
+  var _\u53F3\u819D\u6781\u5411 = new Vector3(-0.08, 0.12, 1).normalize();
   var _\u76EE\u6807LF = new Vector3();
   var _\u76EE\u6807RF = new Vector3();
   var _\u76EE\u6807LH = new Vector3();
@@ -53766,17 +54969,18 @@ void main() {
     \u89E6\u5730\u529B\u5EA6 = [0, 0, 0, 0];
     \u4E0A\u5E27\u7A7A\u4E2D = false;
     \u4E0A\u5E27\u5228\u5730\u76F8 = 0;
+    \u4E0A\u5E27\u666E\u653B\u7838\u5730 = false;
     \u6700\u8FD1\u5168\u9707 = 0;
     \u9707\u52A8\u5F39\u7C27Y = new \u4E8C\u9636\u60EF\u6027\u5F39\u7C27();
     \u9707\u52A8\u5F39\u7C27\u626D = new \u4E8C\u9636\u60EF\u6027\u5F39\u7C27();
     \u4E0B\u988C\u9707\u98A4 = new \u4E8C\u9636\u60EF\u6027\u5F39\u7C27();
     \u9888\u90E8\u6EDE\u540E\u5F39\u7C27 = new \u4E8C\u9636\u60EF\u6027\u5F39\u7C27();
-    \u4E0A\u81C2\u957F = 0.5;
-    \u524D\u81C2\u957F = 0.48;
-    \u5927\u817F\u957F = 0.5;
-    \u5C0F\u817F\u957F = 0.48;
-    \u8155\u9AD8 = 0.065;
-    \u8E1D\u9AD8 = 0.12;
+    \u4E0A\u81C2\u957F = 0.67;
+    \u524D\u81C2\u957F = 0.66;
+    \u5927\u817F\u957F = 0.7;
+    \u5C0F\u817F\u957F = 0.7;
+    \u8155\u9AD8 = 0.062;
+    \u8E1D\u9AD8 = 0.095;
     constructor() {
       super("horseman", "\u534A\u9A6C\u4EBA", "\u9876\u7740\u5927\u9A6C\u8116\u5B50\u548C\u5927\u9A6C\u8111\u888B\uFF0C\u5149\u6E9C\u6E9C\u7684\u4EBA\u8EAB\u5B50\u65E0\u7F1D\u63A5\u5728\u9A6C\u8116\u5B50\u4E0A\uFF0C\u56DB\u53EA\u624B\u811A\u5B8C\u5168\u6309\u771F\u9A6C\u6B65\u6CD5\u72C2\u5954\u7684\u602A\u4E1C\u897F");
       this.\u53C2\u6570 = {
@@ -53820,6 +55024,7 @@ void main() {
       this.\u89E6\u5730\u529B\u5EA6 = [0, 0, 0, 0];
       this.\u4E0A\u5E27\u7A7A\u4E2D = false;
       this.\u4E0A\u5E27\u5228\u5730\u76F8 = 0;
+      this.\u4E0A\u5E27\u666E\u653B\u7838\u5730 = false;
       this.\u6700\u8FD1\u5168\u9707 = 0;
       this.\u4E0A\u6B21\u9A6C\u6BDB\u8272 = "";
       this.\u9707\u52A8\u5F39\u7C27Y.\u4F4D\u7F6E = 0;
@@ -53831,12 +55036,13 @@ void main() {
       this.\u9888\u90E8\u6EDE\u540E\u5F39\u7C27.\u4F4D\u7F6E = 0;
       this.\u9888\u90E8\u6EDE\u540E\u5F39\u7C27.\u901F\u5EA6 = 0;
       const k = Number(this.\u53C2\u6570.\u4F53\u578B\u500D\u7387) || 1;
-      this.\u4E0A\u81C2\u957F = 0.5 * k;
-      this.\u524D\u81C2\u957F = 0.48 * k;
-      this.\u5927\u817F\u957F = 0.5 * k;
-      this.\u5C0F\u817F\u957F = 0.48 * k;
-      this.\u8155\u9AD8 = 0.065 * k;
-      this.\u8E1D\u9AD8 = 0.12 * k;
+      const \u62AC\u9AD8\u91CF = 0.36 * k;
+      this.\u4E0A\u81C2\u957F = 0.67 * k;
+      this.\u524D\u81C2\u957F = 0.66 * k;
+      this.\u5927\u817F\u957F = 0.7 * k;
+      this.\u5C0F\u817F\u957F = 0.7 * k;
+      this.\u8155\u9AD8 = 0.062 * k;
+      this.\u8E1D\u9AD8 = 0.095 * k;
       const \u4E00\u4F53\u76AE\u6BDB\u6750 = new MeshStandardMaterial({
         map: \u83B7\u53D6\u4EBA\u76AE\u7EB9\u7406(),
         vertexColors: true,
@@ -53850,9 +55056,26 @@ void main() {
         metalness: 0.02
       });
       const \u4EBA\u76AE\u7EC6\u8282\u6750 = new MeshStandardMaterial({
-        color: 15844002,
+        color: 15909538,
+        map: \u83B7\u53D6\u4EBA\u76AE\u7EB9\u7406(),
+        roughness: 0.56,
+        metalness: 0.02
+      });
+      const \u638C\u5FC3\u7EA2\u6DA6\u6750 = new MeshStandardMaterial({
+        color: 16176320,
+        map: \u83B7\u53D6\u638C\u8DD6\u7EB9\u7406(),
+        roughness: 0.62,
+        metalness: 0.02
+      });
+      const \u5173\u8282\u6697\u80A4\u6750 = new MeshStandardMaterial({
+        color: 14459008,
         roughness: 0.6,
         metalness: 0.02
+      });
+      const \u6307\u7532\u5149\u6750 = new MeshStandardMaterial({
+        color: 16245978,
+        roughness: 0.24,
+        metalness: 0.04
       });
       this.\u9A6C\u6BDB\u6750 = new MeshStandardMaterial({
         color: this.\u53C2\u6570.\u9A6C\u6BDB\u989C\u8272 || "#7c3f1d",
@@ -53880,7 +55103,7 @@ void main() {
       this.\u6839\u9AA8 = new Bone();
       this.\u603B\u67A2.add(this.\u6839\u9AA8);
       this.\u9AA8\u76C6\u9AA8 = new Bone();
-      this.\u9AA8\u76C6\u9AA8.position.set(0, 0.88 * k, 0);
+      this.\u9AA8\u76C6\u9AA8.position.set(0, 0.88 * k + \u62AC\u9AD8\u91CF, 0);
       this.\u6839\u9AA8.add(this.\u9AA8\u76C6\u9AA8);
       this.\u8170\u8179\u9AA8 = new Bone();
       this.\u8170\u8179\u9AA8.position.set(0, 0.01 * k, 0.02 * k);
@@ -53909,7 +55132,7 @@ void main() {
         \u8155\u9AA8.position.set(0, -this.\u524D\u81C2\u957F, 0);
         \u8098\u9AA8.add(\u8155\u9AA8);
         const \u89E6\u5730\u6302\u70B9 = new Object3D();
-        \u89E6\u5730\u6302\u70B9.position.set(0, -this.\u8155\u9AD8, 0.06 * k);
+        \u89E6\u5730\u6302\u70B9.position.set(0, -this.\u8155\u9AD8, 0.075 * k);
         \u8155\u9AA8.add(\u89E6\u5730\u6302\u70B9);
         return { \u80A9\u9AA8, \u8098\u9AA8, \u8155\u9AA8, \u80A9\u951A, \u89E6\u5730\u6302\u70B9 };
       };
@@ -53927,7 +55150,7 @@ void main() {
         \u8E1D\u9AA8.position.set(0, -this.\u5C0F\u817F\u957F, 0);
         \u819D\u9AA8.add(\u8E1D\u9AA8);
         const \u89E6\u5730\u6302\u70B9 = new Object3D();
-        \u89E6\u5730\u6302\u70B9.position.set(0, -0.082 * k, 0.14 * k);
+        \u89E6\u5730\u6302\u70B9.position.set(0, -this.\u8E1D\u9AD8, 0.095 * k);
         \u8E1D\u9AA8.add(\u89E6\u5730\u6302\u70B9);
         return { \u9ACB\u9AA8, \u819D\u9AA8, \u8E1D\u9AA8, \u9ACB\u951A, \u89E6\u5730\u6302\u70B9 };
       };
@@ -53957,23 +55180,23 @@ void main() {
       this.\u603B\u67A2.updateMatrixWorld(true);
       this.\u9AA8\u67B6 = new Skeleton(\u6240\u6709\u9AA8\u9ABC);
       const \u8EAB\u9888\u4E2D\u5FC3\u8868 = [
-        { p: new Vector3(0, 0.9 * k, -0.66 * k), rx: 2e-3 * k, ry: 2e-3 * k, \u6BDB: 0, \u6C9F: 0.35, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { p: new Vector3(0, 0.91 * k, -0.61 * k), rx: 0.24 * k, ry: 0.21 * k, \u6BDB: 0, \u6C9F: 0.3, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { p: new Vector3(0, 0.91 * k, -0.5 * k), rx: 0.31 * k, ry: 0.27 * k, \u6BDB: 0, \u6C9F: 0.18, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { p: new Vector3(0, 0.9 * k, -0.36 * k), rx: 0.29 * k, ry: 0.25 * k, \u6BDB: 0, \u6C9F: 0.1, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { p: new Vector3(0, 0.89 * k, -0.22 * k), rx: 0.26 * k, ry: 0.22 * k, \u6BDB: 0, \u6C9F: 0.12, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.82 }, { id: \u9AA8_\u8170\u8179, w: 0.18 }] },
-        { p: new Vector3(0, 0.88 * k, -0.1 * k), rx: 0.24 * k, ry: 0.2 * k, \u6BDB: 0, \u6C9F: 0.18, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.42 }, { id: \u9AA8_\u8170\u8179, w: 0.58 }] },
-        { p: new Vector3(0, 0.89 * k, 0.02 * k), rx: 0.255 * k, ry: 0.215 * k, \u6BDB: 0, \u6C9F: 0.16, \u9AA8: [{ id: \u9AA8_\u8170\u8179, w: 0.68 }, { id: \u9AA8_\u80F8\u5ED3, w: 0.32 }] },
-        { p: new Vector3(0, 0.9 * k, 0.14 * k), rx: 0.3 * k, ry: 0.24 * k, \u6BDB: 0, \u6C9F: 0.12, \u9AA8: [{ id: \u9AA8_\u8170\u8179, w: 0.22 }, { id: \u9AA8_\u80F8\u5ED3, w: 0.78 }] },
-        { p: new Vector3(0, 0.91 * k, 0.28 * k), rx: 0.345 * k, ry: 0.265 * k, \u6BDB: 0, \u6C9F: 0.1, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 1 }] },
-        { p: new Vector3(0, 0.93 * k, 0.42 * k), rx: 0.33 * k, ry: 0.255 * k, \u6BDB: 0.04, \u6C9F: 0.1, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.88 }, { id: \u9AA8_\u4E0B\u9888, w: 0.12 }] },
-        { p: new Vector3(0, 0.99 * k, 0.55 * k), rx: 0.24 * k, ry: 0.245 * k, \u6BDB: 0.28, \u6C9F: 0.14, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.45 }, { id: \u9AA8_\u4E0B\u9888, w: 0.55 }] },
-        { p: new Vector3(0, 1.11 * k, 0.62 * k), rx: 0.195 * k, ry: 0.255 * k, \u6BDB: 0.72, \u6C9F: 0.08, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.12 }, { id: \u9AA8_\u4E0B\u9888, w: 0.88 }] },
-        { p: new Vector3(0, 1.25 * k, 0.67 * k), rx: 0.175 * k, ry: 0.245 * k, \u6BDB: 0.96, \u6C9F: 0.04, \u9AA8: [{ id: \u9AA8_\u4E0B\u9888, w: 0.82 }, { id: \u9AA8_\u4E0A\u9888, w: 0.18 }] },
-        { p: new Vector3(0, 1.4 * k, 0.72 * k), rx: 0.158 * k, ry: 0.225 * k, \u6BDB: 1, \u6C9F: 0.02, \u9AA8: [{ id: \u9AA8_\u4E0B\u9888, w: 0.35 }, { id: \u9AA8_\u4E0A\u9888, w: 0.65 }] },
-        { p: new Vector3(0, 1.56 * k, 0.78 * k), rx: 0.142 * k, ry: 0.205 * k, \u6BDB: 1, \u6C9F: 0.02, \u9AA8: [{ id: \u9AA8_\u4E0A\u9888, w: 0.88 }, { id: \u9AA8_\u9A6C\u5934, w: 0.12 }] },
-        { p: new Vector3(0, 1.72 * k, 0.84 * k), rx: 0.128 * k, ry: 0.175 * k, \u6BDB: 1, \u6C9F: 0.02, \u9AA8: [{ id: \u9AA8_\u4E0A\u9888, w: 0.5 }, { id: \u9AA8_\u9A6C\u5934, w: 0.5 }] },
-        { p: new Vector3(0, 1.8 * k, 0.87 * k), rx: 2e-3 * k, ry: 2e-3 * k, \u6BDB: 1, \u6C9F: 0.04, \u9AA8: [{ id: \u9AA8_\u9A6C\u5934, w: 1 }] }
+        { p: new Vector3(0, 0.9 * k + \u62AC\u9AD8\u91CF, -0.66 * k), rx: 2e-3 * k, ry: 2e-3 * k, \u6BDB: 0, \u6C9F: 0.35, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { p: new Vector3(0, 0.91 * k + \u62AC\u9AD8\u91CF, -0.61 * k), rx: 0.24 * k, ry: 0.21 * k, \u6BDB: 0, \u6C9F: 0.3, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { p: new Vector3(0, 0.91 * k + \u62AC\u9AD8\u91CF, -0.5 * k), rx: 0.31 * k, ry: 0.27 * k, \u6BDB: 0, \u6C9F: 0.18, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { p: new Vector3(0, 0.9 * k + \u62AC\u9AD8\u91CF, -0.36 * k), rx: 0.29 * k, ry: 0.25 * k, \u6BDB: 0, \u6C9F: 0.1, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { p: new Vector3(0, 0.89 * k + \u62AC\u9AD8\u91CF, -0.22 * k), rx: 0.26 * k, ry: 0.22 * k, \u6BDB: 0, \u6C9F: 0.12, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.82 }, { id: \u9AA8_\u8170\u8179, w: 0.18 }] },
+        { p: new Vector3(0, 0.88 * k + \u62AC\u9AD8\u91CF, -0.1 * k), rx: 0.24 * k, ry: 0.2 * k, \u6BDB: 0, \u6C9F: 0.18, \u9AA8: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.42 }, { id: \u9AA8_\u8170\u8179, w: 0.58 }] },
+        { p: new Vector3(0, 0.89 * k + \u62AC\u9AD8\u91CF, 0.02 * k), rx: 0.255 * k, ry: 0.215 * k, \u6BDB: 0, \u6C9F: 0.16, \u9AA8: [{ id: \u9AA8_\u8170\u8179, w: 0.68 }, { id: \u9AA8_\u80F8\u5ED3, w: 0.32 }] },
+        { p: new Vector3(0, 0.9 * k + \u62AC\u9AD8\u91CF, 0.14 * k), rx: 0.3 * k, ry: 0.24 * k, \u6BDB: 0, \u6C9F: 0.12, \u9AA8: [{ id: \u9AA8_\u8170\u8179, w: 0.22 }, { id: \u9AA8_\u80F8\u5ED3, w: 0.78 }] },
+        { p: new Vector3(0, 0.91 * k + \u62AC\u9AD8\u91CF, 0.28 * k), rx: 0.345 * k, ry: 0.265 * k, \u6BDB: 0, \u6C9F: 0.1, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 1 }] },
+        { p: new Vector3(0, 0.93 * k + \u62AC\u9AD8\u91CF, 0.42 * k), rx: 0.33 * k, ry: 0.255 * k, \u6BDB: 0.04, \u6C9F: 0.1, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.88 }, { id: \u9AA8_\u4E0B\u9888, w: 0.12 }] },
+        { p: new Vector3(0, 0.99 * k + \u62AC\u9AD8\u91CF, 0.55 * k), rx: 0.24 * k, ry: 0.245 * k, \u6BDB: 0.28, \u6C9F: 0.14, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.45 }, { id: \u9AA8_\u4E0B\u9888, w: 0.55 }] },
+        { p: new Vector3(0, 1.11 * k + \u62AC\u9AD8\u91CF, 0.62 * k), rx: 0.195 * k, ry: 0.255 * k, \u6BDB: 0.72, \u6C9F: 0.08, \u9AA8: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.12 }, { id: \u9AA8_\u4E0B\u9888, w: 0.88 }] },
+        { p: new Vector3(0, 1.25 * k + \u62AC\u9AD8\u91CF, 0.67 * k), rx: 0.175 * k, ry: 0.245 * k, \u6BDB: 0.96, \u6C9F: 0.04, \u9AA8: [{ id: \u9AA8_\u4E0B\u9888, w: 0.82 }, { id: \u9AA8_\u4E0A\u9888, w: 0.18 }] },
+        { p: new Vector3(0, 1.4 * k + \u62AC\u9AD8\u91CF, 0.72 * k), rx: 0.158 * k, ry: 0.225 * k, \u6BDB: 1, \u6C9F: 0.02, \u9AA8: [{ id: \u9AA8_\u4E0B\u9888, w: 0.35 }, { id: \u9AA8_\u4E0A\u9888, w: 0.65 }] },
+        { p: new Vector3(0, 1.56 * k + \u62AC\u9AD8\u91CF, 0.78 * k), rx: 0.142 * k, ry: 0.205 * k, \u6BDB: 1, \u6C9F: 0.02, \u9AA8: [{ id: \u9AA8_\u4E0A\u9888, w: 0.88 }, { id: \u9AA8_\u9A6C\u5934, w: 0.12 }] },
+        { p: new Vector3(0, 1.72 * k + \u62AC\u9AD8\u91CF, 0.84 * k), rx: 0.128 * k, ry: 0.175 * k, \u6BDB: 1, \u6C9F: 0.02, \u9AA8: [{ id: \u9AA8_\u4E0A\u9888, w: 0.5 }, { id: \u9AA8_\u9A6C\u5934, w: 0.5 }] },
+        { p: new Vector3(0, 1.8 * k + \u62AC\u9AD8\u91CF, 0.87 * k), rx: 2e-3 * k, ry: 2e-3 * k, \u6BDB: 1, \u6C9F: 0.04, \u9AA8: [{ id: \u9AA8_\u9A6C\u5934, w: 1 }] }
       ];
       const \u8EAB\u9888\u622A\u9762 = [];
       for (let i = 0; i < \u8EAB\u9888\u4E2D\u5FC3\u8868.length; i++) {
@@ -54029,12 +55252,12 @@ void main() {
       \u4E00\u4F53\u8EAB\u9888\u7F51.bind(this.\u9AA8\u67B6);
       this.\u603B\u67A2.add(\u4E00\u4F53\u8EAB\u9888\u7F51);
       const \u77ED\u88E4\u622A\u9762 = [
-        { \u5FC3: new Vector3(0, 0.9 * k, -0.64 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 2e-3 * k, \u7AD6\u534A: 2e-3 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { \u5FC3: new Vector3(0, 0.91 * k, -0.6 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.27 * k, \u7AD6\u534A: 0.24 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { \u5FC3: new Vector3(0, 0.91 * k, -0.49 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.33 * k, \u7AD6\u534A: 0.29 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { \u5FC3: new Vector3(0, 0.9 * k, -0.35 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.31 * k, \u7AD6\u534A: 0.27 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-        { \u5FC3: new Vector3(0, 0.89 * k, -0.25 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.28 * k, \u7AD6\u534A: 0.24 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.9 }, { id: \u9AA8_\u8170\u8179, w: 0.1 }] },
-        { \u5FC3: new Vector3(0, 0.89 * k, -0.22 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.26 * k, \u7AD6\u534A: 0.22 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.85 }, { id: \u9AA8_\u8170\u8179, w: 0.15 }] }
+        { \u5FC3: new Vector3(0, 0.9 * k + \u62AC\u9AD8\u91CF, -0.64 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 2e-3 * k, \u7AD6\u534A: 2e-3 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { \u5FC3: new Vector3(0, 0.91 * k + \u62AC\u9AD8\u91CF, -0.6 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.27 * k, \u7AD6\u534A: 0.24 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { \u5FC3: new Vector3(0, 0.91 * k + \u62AC\u9AD8\u91CF, -0.49 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.33 * k, \u7AD6\u534A: 0.29 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { \u5FC3: new Vector3(0, 0.9 * k + \u62AC\u9AD8\u91CF, -0.35 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.31 * k, \u7AD6\u534A: 0.27 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
+        { \u5FC3: new Vector3(0, 0.89 * k + \u62AC\u9AD8\u91CF, -0.25 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.28 * k, \u7AD6\u534A: 0.24 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.9 }, { id: \u9AA8_\u8170\u8179, w: 0.1 }] },
+        { \u5FC3: new Vector3(0, 0.89 * k + \u62AC\u9AD8\u91CF, -0.22 * k), \u5207: new Vector3(0, 0, 1), \u6A2A\u534A: 0.26 * k, \u7AD6\u534A: 0.22 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.85 }, { id: \u9AA8_\u8170\u8179, w: 0.15 }] }
       ];
       const \u77ED\u88E4\u6784\u5EFA = \u6784\u9020\u65E0\u7F1D\u8499\u76AE\u653E\u6837(\u77ED\u88E4\u622A\u9762, 24, false);
       const \u77ED\u88E4\u7F51 = new SkinnedMesh(\u77ED\u88E4\u6784\u5EFA.\u51E0\u4F55, this.\u77ED\u88E4\u6750);
@@ -54051,12 +55274,12 @@ void main() {
         const \u9ACB\u9AA8ID = sx > 0 ? \u9AA8_\u5DE6\u9ACB : \u9AA8_\u53F3\u9ACB;
         const hipPos = sx > 0 ? this.\u5DE6\u817F.\u9ACB\u951A : this.\u53F3\u817F.\u9ACB\u951A;
         const hx = hipPos.x;
-        const hy = 0.88 * k + hipPos.y;
+        const hy = 0.88 * k + \u62AC\u9AD8\u91CF + hipPos.y;
         const hz = hipPos.z;
         const \u88E4\u7B52\u622A\u9762 = [
           { \u5FC3: new Vector3(hx * 0.82, hy + 0.08 * k, hz), \u5207: new Vector3(0, -1, 0), \u6A2A\u534A: 0.175 * k, \u7AD6\u534A: 0.175 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 1 }] },
-          { \u5FC3: new Vector3(hx, hy - 0.01 * k, hz), \u5207: new Vector3(0, -1, 0), \u6A2A\u534A: 0.178 * k, \u7AD6\u534A: 0.178 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.55 }, { id: \u9ACB\u9AA8ID, w: 0.45 }] },
-          { \u5FC3: new Vector3(hx, hy - 0.16 * k, hz), \u5207: new Vector3(0, -1, 0), \u6A2A\u534A: 0.158 * k, \u7AD6\u534A: 0.158 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9ACB\u9AA8ID, w: 1 }] }
+          { \u5FC3: new Vector3(hx, hy - 0.01 * k, hz), \u5207: new Vector3(0, -1, 0), \u6A2A\u534A: 0.176 * k, \u7AD6\u534A: 0.176 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.55 }, { id: \u9ACB\u9AA8ID, w: 0.45 }] },
+          { \u5FC3: new Vector3(hx, hy - 0.19 * k, hz), \u5207: new Vector3(0, -1, 0), \u6A2A\u534A: 0.152 * k, \u7AD6\u534A: 0.152 * k, \u6BDB\u8FC7\u6E21: 0, \u6743: [{ id: \u9ACB\u9AA8ID, w: 1 }] }
         ];
         const \u88E4\u7B52\u6784\u5EFA = \u6784\u9020\u65E0\u7F1D\u8499\u76AE\u653E\u6837(\u88E4\u7B52\u622A\u9762, 18, false);
         const \u88E4\u7B52\u7F51 = new SkinnedMesh(\u88E4\u7B52\u6784\u5EFA.\u51E0\u4F55, this.\u77ED\u88E4\u6750);
@@ -54070,25 +55293,25 @@ void main() {
         const \u8098ID = sx > 0 ? \u9AA8_\u5DE6\u8098 : \u9AA8_\u53F3\u8098;
         const \u8155ID = sx > 0 ? \u9AA8_\u5DE6\u8155 : \u9AA8_\u53F3\u8155;
         const sx0 = 0.31 * k * sx;
-        const sy0 = 0.9 * k;
+        const sy0 = 0.9 * k + \u62AC\u9AD8\u91CF;
         const sz0 = 0.42 * k;
         const L1 = this.\u4E0A\u81C2\u957F;
         const L2 = this.\u524D\u81C2\u957F;
         const \u81C2\u7AD9\u70B9 = [
           { y\u504F: 0.08 * k, x\u504F: -sx * 0.06 * k, rx: 0.04 * k, rz: 0.04 * k, \u6C9F: 0.15, \u6743: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.85 }, { id: \u80A9ID, w: 0.15 }] },
-          { y\u504F: 0.02 * k, x\u504F: -sx * 0.02 * k, rx: 0.118 * k, rz: 0.118 * k, \u6C9F: 0.08, \u6743: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.42 }, { id: \u80A9ID, w: 0.58 }] },
-          { y\u504F: -0.06 * k, rx: 0.102 * k, rz: 0.106 * k, \u6C9F: 0.05, \u6743: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.12 }, { id: \u80A9ID, w: 0.88 }] },
-          { y\u504F: -L1 * 0.38, rx: 0.088 * k, rz: 0.096 * k, \u6C9F: 0.04, \u6743: [{ id: \u80A9ID, w: 1 }] },
-          { y\u504F: -L1 * 0.72, rx: 0.078 * k, rz: 0.082 * k, \u6C9F: 0.08, \u6743: [{ id: \u80A9ID, w: 0.92 }, { id: \u8098ID, w: 0.08 }] },
-          { y\u504F: -L1 + 0.05 * k, rx: 0.07 * k, rz: 0.072 * k, \u6C9F: 0.14, \u6743: [{ id: \u80A9ID, w: 0.72 }, { id: \u8098ID, w: 0.28 }] },
-          { y\u504F: -L1, rx: 0.068 * k, rz: 0.07 * k, \u6C9F: 0.16, \u6743: [{ id: \u80A9ID, w: 0.48 }, { id: \u8098ID, w: 0.52 }] },
-          { y\u504F: -L1 - 0.06 * k, rx: 0.074 * k, rz: 0.076 * k, \u6C9F: 0.1, \u6743: [{ id: \u80A9ID, w: 0.2 }, { id: \u8098ID, w: 0.8 }] },
-          { y\u504F: -L1 - L2 * 0.34, rx: 0.072 * k, rz: 0.075 * k, \u6C9F: 0.05, \u6743: [{ id: \u8098ID, w: 1 }] },
-          { y\u504F: -L1 - L2 * 0.72, rx: 0.054 * k, rz: 0.056 * k, \u6C9F: 0.05, \u6743: [{ id: \u8098ID, w: 1 }] },
-          { y\u504F: -L1 - L2 + 0.04 * k, rx: 0.048 * k, rz: 0.046 * k, \u6C9F: 0.08, \u6743: [{ id: \u8098ID, w: 0.78 }, { id: \u8155ID, w: 0.22 }] },
-          { y\u504F: -L1 - L2, rx: 0.048 * k, rz: 0.046 * k, \u6C9F: 0.1, \u6743: [{ id: \u8098ID, w: 0.32 }, { id: \u8155ID, w: 0.68 }] },
-          { y\u504F: -L1 - L2 - 0.045 * k, rx: 0.058 * k, rz: 0.042 * k, \u6C9F: 0.06, \u6743: [{ id: \u8155ID, w: 1 }] },
-          { y\u504F: -L1 - L2 - 0.06 * k, rx: 2e-3 * k, rz: 2e-3 * k, \u6C9F: 0.08, \u6743: [{ id: \u8155ID, w: 1 }] }
+          { y\u504F: 0.02 * k, x\u504F: -sx * 0.02 * k, rx: 0.114 * k, rz: 0.114 * k, \u6C9F: 0.08, \u6743: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.42 }, { id: \u80A9ID, w: 0.58 }] },
+          { y\u504F: -0.07 * k, rx: 0.096 * k, rz: 0.1 * k, \u6C9F: 0.05, \u6743: [{ id: \u9AA8_\u80F8\u5ED3, w: 0.12 }, { id: \u80A9ID, w: 0.88 }] },
+          { y\u504F: -L1 * 0.38, rx: 0.084 * k, rz: 0.09 * k, \u6C9F: 0.04, \u6743: [{ id: \u80A9ID, w: 1 }] },
+          { y\u504F: -L1 * 0.72, rx: 0.073 * k, rz: 0.077 * k, \u6C9F: 0.08, \u6743: [{ id: \u80A9ID, w: 0.92 }, { id: \u8098ID, w: 0.08 }] },
+          { y\u504F: -L1 + 0.055 * k, rx: 0.066 * k, rz: 0.068 * k, \u6C9F: 0.14, \u6743: [{ id: \u80A9ID, w: 0.72 }, { id: \u8098ID, w: 0.28 }] },
+          { y\u504F: -L1, rx: 0.064 * k, rz: 0.066 * k, \u6C9F: 0.16, \u6743: [{ id: \u80A9ID, w: 0.48 }, { id: \u8098ID, w: 0.52 }] },
+          { y\u504F: -L1 - 0.065 * k, rx: 0.07 * k, rz: 0.072 * k, \u6C9F: 0.1, \u6743: [{ id: \u80A9ID, w: 0.2 }, { id: \u8098ID, w: 0.8 }] },
+          { y\u504F: -L1 - L2 * 0.34, rx: 0.068 * k, rz: 0.07 * k, \u6C9F: 0.05, \u6743: [{ id: \u8098ID, w: 1 }] },
+          { y\u504F: -L1 - L2 * 0.72, rx: 0.051 * k, rz: 0.053 * k, \u6C9F: 0.05, \u6743: [{ id: \u8098ID, w: 1 }] },
+          { y\u504F: -L1 - L2 + 0.045 * k, rx: 0.045 * k, rz: 0.042 * k, \u6C9F: 0.08, \u6743: [{ id: \u8098ID, w: 0.85 }, { id: \u8155ID, w: 0.15 }] },
+          { y\u504F: -L1 - L2, rx: 0.044 * k, rz: 0.039 * k, \u6C9F: 0.1, \u6743: [{ id: \u8098ID, w: 0.55 }, { id: \u8155ID, w: 0.45 }] },
+          { y\u504F: -L1 - L2 - 0.018 * k, rx: 0.034 * k, rz: 0.03 * k, \u6C9F: 0.08, \u6743: [{ id: \u8098ID, w: 0.2 }, { id: \u8155ID, w: 0.8 }] },
+          { y\u504F: -L1 - L2 - 0.026 * k, rx: 2e-3 * k, rz: 2e-3 * k, \u6C9F: 0.08, \u6743: [{ id: \u8155ID, w: 1 }] }
         ];
         const \u622A\u9762 = \u81C2\u7AD9\u70B9.map((st, idx) => {
           const y = sy0 + st.y\u504F;
@@ -54105,20 +55328,150 @@ void main() {
         \u81C2\u7F51.frustumCulled = false;
         \u81C2\u7F51.bind(this.\u9AA8\u67B6);
         this.\u603B\u67A2.add(\u81C2\u7F51);
-        const \u624B\u638C\u4F53 = new Mesh(new BoxGeometry(0.118 * k, 0.044 * k, 0.135 * k), \u4EBA\u76AE\u7EC6\u8282\u6750);
-        \u624B\u638C\u4F53.position.set(0, -0.028 * k, 0.052 * k);
-        \u624B\u638C\u4F53.castShadow = true;
-        \u81C2\u9AA8.\u8155\u9AA8.add(\u624B\u638C\u4F53);
-        const \u62C7\u6307 = new Mesh(new CapsuleGeometry(0.016 * k, 0.055 * k, 4, 6), \u4EBA\u76AE\u7EC6\u8282\u6750);
-        \u62C7\u6307.rotation.set(Math.PI * 0.45, 0, sx * 0.55);
-        \u62C7\u6307.position.set(-sx * 0.064 * k, -0.032 * k, 0.072 * k);
-        \u81C2\u9AA8.\u8155\u9AA8.add(\u62C7\u6307);
-        for (let fi = 0; fi < 4; fi++) {
-          const \u6307 = new Mesh(new CapsuleGeometry(0.014 * k, 0.062 * k, 4, 6), \u4EBA\u76AE\u7EC6\u8282\u6750);
-          \u6307.rotation.x = Math.PI * 0.52;
-          \u6307.position.set((-0.042 + fi * 0.028) * k, -0.035 * k, 0.14 * k);
-          \u81C2\u9AA8.\u8155\u9AA8.add(\u6307);
+        const \u8155\u8282 = new Mesh(new SphereGeometry(0.044 * k, 12, 10), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u8155\u8282.scale.set(1.06, 0.84, 0.96);
+        \u8155\u8282.position.set(0, -0.012 * k, 2e-3 * k);
+        \u8155\u8282.castShadow = true;
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u8155\u8282);
+        const \u5C3A\u9AA8\u5934 = new Mesh(new SphereGeometry(0.015 * k, 8, 6), \u5173\u8282\u6697\u80A4\u6750);
+        \u5C3A\u9AA8\u5934.scale.set(0.85, 0.72, 1);
+        \u5C3A\u9AA8\u5934.position.set(sx * 0.04 * k, 4e-3 * k, -4e-3 * k);
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u5C3A\u9AA8\u5934);
+        const \u638C\u5F62 = new Shape();
+        const \u5185 = -sx;
+        const \u5916 = sx;
+        \u638C\u5F62.moveTo(\u5185 * 0.042 * k, -0.012 * k);
+        \u638C\u5F62.bezierCurveTo(\u5185 * 0.068 * k, 0.018 * k, \u5185 * 0.066 * k, 0.075 * k, \u5185 * 0.056 * k, 0.114 * k);
+        \u638C\u5F62.quadraticCurveTo(\u5185 * 0.012 * k, 0.128 * k, \u5916 * 0.022 * k, 0.121 * k);
+        \u638C\u5F62.quadraticCurveTo(\u5916 * 0.056 * k, 0.112 * k, \u5916 * 0.058 * k, 0.095 * k);
+        \u638C\u5F62.bezierCurveTo(\u5916 * 0.062 * k, 0.062 * k, \u5916 * 0.054 * k, 0.016 * k, \u5916 * 0.04 * k, -0.012 * k);
+        \u638C\u5F62.quadraticCurveTo(0, -0.026 * k, \u5185 * 0.042 * k, -0.012 * k);
+        const \u638C\u51E0 = new ExtrudeGeometry(\u638C\u5F62, {
+          depth: 0.026 * k,
+          bevelEnabled: true,
+          bevelThickness: 0.011 * k,
+          bevelSize: 9e-3 * k,
+          bevelSegments: 4,
+          curveSegments: 10
+        });
+        \u638C\u51E0.rotateX(Math.PI * 0.5);
+        const \u638C\u4F53 = new Mesh(\u638C\u51E0, \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u638C\u4F53.position.set(0, -0.018 * k, 2e-3 * k);
+        \u638C\u4F53.castShadow = true;
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u638C\u4F53);
+        const \u5927\u9C7C\u9645 = new Mesh(new SphereGeometry(0.038 * k, 12, 10), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u5927\u9C7C\u9645.scale.set(0.88, 0.56, 1.32);
+        \u5927\u9C7C\u9645.position.set(\u5185 * 0.036 * k, -0.044 * k, 0.044 * k);
+        \u5927\u9C7C\u9645.rotation.y = \u5185 * 0.26;
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u5927\u9C7C\u9645);
+        const \u5C0F\u9C7C\u9645 = new Mesh(new SphereGeometry(0.028 * k, 10, 8), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u5C0F\u9C7C\u9645.scale.set(0.76, 0.52, 1.62);
+        \u5C0F\u9C7C\u9645.position.set(\u5916 * 0.038 * k, -0.045 * k, 0.05 * k);
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u5C0F\u9C7C\u9645);
+        const \u524D\u638C\u57AB = new Mesh(new SphereGeometry(0.048 * k, 12, 8), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u524D\u638C\u57AB.scale.set(1.22, 0.36, 0.62);
+        \u524D\u638C\u57AB.position.set(0, -0.048 * k, 0.104 * k);
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u524D\u638C\u57AB);
+        const \u638C\u5FC3\u76AE = new Mesh(new CircleGeometry(0.044 * k, 14), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u638C\u5FC3\u76AE.rotation.x = Math.PI * 0.5;
+        \u638C\u5FC3\u76AE.scale.set(1.05, 1.18, 1);
+        \u638C\u5FC3\u76AE.position.set(0, -0.055 * k, 0.066 * k);
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u638C\u5FC3\u76AE);
+        const \u56DB\u6307\u914D\u7F6E = [
+          { x: \u5185 * 0.042, z: 0.12, \u5BBD: 0.0136, \u957F: 0.094, \u504FY: \u5185 * 0.07 },
+          { x: \u5185 * 0.013, z: 0.126, \u5BBD: 0.0144, \u957F: 0.106, \u504FY: \u5185 * 0.015 },
+          { x: \u5916 * 0.017, z: 0.121, \u5BBD: 0.0134, \u957F: 0.098, \u504FY: \u5916 * 0.035 },
+          { x: \u5916 * 0.044, z: 0.107, \u5BBD: 0.0114, \u957F: 0.077, \u504FY: \u5916 * 0.095 }
+        ];
+        const \u56DB\u6307\u94FE = [];
+        for (let fi = 0; fi < \u56DB\u6307\u914D\u7F6E.length; fi++) {
+          const cfg = \u56DB\u6307\u914D\u7F6E[fi];
+          const \u808C\u8171 = new Mesh(new CapsuleGeometry(46e-4 * k, 0.075 * k, 4, 6), \u5173\u8282\u6697\u80A4\u6750);
+          \u808C\u8171.rotation.x = Math.PI * 0.5;
+          \u808C\u8171.rotation.z = -cfg.x * 2.2;
+          \u808C\u8171.position.set(cfg.x * 0.68 * k, -8e-3 * k, 0.068 * k);
+          \u81C2\u9AA8.\u8155\u9AA8.add(\u808C\u8171);
+          const \u638C\u9AA8\u8282 = new Mesh(new SphereGeometry(cfg.\u5BBD * 1.12 * k, 9, 7), \u5173\u8282\u6697\u80A4\u6750);
+          \u638C\u9AA8\u8282.scale.set(1, 0.78, 1);
+          \u638C\u9AA8\u8282.position.set(cfg.x * k, -0.02 * k, (cfg.z - 6e-3) * k);
+          \u81C2\u9AA8.\u8155\u9AA8.add(\u638C\u9AA8\u8282);
+          if (fi < 3) {
+            const next = \u56DB\u6307\u914D\u7F6E[fi + 1];
+            const \u6307\u8E7C = new Mesh(new SphereGeometry(0.011 * k, 6, 6), \u5173\u8282\u6697\u80A4\u6750);
+            \u6307\u8E7C.scale.set(1.1, 0.55, 1.2);
+            \u6307\u8E7C.position.set((cfg.x + next.x) * 0.5 * k, -0.034 * k, ((cfg.z + next.z) * 0.5 - 4e-3) * k);
+            \u81C2\u9AA8.\u8155\u9AA8.add(\u6307\u8E7C);
+          }
+          const L1f = cfg.\u957F * 0.45 * k;
+          const L2f = cfg.\u957F * 0.31 * k;
+          const L3f = cfg.\u957F * 0.24 * k;
+          const R = cfg.\u5BBD * k;
+          const \u57FA\u67A2 = new Group();
+          \u57FA\u67A2.position.set(cfg.x * k, -0.032 * k, cfg.z * k);
+          \u57FA\u67A2.rotation.y = cfg.\u504FY;
+          const \u8FD1\u8282 = new Mesh(new CylinderGeometry(R * 0.88, R * 1.02, L1f, 9), \u4EBA\u76AE\u7EC6\u8282\u6750);
+          \u8FD1\u8282.rotation.x = Math.PI * 0.5;
+          \u8FD1\u8282.position.z = L1f * 0.5;
+          \u8FD1\u8282.castShadow = true;
+          \u57FA\u67A2.add(\u8FD1\u8282);
+          const \u4E2D\u5173\u7403 = new Mesh(new SphereGeometry(R * 0.9, 8, 6), \u5173\u8282\u6697\u80A4\u6750);
+          \u4E2D\u5173\u7403.position.z = L1f;
+          \u57FA\u67A2.add(\u4E2D\u5173\u7403);
+          const \u4E2D\u67A2 = new Group();
+          \u4E2D\u67A2.position.z = L1f;
+          const \u4E2D\u8282 = new Mesh(new CylinderGeometry(R * 0.78, R * 0.88, L2f, 9), \u4EBA\u76AE\u7EC6\u8282\u6750);
+          \u4E2D\u8282.rotation.x = Math.PI * 0.5;
+          \u4E2D\u8282.position.z = L2f * 0.5;
+          \u4E2D\u67A2.add(\u4E2D\u8282);
+          const \u672B\u5173\u7403 = new Mesh(new SphereGeometry(R * 0.8, 8, 6), \u5173\u8282\u6697\u80A4\u6750);
+          \u672B\u5173\u7403.position.z = L2f;
+          \u4E2D\u67A2.add(\u672B\u5173\u7403);
+          const \u672B\u67A2 = new Group();
+          \u672B\u67A2.position.z = L2f;
+          const \u8FDC\u8282 = new Mesh(new CylinderGeometry(R * 0.66, R * 0.78, L3f, 8), \u4EBA\u76AE\u7EC6\u8282\u6750);
+          \u8FDC\u8282.rotation.x = Math.PI * 0.5;
+          \u8FDC\u8282.position.z = L3f * 0.48;
+          const \u6307\u8179 = new Mesh(new SphereGeometry(R * 0.72, 8, 7), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+          \u6307\u8179.scale.set(0.96, 0.82, 1.15);
+          \u6307\u8179.position.set(0, -R * 0.1, L3f * 0.86);
+          const \u6307\u7532 = new Mesh(new SphereGeometry(R * 0.68, 8, 6), \u6307\u7532\u5149\u6750);
+          \u6307\u7532.scale.set(0.88, 0.28, 1.24);
+          \u6307\u7532.position.set(0, R * 0.58, L3f * 0.64);
+          \u672B\u67A2.add(\u8FDC\u8282, \u6307\u8179, \u6307\u7532);
+          \u4E2D\u67A2.add(\u672B\u67A2);
+          \u57FA\u67A2.add(\u4E2D\u67A2);
+          \u81C2\u9AA8.\u8155\u9AA8.add(\u57FA\u67A2);
+          \u56DB\u6307\u94FE.push({ \u57FA\u67A2, \u4E2D\u67A2, \u672B\u67A2, \u57FA\u504FY: cfg.\u504FY, \u957F\u5EA6\u6BD4: cfg.\u957F / 0.106 });
         }
+        const \u62C7R = 0.0168 * k;
+        const \u62C7L1 = 0.044 * k;
+        const \u62C7L2 = 0.036 * k;
+        const \u62C7\u57FA\u67A2 = new Group();
+        \u62C7\u57FA\u67A2.position.set(\u5185 * 0.056 * k, -0.038 * k, 0.05 * k);
+        \u62C7\u57FA\u67A2.rotation.set(0.18, \u5185 * 0.68, -\u5185 * 0.18);
+        const \u62C7\u6839\u7403 = new Mesh(new SphereGeometry(\u62C7R * 1.1, 9, 7), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        const \u62C7\u8FD1\u8282 = new Mesh(new CylinderGeometry(\u62C7R * 0.88, \u62C7R * 1.06, \u62C7L1, 9), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u62C7\u8FD1\u8282.rotation.x = Math.PI * 0.5;
+        \u62C7\u8FD1\u8282.position.z = \u62C7L1 * 0.5;
+        \u62C7\u8FD1\u8282.castShadow = true;
+        const \u62C7\u5173\u7403 = new Mesh(new SphereGeometry(\u62C7R * 0.9, 8, 6), \u5173\u8282\u6697\u80A4\u6750);
+        \u62C7\u5173\u7403.position.z = \u62C7L1;
+        \u62C7\u57FA\u67A2.add(\u62C7\u6839\u7403, \u62C7\u8FD1\u8282, \u62C7\u5173\u7403);
+        const \u62C7\u672B\u67A2 = new Group();
+        \u62C7\u672B\u67A2.position.z = \u62C7L1;
+        const \u62C7\u8FDC\u8282 = new Mesh(new CylinderGeometry(\u62C7R * 0.72, \u62C7R * 0.88, \u62C7L2, 8), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u62C7\u8FDC\u8282.rotation.x = Math.PI * 0.5;
+        \u62C7\u8FDC\u8282.position.z = \u62C7L2 * 0.46;
+        const \u62C7\u6307\u8179 = new Mesh(new SphereGeometry(\u62C7R * 0.8, 8, 7), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u62C7\u6307\u8179.scale.set(0.98, 0.84, 1.16);
+        \u62C7\u6307\u8179.position.set(0, -\u62C7R * 0.12, \u62C7L2 * 0.84);
+        const \u62C7\u6307\u7532 = new Mesh(new SphereGeometry(\u62C7R * 0.74, 8, 6), \u6307\u7532\u5149\u6750);
+        \u62C7\u6307\u7532.scale.set(0.92, 0.28, 1.22);
+        \u62C7\u6307\u7532.position.set(0, \u62C7R * 0.58, \u62C7L2 * 0.62);
+        \u62C7\u672B\u67A2.add(\u62C7\u8FDC\u8282, \u62C7\u6307\u8179, \u62C7\u6307\u7532);
+        \u62C7\u57FA\u67A2.add(\u62C7\u672B\u67A2);
+        \u81C2\u9AA8.\u8155\u9AA8.add(\u62C7\u57FA\u67A2);
+        \u81C2\u9AA8.\u624B\u7EC6\u90E8 = { \u56DB\u6307: \u56DB\u6307\u94FE, \u62C7\u57FA\u67A2, \u62C7\u672B\u67A2, \u7B26\u53F7: sx };
       };
       \u9020\u65E0\u7F1D\u4EBA\u81C2(1, this.\u5DE6\u81C2);
       \u9020\u65E0\u7F1D\u4EBA\u81C2(-1, this.\u53F3\u81C2);
@@ -54127,24 +55480,24 @@ void main() {
         const \u819DID = sx > 0 ? \u9AA8_\u5DE6\u819D : \u9AA8_\u53F3\u819D;
         const \u8E1DID = sx > 0 ? \u9AA8_\u5DE6\u8E1D : \u9AA8_\u53F3\u8E1D;
         const hx = \u817F\u9AA8.\u9ACB\u951A.x;
-        const hy = 0.88 * k + \u817F\u9AA8.\u9ACB\u951A.y;
+        const hy = 0.88 * k + \u62AC\u9AD8\u91CF + \u817F\u9AA8.\u9ACB\u951A.y;
         const hz = \u817F\u9AA8.\u9ACB\u951A.z;
         const L1 = this.\u5927\u817F\u957F;
         const L2 = this.\u5C0F\u817F\u957F;
         const \u817F\u7AD9\u70B9 = [
           { y\u504F: 0.08 * k, rx: 0.06 * k, rz: 0.06 * k, \u6C9F: 0.12, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.8 }, { id: \u9ACBID, w: 0.2 }] },
-          { y\u504F: 0.01 * k, rx: 0.14 * k, rz: 0.142 * k, \u6C9F: 0.06, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.35 }, { id: \u9ACBID, w: 0.65 }] },
-          { y\u504F: -L1 * 0.34, rx: 0.128 * k, rz: 0.132 * k, \u6C9F: 0.04, \u6743: [{ id: \u9ACBID, w: 1 }] },
-          { y\u504F: -L1 * 0.72, rx: 0.098 * k, rz: 0.102 * k, \u6C9F: 0.08, \u6743: [{ id: \u9ACBID, w: 0.9 }, { id: \u819DID, w: 0.1 }] },
-          { y\u504F: -L1 + 0.05 * k, rx: 0.084 * k, rz: 0.088 * k, \u6C9F: 0.14, \u6743: [{ id: \u9ACBID, w: 0.7 }, { id: \u819DID, w: 0.3 }] },
-          { y\u504F: -L1, rx: 0.082 * k, rz: 0.086 * k, \u6C9F: 0.16, \u6743: [{ id: \u9ACBID, w: 0.48 }, { id: \u819DID, w: 0.52 }] },
-          { y\u504F: -L1 - 0.07 * k, rx: 0.088 * k, rz: 0.09 * k, \u6C9F: 0.08, \u6743: [{ id: \u9ACBID, w: 0.18 }, { id: \u819DID, w: 0.82 }] },
-          { y\u504F: -L1 - L2 * 0.34, z\u504F: -0.015 * k, rx: 0.092 * k, rz: 0.1 * k, \u6C9F: 0.04, \u6743: [{ id: \u819DID, w: 1 }] },
-          { y\u504F: -L1 - L2 * 0.72, rx: 0.064 * k, rz: 0.068 * k, \u6C9F: 0.06, \u6743: [{ id: \u819DID, w: 1 }] },
-          { y\u504F: -L1 - L2 + 0.04 * k, rx: 0.055 * k, rz: 0.058 * k, \u6C9F: 0.1, \u6743: [{ id: \u819DID, w: 0.78 }, { id: \u8E1DID, w: 0.22 }] },
-          { y\u504F: -L1 - L2, rx: 0.056 * k, rz: 0.06 * k, \u6C9F: 0.12, \u6743: [{ id: \u819DID, w: 0.3 }, { id: \u8E1DID, w: 0.7 }] },
-          { y\u504F: -L1 - L2 - 0.05 * k, rx: 0.062 * k, rz: 0.078 * k, \u6C9F: 0.06, \u6743: [{ id: \u8E1DID, w: 1 }] },
-          { y\u504F: -L1 - L2 - 0.068 * k, rx: 2e-3 * k, rz: 2e-3 * k, \u6C9F: 0.08, \u6743: [{ id: \u8E1DID, w: 1 }] }
+          { y\u504F: 0.01 * k, rx: 0.136 * k, rz: 0.138 * k, \u6C9F: 0.06, \u6743: [{ id: \u9AA8_\u9AA8\u76C6, w: 0.35 }, { id: \u9ACBID, w: 0.65 }] },
+          { y\u504F: -L1 * 0.34, rx: 0.12 * k, rz: 0.124 * k, \u6C9F: 0.04, \u6743: [{ id: \u9ACBID, w: 1 }] },
+          { y\u504F: -L1 * 0.72, rx: 0.09 * k, rz: 0.094 * k, \u6C9F: 0.08, \u6743: [{ id: \u9ACBID, w: 0.9 }, { id: \u819DID, w: 0.1 }] },
+          { y\u504F: -L1 + 0.06 * k, rx: 0.076 * k, rz: 0.08 * k, \u6C9F: 0.14, \u6743: [{ id: \u9ACBID, w: 0.7 }, { id: \u819DID, w: 0.3 }] },
+          { y\u504F: -L1, rx: 0.074 * k, rz: 0.078 * k, \u6C9F: 0.16, \u6743: [{ id: \u9ACBID, w: 0.48 }, { id: \u819DID, w: 0.52 }] },
+          { y\u504F: -L1 - 0.08 * k, rx: 0.08 * k, rz: 0.084 * k, \u6C9F: 0.08, \u6743: [{ id: \u9ACBID, w: 0.18 }, { id: \u819DID, w: 0.82 }] },
+          { y\u504F: -L1 - L2 * 0.34, z\u504F: -0.015 * k, rx: 0.084 * k, rz: 0.092 * k, \u6C9F: 0.04, \u6743: [{ id: \u819DID, w: 1 }] },
+          { y\u504F: -L1 - L2 * 0.72, rx: 0.056 * k, rz: 0.06 * k, \u6C9F: 0.06, \u6743: [{ id: \u819DID, w: 1 }] },
+          { y\u504F: -L1 - L2 + 0.05 * k, rx: 0.049 * k, rz: 0.052 * k, \u6C9F: 0.1, \u6743: [{ id: \u819DID, w: 0.82 }, { id: \u8E1DID, w: 0.18 }] },
+          { y\u504F: -L1 - L2, rx: 0.049 * k, rz: 0.053 * k, \u6C9F: 0.12, \u6743: [{ id: \u819DID, w: 0.52 }, { id: \u8E1DID, w: 0.48 }] },
+          { y\u504F: -L1 - L2 - 0.025 * k, rx: 0.04 * k, rz: 0.044 * k, \u6C9F: 0.08, \u6743: [{ id: \u819DID, w: 0.18 }, { id: \u8E1DID, w: 0.82 }] },
+          { y\u504F: -L1 - L2 - 0.036 * k, rx: 2e-3 * k, rz: 2e-3 * k, \u6C9F: 0.08, \u6743: [{ id: \u8E1DID, w: 1 }] }
         ];
         const \u622A\u9762 = \u817F\u7AD9\u70B9.map((st, idx) => {
           const p = new Vector3(hx, hy + st.y\u504F, hz + (st.z\u504F || 0));
@@ -54160,16 +55513,118 @@ void main() {
         \u817F\u7F51.frustumCulled = false;
         \u817F\u7F51.bind(this.\u9AA8\u67B6);
         this.\u603B\u67A2.add(\u817F\u7F51);
-        const \u811A\u638C\u4F53 = new Mesh(new BoxGeometry(0.122 * k, 0.05 * k, 0.215 * k), \u4EBA\u76AE\u7EC6\u8282\u6750);
-        \u811A\u638C\u4F53.position.set(0, -0.054 * k, 0.058 * k);
+        const \u5185 = -sx;
+        const \u5916 = sx;
+        const \u8E1D\u8282 = new Mesh(new SphereGeometry(0.052 * k, 12, 10), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u8E1D\u8282.scale.set(0.98, 0.94, 1.08);
+        \u8E1D\u8282.position.set(0, -0.022 * k, -2e-3 * k);
+        \u8E1D\u8282.castShadow = true;
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u8E1D\u8282);
+        const \u5185\u8E1D\u9AA8 = new Mesh(new SphereGeometry(0.019 * k, 8, 7), \u5173\u8282\u6697\u80A4\u6750);
+        \u5185\u8E1D\u9AA8.scale.set(0.68, 0.96, 1.02);
+        \u5185\u8E1D\u9AA8.position.set(\u5185 * 0.044 * k, -4e-3 * k, 6e-3 * k);
+        const \u5916\u8E1D\u9AA8 = new Mesh(new SphereGeometry(0.018 * k, 8, 7), \u5173\u8282\u6697\u80A4\u6750);
+        \u5916\u8E1D\u9AA8.scale.set(0.68, 0.96, 1.02);
+        \u5916\u8E1D\u9AA8.position.set(\u5916 * 0.044 * k, -0.014 * k, -0.01 * k);
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u5185\u8E1D\u9AA8, \u5916\u8E1D\u9AA8);
+        const \u8DDF\u8171 = new Mesh(new CapsuleGeometry(0.014 * k, 0.068 * k, 5, 8), \u5173\u8282\u6697\u80A4\u6750);
+        \u8DDF\u8171.rotation.x = 0.18;
+        \u8DDF\u8171.position.set(0, 6e-3 * k, -0.045 * k);
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u8DDF\u8171);
+        const \u811A\u540E\u8DDF = new Mesh(new SphereGeometry(0.052 * k, 12, 10), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u811A\u540E\u8DDF.scale.set(0.92, 0.86, 1.18);
+        \u811A\u540E\u8DDF.position.set(0, -0.048 * k, -0.034 * k);
+        \u811A\u540E\u8DDF.castShadow = true;
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u811A\u540E\u8DDF);
+        const \u8DB3\u8DDF\u57AB = new Mesh(new SphereGeometry(0.044 * k, 10, 8), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u8DB3\u8DDF\u57AB.scale.set(0.95, 0.42, 1.1);
+        \u8DB3\u8DDF\u57AB.position.set(0, -0.076 * k, -0.03 * k);
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u8DB3\u8DDF\u57AB);
+        const \u811A\u5F62 = new Shape();
+        \u811A\u5F62.moveTo(\u5185 * 0.038 * k, -0.062 * k);
+        \u811A\u5F62.bezierCurveTo(\u5185 * 0.042 * k, -0.015 * k, \u5185 * 0.024 * k, 0.042 * k, \u5185 * 0.056 * k, 0.125 * k);
+        \u811A\u5F62.quadraticCurveTo(\u5185 * 0.062 * k, 0.166 * k, \u5185 * 0.032 * k, 0.178 * k);
+        \u811A\u5F62.quadraticCurveTo(\u5916 * 0.018 * k, 0.172 * k, \u5916 * 0.056 * k, 0.146 * k);
+        \u811A\u5F62.bezierCurveTo(\u5916 * 0.068 * k, 0.105 * k, \u5916 * 0.056 * k, 0.025 * k, \u5916 * 0.044 * k, -0.052 * k);
+        \u811A\u5F62.quadraticCurveTo(0, -0.082 * k, \u5185 * 0.038 * k, -0.062 * k);
+        const \u811A\u638C\u51E0 = new ExtrudeGeometry(\u811A\u5F62, {
+          depth: 0.028 * k,
+          bevelEnabled: true,
+          bevelThickness: 0.014 * k,
+          bevelSize: 0.01 * k,
+          bevelSegments: 4,
+          curveSegments: 10
+        });
+        \u811A\u638C\u51E0.rotateX(Math.PI * 0.5);
+        const \u811A\u638C\u4F53 = new Mesh(\u811A\u638C\u51E0, \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u811A\u638C\u4F53.position.set(0, -0.052 * k, 4e-3 * k);
         \u811A\u638C\u4F53.castShadow = true;
         \u817F\u9AA8.\u8E1D\u9AA8.add(\u811A\u638C\u4F53);
-        for (let ti = 0; ti < 5; ti++) {
-          const \u8DBE = new Mesh(new SphereGeometry((0.017 - ti * 12e-4) * k, 6, 6), \u4EBA\u76AE\u7EC6\u8282\u6750);
-          \u8DBE.scale.set(0.9, 0.8, 1.35);
-          \u8DBE.position.set(sx * (0.044 - ti * 0.022) * k, -0.06 * k, (0.18 - ti * 4e-3) * k);
-          \u817F\u9AA8.\u8E1D\u9AA8.add(\u8DBE);
+        const \u811A\u80CC\u4E18 = new Mesh(new SphereGeometry(0.064 * k, 12, 10), \u4EBA\u76AE\u7EC6\u8282\u6750);
+        \u811A\u80CC\u4E18.scale.set(0.86, 0.68, 1.62);
+        \u811A\u80CC\u4E18.position.set(\u5185 * 4e-3 * k, -0.032 * k, 0.048 * k);
+        \u811A\u80CC\u4E18.rotation.x = 0.28;
+        \u811A\u80CC\u4E18.castShadow = true;
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u811A\u80CC\u4E18);
+        for (let ti = 0; ti < 4; ti++) {
+          const tx = (\u5185 * 0.034 + (\u5916 - \u5185) * 0.011 * ti) * k;
+          const \u811A\u8171 = new Mesh(new CapsuleGeometry(42e-4 * k, 0.092 * k, 4, 6), \u5173\u8282\u6697\u80A4\u6750);
+          \u811A\u8171.rotation.x = Math.PI * 0.5 + 0.22;
+          \u811A\u8171.rotation.z = -tx * 1.5;
+          \u811A\u8171.position.set(tx * 0.72, -0.024 * k, 0.088 * k);
+          \u817F\u9AA8.\u8E1D\u9AA8.add(\u811A\u8171);
         }
+        const \u524D\u811A\u638C\u57AB = new Mesh(new SphereGeometry(0.054 * k, 12, 8), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u524D\u811A\u638C\u57AB.scale.set(1.16, 0.34, 0.82);
+        \u524D\u811A\u638C\u57AB.position.set(0, -0.077 * k, 0.132 * k);
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u524D\u811A\u638C\u57AB);
+        const \u8DB3\u5F13\u9634\u9762 = new Mesh(new SphereGeometry(0.034 * k, 10, 8), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+        \u8DB3\u5F13\u9634\u9762.scale.set(0.75, 0.32, 1.35);
+        \u8DB3\u5F13\u9634\u9762.position.set(\u5916 * 0.022 * k, -0.076 * k, 0.055 * k);
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u8DB3\u5F13\u9634\u9762);
+        const \u524D\u8DBE\u67A2 = new Group();
+        \u524D\u8DBE\u67A2.position.set(0, -0.074 * k, 0.172 * k);
+        \u817F\u9AA8.\u8E1D\u9AA8.add(\u524D\u8DBE\u67A2);
+        const \u811A\u8DBE\u8868 = [
+          { x: \u5185 * 0.04, z: 0.01, rx: 0.0185, \u957F: 0.054, \u504FY: \u5185 * 0.05 },
+          // 大脚趾
+          { x: \u5185 * 0.012, z: 0.014, rx: 0.0132, \u957F: 0.05, \u504FY: \u5185 * 0.01 },
+          // 二脚趾
+          { x: \u5916 * 0.013, z: 8e-3, rx: 0.0122, \u957F: 0.043, \u504FY: \u5916 * 0.02 },
+          // 三脚趾
+          { x: \u5916 * 0.035, z: -2e-3, rx: 0.0112, \u957F: 0.036, \u504FY: \u5916 * 0.05 },
+          // 四脚趾
+          { x: \u5916 * 0.054, z: -0.016, rx: 0.0102, \u957F: 0.028, \u504FY: \u5916 * 0.1 }
+          // 小脚趾
+        ];
+        for (let ti = 0; ti < \u811A\u8DBE\u8868.length; ti++) {
+          const td = \u811A\u8DBE\u8868[ti];
+          const \u8DBE\u7EC4 = new Group();
+          \u8DBE\u7EC4.position.set(td.x * k, 2e-3 * k, td.z * k);
+          \u8DBE\u7EC4.rotation.y = td.\u504FY;
+          const r = td.rx * k;
+          const l1 = td.\u957F * 0.56 * k;
+          const l2 = td.\u957F * 0.44 * k;
+          const \u8DBE\u8FD1\u8282 = new Mesh(new CylinderGeometry(r * 0.88, r * 1.02, l1, 8), \u4EBA\u76AE\u7EC6\u8282\u6750);
+          \u8DBE\u8FD1\u8282.rotation.x = Math.PI * 0.5;
+          \u8DBE\u8FD1\u8282.position.z = l1 * 0.48;
+          \u8DBE\u8FD1\u8282.castShadow = true;
+          const \u8DBE\u8282\u7EB9 = new Mesh(new SphereGeometry(r * 0.88, 7, 6), \u5173\u8282\u6697\u80A4\u6750);
+          \u8DBE\u8282\u7EB9.scale.set(1, 0.84, 0.9);
+          \u8DBE\u8282\u7EB9.position.z = l1;
+          const \u8DBE\u8FDC\u8282 = new Mesh(new SphereGeometry(r * 0.96, 9, 8), \u4EBA\u76AE\u7EC6\u8282\u6750);
+          \u8DBE\u8FDC\u8282.scale.set(0.96, 0.8, 1.24);
+          \u8DBE\u8FDC\u8282.position.set(0, -r * 0.06, l1 + l2 * 0.45);
+          const \u8DBE\u5E95\u57AB = new Mesh(new SphereGeometry(r * 0.78, 8, 6), \u638C\u5FC3\u7EA2\u6DA6\u6750);
+          \u8DBE\u5E95\u57AB.scale.set(0.95, 0.55, 1.08);
+          \u8DBE\u5E95\u57AB.position.set(0, -r * 0.42, l1 + l2 * 0.42);
+          const \u8DBE\u7532 = new Mesh(new SphereGeometry(r * (ti === 0 ? 0.78 : 0.68), 8, 6), \u6307\u7532\u5149\u6750);
+          \u8DBE\u7532.scale.set(0.96, 0.24, 1.04);
+          \u8DBE\u7532.position.set(0, r * 0.58, l1 + l2 * 0.52);
+          \u8DBE\u7EC4.add(\u8DBE\u8FD1\u8282, \u8DBE\u8282\u7EB9, \u8DBE\u8FDC\u8282, \u8DBE\u5E95\u57AB, \u8DBE\u7532);
+          \u524D\u8DBE\u67A2.add(\u8DBE\u7EC4);
+        }
+        \u817F\u9AA8.\u811A\u7EC6\u90E8 = { \u524D\u8DBE\u67A2 };
       };
       \u9020\u65E0\u7F1D\u4EBA\u817F(1, this.\u5DE6\u817F);
       \u9020\u65E0\u7F1D\u4EBA\u817F(-1, this.\u53F3\u817F);
@@ -54314,19 +55769,19 @@ void main() {
       this.\u5C3E\u6839\u67A2.add(\u5C3E\u6839\u8282, \u5C3E\u6839\u675F);
       this.\u5C3E\u4E2D\u67A2 = new Group();
       this.\u5C3E\u4E2D\u67A2.position.set(0, -0.19 * k, -0.09 * k);
-      const \u5C3E\u4E2D\u675F = new Mesh(new CylinderGeometry(0.056 * k, 0.044 * k, 0.3 * k, 8), \u9B03\u6BDB\u9ED1\u6750);
-      \u5C3E\u4E2D\u675F.scale.set(0.82, 1, 1.1);
-      \u5C3E\u4E2D\u675F.position.set(0, -0.14 * k, -0.015 * k);
+      const \u5C3E\u4E2D\u675F = new Mesh(new CylinderGeometry(0.056 * k, 0.046 * k, 0.36 * k, 8), \u9B03\u6BDB\u9ED1\u6750);
+      \u5C3E\u4E2D\u675F.scale.set(0.84, 1, 1.12);
+      \u5C3E\u4E2D\u675F.position.set(0, -0.17 * k, -0.015 * k);
       \u5C3E\u4E2D\u675F.rotation.x = 0.08;
       \u5C3E\u4E2D\u675F.castShadow = true;
       this.\u5C3E\u4E2D\u67A2.add(\u5C3E\u4E2D\u675F);
       this.\u5C3E\u6839\u67A2.add(this.\u5C3E\u4E2D\u67A2);
       this.\u5C3E\u68A2\u67A2 = new Group();
-      this.\u5C3E\u68A2\u67A2.position.set(0, -0.28 * k, -0.025 * k);
-      const \u5C3E\u68A2\u675F = new Mesh(new ConeGeometry(0.044 * k, 0.26 * k, 8), \u9B03\u6BDB\u9ED1\u6750);
-      \u5C3E\u68A2\u675F.scale.set(0.78, 1, 1.05);
+      this.\u5C3E\u68A2\u67A2.position.set(0, -0.34 * k, -0.025 * k);
+      const \u5C3E\u68A2\u675F = new Mesh(new ConeGeometry(0.046 * k, 0.32 * k, 8), \u9B03\u6BDB\u9ED1\u6750);
+      \u5C3E\u68A2\u675F.scale.set(0.8, 1, 1.08);
       \u5C3E\u68A2\u675F.rotation.x = Math.PI;
-      \u5C3E\u68A2\u675F.position.set(0, -0.12 * k, 0);
+      \u5C3E\u68A2\u675F.position.set(0, -0.15 * k, 0);
       \u5C3E\u68A2\u675F.castShadow = true;
       this.\u5C3E\u68A2\u67A2.add(\u5C3E\u68A2\u675F);
       this.\u5C3E\u4E2D\u67A2.add(this.\u5C3E\u68A2\u67A2);
@@ -54343,12 +55798,12 @@ void main() {
           depthWrite: false
         });
         const \u5F71\u8EAF = new Mesh(\u5F71\u4F53\u51E0, \u6750);
-        \u5F71\u8EAF.position.set(0, 0.94 * k, 0);
+        \u5F71\u8EAF.position.set(0, 0.94 * k + \u62AC\u9AD8\u91CF, 0);
         const \u5F71\u9888 = new Mesh(\u5F71\u9888\u51E0, \u6750);
-        \u5F71\u9888.position.set(0, 1.4 * k, 0.62 * k);
+        \u5F71\u9888.position.set(0, 1.4 * k + \u62AC\u9AD8\u91CF, 0.62 * k);
         \u5F71\u9888.rotation.x = 0.4;
         const \u5F71\u5934 = new Mesh(\u5F71\u5934\u51E0, \u6750);
-        \u5F71\u5934.position.set(0, 1.78 * k, 0.95 * k);
+        \u5F71\u5934.position.set(0, 1.78 * k + \u62AC\u9AD8\u91CF, 0.95 * k);
         \u5F71\u5934.rotation.x = 0.32;
         \u5F71\u7EC4.add(\u5F71\u8EAF, \u5F71\u9888, \u5F71\u5934);
         \u5F71\u7EC4.visible = false;
@@ -54448,7 +55903,7 @@ void main() {
         });
       }
     }
-    \u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(\u6839\u67A2, \u4E2D\u67A2, L1, L2, \u76EE\u6807\u4E16\u754C\u7CFB\u5C40\u90E8, \u6781\u5411\u57FA\u51C6) {
+    \u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(\u6839\u67A2, \u4E2D\u67A2, L1, L2, \u76EE\u6807\u4E16\u754C\u7CFB\u5C40\u90E8, \u6781\u5411\u7236\u7A7A\u95F4\u57FA\u51C6, \u6781\u5411\u671D\u540E) {
       const parent = \u6839\u67A2.parent;
       _\u5C40\u90E8\u6302\u70B9.copy(\u76EE\u6807\u4E16\u754C\u7CFB\u5C40\u90E8);
       this.\u603B\u67A2.localToWorld(_\u5C40\u90E8\u6302\u70B9);
@@ -54460,9 +55915,7 @@ void main() {
       _\u80A2\u5411\u91CF.normalize();
       const cosA = Math.max(-0.999, Math.min(0.999, (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d)));
       const sinA = Math.sqrt(Math.max(0, 1 - cosA * cosA));
-      _\u6781\u5411.copy(\u6781\u5411\u57FA\u51C6).transformDirection(this.\u603B\u67A2.matrixWorld);
-      parent.getWorldQuaternion(_\u56DB\u5143\u6570B).invert();
-      _\u6781\u5411.applyQuaternion(_\u56DB\u5143\u6570B).normalize();
+      _\u6781\u5411.copy(\u6781\u5411\u7236\u7A7A\u95F4\u57FA\u51C6).normalize();
       _\u6781\u5411.addScaledVector(_\u80A2\u5411\u91CF, -_\u6781\u5411.dot(_\u80A2\u5411\u91CF));
       if (_\u6781\u5411.lengthSq() < 1e-5) {
         _\u6781\u5411.copy(_\u540E\u53C2\u8003);
@@ -54471,7 +55924,11 @@ void main() {
       _\u6781\u5411.normalize();
       _\u4E0A\u6BB5\u8F74.copy(_\u80A2\u5411\u91CF).multiplyScalar(cosA).addScaledVector(_\u6781\u5411, sinA).normalize();
       _\u53CD\u4E0A\u6BB5\u8F74.copy(_\u4E0A\u6BB5\u8F74).negate();
-      _\u4FA7\u8F74.crossVectors(_\u6781\u5411, _\u4E0A\u6BB5\u8F74).normalize();
+      if (\u6781\u5411\u671D\u540E) {
+        _\u4FA7\u8F74.crossVectors(_\u4E0A\u6BB5\u8F74, _\u6781\u5411).normalize();
+      } else {
+        _\u4FA7\u8F74.crossVectors(_\u6781\u5411, _\u4E0A\u6BB5\u8F74).normalize();
+      }
       if (_\u4FA7\u8F74.lengthSq() < 1e-5) _\u4FA7\u8F74.set(1, 0, 0);
       _\u8098\u5411.crossVectors(_\u4E0A\u6BB5\u8F74, _\u4FA7\u8F74).normalize();
       _\u65CB\u8F6C\u77E9\u9635.makeBasis(_\u4FA7\u8F74, _\u53CD\u4E0A\u6BB5\u8F74, _\u8098\u5411);
@@ -54580,15 +56037,19 @@ void main() {
       const \u662F\u53F3\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
       const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
       const \u662F\u653B\u51FB = \u662F\u5DE6\u653B || \u662F\u53F3\u653B;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
       const \u662F\u7A7A\u4E2D = !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A || \u662F\u98DE\u5929 || \u662F\u590D\u4F4D && \u590D\u76F8 < 0.68;
-      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u8D77\u6B65 && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u52A0\u901F\u4E2D;
+      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u8D77\u6B65 && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u662F\u5F85\u673A && !\u52A0\u901F\u4E2D;
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
       const \u653B\u76F801 = \u662F\u653B\u51FB || \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.5) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.85 / 0.85 : 0;
-      const \u9A71\u52A8\u901F\u5EA6 = \u662F\u5927\u55B7 ? Math.max(46, Math.abs(\u6709\u6548\u901F\u5EA6)) : \u662F\u8FDE\u55B7 ? Math.max(38, Math.abs(\u6709\u6548\u901F\u5EA6)) : \u662F\u5C0F\u55B7 ? Math.max(32, Math.abs(\u6709\u6548\u901F\u5EA6)) : \u662F\u8F6C\u5F2F && Math.abs(\u6709\u6548\u901F\u5EA6) < 4 ? 28 : Math.abs(\u6709\u6548\u901F\u5EA6);
+      const \u9A71\u52A8\u901F\u5EA6 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5927\u55B7 ? Math.max(46, Math.abs(\u6709\u6548\u901F\u5EA6)) : \u662F\u8FDE\u55B7 ? Math.max(38, Math.abs(\u6709\u6548\u901F\u5EA6)) : \u662F\u5C0F\u55B7 ? Math.max(32, Math.abs(\u6709\u6548\u901F\u5EA6)) : \u662F\u884C\u8D70 ? !\u73AF\u5883 ? 8.2 : Math.abs(\u6709\u6548\u901F\u5EA6) : \u662F\u8F6C\u5F2F && Math.abs(\u6709\u6548\u901F\u5EA6) < 4 ? 28 : Math.abs(\u6709\u6548\u901F\u5EA6);
       let \u6B65\u9891 = 0;
       let \u6EDE\u540ELF = 0;
       let \u6EDE\u540ERF = 0.5;
@@ -54611,82 +56072,97 @@ void main() {
           \u6EDE\u540ERF = 0.5;
           \u6EDE\u540ELH = 0.5;
           \u7AD9\u59FF\u6BD4 = 0.52;
-          \u6446\u9AD8 = 0.2;
-          \u6B65\u5E45 = 0.44 * k;
-          \u5954\u8DD1\u8D77\u4F0F = Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D * Math.PI * 2)) * 0.06 * k;
+          \u6446\u9AD8 = 0.26;
+          \u6B65\u5E45 = 0.56 * k;
+          \u5954\u8DD1\u8D77\u4F0F = Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D * Math.PI * 2)) * 0.075 * k;
         } else if (\u662F\u6F2B\u6B65\u6001) {
-          \u6B65\u9891 = (0.95 + \u9A71\u52A8\u901F\u5EA6 * 0.08) * \u75AF\u766B;
+          \u6B65\u9891 = (0.92 + \u9A71\u52A8\u901F\u5EA6 * 0.075) * \u75AF\u766B;
           this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
           \u6EDE\u540ELH = 0;
           \u6EDE\u540ELF = 0.25;
           \u6EDE\u540ERH = 0.5;
           \u6EDE\u540ERF = 0.75;
-          \u7AD9\u59FF\u6BD4 = 0.76;
-          \u6446\u9AD8 = 0.21;
-          \u6B65\u5E45 = 0.48 * k;
-          \u5954\u8DD1\u8D77\u4F0F = Math.sin(this.\u6B65\u6001\u76F8\u4F4D * Math.PI * 4) * 0.015 * k;
-          \u810A\u67F1\u4FEF\u4EF0\u6CE2 = Math.sin(this.\u6B65\u6001\u76F8\u4F4D * Math.PI * 4) * 0.018;
+          \u7AD9\u59FF\u6BD4 = 0.75;
+          \u6446\u9AD8 = 0.28;
+          \u6B65\u5E45 = 0.64 * k;
+          \u5954\u8DD1\u8D77\u4F0F = Math.sin(this.\u6B65\u6001\u76F8\u4F4D * Math.PI * 4) * 0.026 * k;
+          \u810A\u67F1\u4FEF\u4EF0\u6CE2 = Math.sin(this.\u6B65\u6001\u76F8\u4F4D * Math.PI * 4) * 0.028;
         } else if (\u662F\u5C0F\u8DD1\u6001) {
-          \u6B65\u9891 = (2.2 + (\u9A71\u52A8\u901F\u5EA6 - 9.5) * 0.06) * \u75AF\u766B;
+          \u6B65\u9891 = (2.12 + (\u9A71\u52A8\u901F\u5EA6 - 9.5) * 0.058) * \u75AF\u766B;
           this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
           \u6EDE\u540ELF = 0;
           \u6EDE\u540ERH = 0;
           \u6EDE\u540ERF = 0.5;
           \u6EDE\u540ELH = 0.5;
-          \u7AD9\u59FF\u6BD4 = 0.43;
-          \u6446\u9AD8 = 0.3;
-          \u6B65\u5E45 = 0.78 * k;
+          \u7AD9\u59FF\u6BD4 = 0.42;
+          \u6446\u9AD8 = 0.4;
+          \u6B65\u5E45 = 1.02 * k;
           const \u5F39\u6027\u76F8 = (this.\u6B65\u6001\u76F8\u4F4D * 2 % 1 + 1) % 1;
-          \u5954\u8DD1\u8D77\u4F0F = Math.sin((\u5F39\u6027\u76F8 - 0.3) * Math.PI * 2) * 0.095 * k;
-          \u810A\u67F1\u4FEF\u4EF0\u6CE2 = Math.sin((\u5F39\u6027\u76F8 - 0.15) * Math.PI * 2) * 0.065;
+          \u5954\u8DD1\u8D77\u4F0F = Math.sin((\u5F39\u6027\u76F8 - 0.3) * Math.PI * 2) * 0.125 * k;
+          \u810A\u67F1\u4FEF\u4EF0\u6CE2 = Math.sin((\u5F39\u6027\u76F8 - 0.15) * Math.PI * 2) * 0.085;
         } else {
-          const \u75BE\u5EA6 = Math.min(1.5, 0.88 + Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 18) * 0.024 + (\u662F\u5927\u55B7 ? 0.3 : 0));
-          \u6B65\u9891 = (2.3 + Math.min(1.35, Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 18) * 0.035) + (\u662F\u5927\u55B7 ? 0.4 : 0)) * \u75AF\u766B;
+          const \u55B7\u7EA7 = \u662F\u5927\u55B7 ? 0.55 : \u662F\u8FDE\u55B7 ? 0.24 : \u662F\u5C0F\u55B7 ? 0.1 : 0;
+          const \u75BE\u5EA6 = Math.min(1.85, 0.92 + Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 18) * 0.024 + \u55B7\u7EA7);
+          \u6B65\u9891 = (\u662F\u5927\u55B7 ? 2.62 + Math.min(0.65, Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 30) * 0.025) : 2.22 + Math.min(1.25, Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 18) * 0.032) + \u55B7\u7EA7 * 1.05) * \u75AF\u766B;
           this.\u6B65\u6001\u76F8\u4F4D += dt * \u6B65\u9891;
           if (\u4FA7\u504F < -0.25) {
             \u6EDE\u540ELH = 0;
-            \u6EDE\u540ERH = 0.2;
-            \u6EDE\u540ELF = 0.42;
-            \u6EDE\u540ERF = 0.62;
+            \u6EDE\u540ERH = \u662F\u5927\u55B7 ? 0.15 : 0.2;
+            \u6EDE\u540ELF = \u662F\u5927\u55B7 ? 0.4 : 0.42;
+            \u6EDE\u540ERF = \u662F\u5927\u55B7 ? 0.54 : 0.62;
           } else {
             \u6EDE\u540ERH = 0;
-            \u6EDE\u540ELH = 0.2;
-            \u6EDE\u540ERF = 0.42;
-            \u6EDE\u540ELF = 0.62;
+            \u6EDE\u540ELH = \u662F\u5927\u55B7 ? 0.15 : 0.2;
+            \u6EDE\u540ERF = \u662F\u5927\u55B7 ? 0.4 : 0.42;
+            \u6EDE\u540ELF = \u662F\u5927\u55B7 ? 0.54 : 0.62;
           }
-          \u7AD9\u59FF\u6BD4 = 0.2;
-          \u6446\u9AD8 = 0.48 * Math.min(1.18, \u75BE\u5EA6);
-          \u6B65\u5E45 = (1.02 + Math.min(0.28, Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 18) * 0.011)) * k;
+          \u7AD9\u59FF\u6BD4 = \u662F\u5927\u55B7 ? 0.15 : 0.2;
+          \u6446\u9AD8 = \u662F\u5927\u55B7 ? 1.08 : 0.64 * Math.min(1.26, \u75BE\u5EA6);
+          \u6B65\u5E45 = (\u662F\u5927\u55B7 ? 2.08 : 1.32 + Math.min(0.36, Math.max(0, \u9A71\u52A8\u901F\u5EA6 - 18) * 0.013) + \u55B7\u7EA7 * 0.35) * k;
           const gp = (this.\u6B65\u6001\u76F8\u4F4D % 1 + 1) % 1;
-          const \u8DC3\u76F8 = (gp - 0.68 + 1) % 1;
-          const \u817E\u7A7A\u8DC3 = \u8DC3\u76F8 < 0.36 ? Math.sin(\u8DC3\u76F8 / 0.36 * Math.PI) : 0;
-          const \u652F\u6491\u5F39 = Math.sin(gp * Math.PI * 2) * 0.032;
-          \u5954\u8DD1\u8D77\u4F0F = (\u652F\u6491\u5F39 + \u817E\u7A7A\u8DC3 * 0.27 * Math.min(1.18, \u75BE\u5EA6)) * k;
-          \u810A\u67F1\u4FEF\u4EF0\u6CE2 = -Math.cos((gp - 0.16) * Math.PI * 2) * (0.22 + (\u662F\u5927\u55B7 ? 0.05 : 0));
+          if (\u662F\u5927\u55B7) {
+            const \u8DC3\u76F8 = (gp - 0.52 + 1) % 1;
+            const \u817E\u7A7A\u8DC3 = \u8DC3\u76F8 < 0.54 ? Math.pow(Math.sin(\u8DC3\u76F8 / 0.54 * Math.PI), 0.72) : 0;
+            const \u84C4\u529B\u8E72 = \u8DC3\u76F8 >= 0.54 ? Math.sin((\u8DC3\u76F8 - 0.54) / 0.46 * Math.PI) : 0;
+            \u5954\u8DD1\u8D77\u4F0F = (\u817E\u7A7A\u8DC3 * 0.96 - \u84C4\u529B\u8E72 * 0.16) * k;
+            \u810A\u67F1\u4FEF\u4EF0\u6CE2 = -Math.cos((gp - 0.18) * Math.PI * 2) * 0.52 + Math.sin(gp * Math.PI * 4) * 0.08;
+          } else {
+            const \u8DC3\u76F8 = (gp - 0.66 + 1) % 1;
+            const \u817E\u7A7A\u8DC3 = \u8DC3\u76F8 < 0.38 ? Math.sin(\u8DC3\u76F8 / 0.38 * Math.PI) : 0;
+            const \u652F\u6491\u5F39 = Math.sin(gp * Math.PI * 2) * 0.042;
+            \u5954\u8DD1\u8D77\u4F0F = (\u652F\u6491\u5F39 + \u817E\u7A7A\u8DC3 * 0.38 * Math.min(1.28, \u75BE\u5EA6)) * k;
+            \u810A\u67F1\u4FEF\u4EF0\u6CE2 = -Math.cos((gp - 0.16) * Math.PI * 2) * (0.26 + \u55B7\u7EA7 * 0.28);
+          }
         }
       }
       const \u4E2D\u5730\u9762Y = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0, 0, \u73AF\u5883);
       const \u539F\u6B65\u76F8 = (this.\u6B65\u6001\u76F8\u4F4D % 1 + 1) % 1;
-      let \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.94 * k + \u5954\u8DD1\u8D77\u4F0F + \u60EF\u6027\u6001.\u5782\u538B * 0.14 * k - \u91CD\u521B.\u6241\u538B * 0.22 * k;
-      let \u8EAF\u5E72Z = \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.08 * k;
-      let \u8EAF\u5E72X = \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.08 * k;
-      let \u8EAF\u5E72\u4FEF\u4EF0 = \u810A\u67F1\u4FEF\u4EF0\u6CE2 - \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.12;
-      let \u8EAF\u5E72\u504F\u822A = \u4FA7\u504F * 0.18;
-      let \u8EAF\u5E72\u4FA7\u503E = -\u4FA7\u504F * 0.28 - \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.12;
-      let \u4E0A\u8EAB\u5F13\u5EA6 = -\u810A\u67F1\u4FEF\u4EF0\u6CE2 * 0.65;
-      let \u4E0A\u8EAB\u504F\u822A = 0;
-      let \u4E0A\u8EAB\u4FA7\u503E = 0;
+      const \u5927\u55B7\u8DC3\u6CE2 = \u662F\u5927\u55B7 && \u9A71\u52A8\u901F\u5EA6 > 0.6 ? (() => {
+        const \u8DC3\u76F8 = (\u539F\u6B65\u76F8 - 0.52 + 1) % 1;
+        return \u8DC3\u76F8 < 0.54 ? Math.pow(Math.sin(\u8DC3\u76F8 / 0.54 * Math.PI), 0.72) : 0;
+      })() : 0;
+      let \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.3 * k + \u5954\u8DD1\u8D77\u4F0F + \u60EF\u6027\u6001.\u5782\u538B * 0.16 * k - \u91CD\u521B.\u6241\u538B * 0.26 * k;
+      let \u8EAF\u5E72Z = \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.1 * k + (\u662F\u5927\u55B7 ? Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.12 * k : 0);
+      let \u8EAF\u5E72X = \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.1 * k;
+      let \u8EAF\u5E72\u4FEF\u4EF0 = \u810A\u67F1\u4FEF\u4EF0\u6CE2 - \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.14;
+      let \u8EAF\u5E72\u504F\u822A = \u4FA7\u504F * 0.22;
+      let \u8EAF\u5E72\u4FA7\u503E = -\u4FA7\u504F * 0.34 - \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.14 + (\u662F\u5927\u55B7 ? Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.16 : 0);
+      let \u4E0A\u8EAB\u5F13\u5EA6 = -\u810A\u67F1\u4FEF\u4EF0\u6CE2 * 0.68;
+      let \u4E0A\u8EAB\u504F\u822A = \u4FA7\u504F * 0.12;
+      let \u4E0A\u8EAB\u4FA7\u503E = -\u4FA7\u504F * 0.08;
       let \u4E0A\u8EAB\u504FX = 0;
       let \u9888\u4EE3\u507F\u504F\u822A = 0;
       let \u9888\u4EE3\u507F\u4FEF\u4EF0 = 0;
       let \u9888\u57FAX = 0.02;
-      const \u9888\u4E2DX = -0.1;
+      let \u9888\u4E2DX = -0.1;
       let \u5934\u4FEF\u4EF0X = -0.1;
-      let \u5934\u504F\u822AY = \u4FA7\u504F * 0.34;
-      let \u5934\u6B6AZ = -\u4FA7\u504F * 0.16;
+      let \u5934\u504F\u822AY = \u4FA7\u504F * 0.44;
+      let \u5934\u6B6AZ = -\u4FA7\u504F * 0.2;
       let \u5F20\u5634\u5EA6 = 0.04;
       let \u9F3B\u5B54\u80C0 = 1;
       let \u8033\u6735\u89D2 = 0.15;
+      let \u5DE6\u8033\u5DEE = 0;
+      let \u53F3\u8033\u5DEE = 0;
       let \u773C\u95ED\u91CF = 0;
       let \u773C\u77AA\u5EA6 = 1;
       let \u6655\u663E = false;
@@ -54702,28 +56178,55 @@ void main() {
       }
       if (\u9A71\u52A8\u901F\u5EA6 > 0.6 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u5012\u8F66 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u8D77\u6B65 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
         if (\u662F\u6F2B\u6B65\u6001) {
-          const \u70B9\u5934\u6CE2 = Math.cos((\u539F\u6B65\u76F8 - 0.25) * Math.PI * 4) * 0.095;
-          \u9888\u57FAX += 0.04 + \u70B9\u5934\u6CE2;
-          \u5934\u4FEF\u4EF0X += \u70B9\u5934\u6CE2 * 0.45;
+          const \u70B9\u5934\u6CE2 = Math.cos((\u539F\u6B65\u76F8 - 0.25) * Math.PI * 4) * 0.13;
+          \u9888\u57FAX += 0.05 + \u70B9\u5934\u6CE2;
+          \u5934\u4FEF\u4EF0X += \u70B9\u5934\u6CE2 * 0.5;
+          \u5934\u504F\u822AY += Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.12;
+          \u5DE6\u8033\u5DEE = Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.18;
+          \u53F3\u8033\u5DEE = -Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.18;
         } else if (\u662F\u5C0F\u8DD1\u6001) {
           const \u5F39\u6027\u76F8 = (\u539F\u6B65\u76F8 * 2 % 1 + 1) % 1;
-          const \u5934\u70B9\u6CE2 = Math.sin((\u5F39\u6027\u76F8 - 0.12) * Math.PI * 2) * 0.09;
+          const \u5934\u70B9\u6CE2 = Math.sin((\u5F39\u6027\u76F8 - 0.12) * Math.PI * 2) * 0.13;
           \u9888\u57FAX += \u5934\u70B9\u6CE2;
-          \u5934\u4FEF\u4EF0X -= \u5934\u70B9\u6CE2 * 0.65;
+          \u9888\u4E2DX += -0.06 - \u5934\u70B9\u6CE2 * 0.35;
+          \u5934\u4FEF\u4EF0X -= \u5934\u70B9\u6CE2 * 0.72;
+          \u8033\u6735\u89D2 = 0.22 + Math.sin(\u5F39\u6027\u76F8 * Math.PI * 2) * 0.14;
+          \u5DE6\u8033\u5DEE = Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.12;
+          \u53F3\u8033\u5DEE = -\u5DE6\u8033\u5DEE;
         } else if (\u662F\u72C2\u5954\u6001) {
-          const \u5934\u51B2\u6CE2 = Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 + 0.5) * 0.2;
-          \u9888\u57FAX += -0.05 + \u5934\u51B2\u6CE2;
-          \u5934\u4FEF\u4EF0X -= \u5934\u51B2\u6CE2 * 0.72;
+          const \u7529\u5E45 = \u662F\u5927\u55B7 ? 0.42 : \u662F\u8FDE\u55B7 ? 0.26 : 0.21;
+          const \u5934\u51B2\u6CE2 = Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 + 0.5) * \u7529\u5E45;
+          \u9888\u57FAX += (\u662F\u5927\u55B7 ? 0.18 : -0.04) + \u5934\u51B2\u6CE2;
+          \u9888\u4E2DX += (\u662F\u5927\u55B7 ? -0.18 : -0.12) - \u5934\u51B2\u6CE2 * 0.42;
+          \u5934\u4FEF\u4EF0X -= \u5934\u51B2\u6CE2 * (\u662F\u5927\u55B7 ? 0.88 : 0.78);
+          if (\u662F\u5927\u55B7) {
+            \u5934\u6B6AZ += Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.18;
+            \u5934\u504F\u822AY += Math.cos(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.14;
+          }
         }
       }
-      _\u76EE\u6807LF.set(0.3 * k, this.\u8155\u9AD8, 0.46 * k);
-      _\u76EE\u6807RF.set(-0.3 * k, this.\u8155\u9AD8, 0.46 * k);
-      _\u76EE\u6807LH.set(0.24 * k, this.\u8E1D\u9AD8, -0.46 * k);
-      _\u76EE\u6807RH.set(-0.24 * k, this.\u8E1D\u9AD8, -0.46 * k);
+      _\u76EE\u6807LF.set(0.3 * k, this.\u8155\u9AD8, 0.48 * k);
+      _\u76EE\u6807RF.set(-0.3 * k, this.\u8155\u9AD8, 0.48 * k);
+      _\u76EE\u6807LH.set(0.24 * k, this.\u8E1D\u9AD8, -0.48 * k);
+      _\u76EE\u6807RH.set(-0.24 * k, this.\u8E1D\u9AD8, -0.48 * k);
       let \u8155L\u5F2F = 0.04;
       let \u8155R\u5F2F = 0.04;
-      let \u8E1DL\u5F2F = 0.46;
-      let \u8E1DR\u5F2F = 0.46;
+      let \u8E1DL\u5F2F = 0.32;
+      let \u8E1DR\u5F2F = 0.32;
+      let \u8155L\u8D34\u5730 = 1;
+      let \u8155R\u8D34\u5730 = 1;
+      let \u8E1DL\u8D34\u5730 = 1;
+      let \u8E1DR\u8D34\u5730 = 1;
+      let \u8155L\u5C40\u5F2F = 0.12;
+      let \u8155R\u5C40\u5F2F = 0.12;
+      let \u8155L\u5C40\u65CB = 0;
+      let \u8155R\u5C40\u65CB = 0;
+      let \u5DE6\u63E1\u62F3 = 0;
+      let \u53F3\u63E1\u62F3 = 0;
+      let \u5DE6\u5F20\u6307 = 0.15;
+      let \u53F3\u5F20\u6307 = 0.15;
+      let \u5DE6\u8DBE\u7FD8 = 0;
+      let \u53F3\u8DBE\u7FD8 = 0;
       let \u5DE6\u80A9\u6ED1Z = 0;
       let \u53F3\u80A9\u6ED1Z = 0;
       let \u5DE6\u80A9\u6ED1Y = 0;
@@ -54731,314 +56234,520 @@ void main() {
       const \u5F53\u524D\u652F\u6491 = [false, false, false, false];
       let \u5141\u8BB8\u8E0F\u5730\u68C0\u51FA = false;
       let \u8E0F\u5730\u5F3A\u5EA6\u57FA\u51C6 = 0.6;
+      let \u5632\u8BBD\u62AC\u624B\u4FA7 = 0;
+      if (!\u662F\u666E\u653B) this.\u4E0A\u5E27\u666E\u653B\u7838\u5730 = false;
       if (\u91CD\u521B.\u6FC0\u6D3B) {
-        \u8EAF\u5E72\u4FEF\u4EF0 = -0.35 * \u91CD\u521B.\u5305\u7EDC;
-        \u8EAF\u5E72\u4FA7\u503E = \u91CD\u521B.\u63A8\u5411 * 0.48 * \u91CD\u521B.\u5305\u7EDC;
-        \u4E0A\u8EAB\u4FA7\u503E = -\u91CD\u521B.\u63A8\u5411 * 0.22 * \u91CD\u521B.\u5305\u7EDC;
-        \u9888\u57FAX = -0.22;
-        \u5934\u4FEF\u4EF0X = -0.42;
-        \u5F20\u5634\u5EA6 = 0.72;
-        \u773C\u77AA\u5EA6 = 1.4;
-        \u8033\u6735\u89D2 = -0.75;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -0.38 * \u91CD\u521B.\u5305\u7EDC;
+        \u8EAF\u5E72\u4FA7\u503E = \u91CD\u521B.\u63A8\u5411 * 0.52 * \u91CD\u521B.\u5305\u7EDC;
+        \u4E0A\u8EAB\u4FA7\u503E = -\u91CD\u521B.\u63A8\u5411 * 0.26 * \u91CD\u521B.\u5305\u7EDC;
+        \u9888\u57FAX = -0.26;
+        \u5934\u4FEF\u4EF0X = -0.46;
+        \u5F20\u5634\u5EA6 = 0.78;
+        \u773C\u77AA\u5EA6 = 1.45;
+        \u8033\u6735\u89D2 = -0.82;
       } else if (\u662F\u51B2\u7EBF) {
-        const \u6B22\u547C\u6643 = Math.sin(t * 11);
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.18 * k + Math.abs(Math.sin(t * 7.5)) * 0.14 * k;
-        \u8EAF\u5E72Z = -0.18 * k;
-        \u8EAF\u5E72\u4FEF\u4EF0 = -1.08 + Math.sin(t * 7.5) * 0.12;
-        \u4E0A\u8EAB\u5F13\u5EA6 = -0.16;
-        \u4E0A\u8EAB\u504F\u822A = Math.sin(t * 6.5) * 0.16;
+        const \u6B22\u547C\u6643 = Math.sin(t * 10.5);
+        const \u6B65\u8E66 = Math.abs(Math.sin(t * 7.8));
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.58 * k + \u6B65\u8E66 * 0.14 * k;
+        \u8EAF\u5E72Z = -0.2 * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -1.04 + Math.sin(t * 7.8) * 0.1;
+        \u8EAF\u5E72\u4FA7\u503E = Math.sin(t * 3.9) * 0.1;
+        \u4E0A\u8EAB\u5F13\u5EA6 = -0.18 + Math.sin(t * 7.8) * 0.08;
+        \u4E0A\u8EAB\u504F\u822A = Math.sin(t * 5.25) * 0.2;
         \u9888\u57FAX = -0.16 + \u6B22\u547C\u6643 * 0.14;
+        \u9888\u4E2DX = -0.16;
         \u5934\u4FEF\u4EF0X = -0.22 + Math.sin(t * 14) * 0.16;
-        \u5934\u504F\u822AY = Math.sin(t * 6.5) * 0.35;
-        \u5F20\u5634\u5EA6 = 0.65 + Math.abs(Math.sin(t * 14)) * 0.35;
-        \u8033\u6735\u89D2 = 0.38;
-        \u9F3B\u5B54\u80C0 = 1.45;
-        const \u8E29L = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, -0.36 * k, \u73AF\u5883);
-        const \u8E29R = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, -0.36 * k, \u73AF\u5883);
-        _\u76EE\u6807LH.set(0.26 * k, \u8E29L + this.\u8E1D\u9AD8, -0.36 * k);
-        _\u76EE\u6807RH.set(-0.26 * k, \u8E29R + this.\u8E1D\u9AD8, -0.36 * k);
-        _\u76EE\u6807LF.set(0.38 * k, \u8EAF\u5E72Y + (0.68 + Math.sin(t * 13) * 0.26) * k, 0.74 * k);
-        _\u76EE\u6807RF.set(-0.38 * k, \u8EAF\u5E72Y + (0.68 + Math.cos(t * 13) * 0.26) * k, 0.74 * k);
-        \u8155L\u5F2F = 0.75 + Math.sin(t * 15) * 0.4;
-        \u8155R\u5F2F = 0.75 + Math.cos(t * 15) * 0.4;
-      } else if (\u662F\u653B\u51FB) {
-        const \u84C4 = Math.min(1, \u653B\u76F801 / 0.25);
-        const \u51FA = \u653B\u76F801 < 0.25 ? 0 : Math.sin(Math.min(1, (\u653B\u76F801 - 0.25) / 0.55) * Math.PI);
-        \u8EAF\u5E72\u504F\u822A = -\u653B\u5411 * 0.42 * \u51FA;
-        \u8EAF\u5E72\u4FA7\u503E = -\u653B\u5411 * 0.36 * \u51FA + \u653B\u5411 * 0.14 * \u84C4;
-        \u4E0A\u8EAB\u504F\u822A = \u653B\u5411 * 0.26 * \u51FA;
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (0.9 + \u51FA * 0.14) * k;
-        \u9888\u57FAX = 0.14;
-        \u5934\u504F\u822AY = \u653B\u5411 * (0.95 * \u51FA - 0.2 * \u84C4);
-        \u5934\u4FEF\u4EF0X = -0.04 + 0.18 * \u51FA;
-        \u5F20\u5634\u5EA6 = \u51FA > 0.2 ? 0.92 : 0.28;
-        \u8033\u6735\u89D2 = -0.95;
+        \u5934\u504F\u822AY = Math.sin(t * 5.25) * 0.36;
+        \u5934\u6B6AZ = Math.cos(t * 5.25) * 0.15;
+        \u5F20\u5634\u5EA6 = 0.68 + Math.abs(Math.sin(t * 15)) * 0.34;
+        \u8033\u6735\u89D2 = 0.44;
+        \u5DE6\u8033\u5DEE = Math.sin(t * 13) * 0.16;
+        \u53F3\u8033\u5DEE = -\u5DE6\u8033\u5DEE;
         \u9F3B\u5B54\u80C0 = 1.5;
-        const \u8E39X = \u653B\u5411 * (0.36 + \u51FA * 0.95) * k;
-        const \u8E39Y = (0.35 + \u51FA * 0.72) * k;
+        const \u8E29L = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.28 * k, -0.34 * k, \u73AF\u5883);
+        const \u8E29R = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.28 * k, -0.34 * k, \u73AF\u5883);
+        _\u76EE\u6807LH.set(0.28 * k, \u8E29L + this.\u8E1D\u9AD8 + Math.max(0, Math.sin(t * 7.8)) * 0.1 * k, -0.34 * k);
+        _\u76EE\u6807RH.set(-0.28 * k, \u8E29R + this.\u8E1D\u9AD8 + Math.max(0, -Math.sin(t * 7.8)) * 0.1 * k, -0.34 * k);
+        const \u6325\u62F3 = Math.sin(t * 10.5);
+        const \u6325\u6446 = Math.cos(t * 10.5);
+        _\u76EE\u6807LF.set((0.48 + \u6325\u6446 * 0.08) * k, \u8EAF\u5E72Y + (0.66 + \u6325\u62F3 * 0.3) * k, (0.56 + \u6325\u62F3 * 0.12) * k);
+        _\u76EE\u6807RF.set((-0.48 - \u6325\u6446 * 0.08) * k, \u8EAF\u5E72Y + (0.66 - \u6325\u62F3 * 0.3) * k, (0.56 - \u6325\u62F3 * 0.12) * k);
+        \u8155L\u8D34\u5730 = 0;
+        \u8155R\u8D34\u5730 = 0;
+        \u8155L\u5C40\u5F2F = 0.08 + \u6325\u62F3 * 0.14;
+        \u8155R\u5C40\u5F2F = 0.08 - \u6325\u62F3 * 0.14;
+        \u8155L\u5C40\u65CB = -0.34;
+        \u8155R\u5C40\u65CB = 0.34;
+        \u5DE6\u63E1\u62F3 = 0.9;
+        \u53F3\u63E1\u62F3 = 0.9;
+        \u5DE6\u5F20\u6307 = 0;
+        \u53F3\u5F20\u6307 = 0;
+        \u8E1DL\u5F2F = 0.1;
+        \u8E1DR\u5F2F = 0.1;
+      } else if (\u662F\u653B\u51FB) {
+        const \u84C4 = Math.min(1, \u653B\u76F801 / 0.24);
+        const \u51FA = \u653B\u76F801 < 0.24 ? 0 : Math.sin(Math.min(1, (\u653B\u76F801 - 0.24) / 0.52) * Math.PI);
+        const \u6536 = \u653B\u76F801 > 0.76 ? (\u653B\u76F801 - 0.76) / 0.24 : 0;
+        \u8EAF\u5E72\u504F\u822A = -\u653B\u5411 * 0.5 * \u51FA + \u653B\u5411 * 0.16 * \u84C4 * (1 - \u51FA);
+        \u8EAF\u5E72\u4FA7\u503E = -\u653B\u5411 * 0.42 * \u51FA + \u653B\u5411 * 0.18 * \u84C4 * (1 - \u51FA);
+        \u8EAF\u5E72\u4FEF\u4EF0 = 0.12 * \u84C4 - 0.18 * \u51FA;
+        \u4E0A\u8EAB\u504F\u822A = \u653B\u5411 * 0.34 * \u51FA;
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (1.28 - 0.1 * \u84C4 * (1 - \u51FA) + 0.24 * \u51FA - 0.05 * Math.sin(\u6536 * Math.PI)) * k;
+        \u9888\u57FAX = 0.16 - 0.1 * \u84C4;
+        \u5934\u504F\u822AY = \u653B\u5411 * (1.05 * \u51FA - 0.28 * \u84C4 * (1 - \u51FA));
+        \u5934\u4FEF\u4EF0X = -0.06 + 0.22 * \u51FA;
+        \u5934\u6B6AZ = -\u653B\u5411 * 0.24 * \u51FA;
+        \u5F20\u5634\u5EA6 = \u51FA > 0.16 ? 0.96 : 0.3;
+        \u8033\u6735\u89D2 = -0.98;
+        \u9F3B\u5B54\u80C0 = 1.55;
+        const \u8E39X = \u653B\u5411 * (0.4 + \u51FA * 1.25) * k;
+        const \u8E39Y = (0.42 + \u51FA * 0.92) * k;
+        const \u8E39Z = (-0.52 - 0.22 * \u51FA) * k;
+        const \u6247X = \u653B\u5411 * (0.38 + \u51FA * 0.98) * k;
+        const \u6247Y = (0.34 + \u51FA * 0.72) * k;
         if (\u653B\u5411 > 0) {
-          _\u76EE\u6807LH.set(\u8E39X, \u4E2D\u5730\u9762Y + \u8E39Y, -0.52 * k);
-          _\u76EE\u6807LF.set(\u653B\u5411 * (0.36 + \u51FA * 0.72) * k, \u4E2D\u5730\u9762Y + (0.28 + \u51FA * 0.52) * k, 0.56 * k);
-          _\u76EE\u6807RH.set(-0.26 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
-          _\u76EE\u6807RF.set(-0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.46 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.46 * k);
-          \u8E1DL\u5F2F = 0.15;
-          \u8155L\u5F2F = 0.45;
+          _\u76EE\u6807LH.set(\u8E39X, \u4E2D\u5730\u9762Y + \u8E39Y, \u8E39Z);
+          _\u76EE\u6807LF.set(\u6247X, \u4E2D\u5730\u9762Y + \u6247Y, (0.58 + 0.18 * \u51FA) * k);
+          _\u76EE\u6807RH.set(-0.28 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.28 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
+          _\u76EE\u6807RF.set(-0.32 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.32 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.48 * k);
+          \u8155L\u8D34\u5730 = 0;
+          \u8155L\u5C40\u5F2F = -0.18 + 0.34 * \u51FA;
+          \u8155L\u5C40\u65CB = -0.28;
+          \u5DE6\u5F20\u6307 = 0.55;
+          \u8E1DL\u8D34\u5730 = 0;
+          \u8E1DL\u5F2F = 0.35 + 0.25 * \u51FA;
         } else {
-          _\u76EE\u6807RH.set(\u8E39X, \u4E2D\u5730\u9762Y + \u8E39Y, -0.52 * k);
-          _\u76EE\u6807RF.set(\u653B\u5411 * (0.36 + \u51FA * 0.72) * k, \u4E2D\u5730\u9762Y + (0.28 + \u51FA * 0.52) * k, 0.56 * k);
-          _\u76EE\u6807LH.set(0.26 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
-          _\u76EE\u6807LF.set(0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.46 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.46 * k);
-          \u8E1DR\u5F2F = 0.15;
-          \u8155R\u5F2F = 0.45;
+          _\u76EE\u6807RH.set(\u8E39X, \u4E2D\u5730\u9762Y + \u8E39Y, \u8E39Z);
+          _\u76EE\u6807RF.set(\u6247X, \u4E2D\u5730\u9762Y + \u6247Y, (0.58 + 0.18 * \u51FA) * k);
+          _\u76EE\u6807LH.set(0.28 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.28 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
+          _\u76EE\u6807LF.set(0.32 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.32 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.48 * k);
+          \u8155R\u8D34\u5730 = 0;
+          \u8155R\u5C40\u5F2F = -0.18 + 0.34 * \u51FA;
+          \u8155R\u5C40\u65CB = 0.28;
+          \u53F3\u5F20\u6307 = 0.55;
+          \u8E1DR\u8D34\u5730 = 0;
+          \u8E1DR\u5F2F = 0.35 + 0.25 * \u51FA;
         }
       } else if (\u662F\u666E\u653B) {
-        const \u84C4 = Math.min(1, \u653B\u76F801 / 0.26);
-        const \u51FA = \u653B\u76F801 < 0.26 ? 0 : Math.sin(Math.min(1, (\u653B\u76F801 - 0.26) / 0.56) * Math.PI);
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (0.94 + 0.1 * \u84C4 - 0.06 * \u51FA) * k;
-        \u8EAF\u5E72Z = (-0.18 * \u84C4 + 0.42 * \u51FA) * k;
-        \u8EAF\u5E72\u4FEF\u4EF0 = -0.34 * \u84C4 + 0.24 * \u51FA;
-        \u4E0A\u8EAB\u5F13\u5EA6 = -0.18 * \u84C4 + 0.22 * \u51FA;
-        \u9888\u57FAX = -0.16 * \u84C4 + 0.28 * \u51FA;
-        \u5934\u4FEF\u4EF0X = -0.22 * \u84C4 + 0.24 * \u51FA;
-        \u5934\u504F\u822AY = 0;
-        \u5F20\u5634\u5EA6 = \u51FA > 0.15 ? 0.96 : 0.24;
-        \u8033\u6735\u89D2 = -0.92;
-        \u9F3B\u5B54\u80C0 = 1.6;
-        \u5DE6\u80A9\u6ED1Z = 0.12 * \u51FA * k;
-        \u53F3\u80A9\u6ED1Z = 0.12 * \u51FA * k;
-        const \u8E29LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, (-0.48 - 0.16 * \u84C4) * k, \u73AF\u5883);
-        const \u8E29RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, (-0.48 - 0.16 * \u84C4) * k, \u73AF\u5883);
-        _\u76EE\u6807LH.set(0.26 * k, \u8E29LH + this.\u8E1D\u9AD8, (-0.48 - 0.16 * \u84C4) * k);
-        _\u76EE\u6807RH.set(-0.26 * k, \u8E29RH + this.\u8E1D\u9AD8, (-0.48 - 0.16 * \u84C4) * k);
-        _\u76EE\u6807LF.set(0.24 * k, \u4E2D\u5730\u9762Y + (0.74 - 0.14 * \u84C4 + 0.46 * \u51FA) * k, (0.42 - 0.18 * \u84C4 + 0.72 * \u51FA) * k);
-        _\u76EE\u6807RF.set(-0.24 * k, \u4E2D\u5730\u9762Y + (0.74 - 0.14 * \u84C4 + 0.46 * \u51FA) * k, (0.42 - 0.18 * \u84C4 + 0.72 * \u51FA) * k);
-        \u8155L\u5F2F = 0.55 - 0.35 * \u51FA;
-        \u8155R\u5F2F = 0.55 - 0.35 * \u51FA;
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.38 * k;
-        \u8EAF\u5E72Z = 0;
+        const \u7ACB = \u653B\u76F801 < 0.34 ? Math.sin(\u653B\u76F801 / 0.34 * Math.PI * 0.5) : \u653B\u76F801 < 0.56 ? Math.cos((\u653B\u76F801 - 0.34) / 0.22 * Math.PI * 0.5) : 0;
+        const \u7838 = \u653B\u76F801 < 0.34 ? 0 : Math.sin(Math.min(1, (\u653B\u76F801 - 0.34) / 0.44) * Math.PI);
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (1.3 + 0.26 * \u7ACB - 0.18 * \u7838) * k;
+        \u8EAF\u5E72Z = (-0.22 * \u7ACB + 0.46 * \u7838) * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -0.62 * \u7ACB + 0.28 * \u7838;
+        \u4E0A\u8EAB\u5F13\u5EA6 = -0.24 * \u7ACB + 0.28 * \u7838;
+        \u9888\u57FAX = -0.24 * \u7ACB + 0.34 * \u7838;
+        \u9888\u4E2DX = -0.18 * \u7ACB + 0.08 * \u7838;
+        \u5934\u4FEF\u4EF0X = -0.28 * \u7ACB + 0.26 * \u7838;
+        \u5934\u504F\u822AY = Math.sin(\u653B\u76F801 * Math.PI * 4) * 0.08 * \u7838;
+        \u5F20\u5634\u5EA6 = \u7838 > 0.15 ? 0.98 : 0.32 + \u7ACB * 0.24;
+        \u8033\u6735\u89D2 = -0.95;
+        \u9F3B\u5B54\u80C0 = 1.65;
+        \u5DE6\u80A9\u6ED1Z = (-0.08 * \u7ACB + 0.16 * \u7838) * k;
+        \u53F3\u80A9\u6ED1Z = (-0.08 * \u7ACB + 0.16 * \u7838) * k;
+        const \u8E29LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, (-0.48 - 0.16 * \u7ACB) * k, \u73AF\u5883);
+        const \u8E29RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, (-0.48 - 0.16 * \u7ACB) * k, \u73AF\u5883);
+        const \u7838\u5730L = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, 0.88 * k, \u73AF\u5883);
+        const \u7838\u5730R = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, 0.88 * k, \u73AF\u5883);
+        _\u76EE\u6807LH.set(0.26 * k, \u8E29LH + this.\u8E1D\u9AD8, (-0.48 - 0.16 * \u7ACB) * k);
+        _\u76EE\u6807RH.set(-0.26 * k, \u8E29RH + this.\u8E1D\u9AD8, (-0.48 - 0.16 * \u7ACB) * k);
+        const \u624B\u9AD8 = \u653B\u76F801 < 0.5 ? this.\u8155\u9AD8 + (0.94 * \u7ACB + 0.18 * \u7838) * k : this.\u8155\u9AD8 + Math.max(0, 0.16 * (1 - (\u653B\u76F801 - 0.5) / 0.28)) * k;
+        const \u624B\u524D = (0.48 - 0.12 * \u7ACB + 0.56 * \u7838) * k;
+        _\u76EE\u6807LF.set(0.28 * k, \u7838\u5730L + \u624B\u9AD8, \u624B\u524D);
+        _\u76EE\u6807RF.set(-0.28 * k, \u7838\u5730R + \u624B\u9AD8, \u624B\u524D);
+        const \u62CD\u5730\u6743 = \u653B\u76F801 >= 0.46 ? Math.min(1, (\u653B\u76F801 - 0.46) / 0.12) : Math.max(0, 1 - \u7ACB * 1.4);
+        \u8155L\u8D34\u5730 = \u62CD\u5730\u6743;
+        \u8155R\u8D34\u5730 = \u62CD\u5730\u6743;
+        \u8155L\u5C40\u5F2F = 0.18 * \u7ACB;
+        \u8155R\u5C40\u5F2F = 0.18 * \u7ACB;
+        \u8155L\u5F2F = -0.1 * \u7838;
+        \u8155R\u5F2F = -0.1 * \u7838;
+        \u5DE6\u63E1\u62F3 = \u7ACB * 0.72 * (1 - \u62CD\u5730\u6743);
+        \u53F3\u63E1\u62F3 = \u7ACB * 0.72 * (1 - \u62CD\u5730\u6743);
+        \u5DE6\u5F20\u6307 = 0.15 + \u62CD\u5730\u6743 * 0.42;
+        \u53F3\u5F20\u6307 = 0.15 + \u62CD\u5730\u6743 * 0.42;
+        if (!this.\u4E0A\u5E27\u666E\u653B\u7838\u5730 && \u653B\u76F801 >= 0.5 && \u653B\u76F801 < 0.72 && !\u662F\u7A7A\u4E2D) {
+          this.\u4E0A\u5E27\u666E\u653B\u7838\u5730 = true;
+          this.\u89E6\u53D1\u8E0F\u5730\u51B2\u51FB(0, _\u76EE\u6807LF, \u7838\u5730L, 1.25, k);
+          this.\u89E6\u53D1\u8E0F\u5730\u51B2\u51FB(1, _\u76EE\u6807RF, \u7838\u5730R, 1.25, k);
+        } else if (\u653B\u76F801 < 0.3) {
+          this.\u4E0A\u5E27\u666E\u653B\u7838\u5730 = false;
+        }
+      } else if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (1.3 - 0.92 * d) * k + b * 0.18 * k;
+        \u8EAF\u5E72Z = -0.12 * hit * k;
         \u8EAF\u5E72X = 0;
-        \u8EAF\u5E72\u4FEF\u4EF0 = 0.14;
-        \u8EAF\u5E72\u504F\u822A = 0.08;
-        \u8EAF\u5E72\u4FA7\u503E = 1.46;
-        \u4E0A\u8EAB\u5F13\u5EA6 = 0.06;
-        \u4E0A\u8EAB\u4FA7\u503E = 0.08;
-        \u9888\u57FAX = 0.36;
-        \u5934\u4FEF\u4EF0X = 0.22;
-        \u5934\u504F\u822AY = -0.24;
-        \u5934\u6B6AZ = -0.28;
-        \u5F20\u5634\u5EA6 = 0.46;
-        \u773C\u95ED\u91CF = 1;
-        \u8033\u6735\u89D2 = -0.92;
-        _\u76EE\u6807LF.set(0.72 * k, \u4E2D\u5730\u9762Y + 0.24 * k, 0.54 * k);
-        _\u76EE\u6807RF.set(0.56 * k, \u4E2D\u5730\u9762Y + 0.15 * k, 0.42 * k);
-        _\u76EE\u6807LH.set(0.68 * k, \u4E2D\u5730\u9762Y + 0.24 * k, -0.46 * k);
-        _\u76EE\u6807RH.set(0.52 * k, \u4E2D\u5730\u9762Y + 0.15 * k, -0.52 * k);
-        \u8155L\u5F2F = 0.15;
-        \u8155R\u5F2F = 0.15;
-        \u8E1DL\u5F2F = 0.15;
-        \u8E1DR\u5F2F = 0.15;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -0.26 * hit + 0.14 * d;
+        \u8EAF\u5E72\u504F\u822A = 0.08 * d;
+        \u8EAF\u5E72\u4FA7\u503E = -0.2 * hit + 1.46 * d - b * 0.16 + tw * 0.05;
+        \u4E0A\u8EAB\u5F13\u5EA6 = -0.14 * hit + 0.06 * d;
+        \u4E0A\u8EAB\u4FA7\u503E = 0.08 * d;
+        \u9888\u57FAX = -0.26 * hit + 0.38 * d;
+        \u5934\u4FEF\u4EF0X = -0.22 * hit + 0.24 * d;
+        \u5934\u504F\u822AY = -0.26 * d;
+        \u5934\u6B6AZ = -0.3 * d;
+        \u5F20\u5634\u5EA6 = 0.04 + 0.54 * hit + 0.44 * d;
+        \u773C\u95ED\u91CF = Math.min(1, d * 1.15);
+        \u8033\u6735\u89D2 = 0.15 - 1.07 * d;
+        _\u76EE\u6807LF.set((0.3 + 0.58 * d + tw * 0.08) * k, \u4E2D\u5730\u9762Y + (this.\u8155\u9AD8 + (0.26 * k - this.\u8155\u9AD8) * d) + b * 0.12 * k, (0.48 + 0.14 * d) * k);
+        _\u76EE\u6807RF.set((-0.3 + 1.06 * d) * k, \u4E2D\u5730\u9762Y + (this.\u8155\u9AD8 + (0.16 * k - this.\u8155\u9AD8) * d), (0.48 - 0.06 * d) * k);
+        _\u76EE\u6807LH.set((0.24 + 0.62 * d - tw * 0.08) * k, \u4E2D\u5730\u9762Y + (this.\u8E1D\u9AD8 + (0.26 * k - this.\u8E1D\u9AD8) * d) + b * 0.1 * k, -0.48 * k);
+        _\u76EE\u6807RH.set((-0.24 + 0.98 * d) * k, \u4E2D\u5730\u9762Y + (this.\u8E1D\u9AD8 + (0.16 * k - this.\u8E1D\u9AD8) * d), (-0.48 - 0.08 * d) * k);
+        \u8155L\u8D34\u5730 = 1 - d;
+        \u8155R\u8D34\u5730 = 1 - d;
+        \u8E1DL\u8D34\u5730 = 1 - d;
+        \u8E1DR\u8D34\u5730 = 1 - d;
+        \u8155L\u5C40\u5F2F = 0.25 * d;
+        \u8155R\u5C40\u5F2F = 0.25 * d;
+        \u5DE6\u63E1\u62F3 = 0.35 * d;
+        \u53F3\u63E1\u62F3 = 0.35 * d;
+        \u8E1DL\u5F2F = 0.32 - 0.15 * d;
+        \u8E1DR\u5F2F = 0.32 - 0.15 * d;
       } else if (\u662F\u541F\u5531) {
         const \u6D6E\u6D6A = Math.sin(t * 2.8);
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (1.16 + \u6D6E\u6D6A * 0.06) * k;
-        \u8EAF\u5E72Z = -0.1 * k;
-        \u8EAF\u5E72\u4FEF\u4EF0 = -0.82 + Math.sin(t * 2.2) * 0.05;
-        \u4E0A\u8EAB\u5F13\u5EA6 = -0.24;
-        \u9888\u57FAX = -0.22 + Math.sin(t * 2.4) * 0.06;
-        \u5934\u4FEF\u4EF0X = -0.36;
-        \u5934\u504F\u822AY = Math.sin(t * 1.8) * 0.16;
-        \u5F20\u5634\u5EA6 = 0.28 + Math.abs(Math.sin(t * 4.5)) * 0.2;
-        \u9F3B\u5B54\u80C0 = 1.35;
-        \u8033\u6735\u89D2 = 0.42;
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (1.56 + \u6D6E\u6D6A * 0.08) * k;
+        \u8EAF\u5E72Z = -0.14 * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -0.84 + Math.sin(t * 2.2) * 0.06;
+        \u4E0A\u8EAB\u5F13\u5EA6 = -0.26;
+        \u9888\u57FAX = -0.24 + Math.sin(t * 2.4) * 0.08;
+        \u5934\u4FEF\u4EF0X = -0.38;
+        \u5934\u504F\u822AY = Math.sin(t * 1.8) * 0.2;
+        \u5F20\u5634\u5EA6 = 0.3 + Math.abs(Math.sin(t * 4.5)) * 0.24;
+        \u9F3B\u5B54\u80C0 = 1.4;
+        \u8033\u6735\u89D2 = 0.44;
         const \u8E29LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.28 * k, -0.38 * k, \u73AF\u5883);
         const \u8E29RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.28 * k, -0.38 * k, \u73AF\u5883);
-        _\u76EE\u6807LH.set(0.28 * k, \u8E29LH + this.\u8E1D\u9AD8 + 0.06 * k, -0.38 * k);
-        _\u76EE\u6807RH.set(-0.28 * k, \u8E29RH + this.\u8E1D\u9AD8 + 0.06 * k, -0.38 * k);
-        _\u76EE\u6807LF.set((0.4 + Math.cos(t * 2.8) * 0.08) * k, \u8EAF\u5E72Y + (0.76 + \u6D6E\u6D6A * 0.1) * k, 0.56 * k);
-        _\u76EE\u6807RF.set((-0.4 - Math.cos(t * 2.8) * 0.08) * k, \u8EAF\u5E72Y + (0.76 - \u6D6E\u6D6A * 0.1) * k, 0.56 * k);
-        \u8155L\u5F2F = -0.25;
-        \u8155R\u5F2F = -0.25;
+        _\u76EE\u6807LH.set(0.28 * k, \u8E29LH + this.\u8E1D\u9AD8 + 0.08 * k, -0.38 * k);
+        _\u76EE\u6807RH.set(-0.28 * k, \u8E29RH + this.\u8E1D\u9AD8 + 0.08 * k, -0.38 * k);
+        _\u76EE\u6807LF.set((0.46 + Math.cos(t * 2.8) * 0.12) * k, \u8EAF\u5E72Y + (0.76 + \u6D6E\u6D6A * 0.14) * k, 0.6 * k);
+        _\u76EE\u6807RF.set((-0.46 - Math.cos(t * 2.8) * 0.12) * k, \u8EAF\u5E72Y + (0.76 - \u6D6E\u6D6A * 0.14) * k, 0.6 * k);
+        \u8155L\u8D34\u5730 = 0;
+        \u8155R\u8D34\u5730 = 0;
+        \u8155L\u5C40\u5F2F = -0.2;
+        \u8155R\u5C40\u5F2F = -0.2;
+        \u8155L\u5C40\u65CB = -0.38;
+        \u8155R\u5C40\u65CB = 0.38;
+        \u5DE6\u63E1\u62F3 = 0.1;
+        \u53F3\u63E1\u62F3 = 0.1;
+        \u5DE6\u5F20\u6307 = 0.48;
+        \u53F3\u5F20\u6307 = 0.48;
       } else if (\u662F\u6025\u5239) {
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.68 * k;
-        \u8EAF\u5E72\u4FEF\u4EF0 = -0.34;
-        \u4E0A\u8EAB\u5F13\u5EA6 = 0.22;
-        \u9888\u57FAX = -0.24;
-        \u5934\u4FEF\u4EF0X = -0.3;
-        \u5F20\u5634\u5EA6 = 0.68;
-        \u773C\u77AA\u5EA6 = 1.42;
-        \u8033\u6735\u89D2 = -0.82;
-        \u9F3B\u5B54\u80C0 = 1.6;
-        _\u76EE\u6807LF.set(0.34 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.34 * k, 0.78 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.78 * k);
-        _\u76EE\u6807RF.set(-0.34 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.34 * k, 0.78 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.78 * k);
-        _\u76EE\u6807LH.set(0.28 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.28 * k, -0.02 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.02 * k);
-        _\u76EE\u6807RH.set(-0.28 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.28 * k, -0.02 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.02 * k);
-        \u8155L\u5F2F = 0.35;
-        \u8155R\u5F2F = 0.35;
-        \u8E1DL\u5F2F = 0.92;
-        \u8E1DR\u5F2F = 0.92;
+        const \u5239\u6296 = Math.sin(t * 28);
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.94 * k + \u5239\u6296 * 0.022 * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -0.38 + Math.sin(t * 14) * 0.04;
+        \u8EAF\u5E72\u4FA7\u503E = \u5239\u6296 * 0.04;
+        \u4E0A\u8EAB\u5F13\u5EA6 = 0.26;
+        \u9888\u57FAX = -0.3 + \u5239\u6296 * 0.05;
+        \u5934\u4FEF\u4EF0X = -0.36;
+        \u5934\u504F\u822AY = Math.sin(t * 11) * 0.12;
+        \u5F20\u5634\u5EA6 = 0.74 + Math.abs(\u5239\u6296) * 0.12;
+        \u773C\u77AA\u5EA6 = 1.48;
+        \u8033\u6735\u89D2 = -0.9;
+        \u9F3B\u5B54\u80C0 = 1.65;
+        _\u76EE\u6807LF.set(0.36 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.36 * k, 0.94 * k, \u73AF\u5883) + this.\u8155\u9AD8, (0.94 + \u5239\u6296 * 0.02) * k);
+        _\u76EE\u6807RF.set(-0.36 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.36 * k, 0.94 * k, \u73AF\u5883) + this.\u8155\u9AD8, (0.94 - \u5239\u6296 * 0.02) * k);
+        _\u76EE\u6807LH.set(0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.08 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, 0.08 * k);
+        _\u76EE\u6807RH.set(-0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.08 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, 0.08 * k);
+        \u8155L\u5F2F = 0.42;
+        \u8155R\u5F2F = 0.42;
+        \u8E1DL\u5F2F = 0.98;
+        \u8E1DR\u5F2F = 0.98;
       } else if (\u662F\u6253\u6655) {
         \u6655\u663E = true;
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.8 * k + Math.sin(t * 14) * 0.04 * k;
-        \u8EAF\u5E72\u4FA7\u503E = Math.sin(t * 5.2) * 0.26;
-        \u4E0A\u8EAB\u4FA7\u503E = -Math.sin(t * 5.2) * 0.18;
-        \u9888\u57FAX = 0.42 + Math.sin(t * 4.2) * 0.22;
-        \u5934\u4FEF\u4EF0X = 0.25;
-        \u5934\u504F\u822AY = Math.sin(t * 6) * 0.55;
-        \u5934\u6B6AZ = Math.cos(t * 7.2) * 0.42;
-        \u8033\u6735\u89D2 = -0.95;
-        \u5F20\u5634\u5EA6 = 0.35;
-        const \u6296 = Math.sin(t * 28) * 0.06 * k;
-        _\u76EE\u6807LF.set(0.46 * k + \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.46 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.48 * k);
-        _\u76EE\u6807RF.set(-0.46 * k - \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.46 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.48 * k);
-        _\u76EE\u6807LH.set(0.4 * k - \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.4 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
-        _\u76EE\u6807RH.set(-0.4 * k + \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.4 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.12 * k + Math.sin(t * 13) * 0.055 * k;
+        \u8EAF\u5E72X = Math.sin(t * 4.5) * 0.12 * k;
+        \u8EAF\u5E72\u4FA7\u503E = Math.sin(t * 4.8) * 0.3;
+        \u8EAF\u5E72\u4FEF\u4EF0 = Math.cos(t * 4.8) * 0.12;
+        \u4E0A\u8EAB\u4FA7\u503E = -Math.sin(t * 4.8) * 0.22;
+        \u4E0A\u8EAB\u504F\u822A = Math.sin(t * 3.6) * 0.18;
+        \u9888\u57FAX = 0.46 + Math.sin(t * 4.2) * 0.24;
+        \u5934\u4FEF\u4EF0X = 0.28 + Math.cos(t * 5.2) * 0.14;
+        \u5934\u504F\u822AY = Math.sin(t * 5.8) * 0.62;
+        \u5934\u6B6AZ = Math.cos(t * 6.8) * 0.48;
+        \u8033\u6735\u89D2 = -0.92;
+        \u5DE6\u8033\u5DEE = 0.38;
+        \u53F3\u8033\u5DEE = -0.38;
+        \u5F20\u5634\u5EA6 = 0.42 + Math.sin(t * 9) * 0.14;
+        const \u6296 = Math.sin(t * 24) * 0.08 * k;
+        const \u8F6F\u6B65 = Math.sin(t * 4.8) * 0.08 * k;
+        _\u76EE\u6807LF.set((0.46 + \u8F6F\u6B65) * k + \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.46 * k, 0.5 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.5 * k);
+        _\u76EE\u6807RF.set((-0.46 + \u8F6F\u6B65) * k - \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.46 * k, 0.5 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.5 * k);
+        _\u76EE\u6807LH.set((0.42 - \u8F6F\u6B65) * k - \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.42 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.48 * k);
+        _\u76EE\u6807RH.set((-0.42 - \u8F6F\u6B65) * k + \u6296, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.42 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.48 * k);
       } else if (\u662F\u649E\u8F66 || \u662F\u7A7A\u4E2D) {
-        const \u7A7A\u6446 = t * (\u662F\u649E\u8F66 ? 18 : 11);
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (\u662F\u649E\u8F66 ? 1.08 : 0.98) * k;
-        \u8EAF\u5E72\u4FEF\u4EF0 = \u662F\u649E\u8F66 ? -0.35 : Math.sin(t * 4.2) * 0.08;
-        \u8EAF\u5E72\u4FA7\u503E = \u662F\u649E\u8F66 ? Math.sin(t * 14) * 0.42 : -\u4FA7\u504F * 0.22;
-        \u4E0A\u8EAB\u504F\u822A = Math.sin(\u7A7A\u6446) * 0.18;
-        \u9888\u57FAX = \u662F\u649E\u8F66 ? -0.22 : 0.32;
-        \u5934\u4FEF\u4EF0X = \u662F\u649E\u8F66 ? -0.35 : -0.1;
-        \u5F20\u5634\u5EA6 = \u662F\u649E\u8F66 ? 0.85 : 0.28;
-        \u773C\u77AA\u5EA6 = \u662F\u649E\u8F66 ? 1.45 : 1.15;
-        \u8033\u6735\u89D2 = \u662F\u649E\u8F66 ? -0.9 : 0.1;
-        _\u76EE\u6807LF.set(0.32 * k, \u8EAF\u5E72Y - 0.58 * k + Math.sin(\u7A7A\u6446) * 0.28 * k, 0.46 * k + Math.cos(\u7A7A\u6446) * 0.42 * k);
-        _\u76EE\u6807RF.set(-0.32 * k, \u8EAF\u5E72Y - 0.58 * k + Math.sin(\u7A7A\u6446 + 0.9) * 0.28 * k, 0.46 * k + Math.cos(\u7A7A\u6446 + 0.9) * 0.42 * k);
-        _\u76EE\u6807LH.set(0.26 * k, \u8EAF\u5E72Y - 0.6 * k + Math.sin(\u7A7A\u6446 + 3.1) * 0.28 * k, -0.46 * k + Math.cos(\u7A7A\u6446 + 3.1) * 0.42 * k);
-        _\u76EE\u6807RH.set(-0.26 * k, \u8EAF\u5E72Y - 0.6 * k + Math.sin(\u7A7A\u6446 + 4) * 0.28 * k, -0.46 * k + Math.cos(\u7A7A\u6446 + 4) * 0.42 * k);
-        \u8155L\u5F2F = 0.95 * Math.max(0, Math.sin(\u7A7A\u6446));
-        \u8155R\u5F2F = 0.95 * Math.max(0, Math.sin(\u7A7A\u6446 + 0.9));
+        const \u7A7A\u6446 = t * (\u662F\u649E\u8F66 ? 19 : 12);
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + (\u662F\u649E\u8F66 ? 1.42 : 1.32) * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = \u662F\u649E\u8F66 ? -0.38 + Math.sin(t * 11) * 0.18 : Math.sin(t * 4.4) * 0.12;
+        \u8EAF\u5E72\u4FA7\u503E = \u662F\u649E\u8F66 ? Math.sin(t * 14) * 0.46 : -\u4FA7\u504F * 0.26;
+        \u4E0A\u8EAB\u504F\u822A = Math.sin(\u7A7A\u6446) * 0.24;
+        \u9888\u57FAX = \u662F\u649E\u8F66 ? -0.24 + Math.cos(t * 13) * 0.22 : 0.34;
+        \u5934\u4FEF\u4EF0X = \u662F\u649E\u8F66 ? -0.38 : -0.12;
+        \u5934\u504F\u822AY = \u662F\u649E\u8F66 ? Math.sin(t * 11) * 0.48 : \u4FA7\u504F * 0.35;
+        \u5F20\u5634\u5EA6 = \u662F\u649E\u8F66 ? 0.88 : 0.32;
+        \u773C\u77AA\u5EA6 = \u662F\u649E\u8F66 ? 1.48 : 1.18;
+        \u8033\u6735\u89D2 = \u662F\u649E\u8F66 ? -0.92 : 0.12;
+        _\u76EE\u6807LF.set(0.34 * k, \u8EAF\u5E72Y - 0.84 * k + Math.sin(\u7A7A\u6446) * 0.4 * k, 0.48 * k + Math.cos(\u7A7A\u6446) * 0.58 * k);
+        _\u76EE\u6807RF.set(-0.34 * k, \u8EAF\u5E72Y - 0.84 * k + Math.sin(\u7A7A\u6446 + 2.6) * 0.4 * k, 0.48 * k + Math.cos(\u7A7A\u6446 + 2.6) * 0.58 * k);
+        _\u76EE\u6807LH.set(0.28 * k, \u8EAF\u5E72Y - 0.88 * k + Math.sin(\u7A7A\u6446 + 3.2) * 0.42 * k, -0.48 * k + Math.cos(\u7A7A\u6446 + 3.2) * 0.6 * k);
+        _\u76EE\u6807RH.set(-0.28 * k, \u8EAF\u5E72Y - 0.88 * k + Math.sin(\u7A7A\u6446 + 0.5) * 0.42 * k, -0.48 * k + Math.cos(\u7A7A\u6446 + 0.5) * 0.6 * k);
+        \u8155L\u8D34\u5730 = 0;
+        \u8155R\u8D34\u5730 = 0;
+        \u8E1DL\u8D34\u5730 = 0;
+        \u8E1DR\u8D34\u5730 = 0;
+        \u8155L\u5C40\u5F2F = 0.24 * Math.sin(\u7A7A\u6446);
+        \u8155R\u5C40\u5F2F = 0.24 * Math.sin(\u7A7A\u6446 + 2.6);
+        \u5DE6\u5F20\u6307 = 0.52;
+        \u53F3\u5F20\u6307 = 0.52;
+        \u8E1DL\u5F2F = 0.35 + 0.35 * Math.sin(\u7A7A\u6446 + 3.2);
+        \u8E1DR\u5F2F = 0.35 + 0.35 * Math.sin(\u7A7A\u6446 + 0.5);
       } else if (\u662F\u5632\u8BBD) {
-        const \u5228 = t * 2.2 % 1;
+        const \u5228\u603B = t * 1.95;
+        const \u5228 = \u5228\u603B % 1;
         const \u62AC = Math.sin(\u5228 * Math.PI);
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.88 * k + Math.sin(t * 24) * 0.018 * k;
-        \u4E0A\u8EAB\u504F\u822A = \u62AC * 0.14;
-        \u4E0A\u8EAB\u4FA7\u503E = -\u62AC * 0.08;
-        \u53F3\u80A9\u6ED1Z = (0.5 - \u5228) * 0.06 * k;
-        \u9888\u57FAX = -0.05 + Math.sin(t * 7.5) * 0.14;
-        \u5934\u4FEF\u4EF0X = -0.1 - Math.sin(t * 7.5) * 0.14;
-        \u5F20\u5634\u5EA6 = 0.22 + Math.max(0, Math.sin(t * 11)) * 0.25;
-        \u9F3B\u5B54\u80C0 = 1.45;
-        \u8033\u6735\u89D2 = -0.35;
-        const \u5228\u5730Y = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.48 * k, \u73AF\u5883);
-        _\u76EE\u6807LF.set(0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.46 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.46 * k);
-        _\u76EE\u6807RF.set(-0.3 * k, \u5228\u5730Y + this.\u8155\u9AD8 + \u62AC * 0.3 * k, (0.48 + (0.5 - \u5228) * 0.36) * k);
-        _\u76EE\u6807LH.set(0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
-        _\u76EE\u6807RH.set(-0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.46 * k);
-        \u8155R\u5F2F = 1.15 * \u62AC;
+        const \u6362\u5DE6 = Math.floor(\u5228\u603B) % 2 === 1;
+        \u5632\u8BBD\u62AC\u624B\u4FA7 = \u6362\u5DE6 ? 1 : -1;
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.24 * k + Math.sin(t * 22) * 0.022 * k - \u62AC * 0.04 * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = 0.06 * \u62AC;
+        \u4E0A\u8EAB\u504F\u822A = (\u6362\u5DE6 ? -1 : 1) * \u62AC * 0.2;
+        \u4E0A\u8EAB\u4FA7\u503E = (\u6362\u5DE6 ? 1 : -1) * \u62AC * 0.11;
+        if (\u6362\u5DE6) \u5DE6\u80A9\u6ED1Z = (0.5 - \u5228) * 0.1 * k;
+        else \u53F3\u80A9\u6ED1Z = (0.5 - \u5228) * 0.1 * k;
+        \u9888\u57FAX = -0.08 + Math.sin(t * 7.8) * 0.18;
+        \u5934\u4FEF\u4EF0X = -0.14 - Math.sin(t * 7.8) * 0.16;
+        \u5934\u504F\u822AY = Math.sin(t * 3.9) * 0.4;
+        \u5934\u6B6AZ = (\u6362\u5DE6 ? 0.16 : -0.16) * \u62AC;
+        \u5F20\u5634\u5EA6 = 0.28 + Math.max(0, Math.sin(t * 11)) * 0.34;
+        \u9F3B\u5B54\u80C0 = 1.55;
+        \u8033\u6735\u89D2 = -0.38;
+        \u5DE6\u8033\u5DEE = Math.sin(t * 10) * 0.18;
+        \u53F3\u8033\u5DEE = -\u5DE6\u8033\u5DEE;
+        const \u5228\u5730Y = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6((\u6362\u5DE6 ? 0.3 : -0.3) * k, 0.52 * k, \u73AF\u5883);
+        if (\u6362\u5DE6) {
+          _\u76EE\u6807LF.set(0.32 * k, \u5228\u5730Y + this.\u8155\u9AD8 + \u62AC * 0.42 * k, (0.52 + (0.5 - \u5228) * 0.52) * k);
+          _\u76EE\u6807RF.set(-0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.48 * k);
+          \u8155L\u8D34\u5730 = 1 - \u62AC;
+          \u8155L\u5C40\u5F2F = 0.45 * \u62AC;
+          \u5DE6\u63E1\u62F3 = 0.45 * \u62AC;
+        } else {
+          _\u76EE\u6807LF.set(0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8, 0.48 * k);
+          _\u76EE\u6807RF.set(-0.32 * k, \u5228\u5730Y + this.\u8155\u9AD8 + \u62AC * 0.42 * k, (0.52 + (0.5 - \u5228) * 0.52) * k);
+          \u8155R\u8D34\u5730 = 1 - \u62AC;
+          \u8155R\u5C40\u5F2F = 0.45 * \u62AC;
+          \u53F3\u63E1\u62F3 = 0.45 * \u62AC;
+        }
+        _\u76EE\u6807LH.set(0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.48 * k);
+        _\u76EE\u6807RH.set(-0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8, -0.48 * k);
         if (this.\u4E0A\u5E27\u5228\u5730\u76F8 < 0.78 && \u5228 >= 0.78 && !\u662F\u7A7A\u4E2D) {
-          this.\u89E6\u53D1\u8E0F\u5730\u51B2\u51FB(1, _\u76EE\u6807RF, \u5228\u5730Y, 0.72, k);
+          this.\u89E6\u53D1\u8E0F\u5730\u51B2\u51FB(\u6362\u5DE6 ? 0 : 1, \u6362\u5DE6 ? _\u76EE\u6807LF : _\u76EE\u6807RF, \u5228\u5730Y, 0.85, k);
         }
         this.\u4E0A\u5E27\u5228\u5730\u76F8 = \u5228;
       } else if (\u662F\u7B11\u8BDD) {
         const \u7B11\u9707 = Math.sin(t * 16);
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.9 * k + Math.abs(\u7B11\u9707) * 0.04 * k;
-        \u8EAF\u5E72\u4FEF\u4EF0 = -0.14 + Math.sin(t * 7.5) * 0.08;
-        \u4E0A\u8EAB\u504F\u822A = Math.sin(t * 6) * 0.18;
-        \u9888\u57FAX = -0.18 + \u7B11\u9707 * 0.1;
-        \u5934\u4FEF\u4EF0X = -0.24 + Math.cos(t * 14) * 0.14;
-        \u5934\u504F\u822AY = Math.sin(t * 6) * 0.35;
-        \u5F20\u5634\u5EA6 = 0.42 + Math.abs(Math.sin(t * 19)) * 0.56;
-        \u8033\u6735\u89D2 = 0.25;
-        const \u8E29LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.46 * k, \u73AF\u5883);
-        const \u8E29RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.46 * k, \u73AF\u5883);
-        const \u8E29RF = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.46 * k, \u73AF\u5883);
-        _\u76EE\u6807LF.set(0.32 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.32 * k, 0.46 * k, \u73AF\u5883) + this.\u8155\u9AD8 + Math.max(0, \u7B11\u9707) * 0.24 * k, 0.5 * k);
-        _\u76EE\u6807RF.set(-0.3 * k, \u8E29RF + this.\u8155\u9AD8, 0.46 * k);
-        _\u76EE\u6807LH.set(0.24 * k, \u8E29LH + this.\u8E1D\u9AD8, -0.46 * k);
-        _\u76EE\u6807RH.set(-0.24 * k, \u8E29RH + this.\u8E1D\u9AD8, -0.46 * k);
-        \u8155L\u5F2F = Math.max(0, \u7B11\u9707) * 0.9;
+        const \u4EF0\u6CE2 = Math.sin(t * 6.4);
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.32 * k + Math.abs(\u7B11\u9707) * 0.06 * k - Math.max(0, -\u4EF0\u6CE2) * 0.08 * k;
+        \u8EAF\u5E72Z = -0.14 * k;
+        \u8EAF\u5E72\u4FEF\u4EF0 = -0.46 + \u4EF0\u6CE2 * 0.14;
+        \u8EAF\u5E72\u4FA7\u503E = Math.sin(t * 5.2) * 0.12;
+        \u4E0A\u8EAB\u5F13\u5EA6 = -0.14 + \u7B11\u9707 * 0.08;
+        \u4E0A\u8EAB\u504F\u822A = Math.sin(t * 6.4) * 0.24;
+        \u9888\u57FAX = -0.26 + \u7B11\u9707 * 0.14;
+        \u5934\u4FEF\u4EF0X = -0.32 + Math.cos(t * 15) * 0.18;
+        \u5934\u504F\u822AY = Math.sin(t * 6.4) * 0.42;
+        \u5934\u6B6AZ = Math.sin(t * 9.5) * 0.22;
+        \u5F20\u5634\u5EA6 = 0.48 + Math.abs(Math.sin(t * 20)) * 0.52;
+        \u8033\u6735\u89D2 = 0.28;
+        \u5DE6\u8033\u5DEE = Math.sin(t * 16) * 0.26;
+        \u53F3\u8033\u5DEE = -\u5DE6\u8033\u5DEE;
+        const \u8E29LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, -0.44 * k, \u73AF\u5883);
+        const \u8E29RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, -0.44 * k, \u73AF\u5883);
+        _\u76EE\u6807LH.set(0.26 * k, \u8E29LH + this.\u8E1D\u9AD8, -0.44 * k);
+        _\u76EE\u6807RH.set(-0.26 * k, \u8E29RH + this.\u8E1D\u9AD8, -0.44 * k);
+        _\u76EE\u6807LF.set((0.38 + Math.sin(t * 11) * 0.1) * k, \u8EAF\u5E72Y + (0.04 + Math.max(0, \u7B11\u9707) * 0.34) * k, (0.64 + Math.cos(t * 11) * 0.14) * k);
+        _\u76EE\u6807RF.set((-0.38 - Math.sin(t * 11) * 0.1) * k, \u8EAF\u5E72Y + (0.04 + Math.max(0, -\u7B11\u9707) * 0.34) * k, (0.64 - Math.cos(t * 11) * 0.14) * k);
+        \u8155L\u8D34\u5730 = 0;
+        \u8155R\u8D34\u5730 = 0;
+        \u8155L\u5C40\u5F2F = 0.12 + Math.max(0, \u7B11\u9707) * 0.36;
+        \u8155R\u5C40\u5F2F = 0.12 + Math.max(0, -\u7B11\u9707) * 0.36;
+        \u5DE6\u63E1\u62F3 = 0.2;
+        \u53F3\u63E1\u62F3 = 0.2;
+        \u5DE6\u5F20\u6307 = 0.35;
+        \u53F3\u5F20\u6307 = 0.35;
       } else if (\u662F\u8DF3\u821E) {
-        const \u62CD = t * 7.2;
+        const \u62CD = t * 7.6;
+        const \u821E\u6BB5 = Math.floor(t * 1.45 % 2);
         const \u5BF9\u89D2A = Math.max(0, Math.sin(\u62CD));
         const \u5BF9\u89D2B = Math.max(0, -Math.sin(\u62CD));
-        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 0.92 * k + Math.abs(Math.sin(\u62CD)) * 0.09 * k;
-        \u8EAF\u5E72\u4FA7\u503E = Math.sin(\u62CD * 0.5) * 0.14;
-        \u4E0A\u8EAB\u504F\u822A = Math.sin(\u62CD) * 0.16;
-        \u9888\u57FAX = Math.sin(\u62CD * 2) * 0.12;
-        \u5934\u504F\u822AY = Math.sin(\u62CD * 0.5) * 0.32;
-        \u8033\u6735\u89D2 = Math.sin(\u62CD) * 0.35;
-        \u5F20\u5634\u5EA6 = 0.14 + \u5BF9\u89D2A * 0.12;
-        _\u76EE\u6807LF.set(0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.46 * k, \u73AF\u5883) + this.\u8155\u9AD8 + \u5BF9\u89D2A * 0.34 * k, (0.46 + \u5BF9\u89D2A * 0.12) * k);
-        _\u76EE\u6807RF.set(-0.3 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.46 * k, \u73AF\u5883) + this.\u8155\u9AD8 + \u5BF9\u89D2B * 0.34 * k, (0.46 + \u5BF9\u89D2B * 0.12) * k);
-        _\u76EE\u6807LH.set(0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8 + \u5BF9\u89D2B * 0.22 * k, -0.46 * k);
-        _\u76EE\u6807RH.set(-0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.46 * k, \u73AF\u5883) + this.\u8E1D\u9AD8 + \u5BF9\u89D2A * 0.22 * k, -0.46 * k);
-        \u8155L\u5F2F = \u5BF9\u89D2A * 0.95;
-        \u8155R\u5F2F = \u5BF9\u89D2B * 0.95;
+        if (\u821E\u6BB5 === 0) {
+          \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.32 * k + Math.abs(Math.sin(\u62CD)) * 0.12 * k;
+          \u8EAF\u5E72\u4FEF\u4EF0 = -0.14 + Math.sin(\u62CD * 2) * 0.06;
+          \u8EAF\u5E72\u4FA7\u503E = Math.sin(\u62CD * 0.5) * 0.14;
+          \u4E0A\u8EAB\u504F\u822A = Math.sin(\u62CD) * 0.22;
+          \u9888\u57FAX = -0.1 + Math.sin(\u62CD * 2) * 0.16;
+          \u9888\u4E2DX = -0.2;
+          \u5934\u4FEF\u4EF0X = -0.06 - Math.sin(\u62CD * 2) * 0.14;
+          \u5934\u504F\u822AY = Math.sin(\u62CD * 0.5) * 0.38;
+          \u8033\u6735\u89D2 = 0.3 + Math.sin(\u62CD) * 0.22;
+          \u5DE6\u8033\u5DEE = Math.sin(\u62CD) * 0.2;
+          \u53F3\u8033\u5DEE = -\u5DE6\u8033\u5DEE;
+          \u5F20\u5634\u5EA6 = 0.16 + \u5BF9\u89D2A * 0.16;
+          _\u76EE\u6807LF.set(0.32 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.32 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8 + \u5BF9\u89D2A * 0.56 * k, (0.48 + \u5BF9\u89D2A * 0.34) * k);
+          _\u76EE\u6807RF.set(-0.32 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.32 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8 + \u5BF9\u89D2B * 0.56 * k, (0.48 + \u5BF9\u89D2B * 0.34) * k);
+          _\u76EE\u6807LH.set(0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8 + \u5BF9\u89D2B * 0.3 * k, -0.48 * k);
+          _\u76EE\u6807RH.set(-0.24 * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8 + \u5BF9\u89D2A * 0.3 * k, -0.48 * k);
+          \u8155L\u8D34\u5730 = 1 - \u5BF9\u89D2A;
+          \u8155R\u8D34\u5730 = 1 - \u5BF9\u89D2B;
+          \u8155L\u5C40\u5F2F = 0.38 * \u5BF9\u89D2A;
+          \u8155R\u5C40\u5F2F = 0.38 * \u5BF9\u89D2B;
+          \u5DE6\u63E1\u62F3 = 0.25 * \u5BF9\u89D2A;
+          \u53F3\u63E1\u62F3 = 0.25 * \u5BF9\u89D2B;
+        } else {
+          const \u626D = Math.sin(\u62CD * 0.5);
+          \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.28 * k + Math.abs(Math.sin(\u62CD)) * 0.15 * k;
+          \u8EAF\u5E72X = \u626D * 0.14 * k;
+          \u8EAF\u5E72\u4FA7\u503E = \u626D * 0.22;
+          \u8EAF\u5E72\u504F\u822A = -\u626D * 0.18;
+          \u4E0A\u8EAB\u504F\u822A = \u626D * 0.32;
+          \u4E0A\u8EAB\u4FA7\u503E = -\u626D * 0.16;
+          \u9888\u57FAX = Math.sin(\u62CD * 2) * 0.15;
+          \u5934\u504F\u822AY = -\u626D * 0.44;
+          \u5934\u6B6AZ = \u626D * 0.24;
+          \u8033\u6735\u89D2 = 0.24;
+          \u5DE6\u8033\u5DEE = Math.cos(\u62CD) * 0.28;
+          \u53F3\u8033\u5DEE = -\u5DE6\u8033\u5DEE;
+          \u5F20\u5634\u5EA6 = 0.2 + Math.abs(Math.sin(\u62CD)) * 0.18;
+          _\u76EE\u6807LF.set((0.32 + \u626D * 0.1) * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.32 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8 + \u5BF9\u89D2A * 0.38 * k, (0.48 + \u5BF9\u89D2A * 0.14) * k);
+          _\u76EE\u6807RF.set((-0.32 + \u626D * 0.1) * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.32 * k, 0.48 * k, \u73AF\u5883) + this.\u8155\u9AD8 + \u5BF9\u89D2B * 0.38 * k, (0.48 + \u5BF9\u89D2B * 0.14) * k);
+          _\u76EE\u6807LH.set((0.26 - \u626D * 0.1) * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.26 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8 + \u5BF9\u89D2B * 0.34 * k, (-0.48 + \u5BF9\u89D2B * 0.12) * k);
+          _\u76EE\u6807RH.set((-0.26 - \u626D * 0.1) * k, \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.26 * k, -0.48 * k, \u73AF\u5883) + this.\u8E1D\u9AD8 + \u5BF9\u89D2A * 0.34 * k, (-0.48 + \u5BF9\u89D2A * 0.12) * k);
+          \u8155L\u8D34\u5730 = 1 - \u5BF9\u89D2A;
+          \u8155R\u8D34\u5730 = 1 - \u5BF9\u89D2B;
+          \u8155L\u5C40\u5F2F = 0.34 * \u5BF9\u89D2A;
+          \u8155R\u5C40\u5F2F = 0.34 * \u5BF9\u89D2B;
+          \u5DE6\u63E1\u62F3 = 0.22 * \u5BF9\u89D2A;
+          \u53F3\u63E1\u62F3 = 0.22 * \u5BF9\u89D2B;
+        }
       } else if (\u9A71\u52A8\u901F\u5EA6 <= 0.6) {
-        const \u6B47\u76F8 = Math.max(0, Math.sin(t * 0.8));
-        const \u5730\u9762LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.46 * k, \u73AF\u5883);
-        const \u5730\u9762RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.46 * k, \u73AF\u5883);
-        const \u5730\u9762LF = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.46 * k, \u73AF\u5883);
-        const \u5730\u9762RF = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.46 * k, \u73AF\u5883);
-        _\u76EE\u6807LF.set(0.3 * k, \u5730\u9762LF + this.\u8155\u9AD8, 0.46 * k);
-        _\u76EE\u6807RF.set(-0.3 * k, \u5730\u9762RF + this.\u8155\u9AD8, 0.46 * k);
-        _\u76EE\u6807LH.set(0.24 * k, \u5730\u9762LH + this.\u8E1D\u9AD8, -0.46 * k);
-        _\u76EE\u6807RH.set(-0.24 * k, \u5730\u9762RH + this.\u8E1D\u9AD8 + \u6B47\u76F8 * 0.05 * k, (-0.46 + \u6B47\u76F8 * 0.08) * k);
-        \u8E1DR\u5F2F = 0.46 + \u6B47\u76F8 * 0.45;
-        \u8EAF\u5E72\u4FA7\u503E += \u6B47\u76F8 * 0.055;
-        \u4E0A\u8EAB\u4FA7\u503E -= \u6B47\u76F8 * 0.04;
-        \u9888\u57FAX = 0.14 + Math.sin(t * 1.4) * 0.12;
-        \u5934\u504F\u822AY = Math.sin(t * 1.1) * 0.45;
-        \u5934\u4FEF\u4EF0X = -0.1 + Math.sin(t * 2.2) * 0.08;
-        \u8033\u6735\u89D2 = Math.sin(t * 3.8) * 0.25;
-        \u5F20\u5634\u5EA6 = 0.04 + Math.max(0, Math.sin(t * 2.5)) * 0.08;
+        const \u547C\u5438 = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2.2);
+        const \u95F2\u76F8 = t % 7.2 / 7.2;
+        const \u8F7B\u70B9\u76F8 = \u95F2\u76F8 >= 0.38 && \u95F2\u76F8 < 0.56 ? Math.sin((\u95F2\u76F8 - 0.38) / 0.18 * Math.PI) : 0;
+        const \u6B47\u817F\u76F8 = \u95F2\u76F8 >= 0.6 && \u95F2\u76F8 < 0.84 ? Math.sin((\u95F2\u76F8 - 0.6) / 0.24 * Math.PI) : 0;
+        const \u6296\u5934\u76F8 = \u95F2\u76F8 >= 0.86 && \u95F2\u76F8 < 0.98 ? Math.sin((\u95F2\u76F8 - 0.86) / 0.12 * Math.PI) : 0;
+        const \u6296\u6CE2 = \u6296\u5934\u76F8 * Math.sin(t * 34);
+        const \u5730\u9762LH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.24 * k, -0.48 * k, \u73AF\u5883);
+        const \u5730\u9762RH = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.24 * k, -0.48 * k, \u73AF\u5883);
+        const \u5730\u9762LF = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0.3 * k, 0.48 * k, \u73AF\u5883);
+        const \u5730\u9762RF = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(-0.3 * k, 0.48 * k, \u73AF\u5883);
+        _\u76EE\u6807LF.set(0.3 * k, \u5730\u9762LF + this.\u8155\u9AD8, 0.48 * k);
+        _\u76EE\u6807RF.set(-0.3 * k, \u5730\u9762RF + this.\u8155\u9AD8 + \u8F7B\u70B9\u76F8 * 0.22 * k, (0.48 + \u8F7B\u70B9\u76F8 * 0.14) * k);
+        _\u76EE\u6807LH.set(0.24 * k, \u5730\u9762LH + this.\u8E1D\u9AD8, -0.48 * k);
+        _\u76EE\u6807RH.set(-0.24 * k, \u5730\u9762RH + this.\u8E1D\u9AD8 + \u6B47\u817F\u76F8 * 0.08 * k, (-0.48 + \u6B47\u817F\u76F8 * 0.1) * k);
+        \u8155R\u8D34\u5730 = 1 - \u8F7B\u70B9\u76F8;
+        \u8155R\u5C40\u5F2F = 0.32 * \u8F7B\u70B9\u76F8;
+        \u53F3\u63E1\u62F3 = 0.28 * \u8F7B\u70B9\u76F8;
+        \u8E1DR\u5F2F = 0.32 + \u6B47\u817F\u76F8 * 0.4;
+        \u53F3\u8DBE\u7FD8 = -0.22 * \u6B47\u817F\u76F8;
+        \u8EAF\u5E72Y = \u4E2D\u5730\u9762Y + 1.3 * k + \u547C\u5438 * 0.022 * k - \u6B47\u817F\u76F8 * 0.03 * k;
+        \u8EAF\u5E72X = (Math.sin(t * 0.85) * 0.028 + \u6B47\u817F\u76F8 * 0.05) * k;
+        \u8EAF\u5E72\u4FA7\u503E = Math.sin(t * 0.85) * 0.03 + \u6B47\u817F\u76F8 * 0.07;
+        \u4E0A\u8EAB\u5F13\u5EA6 = \u547C\u5438 * 0.028 - \u8F7B\u70B9\u76F8 * 0.04;
+        \u4E0A\u8EAB\u504F\u822A = \u8F7B\u70B9\u76F8 * 0.08 - \u6B47\u817F\u76F8 * 0.06;
+        \u9888\u57FAX = 0.05 + (\u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.28 : 0) + \u547C\u5438 * 0.035 - \u8F7B\u70B9\u76F8 * 0.12 + \u6B47\u817F\u76F8 * 0.1;
+        \u5934\u504F\u822AY = (\u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.9 : Math.sin(t * 1.1) * 0.35) + \u6296\u6CE2 * 0.32;
+        \u5934\u4FEF\u4EF0X = -0.1 + (\u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.38 : 0) - \u8F7B\u70B9\u76F8 * 0.1;
+        \u5934\u6B6AZ = (\u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.45 : 0) + \u6296\u6CE2 * 0.36;
+        \u8033\u6735\u89D2 = 0.16 + Math.sin(t * 2.4) * 0.1 - \u6296\u5934\u76F8 * 0.28;
+        \u5DE6\u8033\u5DEE = Math.sin(t * 1.7) * 0.22 + \u6296\u6CE2 * 0.3;
+        \u53F3\u8033\u5DEE = Math.cos(t * 2.1) * 0.22 - \u6296\u6CE2 * 0.3;
+        \u9F3B\u5B54\u80C0 = 1 + \u8F7B\u70B9\u76F8 * 0.42;
+        \u5F20\u5634\u5EA6 = 0.04 + Math.max(0, \u547C\u5438) * 0.035 + \u6B47\u817F\u76F8 * Math.abs(Math.sin(t * 6.5)) * 0.16;
       } else {
         const \u5F2F\u5411 = \u4FA7\u504F;
-        const LF = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ELF, \u7AD9\u59FF\u6BD4, \u6446\u9AD8, \u6B65\u5E45, 0.35 * k, 0.48 * k, (0.065 + \u5F2F\u5411 * 0.1) * k, true, k, _\u76EE\u6807LF, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
-        const RF = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ERF, \u7AD9\u59FF\u6BD4, \u6446\u9AD8, \u6B65\u5E45, -0.35 * k, 0.48 * k, (-0.065 + \u5F2F\u5411 * 0.1) * k, true, k, _\u76EE\u6807RF, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
-        const LH = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ELH, \u7AD9\u59FF\u6BD4, \u6446\u9AD8 * 0.94, \u6B65\u5E45 * 1.04, 0.28 * k, -0.46 * k, (0.06 - \u5F2F\u5411 * 0.1) * k, false, k, _\u76EE\u6807LH, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
-        const RH = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ERH, \u7AD9\u59FF\u6BD4, \u6446\u9AD8 * 0.94, \u6B65\u5E45 * 1.04, -0.28 * k, -0.46 * k, (-0.06 - \u5F2F\u5411 * 0.1) * k, false, k, _\u76EE\u6807RH, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
+        const LF = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ELF, \u7AD9\u59FF\u6BD4, \u6446\u9AD8, \u6B65\u5E45, 0.35 * k, 0.5 * k, (0.075 + \u5F2F\u5411 * 0.14) * k, true, k, _\u76EE\u6807LF, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
+        const RF = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ERF, \u7AD9\u59FF\u6BD4, \u6446\u9AD8, \u6B65\u5E45, -0.35 * k, 0.5 * k, (-0.075 + \u5F2F\u5411 * 0.14) * k, true, k, _\u76EE\u6807RF, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
+        const LH = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ELH, \u7AD9\u59FF\u6BD4, \u6446\u9AD8 * 0.96, \u6B65\u5E45 * 1.06, 0.28 * k, -0.48 * k, (0.07 - \u5F2F\u5411 * 0.14) * k, false, k, _\u76EE\u6807LH, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
+        const RH = this.\u8BA1\u7B97\u9A6C\u6B65\u80A2\u7AEF\u8F68\u8FF9(this.\u6B65\u6001\u76F8\u4F4D - \u6EDE\u540ERH, \u7AD9\u59FF\u6BD4, \u6446\u9AD8 * 0.96, \u6B65\u5E45 * 1.06, -0.28 * k, -0.48 * k, (-0.07 - \u5F2F\u5411 * 0.14) * k, false, k, _\u76EE\u6807RH, \u73AF\u5883, \u662F\u72C2\u5954\u6001);
+        if (\u662F\u5927\u55B7 && \u5927\u55B7\u8DC3\u6CE2 > 0.01) {
+          if (!LF.\u662F\u652F\u6491) {
+            _\u76EE\u6807LF.y += \u5927\u55B7\u8DC3\u6CE2 * 0.58 * k;
+            _\u76EE\u6807LF.z += \u5927\u55B7\u8DC3\u6CE2 * 0.24 * k;
+          }
+          if (!RF.\u662F\u652F\u6491) {
+            _\u76EE\u6807RF.y += \u5927\u55B7\u8DC3\u6CE2 * 0.58 * k;
+            _\u76EE\u6807RF.z += \u5927\u55B7\u8DC3\u6CE2 * 0.24 * k;
+          }
+          if (!LH.\u662F\u652F\u6491) {
+            _\u76EE\u6807LH.y += \u5927\u55B7\u8DC3\u6CE2 * 0.64 * k;
+            _\u76EE\u6807LH.z -= \u5927\u55B7\u8DC3\u6CE2 * 0.3 * k;
+          }
+          if (!RH.\u662F\u652F\u6491) {
+            _\u76EE\u6807RH.y += \u5927\u55B7\u8DC3\u6CE2 * 0.64 * k;
+            _\u76EE\u6807RH.z -= \u5927\u55B7\u8DC3\u6CE2 * 0.3 * k;
+          }
+        }
         \u8155L\u5F2F = LF.\u8155\u8E1D\u5F2F;
         \u8155R\u5F2F = RF.\u8155\u8E1D\u5F2F;
         \u8E1DL\u5F2F = LH.\u8155\u8E1D\u5F2F;
         \u8E1DR\u5F2F = RH.\u8155\u8E1D\u5F2F;
+        \u8155L\u8D34\u5730 = LF.\u662F\u652F\u6491 ? 1 : 0;
+        \u8155R\u8D34\u5730 = RF.\u662F\u652F\u6491 ? 1 : 0;
+        \u8E1DL\u8D34\u5730 = LH.\u662F\u652F\u6491 ? 1 : 0;
+        \u8E1DR\u8D34\u5730 = RH.\u662F\u652F\u6491 ? 1 : 0;
+        \u8155L\u5C40\u5F2F = LF.\u662F\u652F\u6491 ? 0.08 : \u662F\u5927\u55B7 ? 0.42 : 0.34;
+        \u8155R\u5C40\u5F2F = RF.\u662F\u652F\u6491 ? 0.08 : \u662F\u5927\u55B7 ? 0.42 : 0.34;
+        \u5DE6\u63E1\u62F3 = LF.\u662F\u652F\u6491 ? 0 : \u662F\u5927\u55B7 ? 0.48 : 0.28;
+        \u53F3\u63E1\u62F3 = RF.\u662F\u652F\u6491 ? 0 : \u662F\u5927\u55B7 ? 0.48 : 0.28;
+        \u5DE6\u5F20\u6307 = LF.\u662F\u652F\u6491 ? 0.24 : 0.12;
+        \u53F3\u5F20\u6307 = RF.\u662F\u652F\u6491 ? 0.24 : 0.12;
+        \u5DE6\u8DBE\u7FD8 = LH.\u662F\u652F\u6491 ? -0.26 * Math.max(0, -LH.\u80A2\u524D\u4F4D) : 0.18;
+        \u53F3\u8DBE\u7FD8 = RH.\u662F\u652F\u6491 ? -0.26 * Math.max(0, -RH.\u80A2\u524D\u4F4D) : 0.18;
         \u5F53\u524D\u652F\u6491[0] = LF.\u662F\u652F\u6491;
         \u5F53\u524D\u652F\u6491[1] = RF.\u662F\u652F\u6491;
         \u5F53\u524D\u652F\u6491[2] = LH.\u662F\u652F\u6491;
         \u5F53\u524D\u652F\u6491[3] = RH.\u662F\u652F\u6491;
         \u5141\u8BB8\u8E0F\u5730\u68C0\u51FA = !\u662F\u7A7A\u4E2D;
-        \u8E0F\u5730\u5F3A\u5EA6\u57FA\u51C6 = \u662F\u72C2\u5954\u6001 ? \u662F\u5927\u55B7 ? 1.35 : 1.1 : \u662F\u5C0F\u8DD1\u6001 ? 0.82 : \u662F\u5012\u8F66 ? 0.48 : 0.36;
+        \u8E0F\u5730\u5F3A\u5EA6\u57FA\u51C6 = \u662F\u72C2\u5954\u6001 ? \u662F\u5927\u55B7 ? 1.55 : \u662F\u8FDE\u55B7 ? 1.24 : 1.1 : \u662F\u5C0F\u8DD1\u6001 ? 0.84 : \u662F\u5012\u8F66 ? 0.5 : 0.38;
         const \u6B65\u6001\u6743\u91CD = Math.min(1, (\u9A71\u52A8\u901F\u5EA6 - 0.6) / 6.5);
         const \u524D\u80A2\u5DE6\u53F3\u5DEE = LF.\u80A2\u524D\u4F4D - RF.\u80A2\u524D\u4F4D;
         const \u540E\u80A2\u5DE6\u53F3\u5DEE = LH.\u80A2\u524D\u4F4D - RH.\u80A2\u524D\u4F4D;
         const \u524D\u80A2\u538B\u5DEE = LF.\u652F\u6491\u538B - RF.\u652F\u6491\u538B;
         const \u540E\u80A2\u538B\u5DEE = LH.\u652F\u6491\u538B - RH.\u652F\u6491\u538B;
-        const \u626D\u5E45 = \u662F\u5C0F\u8DD1\u6001 ? 0.18 : \u662F\u72C2\u5954\u6001 ? 0.13 : 0.095;
-        const \u6EDA\u5E45 = \u662F\u5C0F\u8DD1\u6001 ? 0.13 : \u662F\u72C2\u5954\u6001 ? 0.1 : 0.05;
+        const \u626D\u5E45 = \u662F\u5C0F\u8DD1\u6001 ? 0.2 : \u662F\u5927\u55B7 ? 0.22 : \u662F\u72C2\u5954\u6001 ? 0.15 : 0.11;
+        const \u6EDA\u5E45 = \u662F\u5C0F\u8DD1\u6001 ? 0.15 : \u662F\u5927\u55B7 ? 0.18 : \u662F\u72C2\u5954\u6001 ? 0.12 : 0.065;
         const \u9AA8\u76C6\u626D\u8F6CY = -\u540E\u80A2\u5DE6\u53F3\u5DEE * \u626D\u5E45 * \u6B65\u6001\u6743\u91CD;
         const \u9AA8\u76C6\u6EDA\u8F6CZ = \u540E\u80A2\u538B\u5DEE * \u6EDA\u5E45 * \u6B65\u6001\u6743\u91CD;
         \u8EAF\u5E72\u504F\u822A += \u9AA8\u76C6\u626D\u8F6CY;
         \u8EAF\u5E72\u4FA7\u503E += \u9AA8\u76C6\u6EDA\u8F6CZ;
-        \u8EAF\u5E72X += (RH.\u652F\u6491\u538B - LF.\u652F\u6491\u538B * 0.2 - LH.\u652F\u6491\u538B) * (\u662F\u72C2\u5954\u6001 ? 0.032 : \u662F\u6F2B\u6B65\u6001 ? 0.018 : 0.035) * k * \u6B65\u6001\u6743\u91CD;
-        const \u76EE\u6807\u80F8\u504F\u822A = -\u524D\u80A2\u5DE6\u53F3\u5DEE * (\u662F\u5C0F\u8DD1\u6001 ? 0.2 : \u662F\u72C2\u5954\u6001 ? 0.14 : 0.105) * \u6B65\u6001\u6743\u91CD;
-        const \u76EE\u6807\u80F8\u6EDA\u8F6C = \u524D\u80A2\u538B\u5DEE * (\u662F\u5C0F\u8DD1\u6001 ? 0.12 : 0.085) * \u6B65\u6001\u6743\u91CD;
-        \u4E0A\u8EAB\u504F\u822A = \u76EE\u6807\u80F8\u504F\u822A - \u9AA8\u76C6\u626D\u8F6CY;
-        \u4E0A\u8EAB\u4FA7\u503E = \u76EE\u6807\u80F8\u6EDA\u8F6C - \u9AA8\u76C6\u6EDA\u8F6CZ;
-        \u4E0A\u8EAB\u504FX = (RF.\u652F\u6491\u538B - LF.\u652F\u6491\u538B) * 0.024 * k * \u6B65\u6001\u6743\u91CD - \u9AA8\u76C6\u626D\u8F6CY * 0.04 * k;
+        \u8EAF\u5E72X += (RH.\u652F\u6491\u538B - LF.\u652F\u6491\u538B * 0.2 - LH.\u652F\u6491\u538B) * (\u662F\u72C2\u5954\u6001 ? 0.036 : \u662F\u6F2B\u6B65\u6001 ? 0.022 : 0.04) * k * \u6B65\u6001\u6743\u91CD;
+        const \u76EE\u6807\u80F8\u504F\u822A = -\u524D\u80A2\u5DE6\u53F3\u5DEE * (\u662F\u5C0F\u8DD1\u6001 ? 0.22 : \u662F\u5927\u55B7 ? 0.22 : \u662F\u72C2\u5954\u6001 ? 0.16 : 0.12) * \u6B65\u6001\u6743\u91CD;
+        const \u76EE\u6807\u80F8\u6EDA\u8F6C = \u524D\u80A2\u538B\u5DEE * (\u662F\u5C0F\u8DD1\u6001 ? 0.14 : \u662F\u5927\u55B7 ? 0.15 : 0.095) * \u6B65\u6001\u6743\u91CD;
+        \u4E0A\u8EAB\u504F\u822A += \u76EE\u6807\u80F8\u504F\u822A - \u9AA8\u76C6\u626D\u8F6CY;
+        \u4E0A\u8EAB\u4FA7\u503E += \u76EE\u6807\u80F8\u6EDA\u8F6C - \u9AA8\u76C6\u6EDA\u8F6CZ;
+        \u4E0A\u8EAB\u504FX = (RF.\u652F\u6491\u538B - LF.\u652F\u6491\u538B) * 0.028 * k * \u6B65\u6001\u6743\u91CD - \u9AA8\u76C6\u626D\u8F6CY * 0.045 * k;
         if (\u662F\u72C2\u5954\u6001) {
           const \u75BE\u4F38\u6CE2 = Math.cos((\u539F\u6B65\u76F8 - 0.18) * Math.PI * 2);
-          \u4E0A\u8EAB\u5F13\u5EA6 = \u75BE\u4F38\u6CE2 * 0.24 - \u810A\u67F1\u4FEF\u4EF0\u6CE2 * 0.5;
+          \u4E0A\u8EAB\u5F13\u5EA6 = \u75BE\u4F38\u6CE2 * (\u662F\u5927\u55B7 ? 0.48 : \u662F\u8FDE\u55B7 ? 0.28 : 0.24) - \u810A\u67F1\u4FEF\u4EF0\u6CE2 * 0.54;
         } else {
-          \u4E0A\u8EAB\u5F13\u5EA6 += (\u540E\u80A2\u538B\u5DEE - \u524D\u80A2\u538B\u5DEE) * 0.055;
+          \u4E0A\u8EAB\u5F13\u5EA6 += (\u540E\u80A2\u538B\u5DEE - \u524D\u80A2\u538B\u5DEE) * 0.065;
         }
-        const \u80A9\u6ED1\u5E45\u5EA6 = \u662F\u72C2\u5954\u6001 ? 0.105 : \u662F\u5C0F\u8DD1\u6001 ? 0.085 : 0.062;
+        const \u80A9\u6ED1\u5E45\u5EA6 = \u662F\u5927\u55B7 ? 0.19 : \u662F\u72C2\u5954\u6001 ? 0.135 : \u662F\u5C0F\u8DD1\u6001 ? 0.105 : 0.075;
         \u5DE6\u80A9\u6ED1Z = LF.\u80A2\u524D\u4F4D * \u80A9\u6ED1\u5E45\u5EA6 * k * \u6B65\u6001\u6743\u91CD;
         \u53F3\u80A9\u6ED1Z = RF.\u80A2\u524D\u4F4D * \u80A9\u6ED1\u5E45\u5EA6 * k * \u6B65\u6001\u6743\u91CD;
-        \u5DE6\u80A9\u6ED1Y = LF.\u652F\u6491\u538B * 0.045 * k * \u6B65\u6001\u6743\u91CD;
-        \u53F3\u80A9\u6ED1Y = RF.\u652F\u6491\u538B * 0.045 * k * \u6B65\u6001\u6743\u91CD;
+        \u5DE6\u80A9\u6ED1Y = LF.\u652F\u6491\u538B * 0.055 * k * \u6B65\u6001\u6743\u91CD + \u5927\u55B7\u8DC3\u6CE2 * 0.08 * k;
+        \u53F3\u80A9\u6ED1Y = RF.\u652F\u6491\u538B * 0.055 * k * \u6B65\u6001\u6743\u91CD + \u5927\u55B7\u8DC3\u6CE2 * 0.08 * k;
         const \u6EDE\u540E\u80F8\u822A = this.\u9888\u90E8\u6EDE\u540E\u5F39\u7C27.\u66F4\u65B0(\u76EE\u6807\u80F8\u504F\u822A, dt, 165, 15, 0.8);
         \u9888\u4EE3\u507F\u504F\u822A = -\u76EE\u6807\u80F8\u504F\u822A * 0.62 - \u6EDE\u540E\u80F8\u822A * 0.28;
         if (\u662F\u72C2\u5954\u6001) {
-          \u9888\u4EE3\u507F\u4FEF\u4EF0 = Math.sin((\u539F\u6B65\u76F8 - 0.2) * Math.PI * 2) * 0.18;
+          \u9888\u4EE3\u507F\u4FEF\u4EF0 = Math.sin((\u539F\u6B65\u76F8 - 0.2) * Math.PI * 2) * (\u662F\u5927\u55B7 ? 0.34 : 0.19);
         }
         if (\u5141\u8BB8\u8E0F\u5730\u68C0\u51FA) {
           const \u76EE\u6807\u7EC4 = [_\u76EE\u6807LF, _\u76EE\u6807RF, _\u76EE\u6807LH, _\u76EE\u6807RH];
           const \u5730\u9762\u7EC4 = [LF.\u5730\u9762Y, RF.\u5730\u9762Y, LH.\u5730\u9762Y, RH.\u5730\u9762Y];
           for (let ci = 0; ci < 4; ci++) {
             if (!this.\u4E0A\u5E27\u652F\u6491[ci] && \u5F53\u524D\u652F\u6491[ci]) {
-              const \u80A2\u6743\u91CD = ci >= 2 ? 1.15 : 0.94;
+              const \u80A2\u6743\u91CD = ci >= 2 ? 1.18 : 0.96;
               this.\u89E6\u53D1\u8E0F\u5730\u51B2\u51FB(ci, \u76EE\u6807\u7EC4[ci], \u5730\u9762\u7EC4[ci], \u8E0F\u5730\u5F3A\u5EA6\u57FA\u51C6 * \u80A2\u6743\u91CD, k);
             }
           }
@@ -55052,12 +56761,13 @@ void main() {
           \u8033\u6735\u89D2 = -0.45;
           \u5F20\u5634\u5EA6 = 0.22;
         } else if (\u52A0\u901F\u4E2D) {
-          \u9888\u57FAX = 0.18;
-          \u5934\u4FEF\u4EF0X = -0.16;
-          \u8033\u6735\u89D2 = -0.88;
-          \u5F20\u5634\u5EA6 = \u662F\u5927\u55B7 ? 0.84 + Math.sin(t * 22) * 0.12 : 0.42;
-          \u9F3B\u5B54\u80C0 = \u662F\u5927\u55B7 ? 1.55 : 1.3;
-          \u773C\u77AA\u5EA6 = \u662F\u5927\u55B7 ? 1.32 : 1.15;
+          const \u72C2\u7529 = Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * (\u662F\u5927\u55B7 ? 0.24 : 0.08);
+          \u9888\u57FAX = (\u662F\u5927\u55B7 ? 0.28 : \u662F\u8FDE\u55B7 ? 0.2 : 0.14) + \u72C2\u7529;
+          \u5934\u4FEF\u4EF0X = (\u662F\u5927\u55B7 ? -0.3 : -0.16) - \u72C2\u7529 * 0.72;
+          \u8033\u6735\u89D2 = \u662F\u5927\u55B7 ? -1.08 : \u662F\u8FDE\u55B7 ? -0.86 : -0.68;
+          \u5F20\u5634\u5EA6 = \u662F\u5927\u55B7 ? 0.82 + Math.abs(Math.sin(t * 26)) * 0.28 : \u662F\u8FDE\u55B7 ? 0.48 + Math.abs(Math.sin(t * 16)) * 0.18 : 0.3;
+          \u9F3B\u5B54\u80C0 = \u662F\u5927\u55B7 ? 1.82 : \u662F\u8FDE\u55B7 ? 1.45 : 1.28;
+          \u773C\u77AA\u5EA6 = \u662F\u5927\u55B7 ? 1.52 : \u662F\u8FDE\u55B7 ? 1.22 : 1.12;
         }
       }
       if (this.\u4E0A\u5E27\u7A7A\u4E2D && !\u662F\u7A7A\u4E2D && !\u662F\u51B2\u7EBF && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
@@ -55106,41 +56816,64 @@ void main() {
       this.\u9A6C\u4E0B\u988C\u67A2.rotation.x = \u5F20\u5634\u5EA6;
       this.\u5DE6\u9F3B\u5B54.scale.set(0.65 * \u9F3B\u5B54\u80C0, 1.05 * \u9F3B\u5B54\u80C0, 1.2);
       this.\u53F3\u9F3B\u5B54.scale.set(0.65 * \u9F3B\u5B54\u80C0, 1.05 * \u9F3B\u5B54\u80C0, 1.2);
-      const \u8033\u9707 = \u98A4\u6CE2 * 3.2 - \u9707Y * 0.8;
-      this.\u5DE6\u8033\u67A2.rotation.set(\u8033\u6735\u89D2 + \u8033\u9707, 0.12, -0.22 - \u9707\u626D * 0.06);
-      this.\u53F3\u8033\u67A2.rotation.set(\u8033\u6735\u89D2 + \u8033\u9707, -0.12, 0.22 + \u9707\u626D * 0.06);
-      this.\u989D\u9B03\u67A2.rotation.x = Math.min(0.6, \u9A71\u52A8\u901F\u5EA6 * 0.015) + Math.sin(t * 14) * 0.16 + Math.abs(\u9707Y) * 1.4;
+      const \u8033\u9707 = \u662F\u6B7B\u4EA1 ? 0 : \u98A4\u6CE2 * 3.2 - \u9707Y * 0.8;
+      this.\u5DE6\u8033\u67A2.rotation.set(\u8033\u6735\u89D2 + \u5DE6\u8033\u5DEE + \u8033\u9707, 0.12 + \u5DE6\u8033\u5DEE * 0.5, -0.22 - \u9707\u626D * 0.06 - \u5DE6\u8033\u5DEE * 0.4);
+      this.\u53F3\u8033\u67A2.rotation.set(\u8033\u6735\u89D2 + \u53F3\u8033\u5DEE + \u8033\u9707, -0.12 - \u53F3\u8033\u5DEE * 0.5, 0.22 + \u9707\u626D * 0.06 + \u53F3\u8033\u5DEE * 0.4);
+      this.\u989D\u9B03\u67A2.rotation.x = \u6B7B\u6001 ? 0.18 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u5F85\u673A ? Math.sin(t * 2.2) * 0.04 + Math.abs(\u5934\u6B6AZ) * 0.45 : Math.min(0.65, \u9A71\u52A8\u901F\u5EA6 * 0.016) + Math.sin(t * 14) * 0.18 + Math.abs(\u9707Y) * 1.4;
       for (let mi = 0; mi < this.\u9888\u9B03\u7EC4.length; mi++) {
-        const \u98CE\u6380 = Math.min(0.45, \u9A71\u52A8\u901F\u5EA6 * 0.012);
-        this.\u9888\u9B03\u7EC4[mi].rotation.set(
-          -\u98CE\u6380 + Math.sin(t * 13 - mi * 0.7) * 0.18 + \u98A4\u6CE2 * 3.8,
-          0,
-          Math.cos(t * 11 - mi * 0.8) * 0.24 + \u9707\u626D * 0.14
-        );
+        if (\u6B7B\u6001) {
+          this.\u9888\u9B03\u7EC4[mi].rotation.set(0.1 * \u6B7B\u6001.\u5012\u4E0B, 0, 0.24 * \u6B7B\u6001.\u5012\u4E0B);
+        } else if (\u662F\u5F85\u673A) {
+          this.\u9888\u9B03\u7EC4[mi].rotation.set(Math.sin(t * 2.2 - mi * 0.5) * 0.04, 0, Math.cos(t * 1.8 - mi * 0.5) * 0.05 + \u5934\u6B6AZ * 0.65);
+        } else {
+          const \u98CE\u6380 = Math.min(0.5, \u9A71\u52A8\u901F\u5EA6 * 0.013);
+          this.\u9888\u9B03\u7EC4[mi].rotation.set(
+            -\u98CE\u6380 + Math.sin(t * 13 - mi * 0.7) * 0.2 + \u98A4\u6CE2 * 3.8,
+            0,
+            Math.cos(t * 11 - mi * 0.8) * 0.26 + \u9707\u626D * 0.14
+          );
+        }
       }
-      if (\u662F\u72C2\u5954\u6001 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF) {
-        this.\u5C3E\u6839\u67A2.rotation.set(0.76 + Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.18 - \u9707Y * 0.7, -\u4FA7\u504F * 0.22, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.1 + \u9707\u626D * 0.1);
-        this.\u5C3E\u4E2D\u67A2.rotation.set(0.45 + Math.sin(t * 16) * 0.16, 0, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 - 0.8) * 0.14);
-        this.\u5C3E\u68A2\u67A2.rotation.set(0.32 + Math.cos(t * 18) * 0.22, 0, Math.sin(t * 15) * 0.18);
-      } else if (\u662F\u5C0F\u8DD1\u6001 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF) {
+      if (\u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        this.\u5C3E\u6839\u67A2.rotation.set(0.06 * d, 0, 0.22 * d);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(-0.08 * d, 0, 0.16 * d);
+        this.\u5C3E\u68A2\u67A2.rotation.set(-0.06 * d, 0, 0.14 * d);
+      } else if (\u662F\u51B2\u7EBF || \u662F\u8DF3\u821E) {
+        const \u5C3E\u62CD = t * (\u662F\u51B2\u7EBF ? 11 : 7.6);
+        this.\u5C3E\u6839\u67A2.rotation.set(0.72 + Math.sin(\u5C3E\u62CD) * 0.22, Math.sin(\u5C3E\u62CD * 0.5) * 0.42, Math.sin(\u5C3E\u62CD) * 0.18);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(0.32, 0, Math.sin(\u5C3E\u62CD - 0.7) * 0.28);
+        this.\u5C3E\u68A2\u67A2.rotation.set(0.22, 0, Math.sin(\u5C3E\u62CD - 1.4) * 0.36);
+      } else if (\u662F\u5632\u8BBD || \u662F\u653B\u51FB) {
+        const \u7529\u5C3E = Math.sin(t * 12);
+        this.\u5C3E\u6839\u67A2.rotation.set(0.62 + Math.abs(\u7529\u5C3E) * 0.24, \u7529\u5C3E * 0.48, \u7529\u5C3E * 0.22);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(0.28, 0, Math.sin(t * 12 - 0.8) * 0.34);
+        this.\u5C3E\u68A2\u67A2.rotation.set(0.2, 0, Math.sin(t * 12 - 1.5) * 0.42);
+      } else if (\u662F\u72C2\u5954\u6001 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66) {
+        const \u98DE\u5C3E = \u662F\u5927\u55B7 ? 0.96 : 0.78;
+        this.\u5C3E\u6839\u67A2.rotation.set(\u98DE\u5C3E + Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.2 - \u9707Y * 0.7, -\u4FA7\u504F * 0.36, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.12 + \u9707\u626D * 0.1);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(0.48 + Math.sin(t * 16) * 0.18, 0, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 - 0.8) * 0.16 - \u4FA7\u504F * 0.2);
+        this.\u5C3E\u68A2\u67A2.rotation.set(0.34 + Math.cos(t * 18) * 0.24, 0, Math.sin(t * 15) * 0.2 - \u4FA7\u504F * 0.22);
+      } else if (\u662F\u5C0F\u8DD1\u6001 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66) {
         const \u5F39\u6CE2 = Math.sin(\u539F\u6B65\u76F8 * Math.PI * 4);
-        this.\u5C3E\u6839\u67A2.rotation.set(0.42 + \u5F39\u6CE2 * 0.14 - \u9707Y * 0.8, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.12 - \u4FA7\u504F * 0.25, \u9707\u626D * 0.1);
-        this.\u5C3E\u4E2D\u67A2.rotation.set(0.24 - \u5F39\u6CE2 * 0.12, 0, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 - 0.7) * 0.14);
-        this.\u5C3E\u68A2\u67A2.rotation.set(0.16 + Math.cos(\u539F\u6B65\u76F8 * Math.PI * 4) * 0.16, 0, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 - 1.4) * 0.18);
+        this.\u5C3E\u6839\u67A2.rotation.set(0.46 + \u5F39\u6CE2 * 0.16 - \u9707Y * 0.8, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2) * 0.16 - \u4FA7\u504F * 0.32, \u9707\u626D * 0.1);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(0.26 - \u5F39\u6CE2 * 0.12, 0, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 - 0.7) * 0.16);
+        this.\u5C3E\u68A2\u67A2.rotation.set(0.18 + Math.cos(\u539F\u6B65\u76F8 * Math.PI * 4) * 0.18, 0, Math.sin(\u539F\u6B65\u76F8 * Math.PI * 2 - 1.4) * 0.2);
       } else if (\u662F\u6025\u5239) {
-        this.\u5C3E\u6839\u67A2.rotation.set(0.12, 0, Math.sin(t * 16) * 0.12);
-        this.\u5C3E\u4E2D\u67A2.rotation.set(0.1, 0, Math.sin(t * 16 - 0.7) * 0.16);
-        this.\u5C3E\u68A2\u67A2.rotation.set(0.08, 0, Math.sin(t * 16 - 1.4) * 0.2);
+        this.\u5C3E\u6839\u67A2.rotation.set(0.12, 0, Math.sin(t * 22) * 0.16);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(0.1, 0, Math.sin(t * 22 - 0.7) * 0.2);
+        this.\u5C3E\u68A2\u67A2.rotation.set(0.08, 0, Math.sin(t * 22 - 1.4) * 0.24);
       } else if (\u662F\u649E\u8F66 || \u662F\u7A7A\u4E2D) {
-        this.\u5C3E\u6839\u67A2.rotation.set(0.85 + Math.sin(t * 18) * 0.28, Math.cos(t * 14) * 0.35, 0);
-        this.\u5C3E\u4E2D\u67A2.rotation.set(0.35, 0, Math.sin(t * 19) * 0.35);
-        this.\u5C3E\u68A2\u67A2.rotation.set(0.25, 0, Math.cos(t * 21) * 0.4);
+        this.\u5C3E\u6839\u67A2.rotation.set(0.88 + Math.sin(t * 18) * 0.3, Math.cos(t * 14) * 0.42, 0);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(0.38, 0, Math.sin(t * 19) * 0.38);
+        this.\u5C3E\u68A2\u67A2.rotation.set(0.28, 0, Math.cos(t * 21) * 0.44);
       } else {
-        const \u6162\u6447\u89D2 = \u662F\u6F2B\u6B65\u6001 ? \u539F\u6B65\u76F8 * Math.PI * 2 : t * 2.1;
-        const \u6447\u5E45 = \u662F\u6F2B\u6B65\u6001 ? 0.15 : 0.11;
-        this.\u5C3E\u6839\u67A2.rotation.set(0.04 + Math.sin(\u6162\u6447\u89D2 * 2) * 0.03 - \u9707Y * 0.4, Math.sin(\u6162\u6447\u89D2) * \u6447\u5E45, Math.sin(\u6162\u6447\u89D2) * (\u6447\u5E45 * 0.45));
-        this.\u5C3E\u4E2D\u67A2.rotation.set(-0.08, 0, Math.sin(\u6162\u6447\u89D2 - 0.8) * (\u6447\u5E45 * 0.9));
-        this.\u5C3E\u68A2\u67A2.rotation.set(-0.06, 0, Math.sin(\u6162\u6447\u89D2 - 1.6) * (\u6447\u5E45 * 1.1));
+        const \u8D76\u8747 = t % 4.4 < 0.75 ? Math.sin(t % 4.4 / 0.75 * Math.PI * 3) * 0.34 : 0;
+        const \u6162\u6447\u89D2 = \u662F\u6F2B\u6B65\u6001 ? \u539F\u6B65\u76F8 * Math.PI * 2 : t * 1.9;
+        const \u6447\u5E45 = \u662F\u6F2B\u6B65\u6001 ? 0.18 : 0.11;
+        this.\u5C3E\u6839\u67A2.rotation.set(0.06 + Math.sin(\u6162\u6447\u89D2 * 2) * 0.04 + Math.abs(\u8D76\u8747) * 0.35 - \u9707Y * 0.4, Math.sin(\u6162\u6447\u89D2) * \u6447\u5E45 + \u8D76\u8747, Math.sin(\u6162\u6447\u89D2) * (\u6447\u5E45 * 0.5) + \u8D76\u8747 * 0.5);
+        this.\u5C3E\u4E2D\u67A2.rotation.set(-0.08, 0, Math.sin(\u6162\u6447\u89D2 - 0.8) * (\u6447\u5E45 * 0.95) + \u8D76\u8747 * 0.65);
+        this.\u5C3E\u68A2\u67A2.rotation.set(-0.06, 0, Math.sin(\u6162\u6447\u89D2 - 1.6) * (\u6447\u5E45 * 1.15) + \u8D76\u8747 * 0.85);
       }
       const \u773C\u76D6\u89D2 = -0.85 + \u773C\u95ED\u91CF * 1.15;
       this.\u5DE6\u773C\u76D6.rotation.x = \u773C\u76D6\u89D2;
@@ -55154,21 +56887,68 @@ void main() {
         this.\u53F3\u6655\u5708.rotation.z = -t * 14;
       }
       this.\u603B\u67A2.updateMatrixWorld(true);
-      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u5DE6\u81C2.\u80A9\u9AA8, this.\u5DE6\u81C2.\u8098\u9AA8, this.\u4E0A\u81C2\u957F, this.\u524D\u81C2\u957F, _\u76EE\u6807LF, _\u8098\u6781\u5411);
-      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u53F3\u81C2.\u80A9\u9AA8, this.\u53F3\u81C2.\u8098\u9AA8, this.\u4E0A\u81C2\u957F, this.\u524D\u81C2\u957F, _\u76EE\u6807RF, _\u8098\u6781\u5411);
-      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u5DE6\u817F.\u9ACB\u9AA8, this.\u5DE6\u817F.\u819D\u9AA8, this.\u5927\u817F\u957F, this.\u5C0F\u817F\u957F, _\u76EE\u6807LH, _\u819D\u6781\u5411);
-      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u53F3\u817F.\u9ACB\u9AA8, this.\u53F3\u817F.\u819D\u9AA8, this.\u5927\u817F\u957F, this.\u5C0F\u817F\u957F, _\u76EE\u6807RH, _\u819D\u6781\u5411);
-      const \u7A33\u6C34\u5E73\u8155 = (\u8155\u67A2, \u5F2F) => {
-        \u8155\u67A2.parent.getWorldQuaternion(_\u56DB\u5143\u6570A);
-        this.\u603B\u67A2.getWorldQuaternion(_\u56DB\u5143\u6570B);
-        _\u56DB\u5143\u6570A.premultiply(_\u56DB\u5143\u6570B.invert());
-        \u8155\u67A2.quaternion.copy(_\u56DB\u5143\u6570A.invert());
-        \u8155\u67A2.rotateX(\u5F2F);
+      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u5DE6\u81C2.\u80A9\u9AA8, this.\u5DE6\u81C2.\u8098\u9AA8, this.\u4E0A\u81C2\u957F, this.\u524D\u81C2\u957F, _\u76EE\u6807LF, _\u5DE6\u8098\u6781\u5411, true);
+      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u53F3\u81C2.\u80A9\u9AA8, this.\u53F3\u81C2.\u8098\u9AA8, this.\u4E0A\u81C2\u957F, this.\u524D\u81C2\u957F, _\u76EE\u6807RF, _\u53F3\u8098\u6781\u5411, true);
+      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u5DE6\u817F.\u9ACB\u9AA8, this.\u5DE6\u817F.\u819D\u9AA8, this.\u5927\u817F\u957F, this.\u5C0F\u817F\u957F, _\u76EE\u6807LH, _\u5DE6\u819D\u6781\u5411, false);
+      this.\u89E3\u7B97\u4EBA\u80A2\u4E24\u6BB5IK(this.\u53F3\u817F.\u9ACB\u9AA8, this.\u53F3\u817F.\u819D\u9AA8, this.\u5927\u817F\u957F, this.\u5C0F\u817F\u957F, _\u76EE\u6807RH, _\u53F3\u819D\u6781\u5411, false);
+      this.\u603B\u67A2.updateMatrixWorld(true);
+      const \u8BBE\u7F6E\u624B\u8155\u59FF\u6001 = (\u81C2\u9AA8, \u8D34\u5730\u6743, \u5730\u9762\u5F2F, \u5C40\u90E8\u5F2F, \u5C40\u90E8\u65CB, \u63E1\u62F3\u5EA6, \u5F20\u6307\u5EA6) => {
+        _\u6B27\u62C9\u4E34\u65F6.set(Math.PI * 0.46 + \u5C40\u90E8\u5F2F, \u5C40\u90E8\u65CB, 0, "YXZ");
+        _\u56DB\u5143\u6570\u672C\u5730.setFromEuler(_\u6B27\u62C9\u4E34\u65F6);
+        const w = Math.max(0, Math.min(1, \u8D34\u5730\u6743));
+        if (w > 1e-3) {
+          \u81C2\u9AA8.\u8155\u9AA8.parent.getWorldQuaternion(_\u56DB\u5143\u6570A);
+          this.\u603B\u67A2.getWorldQuaternion(_\u56DB\u5143\u6570B);
+          _\u56DB\u5143\u6570A.premultiply(_\u56DB\u5143\u6570B.invert());
+          _\u56DB\u5143\u6570\u8D34\u5730.copy(_\u56DB\u5143\u6570A.invert());
+          _\u6B27\u62C9\u4E34\u65F6.set(\u5730\u9762\u5F2F, 0, 0, "YXZ");
+          _\u56DB\u5143\u6570A.setFromEuler(_\u6B27\u62C9\u4E34\u65F6);
+          _\u56DB\u5143\u6570\u8D34\u5730.multiply(_\u56DB\u5143\u6570A);
+          \u81C2\u9AA8.\u8155\u9AA8.quaternion.copy(_\u56DB\u5143\u6570\u672C\u5730).slerp(_\u56DB\u5143\u6570\u8D34\u5730, w);
+        } else {
+          \u81C2\u9AA8.\u8155\u9AA8.quaternion.copy(_\u56DB\u5143\u6570\u672C\u5730);
+        }
+        const \u624B = \u81C2\u9AA8.\u624B\u7EC6\u90E8;
+        if (\u624B) {
+          const \u63E1 = Math.max(0, Math.min(1, \u63E1\u62F3\u5EA6));
+          const \u5F20 = Math.max(0, Math.min(1, \u5F20\u6307\u5EA6)) * (1 - \u63E1 * 0.85);
+          for (let fi = 0; fi < \u624B.\u56DB\u6307.length; fi++) {
+            const f = \u624B.\u56DB\u6307[fi];
+            const \u9519\u4F4D = 1 + fi * 0.05;
+            f.\u57FA\u67A2.rotation.x = \u63E1 * 1.18 * \u9519\u4F4D;
+            f.\u4E2D\u67A2.rotation.x = \u63E1 * 1.38 * \u9519\u4F4D + (1 - \u63E1) * 0.08;
+            f.\u672B\u67A2.rotation.x = \u63E1 * 0.96 * \u9519\u4F4D + (1 - \u63E1) * 0.05;
+            f.\u57FA\u67A2.rotation.y = f.\u57FA\u504FY * (1 + \u5F20 * 1.6);
+          }
+          const \u5185 = -\u624B.\u7B26\u53F7;
+          \u624B.\u62C7\u57FA\u67A2.rotation.set(0.18 + \u63E1 * 0.62, \u5185 * (0.68 - \u63E1 * 0.72 + \u5F20 * 0.25), -\u5185 * (0.18 + \u63E1 * 0.45));
+          \u624B.\u62C7\u672B\u67A2.rotation.x = \u63E1 * 0.92 + 0.06;
+        }
       };
-      \u7A33\u6C34\u5E73\u8155(this.\u5DE6\u81C2.\u8155\u9AA8, \u8155L\u5F2F);
-      \u7A33\u6C34\u5E73\u8155(this.\u53F3\u81C2.\u8155\u9AA8, \u8155R\u5F2F);
-      \u7A33\u6C34\u5E73\u8155(this.\u5DE6\u817F.\u8E1D\u9AA8, \u8E1DL\u5F2F);
-      \u7A33\u6C34\u5E73\u8155(this.\u53F3\u817F.\u8E1D\u9AA8, \u8E1DR\u5F2F);
+      const \u8BBE\u7F6E\u811A\u8E1D\u59FF\u6001 = (\u817F\u9AA8, \u8D34\u5730\u6743, \u5730\u9762\u5F2F, \u8DBE\u7FD8) => {
+        _\u6B27\u62C9\u4E34\u65F6.set(0.36 + \u5730\u9762\u5F2F * 0.35, 0, 0, "YXZ");
+        _\u56DB\u5143\u6570\u672C\u5730.setFromEuler(_\u6B27\u62C9\u4E34\u65F6);
+        const w = Math.max(0, Math.min(1, \u8D34\u5730\u6743));
+        if (w > 1e-3) {
+          \u817F\u9AA8.\u8E1D\u9AA8.parent.getWorldQuaternion(_\u56DB\u5143\u6570A);
+          this.\u603B\u67A2.getWorldQuaternion(_\u56DB\u5143\u6570B);
+          _\u56DB\u5143\u6570A.premultiply(_\u56DB\u5143\u6570B.invert());
+          _\u56DB\u5143\u6570\u8D34\u5730.copy(_\u56DB\u5143\u6570A.invert());
+          _\u6B27\u62C9\u4E34\u65F6.set(\u5730\u9762\u5F2F, 0, 0, "YXZ");
+          _\u56DB\u5143\u6570A.setFromEuler(_\u6B27\u62C9\u4E34\u65F6);
+          _\u56DB\u5143\u6570\u8D34\u5730.multiply(_\u56DB\u5143\u6570A);
+          \u817F\u9AA8.\u8E1D\u9AA8.quaternion.copy(_\u56DB\u5143\u6570\u672C\u5730).slerp(_\u56DB\u5143\u6570\u8D34\u5730, w);
+        } else {
+          \u817F\u9AA8.\u8E1D\u9AA8.quaternion.copy(_\u56DB\u5143\u6570\u672C\u5730);
+        }
+        if (\u817F\u9AA8.\u811A\u7EC6\u90E8) {
+          \u817F\u9AA8.\u811A\u7EC6\u90E8.\u524D\u8DBE\u67A2.rotation.x = \u8DBE\u7FD8;
+        }
+      };
+      \u8BBE\u7F6E\u624B\u8155\u59FF\u6001(this.\u5DE6\u81C2, \u8155L\u8D34\u5730, \u8155L\u5F2F, \u8155L\u5C40\u5F2F, \u8155L\u5C40\u65CB, \u5DE6\u63E1\u62F3, \u5DE6\u5F20\u6307);
+      \u8BBE\u7F6E\u624B\u8155\u59FF\u6001(this.\u53F3\u81C2, \u8155R\u8D34\u5730, \u8155R\u5F2F, \u8155R\u5C40\u5F2F, \u8155R\u5C40\u65CB, \u53F3\u63E1\u62F3, \u53F3\u5F20\u6307);
+      \u8BBE\u7F6E\u811A\u8E1D\u59FF\u6001(this.\u5DE6\u817F, \u8E1DL\u8D34\u5730, \u8E1DL\u5F2F, \u5DE6\u8DBE\u7FD8);
+      \u8BBE\u7F6E\u811A\u8E1D\u59FF\u6001(this.\u53F3\u817F, \u8E1DR\u8D34\u5730, \u8E1DR\u5F2F, \u53F3\u8DBE\u7FD8);
       this.\u6A21\u578B\u7EC4.updateWorldMatrix(true, false);
       this.\u603B\u67A2.getWorldQuaternion(_\u4E34\u65F6\u6A21\u578B\u56DB\u5143\u6570);
       _\u4E34\u65F6\u5411\u91CF2.set(0, 0, -1).applyQuaternion(_\u4E34\u65F6\u6A21\u578B\u56DB\u5143\u6570).normalize();
@@ -55246,10 +57026,10 @@ void main() {
         const tp = this.\u6F02\u79FB\u89E6\u70B9\u7EC4[ci];
         tp.\u6302\u70B9.getWorldPosition(tp.\u4E16\u754C\u5750\u6807);
         if (\u662F\u7A7A\u4E2D || \u662F\u649E\u8F66 || \u662F\u6B7B\u4EA1 || \u662F\u541F\u5531) tp.\u8D34\u5730 = false;
-        else if (\u662F\u51B2\u7EBF) tp.\u8D34\u5730 = ci >= 2;
+        else if (\u662F\u51B2\u7EBF || \u662F\u7B11\u8BDD) tp.\u8D34\u5730 = ci >= 2;
+        else if (\u662F\u666E\u653B) tp.\u8D34\u5730 = \u653B\u76F801 < 0.5 ? ci >= 2 : true;
         else if (\u662F\u653B\u51FB) tp.\u8D34\u5730 = \u653B\u5411 > 0 ? ci % 2 === 1 : ci % 2 === 0;
-        else if (\u662F\u5632\u8BBD) tp.\u8D34\u5730 = ci !== 1;
-        else if (\u662F\u7B11\u8BDD) tp.\u8D34\u5730 = ci !== 0;
+        else if (\u662F\u5632\u8BBD) tp.\u8D34\u5730 = \u5632\u8BBD\u62AC\u624B\u4FA7 > 0 ? ci !== 0 : ci !== 1;
         else if (\u5141\u8BB8\u8E0F\u5730\u68C0\u51FA) tp.\u8D34\u5730 = \u5F53\u524D\u652F\u6491[ci];
         else tp.\u8D34\u5730 = true;
       }
@@ -55977,6 +57757,8 @@ void main() {
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       const \u8F68\u8FF9\u76F8 = \u662F\u6363\u4E71 ? Math.max(0, Math.min(1, (\u6363\u76F8 - 0.24) / 0.46)) : 0;
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u6363\u4E71, \u653B\u5411, \u8F68\u8FF9\u76F8, 16729344, 16707722, 2.25, 1.44, 0.08);
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -55984,7 +57766,7 @@ void main() {
       const \u662F\u5DE6\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0";
       const \u662F\u53F3\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
       const \u662F\u8F6C\u5F2F = \u662F\u5DE6\u62D0 || \u662F\u53F3\u62D0;
-      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
+      const \u5C55\u793A\u53F0\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
       const \u662F\u6025\u5239 = this.\u5F53\u524D\u52A8\u4F5C === "\u6025\u505C";
       const \u662F\u5632\u8BBD = this.\u5F53\u524D\u52A8\u4F5C === "\u5632\u8BBD";
       const \u662F\u7B11\u8BDD = this.\u5F53\u524D\u52A8\u4F5C === "\u7B11\u8BDD";
@@ -55993,18 +57775,20 @@ void main() {
       const \u662F\u51B2\u7EBF = this.\u5F53\u524D\u52A8\u4F5C === "\u5E86\u795D";
       const \u662F\u6253\u6655 = this.\u5F53\u524D\u52A8\u4F5C === "\u7729\u6655";
       const \u662F\u649E\u8F66 = this.\u5F53\u524D\u52A8\u4F5C === "\u5931\u63A7";
-      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u6025\u5239 && !\u662F\u8D77\u6B65 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u52A0\u901F\u4E2D;
+      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u5F85\u673A && !\u662F\u6025\u5239 && !\u662F\u8D77\u6B65 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u52A0\u901F\u4E2D;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(\u65F6\u95F4) : null;
       const \u60EF\u6027\u6001 = this.\u60EF\u6027.\u66F4\u65B0(\u65F6\u95F4, dt, \u901F\u5EA6, \u8F6C\u5411\u89D2, this.\u5F53\u524D\u52A8\u4F5C, \u73AF\u5883);
-      const \u6709\u6548\u901F = \u662F\u5012\u8F66 ? Math.max(5.5, Math.abs(\u901F\u5EA6), Math.abs(\u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6)) : \u5C55\u793A\u53F0\u8DD1 ? Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u6709\u6548\u901F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5012\u8F66 ? Math.max(5.5, Math.abs(\u901F\u5EA6), Math.abs(\u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6)) : \u5C55\u793A\u53F0\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(26, \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6) : \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
       const \u5012\u8F66\u653B = \u662F\u6363\u4E71 && (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5);
       const \u8DD1\u653B\u4E2D = \u662F\u6363\u4E71 && !\u5012\u8F66\u653B && (\u6709\u6548\u901F > 0.5 || \u52A0\u901F\u4E2D);
       const \u51B2\u7EBF\u8DD1\u4E2D = \u662F\u51B2\u7EBF && !\u73AF\u5883?.\u662F\u5426\u5012\u8F66 && \u6709\u6548\u901F > 0.5;
-      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5012\u8F66 && (\u6709\u6548\u901F > 0.5 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F) && !\u662F\u6025\u5239 && !\u662F\u8D77\u6B65 && !\u662F\u51B2\u7EBF && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u6B63\u5728\u8DD1\u52A8 = !\u662F\u5F85\u673A && !\u662F\u5012\u8F66 && (\u662F\u884C\u8D70 || \u6709\u6548\u901F > 0.5 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F) && !\u662F\u6025\u5239 && !\u662F\u8D77\u6B65 && !\u662F\u51B2\u7EBF && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       const \u6B63\u5728\u817F\u8DD1 = \u6B63\u5728\u8DD1\u52A8 || \u8DD1\u653B\u4E2D || \u51B2\u7EBF\u8DD1\u4E2D;
       const \u6B63\u5728\u817F\u9000 = \u662F\u5012\u8F66 || \u5012\u8F66\u653B;
-      const \u6B63\u5728\u8FD0\u52A8 = \u6B63\u5728\u817F\u8DD1 || \u6B63\u5728\u817F\u9000 || this.\u5F53\u524D\u52A8\u4F5C !== "\u5F85\u673A" && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
+      const \u6B63\u5728\u8FD0\u52A8 = \u6B63\u5728\u817F\u8DD1 || \u6B63\u5728\u817F\u9000 || !\u662F\u5F85\u673A && !\u662F\u98DE\u5929 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F * 0.72;
-      const \u55B7\u706B\u6B65\u9891\u500D\u7387 = \u662F\u5927\u55B7 ? 2.05 : \u662F\u53CC\u55B7 ? 1.72 : \u662F\u5C0F\u55B7 ? 1.38 : \u6B63\u5728\u817F\u9000 ? 0.88 : 1;
+      const \u55B7\u706B\u6B65\u9891\u500D\u7387 = \u662F\u5927\u55B7 ? 2.05 : \u662F\u53CC\u55B7 ? 1.72 : \u662F\u5C0F\u55B7 ? 1.38 : \u662F\u884C\u8D70 ? 0.72 : \u6B63\u5728\u817F\u9000 ? 0.88 : 1;
       const \u9891 = \u6B63\u5728\u8FD0\u52A8 ? Math.max(6.4, Math.min(15, 6.4 + \u6709\u6548\u901F / 34 * 8.2)) : 2.6;
       const \u5B9E\u9645\u9891 = \u9891 * \u55B7\u706B\u6B65\u9891\u500D\u7387;
       if (\u6B63\u5728\u817F\u8DD1 || \u6B63\u5728\u817F\u9000) {
@@ -56029,38 +57813,33 @@ void main() {
           this.\u5934\u90E8.position.z = 0.05;
           this.\u5934\u90E8.rotation.x = -\u60EF\u6027\u6001.\u7EB5\u62C9 * 0.14;
         }
-        const \u5634\u5F20\u89D2 = \u91CD\u521B.\u6FC0\u6D3B ? 0.68 + \u91CD\u521B.\u5305\u7EDC * 0.42 : \u662F\u6B7B\u4EA1 ? 0.56 : \u662F\u541F\u5531 ? 0.24 + Math.abs(Math.sin(t * 4.6)) * 0.22 : \u662F\u666E\u653B ? 0.62 * \u666E\u653B\u7A81 + 0.16 : \u662F\u5927\u55B7 ? 0.62 + Math.abs(Math.sin(\u65F6\u95F4 * 26)) * 0.26 : \u662F\u6025\u5239 ? 0.72 : \u662F\u5012\u8F66 ? 0.2 + Math.abs(Math.sin(\u65F6\u95F4 * 16)) * 0.26 : \u662F\u51B2\u7EBF ? 0.14 + Math.abs(Math.sin(\u65F6\u95F4 * 18)) * 0.14 : \u662F\u6363\u4E71 ? 0.56 + Math.abs(Math.sin(\u65F6\u95F4 * 22)) * 0.3 : \u6B63\u5728\u8DD1\u52A8 ? 0.24 + Math.abs(Math.sin(\u65F6\u95F4 * 18)) * 0.36 + (\u52A0\u901F\u4E2D ? 0.16 : 0) : 0.08 + Math.max(0, Math.sin(\u65F6\u95F4 * 3.1)) * 0.14;
+        const \u5634\u5F20\u89D2 = \u91CD\u521B.\u6FC0\u6D3B ? 0.68 + \u91CD\u521B.\u5305\u7EDC * 0.42 : \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.08 * (1 - \u6B7B\u6001.\u5012\u4E0B) + 0.56 * \u6B7B\u6001.\u5012\u4E0B + 0.32 * \u6B7B\u6001.\u53D7\u51FB\u9707 : \u662F\u541F\u5531 ? 0.24 + Math.abs(Math.sin(t * 4.6)) * 0.22 : \u662F\u666E\u653B ? 0.62 * \u666E\u653B\u7A81 + 0.16 : \u662F\u5927\u55B7 ? 0.62 + Math.abs(Math.sin(\u65F6\u95F4 * 26)) * 0.26 : \u662F\u6025\u5239 ? 0.72 : \u662F\u5012\u8F66 ? 0.2 + Math.abs(Math.sin(\u65F6\u95F4 * 16)) * 0.26 : \u662F\u51B2\u7EBF ? 0.14 + Math.abs(Math.sin(\u65F6\u95F4 * 18)) * 0.14 : \u662F\u6363\u4E71 ? 0.56 + Math.abs(Math.sin(\u65F6\u95F4 * 22)) * 0.3 : \u662F\u884C\u8D70 ? 0.1 + Math.max(0, Math.sin(\u5B9E\u9645\u76F8\u4F4D * 2)) * 0.08 : \u6B63\u5728\u8DD1\u52A8 ? 0.24 + Math.abs(Math.sin(\u65F6\u95F4 * 18)) * 0.36 + (\u52A0\u901F\u4E2D ? 0.16 : 0) : 0.08 + Math.max(0, Math.sin(\u65F6\u95F4 * 3.1)) * 0.1;
         this.\u4E0B\u988C\u67A2.rotation.x = \u5634\u5F20\u89D2;
-        const \u773C\u706B\u7F29\u653E = \u662F\u6B7B\u4EA1 ? 0.18 : 1 + (\u662F\u541F\u5531 ? 0.65 : \u662F\u5927\u55B7 ? 0.85 : \u52A0\u901F\u4E2D ? 0.52 : \u6B63\u5728\u8DD1\u52A8 ? 0.26 : 0) + (\u91CD\u521B.\u6FC0\u6D3B || \u662F\u6363\u4E71 || \u662F\u666E\u653B ? 0.48 : 0) + Math.sin(\u65F6\u95F4 * 28) * 0.18;
-        this.\u773C\u706B\u6750.emissiveIntensity = \u662F\u6B7B\u4EA1 ? 0.05 : \u662F\u541F\u5531 ? 4.4 + Math.sin(t * 9) * 0.9 : \u662F\u5927\u55B7 ? 4.2 : \u52A0\u901F\u4E2D ? 3.4 : 2.3 + Math.sin(\u65F6\u95F4 * 18) * 0.45;
+        const \u773C\u706B\u7F29\u653E = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 1 * (1 - \u6B7B\u6001.\u5012\u4E0B) + 0.14 * \u6B7B\u6001.\u5012\u4E0B : 1 + (\u662F\u541F\u5531 ? 0.65 : \u662F\u5927\u55B7 ? 0.85 : \u52A0\u901F\u4E2D ? 0.52 : \u662F\u884C\u8D70 ? 0.08 : \u6B63\u5728\u8DD1\u52A8 ? 0.26 : 0) + (\u91CD\u521B.\u6FC0\u6D3B || \u662F\u6363\u4E71 || \u662F\u666E\u653B ? 0.48 : 0) + Math.sin(\u65F6\u95F4 * (\u662F\u5F85\u673A ? 8 : 28)) * (\u662F\u5F85\u673A ? 0.06 : 0.18);
+        this.\u773C\u706B\u6750.emissiveIntensity = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.05 + (1 - \u6B7B\u6001.\u5012\u4E0B) * 2.2 : \u662F\u541F\u5531 ? 4.4 + Math.sin(t * 9) * 0.9 : \u662F\u5927\u55B7 ? 4.2 : \u52A0\u901F\u4E2D ? 3.4 : \u662F\u5F85\u673A ? 1.9 + Math.sin(\u65F6\u95F4 * 5) * 0.2 : 2.3 + Math.sin(\u65F6\u95F4 * 18) * 0.45;
         if (this.\u5DE6\u773C\u706B) this.\u5DE6\u773C\u706B.scale.set(0.95 * \u773C\u706B\u7F29\u653E, 1.15 * \u773C\u706B\u7F29\u653E, 0.9 * \u773C\u706B\u7F29\u653E);
         if (this.\u53F3\u773C\u706B) this.\u53F3\u773C\u706B.scale.set(0.95 * \u773C\u706B\u7F29\u653E, 1.15 * \u773C\u706B\u7F29\u653E, 0.9 * \u773C\u706B\u7F29\u653E);
-        const \u98CE\u901F = \u662F\u6B7B\u4EA1 ? 0 : Math.min(1.4, \u6709\u6548\u901F / 34 + (\u52A0\u901F\u4E2D ? 0.55 : 0));
+        const \u98CE\u901F = \u662F\u6B7B\u4EA1 || \u662F\u5F85\u673A ? 0 : Math.min(1.4, \u6709\u6548\u901F / 34 + (\u52A0\u901F\u4E2D ? 0.55 : 0));
         if (this.\u5934\u5E26\u5C3E\u5DE6) {
-          this.\u5934\u5E26\u5C3E\u5DE6.rotation.x = \u662F\u6B7B\u4EA1 ? 0.15 : 0.26 + \u98CE\u901F * 0.44 + Math.sin(\u65F6\u95F4 * 19) * (0.14 + \u98CE\u901F * 0.2);
-          this.\u5934\u5E26\u5C3E\u5DE6.rotation.y = \u662F\u6B7B\u4EA1 ? 0.15 : 0.26 - \u4FA7\u504F * 0.48 + Math.cos(\u65F6\u95F4 * 15) * 0.16;
+          this.\u5934\u5E26\u5C3E\u5DE6.rotation.x = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.26 * (1 - \u6B7B\u6001.\u5012\u4E0B) + 0.15 * \u6B7B\u6001.\u5012\u4E0B : 0.26 + \u98CE\u901F * 0.44 + Math.sin(\u65F6\u95F4 * (\u662F\u5F85\u673A ? 2.8 : 19)) * (\u662F\u5F85\u673A ? 0.04 : 0.14 + \u98CE\u901F * 0.2);
+          this.\u5934\u5E26\u5C3E\u5DE6.rotation.y = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.26 * (1 - \u6B7B\u6001.\u5012\u4E0B) + 0.15 * \u6B7B\u6001.\u5012\u4E0B : 0.26 - \u4FA7\u504F * 0.48 + Math.cos(\u65F6\u95F4 * (\u662F\u5F85\u673A ? 2.4 : 15)) * (\u662F\u5F85\u673A ? 0.05 : 0.16);
         }
         if (this.\u5934\u5E26\u5C3E\u53F3) {
-          this.\u5934\u5E26\u5C3E\u53F3.rotation.x = \u662F\u6B7B\u4EA1 ? 0.15 : 0.22 + \u98CE\u901F * 0.42 + Math.cos(\u65F6\u95F4 * 20) * (0.14 + \u98CE\u901F * 0.2);
-          this.\u5934\u5E26\u5C3E\u53F3.rotation.y = \u662F\u6B7B\u4EA1 ? -0.15 : -0.26 - \u4FA7\u504F * 0.48 + Math.sin(\u65F6\u95F4 * 16) * 0.16;
+          this.\u5934\u5E26\u5C3E\u53F3.rotation.x = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.22 * (1 - \u6B7B\u6001.\u5012\u4E0B) + 0.15 * \u6B7B\u6001.\u5012\u4E0B : 0.22 + \u98CE\u901F * 0.42 + Math.cos(\u65F6\u95F4 * (\u662F\u5F85\u673A ? 3 : 20)) * (\u662F\u5F85\u673A ? 0.04 : 0.14 + \u98CE\u901F * 0.2);
+          this.\u5934\u5E26\u5C3E\u53F3.rotation.y = \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? -0.26 * (1 - \u6B7B\u6001.\u5012\u4E0B) - 0.15 * \u6B7B\u6001.\u5012\u4E0B : -0.26 - \u4FA7\u504F * 0.48 + Math.sin(\u65F6\u95F4 * (\u662F\u5F85\u673A ? 2.6 : 16)) * (\u662F\u5F85\u673A ? 0.05 : 0.16);
         }
       }
       switch (this.\u5F53\u524D\u52A8\u4F5C) {
-        case "\u5F85\u673A":
-          if (!\u6B63\u5728\u8FD0\u52A8) {
-            const \u6296\u5468 = \u65F6\u95F4 % 3.2;
-            const \u6296\u5F3A = \u6296\u5468 < 0.42 ? Math.sin(\u6296\u5468 / 0.42 * Math.PI) : 0;
-            const \u5494\u54D2 = \u6296\u5F3A * Math.sin(\u65F6\u95F4 * 58);
-            this.\u8EAF\u5E72.position.y = -0.1 + Math.sin(\u65F6\u95F4 * 3.2) * 0.024 + \u5494\u54D2 * 0.018;
-            this.\u8EAF\u5E72.rotation.y = \u5494\u54D2 * 0.1;
-            this.\u4E0A\u8EAB\u67A2.rotation.x = 0.24 + Math.sin(\u65F6\u95F4 * 3.2) * 0.04;
-            this.\u4E0A\u8EAB\u67A2.rotation.z = \u5494\u54D2 * 0.12;
-            this.\u5934\u90E8.rotation.y = Math.sin(\u65F6\u95F4 * 1.45) * 0.38 + \u5494\u54D2 * 0.18;
-            this.\u5934\u90E8.rotation.z = Math.cos(\u65F6\u95F4 * 1.15) * 0.16 + \u5494\u54D2 * 0.22;
-            this.\u5934\u90E8.rotation.x = -0.12;
-            this.\u4E0B\u988C\u67A2.rotation.x = 0.08 + Math.abs(\u5494\u54D2) * 0.42 + Math.max(0, Math.sin(\u65F6\u95F4 * 4.2)) * 0.12;
-          }
+        case "\u5F85\u673A": {
+          const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(\u65F6\u95F4 * 2);
+          this.\u8EAF\u5E72.position.y = -0.05 + \u547C * 0.022;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = 0.1 + \u547C * 0.024;
+          this.\u5934\u90E8.rotation.y = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.72 : 0;
+          this.\u5934\u90E8.rotation.x = -0.06 + (\u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.35 : 0);
+          this.\u5934\u90E8.rotation.z = \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.42 : 0;
+          this.\u4E0B\u988C\u67A2.rotation.x = 0.08 + Math.max(0, \u547C) * 0.06;
           break;
+        }
         case "\u5632\u8BBD": {
           const \u5468 = t % 1.4;
           const \u63B0 = \u5468 < 0.65 ? \u5E73\u6ED1\u9636\u8DC3(0, 0.32, \u5468) : Math.max(0, 1 - (\u5468 - 0.65) / 0.45);
@@ -56138,7 +57917,7 @@ void main() {
           }
           break;
         case "\u6025\u505C": {
-          const \u6298\u6643 = Math.sin(t * 18) * Math.exp(-t * 3.5) * 0.38;
+          const \u6298\u6643 = Math.sin(t * 16) * 0.16;
           this.\u8EAF\u5E72.position.y = -0.16;
           this.\u8EAF\u5E72.rotation.x = -0.16;
           this.\u4E0A\u8EAB\u67A2.rotation.x = 0.62 + \u6298\u6643;
@@ -56161,7 +57940,7 @@ void main() {
           break;
         case "\u5931\u63A7":
           this.\u8EAF\u5E72.position.y = 0.26;
-          this.\u8EAF\u5E72.rotation.z = Math.sin(t * 28) * Math.exp(-t * 4) * 0.72;
+          this.\u8EAF\u5E72.rotation.z = Math.sin(t * 22) * 0.44;
           this.\u8EAF\u5E72.rotation.x = -0.35 + Math.cos(t * 24) * 0.22;
           this.\u4E0A\u8EAB\u67A2.rotation.x = -0.32;
           this.\u5934\u90E8.position.y = 0.84 + 0.32 + Math.abs(Math.sin(t * 22)) * 0.22;
@@ -56233,10 +58012,16 @@ void main() {
           this.\u5934\u90E8.rotation.y = 0.4 * \u666E\u653B\u84C4 - 0.28 * \u666E\u653B\u7A81;
           break;
         case "\u6B7B\u4EA1":
-          this.\u8EAF\u5E72.rotation.set(-1.46, 0.12, 0.08);
-          this.\u8EAF\u5E72.position.set(0, 0.24 * \u6BD4\u4F8B, -0.35 * \u6BD4\u4F8B);
-          this.\u4E0A\u8EAB\u67A2.rotation.x = -0.06;
-          this.\u5934\u90E8.rotation.set(0.18, 0.42, 0.28);
+          if (\u6B7B\u6001) {
+            const d = \u6B7B\u6001.\u5012\u4E0B;
+            const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+            const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+            const tw = \u6B7B\u6001.\u62BD\u6410;
+            this.\u8EAF\u5E72.rotation.set(0.24 * hit - 1.46 * d + b * 0.16, 0.12 * d, -0.14 * hit + 0.08 * d + tw * 0.04);
+            this.\u8EAF\u5E72.position.set(0, 0.24 * \u6BD4\u4F8B * d + b * 0.18, -0.35 * \u6BD4\u4F8B * d - 0.1 * hit);
+            this.\u4E0A\u8EAB\u67A2.rotation.x = -0.18 * hit - 0.06 * d;
+            this.\u5934\u90E8.rotation.set(-0.22 * hit + 0.18 * d, 0.42 * d + tw * 0.05, 0.28 * d + tw * 0.05);
+          }
           break;
         case "\u541F\u5531":
           this.\u8EAF\u5E72.position.y = 0.16 + Math.sin(t * 2.8) * 0.05;
@@ -56307,20 +58092,35 @@ void main() {
         this.\u4E0A\u8EAB\u67A2.rotation.x = -0.1;
         this.\u4E0A\u8EAB\u67A2.rotation.y = \u56DE\u5934\u5411 * 0.42 - Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * 0.12;
       } else if (\u6B63\u5728\u8DD1\u52A8) {
-        const \u817E\u7A7A\u6CE2 = Math.pow(Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.1)), 0.72);
-        const \u6EDE\u7A7A\u9AD8 = \u662F\u5927\u55B7 ? 0.34 : \u662F\u53CC\u55B7 ? 0.28 : \u662F\u5C0F\u55B7 ? 0.24 : Math.min(0.24, 0.17 + \u6709\u6548\u901F / 45 * 0.06);
-        this.\u8EAF\u5E72.position.y += -0.06 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8;
-        this.\u8EAF\u5E72.rotation.x = \u662F\u5927\u55B7 ? 0.26 : \u662F\u53CC\u55B7 ? 0.2 : \u662F\u5C0F\u55B7 ? 0.16 : 0.12;
-        const \u57FA\u7840\u524D\u6251 = 0.36 + \u6709\u6548\u901F / 58 * 0.1;
-        const \u51B2\u523A\u524D\u6251 = \u662F\u5927\u55B7 ? 0.74 : \u662F\u53CC\u55B7 ? 0.58 : \u662F\u5C0F\u55B7 ? 0.48 : \u57FA\u7840\u524D\u6251;
-        this.\u4E0A\u8EAB\u67A2.rotation.x = \u51B2\u523A\u524D\u6251 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.08;
-        this.\u4E0A\u8EAB\u67A2.rotation.y = Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.16 : 0.28);
-        if (!\u662F\u8F6C\u5F2F) {
-          this.\u8EAF\u5E72.rotation.y = -Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.08 : 0.14);
-        }
-        if (this.\u5934\u90E8) {
-          this.\u5934\u90E8.rotation.x = -(this.\u4E0A\u8EAB\u67A2.rotation.x * 0.68) + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.16;
-          this.\u5934\u90E8.rotation.z += Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.08 : 0.14);
+        if (\u662F\u884C\u8D70) {
+          const \u6B65\u6CE2 = Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.1));
+          this.\u8EAF\u5E72.position.y += -0.04 + \u6B65\u6CE2 * 0.07;
+          this.\u8EAF\u5E72.rotation.x = 0.05;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = 0.14 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.03;
+          this.\u4E0A\u8EAB\u67A2.rotation.y = Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * 0.18;
+          if (!\u662F\u8F6C\u5F2F) {
+            this.\u8EAF\u5E72.rotation.y = -Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * 0.08;
+          }
+          if (this.\u5934\u90E8) {
+            this.\u5934\u90E8.rotation.x = -0.08 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.04;
+            this.\u5934\u90E8.rotation.z += Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * 0.04;
+          }
+        } else {
+          const \u817E\u7A7A\u6CE2 = Math.pow(Math.abs(Math.sin(this.\u6B65\u6001\u76F8\u4F4D - 0.1)), 0.72);
+          const \u6EDE\u7A7A\u9AD8 = \u662F\u5927\u55B7 ? 0.34 : \u662F\u53CC\u55B7 ? 0.28 : \u662F\u5C0F\u55B7 ? 0.24 : Math.min(0.24, 0.17 + \u6709\u6548\u901F / 45 * 0.06);
+          this.\u8EAF\u5E72.position.y += -0.06 + \u817E\u7A7A\u6CE2 * \u6EDE\u7A7A\u9AD8;
+          this.\u8EAF\u5E72.rotation.x = \u662F\u5927\u55B7 ? 0.26 : \u662F\u53CC\u55B7 ? 0.2 : \u662F\u5C0F\u55B7 ? 0.16 : 0.12;
+          const \u57FA\u7840\u524D\u6251 = 0.36 + \u6709\u6548\u901F / 58 * 0.1;
+          const \u51B2\u523A\u524D\u6251 = \u662F\u5927\u55B7 ? 0.74 : \u662F\u53CC\u55B7 ? 0.58 : \u662F\u5C0F\u55B7 ? 0.48 : \u57FA\u7840\u524D\u6251;
+          this.\u4E0A\u8EAB\u67A2.rotation.x = \u51B2\u523A\u524D\u6251 + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.08;
+          this.\u4E0A\u8EAB\u67A2.rotation.y = Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.16 : 0.28);
+          if (!\u662F\u8F6C\u5F2F) {
+            this.\u8EAF\u5E72.rotation.y = -Math.cos(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.08 : 0.14);
+          }
+          if (this.\u5934\u90E8) {
+            this.\u5934\u90E8.rotation.x = -(this.\u4E0A\u8EAB\u67A2.rotation.x * 0.68) + Math.sin(this.\u6B65\u6001\u76F8\u4F4D * 2) * 0.16;
+            this.\u5934\u90E8.rotation.z += Math.sin(this.\u6B65\u6001\u76F8\u4F4D) * (\u662F\u5927\u55B7 ? 0.08 : 0.14);
+          }
         }
       }
       if (!\u662F\u8D77\u6B65 && !\u662F\u6363\u4E71 && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531) {
@@ -56366,11 +58166,14 @@ void main() {
         this.\u80A9\u53F3.rotation.set(-1.55 * \u91CD\u521B.\u5305\u7EDC, -0.3, 1.15 + \u91CD\u521B.\u9707\u6CE2 * 0.55);
         this.\u8098\u5DE6.rotation.set(-0.22, 0, 0);
         this.\u8098\u53F3.rotation.set(-0.22, 0, 0);
-      } else if (\u662F\u6B7B\u4EA1) {
-        this.\u80A9\u5DE6.rotation.set(0.18, 0.28, -1.08);
-        this.\u80A9\u53F3.rotation.set(0.24, -0.28, 1.06);
-        this.\u8098\u5DE6.rotation.set(-0.22, 0, 0);
-        this.\u8098\u53F3.rotation.set(-0.26, 0, 0);
+      } else if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        this.\u80A9\u5DE6.rotation.set(-0.24 * (1 - d) - 0.95 * hit + 0.18 * d, 0.14 * (1 - d) + 0.28 * d, -0.18 * (1 - d) - 0.45 * hit - 1.08 * d + tw * 0.06);
+        this.\u80A9\u53F3.rotation.set(-0.24 * (1 - d) - 0.95 * hit + 0.24 * d, -0.14 * (1 - d) - 0.28 * d, 0.18 * (1 - d) + 0.45 * hit + 1.06 * d - tw * 0.06);
+        this.\u8098\u5DE6.rotation.set(-0.48 * (1 - d) - 0.22 * d, 0, 0);
+        this.\u8098\u53F3.rotation.set(-0.48 * (1 - d) - 0.26 * d, 0, 0);
       } else if (\u662F\u541F\u5531) {
         const \u5492\u6447 = Math.sin(t * 3.4) * 0.16;
         this.\u80A9\u5DE6.rotation.set(-2.68 + \u5492\u6447, 0.24, -0.36);
@@ -56522,10 +58325,17 @@ void main() {
         }
       } else if (!\u662F\u8D77\u6B65) {
         if (!\u6B63\u5728\u8FD0\u52A8) {
-          this.\u80A9\u5DE6.rotation.set(-0.78 + Math.sin(\u65F6\u95F4 * 3.2) * 0.08, 0.24, -0.26);
-          this.\u80A9\u53F3.rotation.set(-0.78 - Math.sin(\u65F6\u95F4 * 3.2) * 0.08, -0.24, 0.26);
-          this.\u8098\u5DE6.rotation.set(-1.25 + Math.cos(\u65F6\u95F4 * 3.2) * 0.08, 0, 0);
-          this.\u8098\u53F3.rotation.set(-1.25 - Math.cos(\u65F6\u95F4 * 3.2) * 0.08, 0, 0);
+          const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(\u65F6\u95F4 * 2);
+          this.\u80A9\u5DE6.rotation.set(-0.24 + \u547C * 0.04, 0.14, -0.18 - \u547C * 0.02);
+          this.\u80A9\u53F3.rotation.set(-0.24 + \u547C * 0.04, -0.14, 0.18 + \u547C * 0.02);
+          this.\u8098\u5DE6.rotation.set(-0.48 + \u547C * 0.03, 0, 0);
+          this.\u8098\u53F3.rotation.set(-0.48 + \u547C * 0.03, 0, 0);
+        } else if (\u662F\u884C\u8D70) {
+          const \u6446 = Math.sin(\u5B9E\u9645\u76F8\u4F4D);
+          this.\u80A9\u5DE6.rotation.set(-0.12 - \u6446 * 0.52, 0.1, -0.16);
+          this.\u80A9\u53F3.rotation.set(-0.12 + \u6446 * 0.52, -0.1, 0.16);
+          this.\u8098\u5DE6.rotation.set(-0.42 + Math.max(0, \u6446) * 0.22, 0, 0);
+          this.\u8098\u53F3.rotation.set(-0.42 + Math.max(0, -\u6446) * 0.22, 0, 0);
         } else if (\u662F\u5927\u55B7) {
           const \u632F = Math.sin(\u5B9E\u9645\u76F8\u4F4D * 2) * 0.14;
           this.\u80A9\u5DE6.rotation.set(1.18 + \u632F, -0.22, -0.52);
@@ -56567,10 +58377,12 @@ void main() {
           \u819D\u76D6.rotation.set(0.18, 0, 0);
           \u811A.rotation.x = -(\u8EAF\u5E72\u4FEF\u4EF0 + \u817F\u6839.rotation.x + \u819D\u76D6.rotation.x) - 0.28;
           \u811A.rotation.z = -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z);
-        } else if (\u662F\u6B7B\u4EA1) {
-          \u817F\u6839.rotation.set(-0.1, 0, \u7B26\u53F7 * 0.2);
-          \u819D\u76D6.rotation.set(0.18, 0, 0);
-          \u811A.rotation.set(0.32, 0, 0);
+        } else if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+          const d = \u6B7B\u6001.\u5012\u4E0B;
+          const tw = \u6B7B\u6001.\u62BD\u6410;
+          \u817F\u6839.rotation.set(-0.18 * (1 - d) - 0.1 * d, \u7B26\u53F7 * 0.1 * (1 - d), \u7B26\u53F7 * (0.08 * (1 - d) + 0.2 * d) + tw * 0.04);
+          \u819D\u76D6.rotation.set(0.34 * (1 - d) + 0.18 * d, 0, 0);
+          \u811A.rotation.set(-0.16 * (1 - d) + 0.32 * d, 0, 0);
         } else if (\u662F\u541F\u5531) {
           \u817F\u6839.rotation.set(-0.14, 0, \u7B26\u53F7 * 0.14);
           \u819D\u76D6.rotation.set(0.28, 0, 0);
@@ -56670,9 +58482,21 @@ void main() {
           \u811A.rotation.set(\u811A\u8E1D\u89D2, 0, -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z));
         } else if (!\u662F\u8D77\u6B65) {
           if (!\u6B63\u5728\u8FD0\u52A8) {
-            \u817F\u6839.rotation.set(-0.36, \u7B26\u53F7 * 0.12, \u7B26\u53F7 * 0.1);
-            \u819D\u76D6.rotation.set(0.68, 0, 0);
+            \u817F\u6839.rotation.set(-0.18, \u7B26\u53F7 * 0.1, \u7B26\u53F7 * 0.08);
+            \u819D\u76D6.rotation.set(0.34, 0, 0);
             \u811A.rotation.set(-(\u8EAF\u5E72\u4FEF\u4EF0 + \u817F\u6839.rotation.x + \u819D\u76D6.rotation.x), 0, -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z));
+          } else if (\u662F\u884C\u8D70) {
+            const s = Math.sin(\u5355\u817F\u76F8\u4F4D);
+            const c = Math.cos(\u5355\u817F\u76F8\u4F4D);
+            const \u5927\u817F\u89D2 = -s * 0.56 - 0.06;
+            const \u5C48\u819D = 0.16 + Math.pow(Math.max(0, Math.sin(\u5355\u817F\u76F8\u4F4D + 0.52)), 0.9) * 0.52;
+            const \u6491\u5730\u6743 = \u5E73\u6ED1\u9636\u8DC3(-0.25, 0.35, -c);
+            const \u811A\u5E73 = -(\u8EAF\u5E72\u4FEF\u4EF0 + \u5927\u817F\u89D2 + \u5C48\u819D);
+            const \u811A\u6446 = -0.14 * Math.max(0, s) + 0.24 * Math.max(0, -s);
+            const \u811A\u8E1D\u89D2 = \u811A\u5E73 * \u6491\u5730\u6743 + \u811A\u6446 * (1 - \u6491\u5730\u6743);
+            \u817F\u6839.rotation.set(\u5927\u817F\u89D2, \u7B26\u53F7 * 0.08, -\u4FA7\u504F * 0.14 + \u7B26\u53F7 * 0.08);
+            \u819D\u76D6.rotation.set(\u5C48\u819D, 0, 0);
+            \u811A.rotation.set(\u811A\u8E1D\u89D2, 0, -(\u8EAF\u5E72\u4FA7\u503E + \u817F\u6839.rotation.z));
           } else {
             const \u5E45\u500D = Math.max(0.84, Math.min(1.16, (this.\u53C2\u6570.\u5954\u8DD1\u5E45\u5EA6 || 1.1) / 1.1));
             const \u524D\u6446\u9AD8 = (\u662F\u5927\u55B7 ? 1.62 : \u662F\u53CC\u55B7 ? 1.54 : \u662F\u5C0F\u55B7 ? 1.48 : Math.min(1.46, 1.32 + \u6709\u6548\u901F / 45 * 0.14)) * \u5E45\u500D;
@@ -56868,7 +58692,7 @@ void main() {
           g.mesh.visible = false;
         }
       }
-      const \u9AD8\u901F = !\u662F\u5012\u8F66 && (\u901F\u5EA6 > 10 || \u662F\u5927\u55B7 || \u662F\u53CC\u55B7 || \u662F\u5C0F\u55B7);
+      const \u9AD8\u901F = !\u662F\u5F85\u673A && !\u662F\u884C\u8D70 && !\u662F\u6B7B\u4EA1 && !\u662F\u5012\u8F66 && (\u901F\u5EA6 > 22 || \u662F\u5927\u55B7 || \u662F\u53CC\u55B7 || \u662F\u5C0F\u55B7);
       const \u91C7\u6837\u9608\u503C = \u662F\u5927\u55B7 ? 0.016 : \u662F\u53CC\u55B7 ? 0.022 : \u662F\u5C0F\u55B7 ? 0.03 : 0.038;
       if (\u9AD8\u901F) {
         this.\u6B8B\u5F71\u91C7\u6837\u8BA1\u65F6 += \u589E\u91CF;
@@ -57852,6 +59676,8 @@ void main() {
       const \u60EF\u6027\u6001 = this.\u60EF\u6027.\u66F4\u65B0(t, dt, \u901F\u5EA6, \u8F6C\u5411\u89D2, this.\u5F53\u524D\u52A8\u4F5C, \u73AF\u5883);
       const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F;
       const \u6709\u6548\u901F\u5EA6 = \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
       const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
       const \u662F\u8FDE\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
       const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
@@ -57875,8 +59701,10 @@ void main() {
       const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
       const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
       const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
-      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u6025\u5239 && !\u662F\u8D77\u6B65 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u52A0\u901F\u4E2D;
+      const \u662F\u5012\u8F66 = (!!\u73AF\u5883?.\u662F\u5426\u5012\u8F66 || \u901F\u5EA6 < -0.5) && !\u662F\u5F85\u673A && !\u662F\u6025\u5239 && !\u662F\u8D77\u6B65 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && !\u52A0\u901F\u4E2D;
       const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
       const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
       const \u653B\u76F8 = \u662F\u653B\u51FB ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.56) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.86 / 0.86 : 0;
       const \u666E\u653B\u76F8 = \u662F\u666E\u653B ? \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.45) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72 : 0;
@@ -57886,15 +59714,15 @@ void main() {
       const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
       const \u8F68\u8FDB = Math.max(0, Math.min(1, (\u653B\u76F8 - 0.18) / 0.54));
       this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(\u662F\u653B\u51FB, \u653B\u5411, \u662F\u653B\u51FB ? 0.14 + \u8F68\u8FDB * 0.86 : 0, 2278750, 16707722, 2.25 * k, R * 1.28, 0.14);
-      const \u5C55\u793A\u8DD1 = !\u73AF\u5883 && (\u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
-      const \u5B9E\u901F = \u5C55\u793A\u8DD1 ? Math.max(24, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
-      const \u6B63\u6EDA = !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u590D\u4F4D && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (!\u662F\u666E\u653B || \u5B9E\u901F > 0.6);
-      const \u5904\u4E8E\u9759\u6B62 = !\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u98DE\u5929 && !\u662F\u6B7B\u4EA1 && (\u662F\u8D77\u6B65 || \u662F\u541F\u5531 || this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" && \u5B9E\u901F <= 0.6 && !\u662F\u5012\u8F66);
+      const \u5C55\u793A\u8DD1 = !\u73AF\u5883 && (\u662F\u884C\u8D70 || \u52A0\u901F\u4E2D || \u662F\u8F6C\u5F2F);
+      const \u5B9E\u901F = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : \u5C55\u793A\u8DD1 ? \u662F\u884C\u8D70 ? 18 : Math.max(24, \u6709\u6548\u901F\u5EA6) : \u6709\u6548\u901F\u5EA6;
+      const \u6B63\u6EDA = !\u662F\u5F85\u673A && !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u590D\u4F4D && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (!\u662F\u666E\u653B || \u5B9E\u901F > 0.6);
+      const \u5904\u4E8E\u9759\u6B62 = !\u91CD\u521B.\u6FC0\u6D3B && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u98DE\u5929 && !\u662F\u6B7B\u4EA1 && (\u662F\u5F85\u673A || \u662F\u8D77\u6B65 || \u662F\u541F\u5531);
       const \u5C55\u968F\u901F = \u5904\u4E8E\u9759\u6B62 ? 4.8 : 11;
       this.\u9759\u6B62\u5C55\u5F00\u6743 += ((\u5904\u4E8E\u9759\u6B62 ? 1 : 0) - this.\u9759\u6B62\u5C55\u5F00\u6743) * (1 - Math.exp(-\u5C55\u968F\u901F * dt));
       let \u76EE\u6807\u6EDA\u901F = 0;
       if (\u6B63\u6EDA && (\u5B9E\u901F > 0.45 || \u662F\u5012\u8F66)) {
-        const \u6321\u500D = \u662F\u5927\u55B7 ? 2.25 : \u662F\u8FDE\u55B7 ? 1.8 : \u662F\u5C0F\u55B7 ? 1.42 : 1;
+        const \u6321\u500D = \u662F\u5927\u55B7 ? 2.25 : \u662F\u8FDE\u55B7 ? 1.8 : \u662F\u5C0F\u55B7 ? 1.42 : \u662F\u884C\u8D70 ? 0.72 : 1;
         const \u65B9\u5411 = \u662F\u5012\u8F66 ? -1 : 1;
         \u76EE\u6807\u6EDA\u901F = \u65B9\u5411 * (Math.max(5.5, \u5B9E\u901F) / R) * 0.62 * \u6321\u500D * \u6EDA\u52B2;
       } else if (\u662F\u8FDE\u55B7 || \u662F\u5927\u55B7 || \u662F\u5C0F\u55B7) {
@@ -57902,11 +59730,11 @@ void main() {
       } else if (\u662F\u98DE\u5929) {
         \u76EE\u6807\u6EDA\u901F = 2.6 * \u6EDA\u52B2;
       }
-      const \u6EDA\u8DDF\u968F = \u662F\u6025\u5239 || \u662F\u6B7B\u4EA1 ? 14 : 8.5;
+      const \u6EDA\u8DDF\u968F = \u662F\u5F85\u673A || \u662F\u6025\u5239 || \u662F\u6B7B\u4EA1 ? 14 : 8.5;
       this.\u5F53\u524D\u6EDA\u901F += (\u76EE\u6807\u6EDA\u901F - this.\u5F53\u524D\u6EDA\u901F) * (1 - Math.exp(-\u6EDA\u8DDF\u968F * dt));
-      if (Math.abs(this.\u5F53\u524D\u6EDA\u901F) > 0.08 && !\u662F\u6B7B\u4EA1) {
+      if (Math.abs(this.\u5F53\u524D\u6EDA\u901F) > 0.08 && !\u662F\u6B7B\u4EA1 && !\u662F\u5F85\u673A) {
         this.\u6EDA\u8F6C\u89D2 += dt * this.\u5F53\u524D\u6EDA\u901F;
-      } else if (\u662F\u8D77\u6B65 || \u662F\u541F\u5531 || (this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" || \u662F\u653B\u51FB || \u662F\u666E\u653B) && \u5B9E\u901F <= 0.45 && !\u662F\u5012\u8F66) {
+      } else if (\u662F\u5F85\u673A || \u662F\u8D77\u6B65 || \u662F\u541F\u5531 || (\u662F\u653B\u51FB || \u662F\u666E\u653B) && \u5B9E\u901F <= 0.45 && !\u662F\u5012\u8F66) {
         const \u5F52\u4F4D\u5DEE = Math.atan2(Math.sin(this.\u6EDA\u8F6C\u89D2), Math.cos(this.\u6EDA\u8F6C\u89D2));
         this.\u6EDA\u8F6C\u89D2 -= \u5F52\u4F4D\u5DEE * (1 - Math.exp(-9 * dt));
       } else if (\u662F\u6025\u5239) {
@@ -57915,7 +59743,7 @@ void main() {
       }
       const \u76EE\u6807\u504F\u6EDA = \u662F\u8F6C\u5F2F ? \u4FA7\u504F * 0.42 : \u52A0\u901F\u4E2D ? Math.sin(t * 2.4) * (\u662F\u8FDE\u55B7 ? 0.36 : 0.22) : 0;
       this.\u504F\u6EDA\u89D2 += (\u76EE\u6807\u504F\u6EDA - this.\u504F\u6EDA\u89D2) * (1 - Math.exp(-7.5 * dt));
-      const \u662F\u7B49\u5019 = !\u662F\u8D77\u6B65 && !\u662F\u6025\u5239 && !\u662F\u6253\u6655 && !\u662F\u649E\u8F66 && !\u662F\u653B\u51FB && !\u662F\u666E\u653B && !\u662F\u590D\u4F4D && !\u662F\u51B2\u7EBF && !\u662F\u98DE\u5929 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A" && \u5B9E\u901F <= 0.45 && !\u662F\u5012\u8F66;
+      const \u662F\u7B49\u5019 = \u662F\u5F85\u673A;
       let \u538B\u6241Y = 1;
       let \u644A\u5BBDXZ = 1;
       let \u6A2A\u504FX = Math.max(-0.34 * k, Math.min(0.34 * k, \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.045 * k));
@@ -57939,20 +59767,6 @@ void main() {
       const \u5F27\u89D2 = \u5F27\u89D2\u8D77 + \u5E73\u6ED1\u9636\u8DC3(0, 0.92, \u653B\u76F8) * Math.PI * 1.46;
       const \u5F27X = -Math.cos(\u5F27\u89D2);
       const \u5F27Z = Math.sin(\u5F27\u89D2);
-      const \u5F85\u65F6 = t % 6.4;
-      const \u5F85\u671B\u6743 = 1 - \u5E73\u6ED1\u9636\u8DC3(2.05, 2.35, \u5F85\u65F6) + \u5E73\u6ED1\u9636\u8DC3(6.05, 6.4, \u5F85\u65F6);
-      const \u5F85\u671B\u51C0 = Math.min(1, \u5F85\u671B\u6743);
-      const \u8DF3\u8E721 = \u5E73\u6ED1\u9636\u8DC3(2.22, 2.45, \u5F85\u65F6) * (1 - \u5E73\u6ED1\u9636\u8DC3(2.45, 2.62, \u5F85\u65F6));
-      const \u8DF3\u4E00\u8FDB = \u5E73\u6ED1\u9636\u8DC3(2.54, 3.04, \u5F85\u65F6);
-      const \u8DF3\u4E00\u5CF0 = \u5F85\u65F6 > 2.54 && \u5F85\u65F6 < 3.04 ? Math.sin(\u8DF3\u4E00\u8FDB * Math.PI) : 0;
-      const \u8DF3\u8E722 = \u5E73\u6ED1\u9636\u8DC3(3, 3.16, \u5F85\u65F6) * (1 - \u5E73\u6ED1\u9636\u8DC3(3.16, 3.3, \u5F85\u65F6));
-      const \u8DF3\u4E8C\u8FDB = \u5E73\u6ED1\u9636\u8DC3(3.26, 3.92, \u5F85\u65F6);
-      const \u8DF3\u4E8C\u5CF0 = \u5F85\u65F6 > 3.26 && \u5F85\u65F6 < 3.92 ? Math.sin(\u8DF3\u4E8C\u8FDB * Math.PI) : 0;
-      const \u843D\u5730\u7838 = \u5E73\u6ED1\u9636\u8DC3(3.88, 4.02, \u5F85\u65F6) * (1 - \u5E73\u6ED1\u9636\u8DC3(4.02, 4.26, \u5F85\u65F6));
-      const \u6643\u5708\u6743 = \u5E73\u6ED1\u9636\u8DC3(4.2, 4.5, \u5F85\u65F6) * (1 - \u5E73\u6ED1\u9636\u8DC3(5.22, 5.48, \u5F85\u65F6));
-      const \u54C8\u6B20\u8FDB = \u5E73\u6ED1\u9636\u8DC3(5.32, 6.18, \u5F85\u65F6);
-      const \u54C8\u6B20\u5CF0 = \u5F85\u65F6 > 5.32 && \u5F85\u65F6 < 6.18 ? Math.sin(\u54C8\u6B20\u8FDB * Math.PI) : 0;
-      const \u53F9\u843D = \u5E73\u6ED1\u9636\u8DC3(6.08, 6.22, \u5F85\u65F6) * (1 - \u5E73\u6ED1\u9636\u8DC3(6.22, 6.38, \u5F85\u65F6));
       if (\u662F\u5632\u8BBD) {
         const \u6311\u632F = Math.sin(t * 26);
         const \u538B = 0.5 + 0.5 * Math.sin(t * 3.8);
@@ -57994,7 +59808,7 @@ void main() {
         \u6EDAX = this.\u6EDA\u8F6C\u89D2 + Math.cos(t * 7.8) * 0.18;
         \u6EDAY = \u62CD * 0.28;
       } else if (\u662F\u6025\u5239) {
-        const \u5239\u9707 = Math.sin(this.\u52A8\u4F5C\u8BA1\u65F6 * 24) * Math.exp(-this.\u52A8\u4F5C\u8BA1\u65F6 * 3);
+        const \u5239\u9707 = Math.sin(t * 20) * 0.48;
         \u538B\u6241Y = 0.78 + Math.abs(\u5239\u9707) * 0.06;
         \u644A\u5BBDXZ = 1.14 - Math.abs(\u5239\u9707) * 0.04;
         \u503EX = 0.26 + \u5239\u9707 * 0.18;
@@ -58064,13 +59878,19 @@ void main() {
         \u644A\u5BBDXZ = 1 + 0.16 * \u666E\u653B\u84C4 - 0.08 * \u666E\u653B\u7A81;
         \u503EX = -0.22 * \u666E\u653B\u84C4 + 0.42 * \u666E\u653B\u7A81;
         \u6EDAX = this.\u6EDA\u8F6C\u89D2 - 0.18 * \u666E\u653B\u84C4 + 0.36 * \u666E\u653B\u7A81;
-      } else if (\u662F\u6B7B\u4EA1) {
-        \u503EZ = 0.92;
-        \u503EX = 0.26;
-        \u6EDAX = 0.42;
-        \u6EDAZ = 0.35;
-        \u538B\u6241Y = 0.88;
-        \u644A\u5BBDXZ = 1.07;
+      } else if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u6A2A\u504FX = 0;
+        \u8DC3\u9AD8 = Math.max(0, hit * 0.16 * k + b * 0.22 * k);
+        \u503EZ = -0.18 * hit + 0.92 * d - b * 0.14 + tw * 0.04;
+        \u503EX = -0.16 * hit + 0.26 * d;
+        \u6EDAX = this.\u6EDA\u8F6C\u89D2 * (1 - d) + 0.42 * d;
+        \u6EDAZ = -this.\u504F\u6EDA\u89D2 * (1 - d) + 0.35 * d;
+        \u538B\u6241Y = 1 - 0.12 * d - b * 0.14;
+        \u644A\u5BBDXZ = 1 + 0.07 * d + b * 0.1;
       } else if (\u662F\u541F\u5531) {
         \u8DC3\u9AD8 = (0.34 + Math.sin(t * 2.8) * 0.08) * k;
         \u538B\u6241Y = 1.03 + Math.sin(t * 3.6) * 0.04;
@@ -58114,26 +59934,24 @@ void main() {
         \u503EZ = Math.max(-0.56, Math.min(0.56, -\u4FA7\u504F * 0.44 + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.16));
         \u503EX = 0.04;
       } else if (\u662F\u7B49\u5019) {
-        const \u63A2\u6446 = Math.sin(\u5F85\u65F6 * 2.5);
-        const \u547C\u5438 = Math.sin(t * 3);
-        const \u7ED5\u5708 = (\u5F85\u65F6 - 4.2) * 5.2;
-        \u6A2A\u504FX += \u63A2\u6446 * 0.08 * k * \u5F85\u671B\u51C0 + Math.sin(\u7ED5\u5708) * 0.15 * k * \u6643\u5708\u6743;
-        \u6A2A\u504FZ = Math.cos(\u7ED5\u5708) * 0.08 * k * \u6643\u5708\u6743;
-        \u8DC3\u9AD8 = (\u8DF3\u4E00\u5CF0 * 0.34 + \u8DF3\u4E8C\u5CF0 * 0.56) * k;
-        \u538B\u6241Y = 1 + \u547C\u5438 * 0.03 * \u5F85\u671B\u51C0 - 0.2 * \u8DF3\u8E721 - 0.19 * \u8DF3\u8E722 + 0.11 * (\u8DF3\u4E00\u5CF0 + \u8DF3\u4E8C\u5CF0) - 0.21 * \u843D\u5730\u7838 + 0.09 * \u54C8\u6B20\u5CF0 - 0.08 * \u53F9\u843D;
-        \u644A\u5BBDXZ = 1 + (1 - \u538B\u6241Y) * 0.78;
-        \u603B\u504F\u822AY = \u63A2\u6446 * 0.36 * \u5F85\u671B\u51C0 + (\u5F85\u65F6 > 3.26 && \u5F85\u65F6 < 3.92 ? \u8DF3\u4E8C\u8FDB * Math.PI * 2 : 0) + Math.sin(\u7ED5\u5708) * 0.22 * \u6643\u5708\u6743;
-        \u503EZ = \u63A2\u6446 * 0.22 * \u5F85\u671B\u51C0 + 0.26 * \u8DF3\u4E00\u5CF0 - 0.2 * \u8DF3\u4E8C\u5CF0 + Math.sin(\u7ED5\u5708) * 0.28 * \u6643\u5708\u6743;
-        \u503EX = (0.08 + Math.sin(\u5F85\u65F6 * 5) * 0.08) * \u5F85\u671B\u51C0 + 0.16 * (\u8DF3\u8E721 + \u8DF3\u8E722) - 0.12 * \u8DF3\u4E8C\u5CF0 + Math.cos(\u7ED5\u5708) * 0.2 * \u6643\u5708\u6743 - 0.18 * \u54C8\u6B20\u5CF0;
-        \u6EDAX = this.\u6EDA\u8F6C\u89D2 + Math.sin(\u5F85\u65F6 * 5) * 0.16 * \u5F85\u671B\u51C0 - 0.18 * \u8DF3\u4E00\u5CF0 + 0.14 * \u8DF3\u8E722 + Math.cos(\u7ED5\u5708) * 0.18 * \u6643\u5708\u6743 - 0.16 * \u54C8\u6B20\u5CF0;
-        \u6EDAY = \u63A2\u6446 * 0.24 * \u5F85\u671B\u51C0 + 0.26 * \u8DF3\u4E00\u5CF0;
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2);
+        \u6A2A\u504FX = 0;
+        \u6A2A\u504FZ = 0;
+        \u8DC3\u9AD8 = 0;
+        \u538B\u6241Y = 1 + \u547C * 0.025;
+        \u644A\u5BBDXZ = 1 - \u547C * 0.018;
+        \u603B\u504F\u822AY = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.65 : 0;
+        \u503EX = \u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.24 : 0;
+        \u503EZ = \u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.26 : 0;
+        \u6EDAX = this.\u6EDA\u8F6C\u89D2;
+        \u6EDAY = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.16 : 0;
       } else {
         const \u98A0 = Math.abs(Math.sin(this.\u6EDA\u8F6C\u89D2));
-        \u538B\u6241Y = 1 - \u98A0 * 0.035;
-        \u644A\u5BBDXZ = 1 + \u98A0 * 0.028;
+        \u538B\u6241Y = 1 - \u98A0 * (\u662F\u884C\u8D70 ? 0.024 : 0.035);
+        \u644A\u5BBDXZ = 1 + \u98A0 * (\u662F\u884C\u8D70 ? 0.02 : 0.028);
         \u503EZ = Math.max(-0.35, Math.min(0.35, \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.12));
         \u503EX = \u662F\u5012\u8F66 ? -0.1 : 0.03;
-        \u8DC3\u9AD8 = \u98A0 * 0.025 * k;
+        \u8DC3\u9AD8 = \u98A0 * (\u662F\u884C\u8D70 ? 0.016 : 0.025) * k;
       }
       if (\u91CD\u521B.\u6FC0\u6D3B) {
         \u538B\u6241Y *= 1 - \u91CD\u521B.\u6241\u538B * 0.32;
@@ -58164,13 +59982,14 @@ void main() {
       let \u5634\u82AF\u5BBD = 1.12;
       let \u5634\u82AF\u9AD8 = 0.62;
       let \u53D1\u5149\u5F3A = 0.16;
-      if (\u662F\u6B7B\u4EA1) {
-        \u95ED\u773C\u5EA6 = 1;
-        \u77B3\u7F29 = 0.72;
-        \u5634\u82AFY = -0.078 * R;
-        \u5634\u82AF\u5BBD = 0.78;
-        \u5634\u82AF\u9AD8 = 0.34;
-        \u53D1\u5149\u5F3A = 0;
+      if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        \u95ED\u773C\u5EA6 = Math.min(1, d * 1.15);
+        \u77B3\u7F29 = 1 - 0.28 * d;
+        \u5634\u82AFY = (-0.055 - 0.023 * d) * R;
+        \u5634\u82AF\u5BBD = 1.12 - 0.34 * d;
+        \u5634\u82AF\u9AD8 = 0.62 - 0.28 * d;
+        \u53D1\u5149\u5F3A = 0.16 * (1 - d);
       } else if (\u662F\u541F\u5531) {
         \u77B3Y = 0.024 * R;
         \u77B3\u7F29 = 1.24;
@@ -58248,19 +60067,20 @@ void main() {
         \u5634\u82AF\u9AD8 = 0.76 + Math.abs(Math.sin(t * 7.8)) * 0.24;
         \u53D1\u5149\u5F3A = 0.38;
       } else if (\u662F\u7B49\u5019) {
-        const \u7728\u5468 = t * 0.58 % 1;
+        const \u7728\u5468 = t * 0.52 % 1;
         let \u81EA\u7728 = 0;
-        if (\u7728\u5468 > 0.91) {
-          \u81EA\u7728 = Math.sin((\u7728\u5468 - 0.91) / 0.09 * Math.PI);
+        if (\u7728\u5468 > 0.92) {
+          \u81EA\u7728 = Math.sin((\u7728\u5468 - 0.92) / 0.08 * Math.PI);
         }
-        \u77B3X = Math.sin(\u5F85\u65F6 * 2.5) * 0.034 * R * \u5F85\u671B\u51C0 + Math.sin(t * 4.5) * 0.016 * R * \u6643\u5708\u6743;
-        \u77B3Y = (Math.cos(\u5F85\u65F6 * 3.8) * 0.014 * \u5F85\u671B\u51C0 + 0.018 * (\u8DF3\u4E00\u5CF0 + \u8DF3\u4E8C\u5CF0) - 0.016 * \u54C8\u6B20\u5CF0) * R;
-        \u77B3\u7F29 = 1 + 0.24 * \u8DF3\u4E8C\u5CF0 - 0.14 * \u54C8\u6B20\u5CF0;
-        \u95ED\u773C\u5EA6 = Math.max(\u81EA\u7728, 0.84 * \u54C8\u6B20\u5CF0, 0.32 * (\u8DF3\u8E721 + \u8DF3\u8E722));
-        \u5634\u82AFY = (-0.055 + 0.018 * (\u8DF3\u4E8C\u5CF0 - \u54C8\u6B20\u5CF0)) * R;
-        \u5634\u82AF\u5BBD = 1.06 + 0.14 * \u8DF3\u4E8C\u5CF0 - 0.28 * \u54C8\u6B20\u5CF0;
-        \u5634\u82AF\u9AD8 = 0.58 + Math.sin(t * 3.6) * 0.08 * \u5F85\u671B\u51C0 + 0.52 * \u8DF3\u4E8C\u5CF0 + 0.76 * \u54C8\u6B20\u5CF0;
-        \u53D1\u5149\u5F3A = 0.18 + 0.22 * \u8DF3\u4E8C\u5CF0;
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2);
+        \u77B3X = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.036 * R : 0;
+        \u77B3Y = \u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.02 * R : 0;
+        \u77B3\u7F29 = 1;
+        \u95ED\u773C\u5EA6 = \u81EA\u7728;
+        \u5634\u82AFY = -0.055 * R;
+        \u5634\u82AF\u5BBD = 1.06;
+        \u5634\u82AF\u9AD8 = 0.56 + Math.max(0, \u547C) * 0.06;
+        \u53D1\u5149\u5F3A = 0.16;
       } else {
         const \u7728\u5468 = t * 0.55 % 1;
         if (\u7728\u5468 > 0.93) {
@@ -58302,9 +60122,9 @@ void main() {
         this.\u820C\u6750.emissiveIntensity = \u53D1\u5149\u5F3A * 0.65;
       }
       this.\u5446\u6BDB\u67A2.rotation.set(
-        \u662F\u6B7B\u4EA1 ? 0.25 : -Math.min(0.65, \u5B9E\u901F / 55) - (\u662F\u6025\u5239 ? -0.45 : 0) + (\u662F\u8D77\u6B65 ? 0.25 : 0) + Math.sin(t * (\u662F\u8D77\u6B65 ? 22 : 14)) * (\u662F\u8D77\u6B65 ? 0.18 : 0.08),
+        \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.25 * \u6B7B\u6001.\u5012\u4E0B : \u662F\u7B49\u5019 ? \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 * 0.06 : 0 : -Math.min(0.65, \u5B9E\u901F / 55) - (\u662F\u6025\u5239 ? -0.45 : 0) + (\u662F\u8D77\u6B65 ? 0.25 : 0) + Math.sin(t * (\u662F\u8D77\u6B65 ? 22 : 14)) * (\u662F\u8D77\u6B65 ? 0.18 : 0.08),
         0,
-        \u662F\u6B7B\u4EA1 ? 0.32 : -\u503EZ * 0.8 + Math.sin(t * 11) * (\u662F\u7B49\u5019 ? 0.16 : 0.1)
+        \u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.32 * \u6B7B\u6001.\u5012\u4E0B + \u6B7B\u6001.\u62BD\u6410 * 0.08 : \u662F\u7B49\u5019 ? -\u503EZ * 0.6 + Math.sin(t * 2.2) * 0.04 : -\u503EZ * 0.8 + Math.sin(t * 11) * 0.1
       );
       const \u8DC3\u901F = (\u8DC3\u9AD8 - this.\u4E0A\u4E00\u8DF3\u8DC3\u9AD8) / dt;
       const \u8DC3\u51B2\u51FB = Math.max(-22, Math.min(22, (\u8DC3\u901F - this.\u4E0A\u4E00\u8DC3\u901F) / dt));
@@ -58363,11 +60183,11 @@ void main() {
         const \u98CE\u6CBF\u53F6 = _\u4E34\u65F6\u5411\u91CF2.x * sA + _\u4E34\u65F6\u5411\u91CF2.z * cA;
         const \u98CE\u4FA7 = _\u4E34\u65F6\u5411\u91CF2.x * cA - _\u4E34\u65F6\u5411\u91CF2.z * sA;
         const \u98CE\u4E0B\u538B = -_\u4E34\u65F6\u5411\u91CF2.y;
-        const \u60EF\u6027\u4E0B\u7529 = Math.max(
+        const \u60EF\u6027\u4E0B\u7529 = \u662F\u6B7B\u4EA1 ? 0 : Math.max(
           -0.75,
           Math.min(0.85, -\u8DC3\u51B2\u51FB * 0.045 + (\u662F\u6025\u5239 ? 0.55 : 0) + (\u91CD\u521B.\u6FC0\u6D3B ? 0.65 * \u91CD\u521B.\u6241\u538B : 0))
         );
-        const \u6EDA\u6446\u5F2F = Math.max(
+        const \u6EDA\u6446\u5F2F = \u662F\u6B7B\u4EA1 ? 0 : Math.max(
           -0.75,
           Math.min(0.75, -\u6EDA\u89D2\u52A0\u901F * 0.024 * cA + \u60EF\u6027\u6001.\u8F6C\u5411\u53D8\u5316\u7387 * 0.055 * sA)
         );
@@ -58398,14 +60218,13 @@ void main() {
           \u9759\u5F85\u6839\u62AC = -0.42 + Math.sin(t * 3.8 + \u53F6.\u76F8\u4F4D\u504F) * 0.1;
           \u9759\u5F85\u6839\u504F = Math.sin(t * 1.9 + \u53F6.\u76F8\u4F4D\u504F) * 0.12;
         } else if (\u662F\u7B49\u5019) {
-          const \u6247\u98CE = Math.sin(t * 2.8 + \u53F6.\u76F8\u4F4D\u504F);
-          const \u9519\u6446 = Math.cos(t * 2.1 + \u53F6.\u76F8\u4F4D\u504F);
-          \u9759\u5F85\u53F6\u5F2F = \u6247\u98CE * 0.22 * \u5F85\u671B\u51C0 + 0.24 * (\u8DF3\u8E721 + \u8DF3\u8E722) - 0.32 * (\u8DF3\u4E00\u5CF0 + \u8DF3\u4E8C\u5CF0) + 0.26 * \u843D\u5730\u7838 + Math.sin(t * 5.2 + \u53F6.\u76F8\u4F4D\u504F) * 0.16 * \u6643\u5708\u6743 - 0.36 * \u54C8\u6B20\u5CF0;
-          \u9759\u5F85\u53F6\u4FA7 = \u9519\u6446 * 0.28 * \u5F85\u671B\u51C0 + Math.cos(t * 5 + \u53F6.\u76F8\u4F4D\u504F) * 0.22 * \u6643\u5708\u6743;
-          \u9759\u5F85\u6839\u62AC = -0.18 * \u54C8\u6B20\u5CF0 - 0.14 * \u8DF3\u4E8C\u5CF0 + 0.12 * \u843D\u5730\u7838 + \u6247\u98CE * 0.08 * \u5F85\u671B\u51C0;
-          \u9759\u5F85\u6839\u504F = \u9519\u6446 * 0.14 * \u5F85\u671B\u51C0;
+          const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 2);
+          \u9759\u5F85\u53F6\u5F2F = \u547C * 0.06 + Math.sin(t * 1.8 + \u53F6.\u76F8\u4F4D\u504F) * 0.04;
+          \u9759\u5F85\u53F6\u4FA7 = Math.cos(t * 1.4 + \u53F6.\u76F8\u4F4D\u504F) * 0.05;
+          \u9759\u5F85\u6839\u62AC = \u547C * 0.04;
+          \u9759\u5F85\u6839\u504F = 0;
         }
-        const \u57FA\u7840\u8F6F\u5F2F = (\u662F\u6B7B\u4EA1 ? 1.48 : 0.34 * \u5C55 + 2.2 * \u6536\u62E2\u6743 + (\u662F\u653B\u51FB ? 0.62 : 0)) + \u9759\u5F85\u53F6\u5F2F;
+        const \u57FA\u7840\u8F6F\u5F2F = (\u662F\u6B7B\u4EA1 && \u6B7B\u6001 ? 0.34 * (1 - \u6B7B\u6001.\u5012\u4E0B) + 1.48 * \u6B7B\u6001.\u5012\u4E0B : 0.34 * \u5C55 + 2.2 * \u6536\u62E2\u6743 + (\u662F\u653B\u51FB ? 0.62 : 0)) + \u9759\u5F85\u53F6\u5F2F;
         const \u538B\u5730\u51C0\u5F2F = \u5730\u9762\u538B\u5F2F\u6743 * 0.14;
         const \u7529\u53F6\u62C9\u76F4 = \u662F\u653B\u51FB ? -0.58 * \u53F6\u62C9\u957F : \u662F\u666E\u653B ? 0.42 * \u666E\u653B\u84C4 - 0.56 * \u666E\u653B\u7A81 : 0;
         const \u76EE\u6807\u5F2F = \u57FA\u7840\u8F6F\u5F2F + (\u662F\u6B7B\u4EA1 ? 0 : (\u91CD\u529B\u538B\u53F6 * 0.34 + \u91CD\u529B\u6CBF\u53F6 * 0.14) * (1 - \u5C55 * 0.55) * (1 - \u6536\u62E2\u6743 * 0.82) + (\u98CE\u4E0B\u538B * \u98CE\u5F3A * 0.3 + Math.max(-0.3, \u98CE\u6CBF\u53F6 * \u98CE\u5F3A * 0.28)) * (1 - \u5C55 * 0.7) * (1 - \u6536\u62E2\u6743 * 0.85) + \u60EF\u6027\u4E0B\u7529 * (1 - \u6536\u62E2\u6743 * 0.65) + \u538B\u5730\u51C0\u5F2F + \u7529\u53F6\u62C9\u76F4);
@@ -58416,7 +60235,7 @@ void main() {
         const \u8F6F\u6839\u5F2F = \u6839\u4E2D\u5F39\u7C27 * (1 - \u5730\u9762\u538B\u5F2F\u6743 * 0.72 * (1 - \u6536\u62E2\u6743 * 0.6));
         const \u8F6F\u68A2\u5F2F = \u68A2\u7529\u5F39\u7C27 * (1 - \u5730\u9762\u538B\u5F2F\u6743 * 0.72 * (1 - \u6536\u62E2\u6743 * 0.6));
         const \u6296\u9891 = \u662F\u8D77\u6B65 ? 16 : 4.6 + \u98CE\u5F3A * 14;
-        const \u6296\u5E45 = \u662F\u6B7B\u4EA1 ? 0 : (0.055 + \u98CE\u5F3A * 0.13 + (\u662F\u6025\u5239 || \u662F\u6253\u6655 || \u662F\u649E\u8F66 ? 0.11 : 0)) * (1 - \u5730\u9762\u538B\u5F2F\u6743 * 0.8) * (1 - \u5C55 * 0.76) * (1 - \u6536\u62E2\u6743 * 0.68) + (\u662F\u8D77\u6B65 ? 0.055 : \u662F\u7B49\u5019 ? 0.038 : 0);
+        const \u6296\u5E45 = \u662F\u6B7B\u4EA1 ? 0 : (0.055 + \u98CE\u5F3A * 0.13 + (\u662F\u6025\u5239 || \u662F\u6253\u6655 || \u662F\u649E\u8F66 ? 0.11 : 0)) * (1 - \u5730\u9762\u538B\u5F2F\u6743 * 0.8) * (1 - \u5C55 * 0.76) * (1 - \u6536\u62E2\u6743 * 0.68) + (\u662F\u8D77\u6B65 ? 0.055 : \u662F\u7B49\u5019 ? 0.014 : 0);
         const \u9AA8\u7EC4 = \u53F6.\u9AA8\u9ABC\u7EC4;
         for (let s = 1; s < \u9AA8\u7EC4.length; s++) {
           \u9AA8\u7EC4[s].position.z = \u53F6.\u957F\u5EA6 * \u8282\u957F\u6BD4[s - 1] * \u53F6\u957F\u62C9\u957F;
@@ -58746,17 +60565,13 @@ void main() {
         this.\u6F02\u79FB\u89E6\u70B9\u7EC4[0].\u8D34\u5730 = !\u662F\u5426\u817E\u7A7A && !\u662F\u51B2\u7EBF && !\u662F\u649E\u8F66 && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531;
       }
       this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 += dt;
-      const \u8BE5\u6492\u5C18 = !\u662F\u5426\u817E\u7A7A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u52A0\u901F\u4E2D && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.03 || \u662F\u6025\u5239 && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.04 || \u662F\u5632\u8BBD && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.095 || \u6B63\u6EDA && \u5B9E\u901F > 18 && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.065);
+      const \u8BE5\u6492\u5C18 = !\u662F\u5426\u817E\u7A7A && !\u662F\u6B7B\u4EA1 && !\u662F\u541F\u5531 && (\u52A0\u901F\u4E2D && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.03 || \u662F\u6025\u5239 && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.04 || \u662F\u5632\u8BBD && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.095 || \u6B63\u6EDA && !\u662F\u884C\u8D70 && \u5B9E\u901F > 18 && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.065);
       if (\u8BE5\u6492\u5C18) {
         this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 = 0;
         this.\u629B\u6492\u6930\u6E23\u5C18(\u6A2A\u504FX, \u5730\u9AD8, -0.22 * R, \u52A0\u901F\u4E2D ? 2 : 1, \u662F\u5927\u55B7 ? 1.2 : \u662F\u5632\u8BBD ? 0.72 : 0.85);
       }
       if (\u662F\u590D\u4F4D && \u590D\u76F8 >= 0.68 && \u590D\u76F8 < 0.74) {
         this.\u629B\u6492\u6930\u6E23\u5C18(\u6A2A\u504FX, \u5730\u9AD8, 0, 3, 1.15);
-      }
-      if (\u662F\u7B49\u5019 && \u843D\u5730\u7838 > 0.55 && this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 >= 0.18) {
-        this.\u5C18\u7C92\u91C7\u6837\u8BA1\u65F6 = 0;
-        this.\u629B\u6492\u6930\u6E23\u5C18(\u6A2A\u504FX, \u5730\u9AD8, 0, 2, 0.55);
       }
       for (let i = 0; i < this.\u6930\u6E23\u5C18\u6C60.length; i++) {
         const p = this.\u6930\u6E23\u5C18\u6C60[i];
@@ -58821,6 +60636,1285 @@ void main() {
     }
   };
 
+  // src/core/entities/paperBoy.ts
+  function \u521B\u5EFA\u56DE\u5B57\u7EB9\u9576\u8FB9\u7EB9\u7406() {
+    if (typeof document === "undefined") return null;
+    const c = document.createElement("canvas");
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#0d1b38";
+    ctx.fillRect(0, 0, 256, 64);
+    ctx.fillStyle = "#14b8a6";
+    ctx.fillRect(0, 4, 256, 5);
+    ctx.fillRect(0, 55, 256, 5);
+    ctx.fillStyle = "#0a1429";
+    ctx.fillRect(0, 9, 256, 4);
+    ctx.fillRect(0, 51, 256, 4);
+    ctx.strokeStyle = "#eab308";
+    ctx.lineWidth = 4;
+    ctx.lineCap = "square";
+    ctx.lineJoin = "miter";
+    const \u5355\u5143\u5BBD = 64;
+    for (let i = 0; i < 4; i++) {
+      const ox = i * \u5355\u5143\u5BBD;
+      ctx.beginPath();
+      ctx.moveTo(ox + 6, 46);
+      ctx.lineTo(ox + 6, 18);
+      ctx.lineTo(ox + 30, 18);
+      ctx.lineTo(ox + 30, 38);
+      ctx.lineTo(ox + 15, 38);
+      ctx.lineTo(ox + 15, 26);
+      ctx.lineTo(ox + 22, 26);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(ox + 58, 18);
+      ctx.lineTo(ox + 58, 46);
+      ctx.lineTo(ox + 34, 46);
+      ctx.lineTo(ox + 34, 26);
+      ctx.lineTo(ox + 49, 26);
+      ctx.lineTo(ox + 49, 38);
+      ctx.lineTo(ox + 42, 38);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    for (let i = 0; i < 160; i++) {
+      ctx.fillRect(i * 37 % 256, i * 19 % 64, 2, 1);
+    }
+    const tex = new CanvasTexture(c);
+    tex.colorSpace = SRGBColorSpace;
+    tex.wrapS = RepeatWrapping;
+    tex.wrapT = ClampToEdgeWrapping;
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function \u521B\u5EFA\u84DD\u7EF8\u6298\u7EB8\u7EB9\u7406() {
+    if (typeof document === "undefined") return null;
+    const c = document.createElement("canvas");
+    c.width = 256;
+    c.height = 256;
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    const grad = ctx.createLinearGradient(0, 0, 256, 256);
+    grad.addColorStop(0, "#1e3f8f");
+    grad.addColorStop(0.5, "#173173");
+    grad.addColorStop(1, "#102354");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = "rgba(255,255,255,0.035)";
+    for (let y = 0; y < 256; y += 3) {
+      ctx.fillRect(0, y, 256, 1);
+    }
+    ctx.strokeStyle = "rgba(219, 234, 254, 0.14)";
+    ctx.lineWidth = 1.6;
+    const \u6298\u75D5 = [
+      [18, 22, 128, 88],
+      [128, 88, 238, 34],
+      [40, 140, 134, 178],
+      [134, 178, 226, 148],
+      [126, 0, 130, 256],
+      [12, 210, 96, 184]
+    ];
+    for (const [x1, y1, x2, y2] of \u6298\u75D5) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(6, 12, 32, 0.24)";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(132, 0);
+    ctx.lineTo(136, 256);
+    ctx.stroke();
+    const tex = new CanvasTexture(c);
+    tex.colorSpace = SRGBColorSpace;
+    tex.wrapS = RepeatWrapping;
+    tex.wrapT = RepeatWrapping;
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function \u521B\u5EFA\u7EB8\u624E\u8138\u76AE\u7EB9\u7406() {
+    if (typeof document === "undefined") return null;
+    const c = document.createElement("canvas");
+    c.width = 256;
+    c.height = 256;
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#f8dde2";
+    ctx.fillRect(0, 0, 256, 256);
+    const \u816EL = ctx.createRadialGradient(84, 152, 8, 84, 152, 54);
+    \u816EL.addColorStop(0, "rgba(226, 126, 154, 0.56)");
+    \u816EL.addColorStop(1, "rgba(226, 126, 154, 0)");
+    ctx.fillStyle = \u816EL;
+    ctx.fillRect(0, 0, 256, 256);
+    const \u816ER = ctx.createRadialGradient(172, 152, 8, 172, 152, 54);
+    \u816ER.addColorStop(0, "rgba(226, 126, 154, 0.56)");
+    \u816ER.addColorStop(1, "rgba(226, 126, 154, 0)");
+    ctx.fillStyle = \u816ER;
+    ctx.fillRect(0, 0, 256, 256);
+    const \u4E0B\u5DF4\u6655 = ctx.createRadialGradient(128, 214, 10, 128, 214, 48);
+    \u4E0B\u5DF4\u6655.addColorStop(0, "rgba(218, 114, 146, 0.42)");
+    \u4E0B\u5DF4\u6655.addColorStop(1, "rgba(218, 114, 146, 0)");
+    ctx.fillStyle = \u4E0B\u5DF4\u6655;
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = "rgba(130, 88, 98, 0.06)";
+    for (let i = 0; i < 320; i++) {
+      ctx.fillRect(i * 53 % 256, i * 97 % 256, 1.5, 1.5);
+    }
+    const tex = new CanvasTexture(c);
+    tex.colorSpace = SRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function \u521B\u5EFA\u9ED1\u76B1\u7EB8\u7EB9\u7406() {
+    if (typeof document === "undefined") return null;
+    const c = document.createElement("canvas");
+    c.width = 128;
+    c.height = 128;
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#14151a";
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    ctx.lineWidth = 1.5;
+    for (let x = 4; x < 128; x += 9) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + (x % 2 * 4 - 2), 128);
+      ctx.stroke();
+    }
+    const tex = new CanvasTexture(c);
+    tex.colorSpace = SRGBColorSpace;
+    tex.wrapS = RepeatWrapping;
+    tex.wrapT = RepeatWrapping;
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function \u521B\u5EFA\u526A\u7EB8\u624B\u638C\u51E0\u4F55(\u65B9\u5411, \u7F29\u653E = 1) {
+    const s = new Shape();
+    s.moveTo(-0.045, 0.01);
+    s.lineTo(0.045, 0.01);
+    s.lineTo(0.088, -0.055);
+    s.lineTo(0.112, -0.105);
+    s.lineTo(0.09, -0.118);
+    s.lineTo(0.062, -0.072);
+    s.lineTo(0.068, -0.175);
+    s.lineTo(0.046, -0.184);
+    s.lineTo(0.036, -0.1);
+    s.lineTo(0.026, -0.195);
+    s.lineTo(4e-3, -0.196);
+    s.lineTo(2e-3, -0.102);
+    s.lineTo(-0.012, -0.186);
+    s.lineTo(-0.034, -0.18);
+    s.lineTo(-0.03, -0.098);
+    s.lineTo(-0.048, -0.156);
+    s.lineTo(-0.068, -0.146);
+    s.lineTo(-0.054, -0.068);
+    s.closePath();
+    const geo = new ExtrudeGeometry(s, {
+      depth: 0.02,
+      bevelEnabled: false,
+      curveSegments: 4
+    });
+    geo.translate(0, 0, -0.01);
+    geo.scale(\u65B9\u5411 * \u7F29\u653E, \u7F29\u653E, \u7F29\u653E);
+    geo.computeVertexNormals();
+    return geo;
+  }
+  function \u521B\u5EFA\u526A\u7EB8\u8033\u6735\u51E0\u4F55(\u65B9\u5411, \u7F29\u653E = 1) {
+    const s = new Shape();
+    s.moveTo(0, 0.12);
+    s.quadraticCurveTo(0.11, 0.14, 0.12, 0.02);
+    s.quadraticCurveTo(0.1, -0.05, 0.075, -0.08);
+    s.quadraticCurveTo(0.085, -0.14, 0.025, -0.14);
+    s.lineTo(0, -0.1);
+    s.closePath();
+    const geo = new ExtrudeGeometry(s, {
+      depth: 0.022,
+      bevelEnabled: false,
+      curveSegments: 8
+    });
+    geo.translate(0, 0, -0.011);
+    geo.scale(\u65B9\u5411 * \u7F29\u653E, \u7F29\u653E, \u7F29\u653E);
+    geo.computeVertexNormals();
+    return geo;
+  }
+  var _\u4E34\u65F6\u4F4D = new Vector3();
+  var _\u4E34\u65F6\u65CB = new Quaternion();
+  var _\u4E34\u65F6\u540E = new Vector3();
+  var _\u4E34\u65F6\u5C3A = new Vector3();
+  var \u7EB8\u672D\u5F1F\u6A21\u578B = class extends \u57FA\u7C7B\u6A21\u578B {
+    \u603B\u67A2;
+    \u6D6E\u8EAB\u67A2;
+    \u8EAF\u5E72\u67A2;
+    \u4E0A\u8EAB\u67A2;
+    \u9888\u67A2;
+    \u5934\u67A2;
+    \u5DE6\u76EE\u77B3\u67A2;
+    \u53F3\u76EE\u77B3\u67A2;
+    \u5DE6\u4E0A\u7751;
+    \u53F3\u4E0A\u7751;
+    \u5DE6\u7709\u67A2;
+    \u53F3\u7709\u67A2;
+    \u53E3\u7F1D\u6846;
+    \u4E0B\u5507\u74E3;
+    \u5DE6\u81C2\u67A2;
+    \u5DE6\u8098\u67A2;
+    \u5DE6\u624B\u67A2;
+    \u53F3\u81C2\u67A2;
+    \u53F3\u8098\u67A2;
+    \u53F3\u624B\u67A2;
+    \u5DE6\u817F\u67A2;
+    \u5DE6\u819D\u67A2;
+    \u53F3\u817F\u67A2;
+    \u53F3\u819D\u67A2;
+    \u7729\u6655\u7B26\u73AF;
+    \u5E7D\u706B\u7FA4 = [];
+    \u6B8B\u5F71\u961F\u5217 = [];
+    \u6B8B\u5F71\u55B7\u53D1\u8BA1\u65F6 = 0;
+    \u60EF\u6027 = new \u89D2\u8272\u60EF\u6027\u5668();
+    \u7728\u773C\u5012\u8BA1\u65F6 = 2.6;
+    \u7728\u773C\u4F59\u65F6 = 0;
+    \u626D\u5934\u8109\u51B2\u8BA1\u65F6 = 2.1;
+    \u76EE\u6807\u602A\u5F02\u626D\u5934 = 0;
+    \u76EE\u6807\u602A\u5F02\u6B6A\u5934 = 0;
+    \u5F53\u524D\u626D\u5934 = 0;
+    \u5F53\u524D\u6B6A\u5934 = 0;
+    \u5E86\u795D\u81EA\u8F6C\u89D2 = 0;
+    constructor() {
+      super(
+        "paperboy",
+        "\u7EB8\u672D\u5F1F",
+        "\u7CCA\u7740\u767D\u7EB8\u753B\u7EA2\u5634\u7684\u5927\u84DD\u8902\u5B50\u7EB8\u624E\u5C0F\u4EBA\uFF0C\u6B7B\u7741\u7740\u773C\u76AE\u7B11\u8089\u4E0D\u7B11\uFF0C\u53CC\u811A\u4E0D\u6CBE\u5730\u98D8\u7740\u5F80\u524D\u8D70"
+      );
+      this.\u53C2\u6570 = {
+        \u4F53\u683C\u5927\u5C0F: 1,
+        \u60AC\u6D6E\u9AD8\u5EA6: 1,
+        \u6B6A\u5934\u72E0\u5EA6: 1
+      };
+      this.\u6784\u5EFA();
+    }
+    \u83B7\u53D6\u53C2\u6570\u5B9A\u4E49() {
+      return [
+        { \u952E: "\u4F53\u683C\u5927\u5C0F", \u540D\u79F0: "\u4E2A\u5934\u5927\u5C0F", \u7C7B\u578B: "\u6570\u5B57", \u6700\u5C0F\u503C: 0.78, \u6700\u5927\u503C: 1.32, \u6B65\u957F: 0.04, \u9ED8\u8BA4\u503C: 1 },
+        { \u952E: "\u60AC\u6D6E\u9AD8\u5EA6", \u540D\u79F0: "\u98D8\u591A\u9AD8", \u7C7B\u578B: "\u6570\u5B57", \u6700\u5C0F\u503C: 0.65, \u6700\u5927\u503C: 1.45, \u6B65\u957F: 0.05, \u9ED8\u8BA4\u503C: 1 },
+        { \u952E: "\u6B6A\u5934\u72E0\u5EA6", \u540D\u79F0: "\u6B6A\u5934\u72E0\u5EA6", \u7C7B\u578B: "\u6570\u5B57", \u6700\u5C0F\u503C: 0.5, \u6700\u5927\u503C: 1.6, \u6B65\u957F: 0.1, \u9ED8\u8BA4\u503C: 1 }
+      ];
+    }
+    \u6784\u5EFA() {
+      const k = Number(this.\u53C2\u6570.\u4F53\u683C\u5927\u5C0F) || 1;
+      const \u56DE\u5B57\u7EB9 = \u521B\u5EFA\u56DE\u5B57\u7EB9\u9576\u8FB9\u7EB9\u7406();
+      const \u84DD\u7EF8\u7EB9 = \u521B\u5EFA\u84DD\u7EF8\u6298\u7EB8\u7EB9\u7406();
+      const \u7EB8\u8138\u7EB9 = \u521B\u5EFA\u7EB8\u624E\u8138\u76AE\u7EB9\u7406();
+      const \u9ED1\u76B1\u7EB9 = \u521B\u5EFA\u9ED1\u76B1\u7EB8\u7EB9\u7406();
+      const \u7EB8\u8138\u6750 = new MeshStandardMaterial({
+        color: \u7EB8\u8138\u7EB9 ? 16777215 : 16243936,
+        ...\u7EB8\u8138\u7EB9 ? { map: \u7EB8\u8138\u7EB9 } : {},
+        roughness: 0.44,
+        metalness: 0.04
+      });
+      const \u767D\u7EB8\u677F\u6750 = new MeshStandardMaterial({
+        color: 16052209,
+        roughness: 0.72,
+        metalness: 0.02,
+        side: DoubleSide
+      });
+      const \u84DD\u7EF8\u8902\u6750 = new MeshStandardMaterial({
+        color: \u84DD\u7EF8\u7EB9 ? 16777215 : 1718400,
+        ...\u84DD\u7EF8\u7EB9 ? { map: \u84DD\u7EF8\u7EB9 } : {},
+        roughness: 0.34,
+        metalness: 0.1,
+        side: DoubleSide
+      });
+      const \u888D\u5185\u6697\u6750 = new MeshStandardMaterial({
+        color: 726061,
+        roughness: 0.85,
+        side: DoubleSide
+      });
+      const \u9576\u8FB9\u6750 = new MeshStandardMaterial({
+        color: \u56DE\u5B57\u7EB9 ? 16777215 : 14251782,
+        ...\u56DE\u5B57\u7EB9 ? { map: \u56DE\u5B57\u7EB9 } : {},
+        roughness: 0.42,
+        metalness: 0.18,
+        side: DoubleSide
+      });
+      const \u9ED1\u76B1\u53D1\u6750 = new MeshStandardMaterial({
+        color: \u9ED1\u76B1\u7EB9 ? 16777215 : 1316122,
+        ...\u9ED1\u76B1\u7EB9 ? { map: \u9ED1\u76B1\u7EB9 } : {},
+        roughness: 0.86,
+        metalness: 0.04,
+        side: DoubleSide
+      });
+      const \u9ED1\u7EB8\u88E4\u6750 = new MeshStandardMaterial({
+        color: 1184536,
+        roughness: 0.82,
+        metalness: 0.04,
+        side: DoubleSide
+      });
+      const \u9ED1\u7EB8\u978B\u6750 = new MeshStandardMaterial({
+        color: 789777,
+        roughness: 0.62,
+        metalness: 0.08
+      });
+      const \u7AF9\u67B6\u6750 = new MeshStandardMaterial({
+        color: 14270090,
+        roughness: 0.88
+      });
+      const \u74F7\u767D\u773C\u6750 = new MeshStandardMaterial({
+        color: 16579068,
+        roughness: 0.14,
+        metalness: 0.05
+      });
+      const \u6F06\u9ED1\u773C\u7EBF\u6750 = new MeshBasicMaterial({ color: 789262 });
+      const \u9ED1\u77B3\u4EC1\u6750 = new MeshBasicMaterial({ color: 591626 });
+      const \u773C\u9AD8\u5149\u6750 = new MeshBasicMaterial({ color: 16777215 });
+      const \u6731\u7EA2\u5507\u6750 = new MeshStandardMaterial({
+        color: 14753096,
+        roughness: 0.28,
+        metalness: 0.06
+      });
+      const \u53E3\u7F1D\u6697\u6750 = new MeshBasicMaterial({ color: 2622475 });
+      this.\u603B\u67A2 = new Group();
+      this.\u603B\u67A2.name = "\u7EB8\u672D\u5F1F\u603B\u67A2";
+      this.\u6A21\u578B\u7EC4.add(this.\u603B\u67A2);
+      this.\u6D6E\u8EAB\u67A2 = new Group();
+      this.\u6D6E\u8EAB\u67A2.name = "\u6D6E\u8EAB\u67A2";
+      this.\u6D6E\u8EAB\u67A2.position.y = 0.28 * k;
+      this.\u603B\u67A2.add(this.\u6D6E\u8EAB\u67A2);
+      this.\u8EAF\u5E72\u67A2 = new Group();
+      this.\u8EAF\u5E72\u67A2.name = "\u8EAF\u5E72\u67A2";
+      this.\u6D6E\u8EAB\u67A2.add(this.\u8EAF\u5E72\u67A2);
+      const \u9020\u817F = (sx, \u540D\u524D\u7F00) => {
+        const \u817F\u67A2 = new Group();
+        \u817F\u67A2.name = `${\u540D\u524D\u7F00}\u817F\u67A2`;
+        \u817F\u67A2.position.set(sx * 0.155 * k, 0.88 * k, 0);
+        const \u88E4\u7BA1\u51E0 = new CylinderGeometry(0.118 * k, 0.132 * k, 0.44 * k, 10, 1, true);
+        const \u5927\u817F\u7B52 = new Mesh(\u88E4\u7BA1\u51E0, \u9ED1\u7EB8\u88E4\u6750);
+        \u5927\u817F\u7B52.position.y = -0.22 * k;
+        \u5927\u817F\u7B52.castShadow = true;
+        \u817F\u67A2.add(\u5927\u817F\u7B52);
+        const \u819D\u67A2 = new Group();
+        \u819D\u67A2.name = `${\u540D\u524D\u7F00}\u819D\u67A2`;
+        \u819D\u67A2.position.y = -0.4 * k;
+        \u817F\u67A2.add(\u819D\u67A2);
+        const \u5C0F\u817F\u51E0 = new CylinderGeometry(0.128 * k, 0.146 * k, 0.42 * k, 10, 1, true);
+        const \u5C0F\u817F\u7B52 = new Mesh(\u5C0F\u817F\u51E0, \u9ED1\u7EB8\u88E4\u6750);
+        \u5C0F\u817F\u7B52.position.y = -0.2 * k;
+        \u5C0F\u817F\u7B52.castShadow = true;
+        \u819D\u67A2.add(\u5C0F\u817F\u7B52);
+        const \u88E4\u5C01\u5E95 = new Mesh(new CircleGeometry(0.122 * k, 10), \u888D\u5185\u6697\u6750);
+        \u88E4\u5C01\u5E95.rotation.x = Math.PI / 2;
+        \u88E4\u5C01\u5E95.position.y = -0.14 * k;
+        \u819D\u67A2.add(\u88E4\u5C01\u5E95);
+        const \u767D\u8E1D = new Mesh(new CylinderGeometry(0.056 * k, 0.062 * k, 0.11 * k, 8), \u767D\u7EB8\u677F\u6750);
+        \u767D\u8E1D.position.y = -0.41 * k;
+        \u819D\u67A2.add(\u767D\u8E1D);
+        const \u978B\u7EC4 = new Group();
+        \u978B\u7EC4.name = `${\u540D\u524D\u7F00}\u7EB8\u978B`;
+        \u978B\u7EC4.position.set(0, -0.48 * k, 0.03 * k);
+        const \u978B\u5E2E = new Mesh(new BoxGeometry(0.135 * k, 0.096 * k, 0.22 * k), \u9ED1\u7EB8\u978B\u6750);
+        \u978B\u5E2E.position.set(0, 0.048 * k, -0.01 * k);
+        \u978B\u5E2E.castShadow = true;
+        \u978B\u7EC4.add(\u978B\u5E2E);
+        const \u978B\u5C16 = new Mesh(new ConeGeometry(0.068 * k, 0.15 * k, 6), \u9ED1\u7EB8\u978B\u6750);
+        \u978B\u5C16.rotation.x = Math.PI * 0.5;
+        \u978B\u5C16.scale.set(0.95, 1, 0.68);
+        \u978B\u5C16.position.set(0, 0.036 * k, 0.145 * k);
+        \u978B\u5C16.castShadow = true;
+        \u978B\u7EC4.add(\u978B\u5C16);
+        \u819D\u67A2.add(\u978B\u7EC4);
+        this.\u8EAF\u5E72\u67A2.add(\u817F\u67A2);
+        return { \u817F\u67A2, \u819D\u67A2 };
+      };
+      const \u5DE6\u817F\u5BF9 = \u9020\u817F(1, "\u5DE6");
+      const \u53F3\u817F\u5BF9 = \u9020\u817F(-1, "\u53F3");
+      this.\u5DE6\u817F\u67A2 = \u5DE6\u817F\u5BF9.\u817F\u67A2;
+      this.\u5DE6\u819D\u67A2 = \u5DE6\u817F\u5BF9.\u819D\u67A2;
+      this.\u53F3\u817F\u67A2 = \u53F3\u817F\u5BF9.\u817F\u67A2;
+      this.\u53F3\u819D\u67A2 = \u53F3\u817F\u5BF9.\u819D\u67A2;
+      this.\u4E0A\u8EAB\u67A2 = new Group();
+      this.\u4E0A\u8EAB\u67A2.name = "\u4E0A\u8EAB\u67A2";
+      this.\u4E0A\u8EAB\u67A2.position.y = 0.9 * k;
+      this.\u8EAF\u5E72\u67A2.add(this.\u4E0A\u8EAB\u67A2);
+      const \u888D\u4F53\u51E0 = new CylinderGeometry(0.32 * k, 0.45 * k, 0.86 * k, 12, 5, true);
+      const \u888Dpos = \u888D\u4F53\u51E0.attributes.position;
+      for (let i = 0; i < \u888Dpos.count; i++) {
+        const vx = \u888Dpos.getX(i);
+        const vy = \u888Dpos.getY(i);
+        const vz = \u888Dpos.getZ(i);
+        const \u9AD8\u5EA6\u6BD4 = (vy + 0.43 * k) / (0.86 * k);
+        const \u6298\u76B1 = Math.sin(Math.atan2(vz, vx) * 6 + \u9AD8\u5EA6\u6BD4 * 4) * 0.012 * k;
+        \u888Dpos.setX(i, vx * 1.1 + \u6298\u76B1);
+        \u888Dpos.setZ(i, vz * 0.72 + \u6298\u76B1 * 0.6);
+      }
+      \u888D\u4F53\u51E0.computeVertexNormals();
+      const \u84DD\u7EF8\u8902 = new Mesh(\u888D\u4F53\u51E0, \u84DD\u7EF8\u8902\u6750);
+      \u84DD\u7EF8\u8902.position.y = 0.36 * k;
+      \u84DD\u7EF8\u8902.castShadow = true;
+      this.\u4E0A\u8EAB\u67A2.add(\u84DD\u7EF8\u8902);
+      const \u80A9\u53F0 = new Mesh(new CylinderGeometry(0.18 * k, 0.34 * k, 0.14 * k, 12), \u84DD\u7EF8\u8902\u6750);
+      \u80A9\u53F0.scale.set(1.1, 1, 0.72);
+      \u80A9\u53F0.position.y = 0.76 * k;
+      this.\u4E0A\u8EAB\u67A2.add(\u80A9\u53F0);
+      const \u5185\u6697\u9762 = new Mesh(new CylinderGeometry(0.3 * k, 0.42 * k, 0.8 * k, 10, 1, true), \u888D\u5185\u6697\u6750);
+      \u5185\u6697\u9762.scale.set(1.06, 1, 0.69);
+      \u5185\u6697\u9762.position.y = 0.36 * k;
+      this.\u4E0A\u8EAB\u67A2.add(\u5185\u6697\u9762);
+      const \u7AF9\u6491 = new Mesh(new CylinderGeometry(0.014 * k, 0.014 * k, 0.74 * k, 6), \u7AF9\u67B6\u6750);
+      \u7AF9\u6491.rotation.z = Math.PI / 2;
+      \u7AF9\u6491.position.set(0, 0.08 * k, 0);
+      const \u7AF9\u64912 = new Mesh(new CylinderGeometry(0.012 * k, 0.012 * k, 0.48 * k, 6), \u7AF9\u67B6\u6750);
+      \u7AF9\u64912.rotation.x = Math.PI / 2;
+      \u7AF9\u64912.position.set(0, 0.08 * k, 0);
+      this.\u4E0A\u8EAB\u67A2.add(\u7AF9\u6491, \u7AF9\u64912);
+      const \u4E0B\u6446\u7EB9 = \u56DE\u5B57\u7EB9 ? \u56DE\u5B57\u7EB9.clone() : null;
+      if (\u4E0B\u6446\u7EB9) {
+        \u4E0B\u6446\u7EB9.repeat.set(5, 1);
+        \u4E0B\u6446\u7EB9.needsUpdate = true;
+      }
+      const \u4E0B\u6446\u6750 = \u4E0B\u6446\u7EB9 ? new MeshStandardMaterial({ color: 16777215, map: \u4E0B\u6446\u7EB9, roughness: 0.42, metalness: 0.18, side: DoubleSide }) : \u9576\u8FB9\u6750;
+      const \u4E0B\u6446\u9576\u8FB9 = new Mesh(new CylinderGeometry(0.435 * k, 0.455 * k, 0.105 * k, 14, 1, true), \u4E0B\u6446\u6750);
+      \u4E0B\u6446\u9576\u8FB9.scale.set(1.105, 1, 0.725);
+      \u4E0B\u6446\u9576\u8FB9.position.y = -0.02 * k;
+      this.\u4E0A\u8EAB\u67A2.add(\u4E0B\u6446\u9576\u8FB9);
+      const \u895F\u7AD6\u7247 = new Mesh(new BoxGeometry(0.022 * k, 0.68 * k, 0.026 * k), \u84DD\u7EF8\u8902\u6750);
+      \u895F\u7AD6\u7247.position.set(0.036 * k, 0.34 * k, 0.305 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u895F\u7AD6\u7247);
+      const \u6263\u7EB9 = \u56DE\u5B57\u7EB9 ? \u56DE\u5B57\u7EB9.clone() : null;
+      if (\u6263\u7EB9) {
+        \u6263\u7EB9.repeat.set(1, 1);
+        \u6263\u7EB9.needsUpdate = true;
+      }
+      const \u6A2A\u6263\u6750 = \u6263\u7EB9 ? new MeshStandardMaterial({ color: 16777215, map: \u6263\u7EB9, roughness: 0.4, metalness: 0.2 }) : \u9576\u8FB9\u6750;
+      for (const ky of [0.58, 0.3, 0.1]) {
+        const \u6263\u5757 = new Mesh(new BoxGeometry(0.145 * k, 0.085 * k, 0.036 * k), \u6A2A\u6263\u6750);
+        const kz = 0.265 + (0.64 - ky) * 0.09;
+        \u6263\u5757.position.set(0.01 * k, ky * k, kz * k);
+        \u6263\u5757.rotation.x = -0.14;
+        this.\u4E0A\u8EAB\u67A2.add(\u6263\u5757);
+      }
+      const \u9886\u5708\u7EC4 = new Group();
+      \u9886\u5708\u7EC4.position.set(0, 0.83 * k, 0.01 * k);
+      const \u5DE6\u659C\u9886 = new Mesh(new CylinderGeometry(0.185 * k, 0.215 * k, 0.155 * k, 12, 1, true, -0.3, Math.PI * 1.15), \u9576\u8FB9\u6750);
+      \u5DE6\u659C\u9886.rotation.y = 0.38;
+      \u5DE6\u659C\u9886.rotation.z = 0.06;
+      const \u53F3\u659C\u9886 = new Mesh(new CylinderGeometry(0.18 * k, 0.21 * k, 0.15 * k, 12, 1, true, Math.PI * 0.75, Math.PI * 1.15), \u9576\u8FB9\u6750);
+      \u53F3\u659C\u9886.rotation.y = -0.35;
+      \u53F3\u659C\u9886.rotation.z = -0.06;
+      \u9886\u5708\u7EC4.add(\u5DE6\u659C\u9886, \u53F3\u659C\u9886);
+      this.\u4E0A\u8EAB\u67A2.add(\u9886\u5708\u7EC4);
+      const \u7EB8\u8116\u5B50 = new Mesh(new CylinderGeometry(0.105 * k, 0.125 * k, 0.18 * k, 10), \u7EB8\u8138\u6750);
+      \u7EB8\u8116\u5B50.position.set(0, 0.86 * k, 0.01 * k);
+      this.\u4E0A\u8EAB\u67A2.add(\u7EB8\u8116\u5B50);
+      const \u9020\u624B\u81C2 = (sx, \u540D\u524D\u7F00) => {
+        const \u81C2\u67A2 = new Group();
+        \u81C2\u67A2.name = `${\u540D\u524D\u7F00}\u81C2\u67A2`;
+        \u81C2\u67A2.position.set(sx * 0.42 * k, 0.72 * k, 0.02 * k);
+        const \u4E0A\u8896 = new Mesh(new CylinderGeometry(0.115 * k, 0.165 * k, 0.36 * k, 8), \u84DD\u7EF8\u8902\u6750);
+        \u4E0A\u8896.scale.set(1.05, 1, 0.84);
+        \u4E0A\u8896.position.y = -0.17 * k;
+        \u4E0A\u8896.castShadow = true;
+        \u81C2\u67A2.add(\u4E0A\u8896);
+        const \u8098\u67A2 = new Group();
+        \u8098\u67A2.name = `${\u540D\u524D\u7F00}\u8098\u67A2`;
+        \u8098\u67A2.position.y = -0.34 * k;
+        \u81C2\u67A2.add(\u8098\u67A2);
+        const \u4E0B\u8896 = new Mesh(new CylinderGeometry(0.155 * k, 0.21 * k, 0.33 * k, 8, 1, true), \u84DD\u7EF8\u8902\u6750);
+        \u4E0B\u8896.scale.set(1.05, 1, 0.84);
+        \u4E0B\u8896.position.y = -0.155 * k;
+        \u4E0B\u8896.castShadow = true;
+        \u8098\u67A2.add(\u4E0B\u8896);
+        const \u8896\u6697 = new Mesh(new CircleGeometry(0.185 * k, 8), \u888D\u5185\u6697\u6750);
+        \u8896\u6697.rotation.x = Math.PI / 2;
+        \u8896\u6697.position.y = -0.18 * k;
+        \u8098\u67A2.add(\u8896\u6697);
+        const \u8896\u53E3\u7EB9 = \u56DE\u5B57\u7EB9 ? \u56DE\u5B57\u7EB9.clone() : null;
+        if (\u8896\u53E3\u7EB9) {
+          \u8896\u53E3\u7EB9.repeat.set(3, 1);
+          \u8896\u53E3\u7EB9.needsUpdate = true;
+        }
+        const \u8896\u53E3\u6750 = \u8896\u53E3\u7EB9 ? new MeshStandardMaterial({ color: 16777215, map: \u8896\u53E3\u7EB9, roughness: 0.42, metalness: 0.18, side: DoubleSide }) : \u9576\u8FB9\u6750;
+        const \u8896\u53E3\u8FB9 = new Mesh(new CylinderGeometry(0.196 * k, 0.214 * k, 0.085 * k, 8, 1, true), \u8896\u53E3\u6750);
+        \u8896\u53E3\u8FB9.scale.set(1.06, 1, 0.85);
+        \u8896\u53E3\u8FB9.position.y = -0.285 * k;
+        \u8098\u67A2.add(\u8896\u53E3\u8FB9);
+        const \u624B\u67A2 = new Group();
+        \u624B\u67A2.name = `${\u540D\u524D\u7F00}\u624B\u67A2`;
+        \u624B\u67A2.position.set(0, -0.31 * k, 0.02 * k);
+        \u624B\u67A2.rotation.y = sx * Math.PI * 0.42;
+        const \u7EB8\u624B\u7247 = new Mesh(\u521B\u5EFA\u526A\u7EB8\u624B\u638C\u51E0\u4F55(sx, 1.25 * k), \u767D\u7EB8\u677F\u6750);
+        \u7EB8\u624B\u7247.castShadow = true;
+        \u624B\u67A2.add(\u7EB8\u624B\u7247);
+        \u8098\u67A2.add(\u624B\u67A2);
+        this.\u4E0A\u8EAB\u67A2.add(\u81C2\u67A2);
+        return { \u81C2\u67A2, \u8098\u67A2, \u624B\u67A2 };
+      };
+      const \u5DE6\u81C2\u5BF9 = \u9020\u624B\u81C2(1, "\u5DE6");
+      const \u53F3\u81C2\u5BF9 = \u9020\u624B\u81C2(-1, "\u53F3");
+      this.\u5DE6\u81C2\u67A2 = \u5DE6\u81C2\u5BF9.\u81C2\u67A2;
+      this.\u5DE6\u8098\u67A2 = \u5DE6\u81C2\u5BF9.\u8098\u67A2;
+      this.\u5DE6\u624B\u67A2 = \u5DE6\u81C2\u5BF9.\u624B\u67A2;
+      this.\u53F3\u81C2\u67A2 = \u53F3\u81C2\u5BF9.\u81C2\u67A2;
+      this.\u53F3\u8098\u67A2 = \u53F3\u81C2\u5BF9.\u8098\u67A2;
+      this.\u53F3\u624B\u67A2 = \u53F3\u81C2\u5BF9.\u624B\u67A2;
+      this.\u9888\u67A2 = new Group();
+      this.\u9888\u67A2.name = "\u9888\u67A2";
+      this.\u9888\u67A2.position.set(0, 0.9 * k, 0.015 * k);
+      this.\u4E0A\u8EAB\u67A2.add(this.\u9888\u67A2);
+      this.\u5934\u67A2 = new Group();
+      this.\u5934\u67A2.name = "\u5934\u67A2";
+      this.\u5934\u67A2.position.set(0, 0.24 * k, 0.01 * k);
+      this.\u9888\u67A2.add(this.\u5934\u67A2);
+      const \u8138\u86CB = new Mesh(new SphereGeometry(0.305 * k, 24, 20), \u7EB8\u8138\u6750);
+      \u8138\u86CB.scale.set(0.88, 1.15, 0.86);
+      \u8138\u86CB.castShadow = true;
+      this.\u5934\u67A2.add(\u8138\u86CB);
+      const \u9F3B\u6881 = new Mesh(new CylinderGeometry(0.014 * k, 0.034 * k, 0.125 * k, 6), \u7EB8\u8138\u6750);
+      \u9F3B\u6881.position.set(0, -2e-3 * k, 0.258 * k);
+      \u9F3B\u6881.rotation.x = -0.22;
+      const \u9F3B\u5C16 = new Mesh(new SphereGeometry(0.026 * k, 10, 8), \u7EB8\u8138\u6750);
+      \u9F3B\u5C16.scale.set(0.9, 0.85, 1.15);
+      \u9F3B\u5C16.position.set(0, -0.056 * k, 0.276 * k);
+      this.\u5934\u67A2.add(\u9F3B\u6881, \u9F3B\u5C16);
+      const \u5DE6\u8033 = new Mesh(\u521B\u5EFA\u526A\u7EB8\u8033\u6735\u51E0\u4F55(1, 1.05 * k), \u767D\u7EB8\u677F\u6750);
+      \u5DE6\u8033.position.set(0.248 * k, -0.02 * k, -0.01 * k);
+      \u5DE6\u8033.rotation.y = -0.28;
+      \u5DE6\u8033.castShadow = true;
+      const \u53F3\u8033 = new Mesh(\u521B\u5EFA\u526A\u7EB8\u8033\u6735\u51E0\u4F55(-1, 1.05 * k), \u767D\u7EB8\u677F\u6750);
+      \u53F3\u8033.position.set(-0.248 * k, -0.02 * k, -0.01 * k);
+      \u53F3\u8033.rotation.y = 0.28;
+      \u53F3\u8033.castShadow = true;
+      this.\u5934\u67A2.add(\u5DE6\u8033, \u53F3\u8033);
+      const \u9020\u773C\u775B = (sx, \u540D) => {
+        const \u773C\u7A9D = new Group();
+        \u773C\u7A9D.name = `${\u540D}\u773C\u7EC4`;
+        \u773C\u7A9D.position.set(sx * 0.114 * k, 0.038 * k, 0.232 * k);
+        \u773C\u7A9D.rotation.y = sx * 0.26;
+        \u773C\u7A9D.rotation.z = sx * -0.05;
+        const \u773C\u767D = new Mesh(new SphereGeometry(0.088 * k, 16, 14), \u74F7\u767D\u773C\u6750);
+        \u773C\u767D.scale.set(1.2, 0.78, 0.38);
+        \u773C\u7A9D.add(\u773C\u767D);
+        const \u4E0A\u773C\u7EBF = new Mesh(
+          new TorusGeometry(0.088 * k, 0.011 * k, 6, 18, Math.PI * 0.96),
+          \u6F06\u9ED1\u773C\u7EBF\u6750
+        );
+        \u4E0A\u773C\u7EBF.scale.set(1.2, 0.8, 0.5);
+        \u4E0A\u773C\u7EBF.position.set(0, 4e-3 * k, 0.012 * k);
+        \u773C\u7A9D.add(\u4E0A\u773C\u7EBF);
+        const \u4E0B\u773C\u7EBF = new Mesh(
+          new TorusGeometry(0.086 * k, 68e-4 * k, 6, 16, Math.PI * 0.88),
+          \u6F06\u9ED1\u773C\u7EBF\u6750
+        );
+        \u4E0B\u773C\u7EBF.rotation.z = Math.PI * 1.06;
+        \u4E0B\u773C\u7EBF.scale.set(1.16, 0.68, 0.44);
+        \u4E0B\u773C\u7EBF.position.set(0, -3e-3 * k, 0.012 * k);
+        \u773C\u7A9D.add(\u4E0B\u773C\u7EBF);
+        const \u773C\u5C3E\u6311 = new Mesh(new BoxGeometry(0.038 * k, 0.01 * k, 0.01 * k), \u6F06\u9ED1\u773C\u7EBF\u6750);
+        \u773C\u5C3E\u6311.position.set(sx * 0.102 * k, 0.011 * k, 6e-3 * k);
+        \u773C\u5C3E\u6311.rotation.z = sx * 0.42;
+        \u773C\u7A9D.add(\u773C\u5C3E\u6311);
+        const \u77B3\u67A2 = new Group();
+        \u77B3\u67A2.name = `${\u540D}\u77B3\u67A2`;
+        \u77B3\u67A2.position.set(0, 0, 0.028 * k);
+        const \u77B3\u4EC1 = new Mesh(new SphereGeometry(0.044 * k, 14, 12), \u9ED1\u77B3\u4EC1\u6750);
+        \u77B3\u4EC1.scale.set(0.95, 1, 0.3);
+        \u77B3\u67A2.add(\u77B3\u4EC1);
+        const \u9488\u70B9\u5149 = new Mesh(new SphereGeometry(0.011 * k, 6, 6), \u773C\u9AD8\u5149\u6750);
+        \u9488\u70B9\u5149.position.set(0.015 * k, 0.016 * k, 0.013 * k);
+        \u77B3\u67A2.add(\u9488\u70B9\u5149);
+        \u773C\u7A9D.add(\u77B3\u67A2);
+        const \u4E0A\u7751 = new Mesh(
+          new SphereGeometry(0.093 * k, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.48),
+          \u7EB8\u8138\u6750
+        );
+        \u4E0A\u7751.scale.set(1.18, 0.82, 0.44);
+        \u4E0A\u7751.rotation.x = -0.92;
+        \u773C\u7A9D.add(\u4E0A\u7751);
+        this.\u5934\u67A2.add(\u773C\u7A9D);
+        return { \u77B3\u67A2, \u4E0A\u7751 };
+      };
+      const \u5DE6\u773C\u5BF9 = \u9020\u773C\u775B(1, "\u5DE6");
+      const \u53F3\u773C\u5BF9 = \u9020\u773C\u775B(-1, "\u53F3");
+      this.\u5DE6\u76EE\u77B3\u67A2 = \u5DE6\u773C\u5BF9.\u77B3\u67A2;
+      this.\u53F3\u76EE\u77B3\u67A2 = \u53F3\u773C\u5BF9.\u77B3\u67A2;
+      this.\u5DE6\u4E0A\u7751 = \u5DE6\u773C\u5BF9.\u4E0A\u7751;
+      this.\u53F3\u4E0A\u7751 = \u53F3\u773C\u5BF9.\u4E0A\u7751;
+      const \u9020\u7709\u6BDB = (sx, \u540D) => {
+        const \u7709\u67A2 = new Group();
+        \u7709\u67A2.name = `${\u540D}\u7709\u67A2`;
+        \u7709\u67A2.position.set(sx * 0.114 * k, 0.132 * k, 0.232 * k);
+        \u7709\u67A2.rotation.y = sx * 0.24;
+        const \u7709\u5F13 = new Mesh(
+          new TorusGeometry(0.086 * k, 0.01 * k, 6, 14, Math.PI * 0.68),
+          \u6F06\u9ED1\u773C\u7EBF\u6750
+        );
+        \u7709\u5F13.rotation.z = Math.PI * 0.16 + sx * 0.06;
+        \u7709\u5F13.scale.set(1.08, 0.52, 0.45);
+        \u7709\u67A2.add(\u7709\u5F13);
+        this.\u5934\u67A2.add(\u7709\u67A2);
+        return \u7709\u67A2;
+      };
+      this.\u5DE6\u7709\u67A2 = \u9020\u7709\u6BDB(1, "\u5DE6");
+      this.\u53F3\u7709\u67A2 = \u9020\u7709\u6BDB(-1, "\u53F3");
+      const \u5634\u7EC4 = new Group();
+      \u5634\u7EC4.name = "\u7EA2\u5507\u5634\u7EC4";
+      \u5634\u7EC4.position.set(0, -0.152 * k, 0.246 * k);
+      const \u5DE6\u5507\u5CF0 = new Mesh(new SphereGeometry(0.038 * k, 12, 10), \u6731\u7EA2\u5507\u6750);
+      \u5DE6\u5507\u5CF0.scale.set(1.22, 0.78, 0.52);
+      \u5DE6\u5507\u5CF0.position.set(0.026 * k, 0.017 * k, 0);
+      \u5DE6\u5507\u5CF0.rotation.z = 0.24;
+      const \u53F3\u5507\u5CF0 = new Mesh(new SphereGeometry(0.038 * k, 12, 10), \u6731\u7EA2\u5507\u6750);
+      \u53F3\u5507\u5CF0.scale.set(1.22, 0.78, 0.52);
+      \u53F3\u5507\u5CF0.position.set(-0.026 * k, 0.017 * k, 0);
+      \u53F3\u5507\u5CF0.rotation.z = -0.24;
+      this.\u53E3\u7F1D\u6846 = new Mesh(new BoxGeometry(0.105 * k, 0.012 * k, 0.018 * k), \u53E3\u7F1D\u6697\u6750);
+      this.\u53E3\u7F1D\u6846.position.set(0, 2e-3 * k, 8e-3 * k);
+      this.\u4E0B\u5507\u74E3 = new Mesh(new SphereGeometry(0.044 * k, 12, 10), \u6731\u7EA2\u5507\u6750);
+      this.\u4E0B\u5507\u74E3.scale.set(1.36, 0.8, 0.54);
+      this.\u4E0B\u5507\u74E3.position.set(0, -0.014 * k, 0);
+      \u5634\u7EC4.add(\u5DE6\u5507\u5CF0, \u53F3\u5507\u5CF0, this.\u53E3\u7F1D\u6846, this.\u4E0B\u5507\u74E3);
+      this.\u5934\u67A2.add(\u5634\u7EC4);
+      const \u53D1\u7EC4 = new Group();
+      \u53D1\u7EC4.name = "\u9ED1\u7EB8\u53D1\u51A0";
+      const \u53D1\u5E3D\u58F3 = new Mesh(
+        new SphereGeometry(0.312 * k, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.32),
+        \u9ED1\u76B1\u53D1\u6750
+      );
+      \u53D1\u5E3D\u58F3.scale.set(0.9, 1.15, 0.89);
+      \u53D1\u5E3D\u58F3.position.set(0, 0.08 * k, -0.01 * k);
+      \u53D1\u5E3D\u58F3.rotation.x = -0.22;
+      \u53D1\u5E3D\u58F3.castShadow = true;
+      \u53D1\u7EC4.add(\u53D1\u5E3D\u58F3);
+      const \u9876\u6298\u51A0 = new Mesh(new CylinderGeometry(0.145 * k, 0.25 * k, 0.155 * k, 6), \u9ED1\u76B1\u53D1\u6750);
+      \u9876\u6298\u51A0.scale.set(1.06, 1, 0.74);
+      \u9876\u6298\u51A0.position.set(0, 0.375 * k, -0.03 * k);
+      \u9876\u6298\u51A0.castShadow = true;
+      \u53D1\u7EC4.add(\u9876\u6298\u51A0);
+      const \u540E\u8111\u53D1 = new Mesh(
+        new CylinderGeometry(0.255 * k, 0.225 * k, 0.36 * k, 10, 1, false, Math.PI * 0.6, Math.PI * 0.8),
+        \u9ED1\u76B1\u53D1\u6750
+      );
+      \u540E\u8111\u53D1.scale.set(0.94, 1, 0.88);
+      \u540E\u8111\u53D1.position.set(0, -0.08 * k, -0.04 * k);
+      \u540E\u8111\u53D1.castShadow = true;
+      \u53D1\u7EC4.add(\u540E\u8111\u53D1);
+      const \u5C16\u9F7F\u51E0 = new ConeGeometry(0.022 * k, 0.052 * k, 3);
+      for (let i = 0; i < 11; i++) {
+        const u = (i - 5) / 5;
+        const ang = u * 0.76;
+        const \u9F7F = new Mesh(\u5C16\u9F7F\u51E0, \u9ED1\u76B1\u53D1\u6750);
+        const \u957F\u504F = 0.82 + i * 7 % 4 * 0.14;
+        \u9F7F.scale.set(1, \u957F\u504F, 0.45);
+        \u9F7F.rotation.x = Math.PI + 0.18;
+        \u9F7F.rotation.z = -ang * 0.24;
+        \u9F7F.rotation.y = ang;
+        \u9F7F.position.set(Math.sin(ang) * 0.236 * k, 0.254 * k - Math.abs(u) * 0.015 * k, Math.cos(ang) * 0.214 * k);
+        \u53D1\u7EC4.add(\u9F7F);
+      }
+      this.\u5934\u67A2.add(\u53D1\u7EC4);
+      this.\u7729\u6655\u7B26\u73AF = new Group();
+      this.\u7729\u6655\u7B26\u73AF.position.set(0, 0.45 * k, 0);
+      this.\u7729\u6655\u7B26\u73AF.visible = false;
+      const \u9EC4\u7B26\u51E0 = new BoxGeometry(0.075 * k, 0.17 * k, 0.012 * k);
+      const \u9EC4\u7B26\u6750 = new MeshBasicMaterial({ color: 16436245, side: DoubleSide });
+      const \u6731\u7802\u6750 = new MeshBasicMaterial({ color: 14427686 });
+      for (let i = 0; i < 4; i++) {
+        const a = i * Math.PI / 2;
+        const \u7B26\u7EC4 = new Group();
+        \u7B26\u7EC4.position.set(Math.cos(a) * 0.36 * k, 0, Math.sin(a) * 0.36 * k);
+        \u7B26\u7EC4.rotation.y = -a;
+        \u7B26\u7EC4.rotation.z = 0.18;
+        const \u7B26\u7EB8 = new Mesh(\u9EC4\u7B26\u51E0, \u9EC4\u7B26\u6750);
+        const \u6731\u753B = new Mesh(new BoxGeometry(0.028 * k, 0.1 * k, 0.016 * k), \u6731\u7802\u6750);
+        \u7B26\u7EC4.add(\u7B26\u7EB8, \u6731\u753B);
+        this.\u7729\u6655\u7B26\u73AF.add(\u7B26\u7EC4);
+      }
+      this.\u6807\u8BB0\u975E\u5BFC\u51FA\u7279\u6548(this.\u7729\u6655\u7B26\u73AF);
+      this.\u5934\u67A2.add(this.\u7729\u6655\u7B26\u73AF);
+      this.\u5E7D\u706B\u7FA4 = [];
+      const \u5E7D\u706B\u51E0 = new OctahedronGeometry(0.055 * k, 0);
+      for (let i = 0; i < 6; i++) {
+        const \u6750 = new MeshBasicMaterial({
+          color: i % 2 === 0 ? 3003583 : 6809849,
+          transparent: true,
+          opacity: 0,
+          blending: AdditiveBlending,
+          depthWrite: false
+        });
+        const \u7403 = new Mesh(\u5E7D\u706B\u51E0, \u6750);
+        \u7403.visible = false;
+        this.\u6807\u8BB0\u975E\u5BFC\u51FA\u7279\u6548(\u7403);
+        this.\u6D6E\u8EAB\u67A2.add(\u7403);
+        this.\u5E7D\u706B\u7FA4.push({
+          \u7F51\u683C: \u7403,
+          \u6750\u8D28: \u6750,
+          \u76F8\u4F4D: i * (Math.PI * 2 / 6),
+          \u534A\u5F84: (0.58 + i % 3 * 0.14) * k,
+          \u9AD8\u504F: (0.55 + i % 3 * 0.45) * k,
+          \u901F\u7387: 2.2 + i % 2 * 0.9
+        });
+      }
+      this.\u6B8B\u5F71\u961F\u5217 = [];
+      const \u5F71\u888D\u51E0 = new CylinderGeometry(0.28 * k, 0.42 * k, 0.84 * k, 8);
+      const \u5F71\u5934\u51E0 = new SphereGeometry(0.29 * k, 10, 8);
+      for (let i = 0; i < 8; i++) {
+        const \u7EC4 = new Group();
+        const \u888D\u6750 = new MeshBasicMaterial({ color: 1920728, transparent: true, opacity: 0, depthWrite: false });
+        const \u5934\u6750 = new MeshBasicMaterial({ color: 6809849, transparent: true, opacity: 0, depthWrite: false });
+        const \u5F71\u888D = new Mesh(\u5F71\u888D\u51E0, \u888D\u6750);
+        \u5F71\u888D.position.y = 1.24 * k;
+        \u5F71\u888D.scale.set(1.06, 1, 0.72);
+        const \u5F71\u5934 = new Mesh(\u5F71\u5934\u51E0, \u5934\u6750);
+        \u5F71\u5934.position.y = 2.02 * k;
+        \u5F71\u5934.scale.set(0.88, 1.14, 0.86);
+        \u7EC4.add(\u5F71\u888D, \u5F71\u5934);
+        \u7EC4.visible = false;
+        this.\u6807\u8BB0\u975E\u5BFC\u51FA\u7279\u6548(\u7EC4);
+        this.\u6A21\u578B\u7EC4.add(\u7EC4);
+        this.\u6B8B\u5F71\u961F\u5217.push({
+          \u7EC4,
+          \u888D\u6750,
+          \u5934\u6750,
+          \u4E16\u754C\u5750\u6807: new Vector3(),
+          \u4E16\u754C\u56DB\u5143\u6570: new Quaternion(),
+          \u603B\u7F29\u653E: new Vector3(1, 1, 1),
+          \u540E\u79FB\u65B9\u5411: new Vector3(0, 0, -1),
+          \u5B58\u6D3B\u65F6\u95F4: 99,
+          \u5BFF\u547D: 0.28
+        });
+      }
+      this.\u5C3E\u6C14\u6302\u70B9\u7EC4 = [];
+      for (const sx of [-1, 1]) {
+        const \u55B7\u70B9 = new Object3D();
+        \u55B7\u70B9.position.set(sx * 0.24 * k, 0.88 * k, -0.34 * k);
+        this.\u6D6E\u8EAB\u67A2.add(\u55B7\u70B9);
+        this.\u5C3E\u6C14\u6302\u70B9\u7EC4.push(\u55B7\u70B9);
+      }
+      const \u7A7A\u89E6\u70B9 = new Object3D();
+      this.\u603B\u67A2.add(\u7A7A\u89E6\u70B9);
+      this.\u6F02\u79FB\u89E6\u70B9\u7EC4 = [
+        {
+          \u952E\u540E\u7F00: "paperboy-none",
+          \u6302\u70B9: \u7A7A\u89E6\u70B9,
+          \u8D34\u5730: false,
+          \u5BBD: 0,
+          \u8F68\u8272: [0, 0, 0],
+          \u70DF\u8272: [0, 0, 0],
+          \u70DF\u8D77\u5927: 0,
+          \u70DF\u7EC8\u5927: 0,
+          \u70DF\u9891: 0,
+          \u70DF\u6D53: 0,
+          \u6709\u706B\u82B1: false,
+          \u4E16\u754C\u5750\u6807: new Vector3()
+        }
+      ];
+    }
+    \u66F4\u65B0(\u65F6\u95F4, \u589E\u91CF, \u901F\u5EA6 = 0, \u8F6C\u5411\u89D2 = 0, \u73AF\u5883) {
+      const t = \u65F6\u95F4;
+      const dt = Math.min(0.05, Math.max(1e-3, \u589E\u91CF || 0.016));
+      const k = Number(this.\u53C2\u6570.\u4F53\u683C\u5927\u5C0F) || 1;
+      const \u6D6E\u9AD8\u500D = Number(this.\u53C2\u6570.\u60AC\u6D6E\u9AD8\u5EA6) || 1;
+      const \u72E0\u5EA6 = Number(this.\u53C2\u6570.\u6B6A\u5934\u72E0\u5EA6) || 1;
+      this.\u52A8\u4F5C\u8BA1\u65F6 += dt;
+      const \u60EF\u6027\u6001 = this.\u60EF\u6027.\u66F4\u65B0(t, dt, \u901F\u5EA6, \u8F6C\u5411\u89D2, this.\u5F53\u524D\u52A8\u4F5C, \u73AF\u5883);
+      const \u4FA7\u504F = \u60EF\u6027\u6001.\u6709\u6548\u4FA7\u504F;
+      const \u6709\u6548\u901F\u5EA6 = \u60EF\u6027\u6001.\u6709\u6548\u901F\u5EA6;
+      const \u901F\u5EA6\u6BD4 = Math.min(2, Math.abs(\u6709\u6548\u901F\u5EA6) / 36);
+      const \u662F\u5F85\u673A = this.\u5F53\u524D\u52A8\u4F5C === "\u5F85\u673A";
+      const \u662F\u884C\u8D70 = this.\u5F53\u524D\u52A8\u4F5C === "\u884C\u8D70";
+      const \u662F\u5927\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5927\u52A0\u901F";
+      const \u662F\u53CC\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u4E2D\u52A0\u901F";
+      const \u662F\u5C0F\u55B7 = this.\u5F53\u524D\u52A8\u4F5C === "\u5C0F\u52A0\u901F";
+      const \u52A0\u901F\u4E2D = \u662F\u5927\u55B7 || \u662F\u53CC\u55B7 || \u662F\u5C0F\u55B7;
+      const \u662F\u6025\u5239 = this.\u5F53\u524D\u52A8\u4F5C === "\u6025\u505C";
+      const \u662F\u6253\u6655 = this.\u5F53\u524D\u52A8\u4F5C === "\u7729\u6655";
+      const \u662F\u649E\u8F66 = this.\u5F53\u524D\u52A8\u4F5C === "\u5931\u63A7";
+      const \u662F\u51B2\u7EBF = this.\u5F53\u524D\u52A8\u4F5C === "\u5E86\u795D";
+      const \u662F\u5632\u8BBD = this.\u5F53\u524D\u52A8\u4F5C === "\u5632\u8BBD";
+      const \u662F\u7B11\u8BDD = this.\u5F53\u524D\u52A8\u4F5C === "\u7B11\u8BDD";
+      const \u662F\u8DF3\u821E = this.\u5F53\u524D\u52A8\u4F5C === "\u8DF3\u821E";
+      const \u662F\u98DE\u5929 = this.\u5F53\u524D\u52A8\u4F5C === "\u6EDE\u7A7A";
+      const \u662F\u5DE6\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u653B\u51FB";
+      const \u662F\u53F3\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u653B\u51FB";
+      const \u662F\u666E\u653B = this.\u5F53\u524D\u52A8\u4F5C === "\u666E\u901A\u653B\u51FB";
+      const \u662F\u653B\u51FB = \u662F\u5DE6\u653B || \u662F\u53F3\u653B || \u662F\u666E\u653B;
+      const \u662F\u590D\u4F4D = this.\u5F53\u524D\u52A8\u4F5C === "\u590D\u6D3B";
+      const \u662F\u6B7B\u4EA1 = this.\u5F53\u524D\u52A8\u4F5C === "\u6B7B\u4EA1";
+      const \u662F\u541F\u5531 = this.\u5F53\u524D\u52A8\u4F5C === "\u541F\u5531";
+      const \u662F\u5DE6\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u5DE6\u62D0";
+      const \u662F\u53F3\u62D0 = this.\u5F53\u524D\u52A8\u4F5C === "\u53F3\u62D0";
+      const \u653B\u5411 = \u662F\u5DE6\u653B ? 1 : \u662F\u53F3\u653B ? -1 : 0;
+      const \u6B7B\u6001 = \u662F\u6B7B\u4EA1 ? \u8BA1\u7B97\u6B7B\u4EA1\u8FDB\u5EA6(this.\u52A8\u4F5C\u8BA1\u65F6, 1.05) : null;
+      const \u73AF\u89C6 = \u662F\u5F85\u673A ? \u8BA1\u7B97\u5F85\u673A\u73AF\u89C6(t) : null;
+      const \u590D\u76F8 = \u662F\u590D\u4F4D ? \u73AF\u5883?.\u590D\u4F4D\u8FDB\u5EA6 !== void 0 ? \u73AF\u5883.\u590D\u4F4D\u8FDB\u5EA6 : this.\u52A8\u4F5C\u8BA1\u65F6 % 1.15 / 1.15 : 0;
+      const \u6709\u6C28\u6C14 = \u73AF\u5883?.\u662F\u5426\u6C28\u6C14 !== void 0 ? !!\u73AF\u5883.\u662F\u5426\u6C28\u6C14 : \u662F\u5927\u55B7 || \u662F\u53CC\u55B7;
+      const \u91CD\u521B = this.\u6B65\u8FDB\u91CD\u521B\u72B6\u6001(dt);
+      if (!\u662F\u6B7B\u4EA1) {
+        this.\u626D\u5934\u8109\u51B2\u8BA1\u65F6 -= dt;
+        if (this.\u626D\u5934\u8109\u51B2\u8BA1\u65F6 <= 0) {
+          this.\u626D\u5934\u8109\u51B2\u8BA1\u65F6 = 1.65 + (Math.sin(t * 9.3) + 1) * 0.5 * 1.85;
+          const \u62BD\u53F7 = Math.sin(t * 17.7);
+          this.\u76EE\u6807\u602A\u5F02\u626D\u5934 = \u62BD\u53F7 * 0.24 * \u72E0\u5EA6;
+          this.\u76EE\u6807\u602A\u5F02\u6B6A\u5934 = (\u62BD\u53F7 > 0 ? 1 : -1) * (0.28 + Math.abs(Math.cos(t * 7.1)) * 0.26) * \u72E0\u5EA6;
+        }
+        const \u9888\u7D27\u5EA6 = 1 - Math.exp(-26 * dt);
+        this.\u5F53\u524D\u626D\u5934 += (this.\u76EE\u6807\u602A\u5F02\u626D\u5934 - this.\u5F53\u524D\u626D\u5934) * \u9888\u7D27\u5EA6;
+        this.\u5F53\u524D\u6B6A\u5934 += (this.\u76EE\u6807\u602A\u5F02\u6B6A\u5934 - this.\u5F53\u524D\u6B6A\u5934) * \u9888\u7D27\u5EA6;
+        this.\u7728\u773C\u5012\u8BA1\u65F6 -= dt;
+        if (this.\u7728\u773C\u5012\u8BA1\u65F6 <= 0) {
+          this.\u7728\u773C\u4F59\u65F6 = 0.16;
+          this.\u7728\u773C\u5012\u8BA1\u65F6 = 3.2 + (Math.sin(t * 4.3) + 1) * 0.5 * 2.4;
+        }
+        if (this.\u7728\u773C\u4F59\u65F6 > 0) this.\u7728\u773C\u4F59\u65F6 = Math.max(0, this.\u7728\u773C\u4F59\u65F6 - dt);
+      }
+      const \u62BD\u7728\u5DE6 = !\u662F\u6B7B\u4EA1 && this.\u7728\u773C\u4F59\u65F6 > 0.04 ? Math.sin((this.\u7728\u773C\u4F59\u65F6 - 0.04) / 0.12 * Math.PI) : 0;
+      const \u62BD\u7728\u53F3 = !\u662F\u6B7B\u4EA1 && this.\u7728\u773C\u4F59\u65F6 > 0 && this.\u7728\u773C\u4F59\u65F6 < 0.13 ? Math.sin(this.\u7728\u773C\u4F59\u65F6 / 0.13 * Math.PI) : 0;
+      let \u6D6E\u9AD8 = (0.28 + Math.sin(t * 2.1) * 0.055) * \u6D6E\u9AD8\u500D;
+      let \u4F53\u4EF0X = 0;
+      let \u4F53\u6B6AZ = 0;
+      let \u4F53\u504FY = 0;
+      let \u8EAF\u5E72\u538BY = 1;
+      let \u8EAF\u5E72\u80D6XZ = 1;
+      let \u5934\u504FY = 0;
+      let \u5934\u4EF0X = 0;
+      let \u5934\u6B6AZ = 0;
+      let \u77B3\u770BX = \u4FA7\u504F * 0.35;
+      let \u77B3\u770BY = 0;
+      let \u5DE6\u95ED = Math.max(0, \u62BD\u7728\u5DE6) * 0.72;
+      let \u53F3\u95ED = Math.max(0, \u62BD\u7728\u53F3) * 0.72;
+      let \u5F20\u5634 = 0;
+      let \u7709\u6311 = 0;
+      let \u5DE6\u81C2X = 0.06;
+      let \u5DE6\u81C2Z = 0.11;
+      let \u5DE6\u81C2Y = 0;
+      let \u5DE6\u8098X = -0.06;
+      let \u53F3\u81C2X = 0.06;
+      let \u53F3\u81C2Z = -0.11;
+      let \u53F3\u81C2Y = 0;
+      let \u53F3\u8098X = -0.06;
+      const \u98CE\u5439\u817F\u4EF0 = \u662F\u5F85\u673A || \u662F\u6B7B\u4EA1 ? 0 : Math.min(0.46, \u901F\u5EA6\u6BD4 * 0.28);
+      const \u817F\u5FAE\u6446 = \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5F85\u673A ? 0.015 : 0.06;
+      const \u819D\u5FAE\u6446 = \u662F\u6B7B\u4EA1 ? 0 : \u662F\u5F85\u673A ? 0.012 : 0.05;
+      let \u5DE6\u817FX = \u98CE\u5439\u817F\u4EF0 + Math.sin(t * 2.4) * \u817F\u5FAE\u6446;
+      let \u5DE6\u817FZ = 0.04;
+      let \u5DE6\u819DX = 0.08 + Math.sin(t * 2.4 - 0.6) * \u819D\u5FAE\u6446;
+      let \u53F3\u817FX = \u98CE\u5439\u817F\u4EF0 - Math.sin(t * 2.4) * \u817F\u5FAE\u6446;
+      let \u53F3\u817FZ = -0.04;
+      let \u53F3\u819DX = 0.08 - Math.sin(t * 2.4 - 0.6) * \u819D\u5FAE\u6446;
+      let \u653B\u8F68\u8FF9\u8FDB = 0;
+      let \u663E\u793A\u5E7D\u706B = false;
+      let \u5E7D\u706B\u5F3A = 0;
+      if (!\u662F\u51B2\u7EBF) this.\u5E86\u795D\u81EA\u8F6C\u89D2 = 0;
+      if (\u91CD\u521B.\u6FC0\u6D3B) {
+        \u6D6E\u9AD8 = 0.22 * \u6D6E\u9AD8\u500D + Math.abs(\u91CD\u521B.\u9707\u6CE2) * 0.08;
+        \u4F53\u6B6AZ = \u91CD\u521B.\u63A8\u5411 * 0.38 * \u91CD\u521B.\u5305\u7EDC;
+        \u4F53\u4EF0X = -0.22 * \u91CD\u521B.\u5305\u7EDC;
+        \u8EAF\u5E72\u538BY = Math.max(0.76, 1 - \u91CD\u521B.\u6241\u538B * 0.24);
+        \u8EAF\u5E72\u80D6XZ = 1 + \u91CD\u521B.\u6241\u538B * 0.22;
+        \u5934\u6B6AZ = -\u91CD\u521B.\u63A8\u5411 * 0.62 * \u91CD\u521B.\u5305\u7EDC;
+        \u5934\u4EF0X = -0.28 * \u91CD\u521B.\u5305\u7EDC;
+        \u5DE6\u81C2Z = 0.65 * \u91CD\u521B.\u5305\u7EDC;
+        \u53F3\u81C2Z = -0.65 * \u91CD\u521B.\u5305\u7EDC;
+        \u5DE6\u817FX = -0.18 * \u91CD\u521B.\u5305\u7EDC;
+        \u53F3\u817FX = 0.26 * \u91CD\u521B.\u5305\u7EDC;
+        \u5F20\u5634 = 0.45 * \u91CD\u521B.\u5305\u7EDC;
+      } else if (\u662F\u6B7B\u4EA1 && \u6B7B\u6001) {
+        const d = \u6B7B\u6001.\u5012\u4E0B;
+        const hit = \u6B7B\u6001.\u53D7\u51FB\u9707;
+        const b = \u6B7B\u6001.\u7838\u5730\u5F39;
+        const tw = \u6B7B\u6001.\u62BD\u6410;
+        \u6D6E\u9AD8 = 0.28 * \u6D6E\u9AD8\u500D * (1 - d) + 0.34 * d + b * 0.16;
+        \u4F53\u4EF0X = 0.22 * hit - Math.PI * 0.46 * d + b * 0.14;
+        \u4F53\u6B6AZ = -0.1 * hit + 0.14 * d + tw * 0.04;
+        \u8EAF\u5E72\u538BY = 1 - 0.12 * d - b * 0.08;
+        \u8EAF\u5E72\u80D6XZ = 1 + 0.14 * d + b * 0.08;
+        \u5934\u504FY = 0.48 * d + tw * 0.05;
+        \u5934\u6B6AZ = -0.22 * hit + 0.56 * d + tw * 0.06;
+        \u5934\u4EF0X = -0.18 * hit + 0.24 * d;
+        \u77B3\u770BX = 0.45 * d;
+        \u5DE6\u95ED = 0.78 * d;
+        \u53F3\u95ED = 0.92 * d;
+        \u5F20\u5634 = 0.55 * d + 0.25 * hit;
+        \u5DE6\u81C2X = 0.06 * (1 - d) - 0.45 * d - 0.35 * hit;
+        \u5DE6\u81C2Z = 0.11 * (1 - d) + 0.92 * d + 0.35 * hit + tw * 0.06;
+        \u5DE6\u8098X = -0.06 * (1 - d) - 0.25 * d;
+        \u53F3\u81C2X = 0.06 * (1 - d) - 0.22 * d - 0.35 * hit;
+        \u53F3\u81C2Z = -0.11 * (1 - d) - 1.18 * d - 0.35 * hit - tw * 0.06;
+        \u53F3\u8098X = -0.06 * (1 - d) - 0.15 * d;
+        \u5DE6\u817FX = 0.06 * d;
+        \u5DE6\u817FZ = 0.04 * (1 - d) + 0.18 * d;
+        \u5DE6\u819DX = 0.08 * (1 - d) + 0.12 * d;
+        \u53F3\u817FX = -0.05 * d;
+        \u53F3\u817FZ = -0.04 * (1 - d) - 0.22 * d;
+        \u53F3\u819DX = 0.08 * (1 - d) + 0.18 * d;
+      } else if (\u662F\u541F\u5531) {
+        \u663E\u793A\u5E7D\u706B = true;
+        \u5E7D\u706B\u5F3A = 0.92;
+        const \u5492\u6446 = Math.sin(t * 2.8);
+        \u6D6E\u9AD8 = (0.58 + Math.sin(t * 2.2) * 0.09) * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = -0.14;
+        \u4F53\u6B6AZ = \u5492\u6446 * 0.08;
+        \u5934\u6B6AZ = (0.44 + Math.sin(t * 1.4) * 0.14) * \u72E0\u5EA6;
+        \u5934\u4EF0X = -0.32 + Math.sin(t * 3) * 0.08;
+        \u5934\u504FY = Math.sin(t * 1.1) * 0.26;
+        \u77B3\u770BY = 0.35;
+        \u5DE6\u95ED = 0.06;
+        \u53F3\u95ED = 0.22;
+        \u7709\u6311 = 0.42;
+        \u5F20\u5634 = 0.28 + Math.abs(Math.sin(t * 6.5)) * 0.46;
+        \u5DE6\u81C2X = -2.42 + Math.sin(t * 4.2) * 0.12;
+        \u5DE6\u81C2Z = 0.34;
+        \u5DE6\u8098X = -0.32;
+        \u53F3\u81C2X = -2.42 - Math.sin(t * 4.2) * 0.12;
+        \u53F3\u81C2Z = -0.34;
+        \u53F3\u8098X = -0.32;
+        \u5DE6\u817FX = 0.16 + Math.sin(t * 2.6) * 0.08;
+        \u53F3\u817FX = 0.16 - Math.sin(t * 2.6) * 0.08;
+      } else if (\u662F\u590D\u4F4D) {
+        const \u964D = \u5E73\u6ED1\u9636\u8DC3(0, 1, \u590D\u76F8);
+        \u6D6E\u9AD8 = (1.35 * (1 - \u964D) + 0.28) * \u6D6E\u9AD8\u500D;
+        \u4F53\u504FY = (1 - \u964D) * Math.PI * 2;
+        \u4F53\u4EF0X = (1 - \u964D) * 0.36;
+        \u5934\u6B6AZ = (1 - \u964D) * 0.58 * \u72E0\u5EA6;
+        \u5DE6\u81C2Z = 0.12 + (1 - \u964D) * 1.15;
+        \u53F3\u81C2Z = -0.12 - (1 - \u964D) * 1.15;
+        \u5DE6\u817FX = (1 - \u964D) * 0.45;
+        \u53F3\u817FX = (1 - \u964D) * 0.35;
+      } else if (\u662F\u653B\u51FB) {
+        const \u653B\u76F801 = \u73AF\u5883 ? Math.min(1, this.\u52A8\u4F5C\u8BA1\u65F6 / 0.48) : this.\u52A8\u4F5C\u8BA1\u65F6 % 0.72 / 0.72;
+        \u653B\u8F68\u8FF9\u8FDB = \u653B\u76F801;
+        \u663E\u793A\u5E7D\u706B = \u653B\u76F801 > 0.16 && \u653B\u76F801 < 0.85;
+        \u5E7D\u706B\u5F3A = 0.78;
+        \u6D6E\u9AD8 = 0.34 * \u6D6E\u9AD8\u500D;
+        const \u84C4 = \u653B\u76F801 < 0.24 ? \u5E73\u6ED1\u9636\u8DC3(0, 0.24, \u653B\u76F801) : 0;
+        const \u65A9 = \u653B\u76F801 >= 0.24 && \u653B\u76F801 < 0.72 ? \u5E73\u6ED1\u9636\u8DC3(0.24, 0.42, \u653B\u76F801) : 0;
+        const \u6536 = \u653B\u76F801 >= 0.72 ? 1 - \u5E73\u6ED1\u9636\u8DC3(0.72, 1, \u653B\u76F801) : 1;
+        const \u52BF = \u653B\u76F801 < 0.24 ? \u84C4 : \u6536;
+        if (\u662F\u666E\u653B) {
+          \u4F53\u4EF0X = -0.22 * \u84C4 + 0.36 * \u65A9 * \u6536;
+          \u5934\u4EF0X = -0.16 * \u52BF;
+          \u5934\u6B6AZ = (\u653B\u76F801 < 0.4 ? 0.38 : -0.32) * \u72E0\u5EA6 * \u52BF;
+          \u7709\u6311 = 0.45;
+          \u5F20\u5634 = 0.42 * \u65A9 * \u6536;
+          \u5DE6\u81C2X = -0.55 * \u84C4 - 1.58 * \u65A9 * \u6536;
+          \u5DE6\u81C2Z = 0.28 * \u84C4 + 0.12 * \u6536;
+          \u5DE6\u8098X = -0.75 * \u84C4 - 0.1 * \u65A9;
+          \u53F3\u81C2X = -0.55 * \u84C4 - 1.58 * \u65A9 * \u6536;
+          \u53F3\u81C2Z = -0.28 * \u84C4 - 0.12 * \u6536;
+          \u53F3\u8098X = -0.75 * \u84C4 - 0.1 * \u65A9;
+          \u5DE6\u817FX = 0.34 * \u52BF;
+          \u53F3\u817FX = 0.22 * \u52BF;
+        } else {
+          const \u5288 = \u653B\u76F801 < 0.24 ? -0.45 * \u84C4 : 1.15 * \u65A9 * \u6536;
+          \u4F53\u504FY = \u653B\u5411 * (-0.38 * \u84C4 + 0.65 * \u65A9 * \u6536);
+          \u4F53\u6B6AZ = -\u653B\u5411 * 0.26 * \u65A9 * \u6536;
+          \u5934\u504FY = \u653B\u5411 * (0.72 * (\u653B\u76F801 < 0.24 ? \u84C4 : \u6536));
+          \u5934\u6B6AZ = -\u653B\u5411 * 0.42 * \u72E0\u5EA6 * \u52BF;
+          \u77B3\u770BX = \u653B\u5411 * 0.52;
+          \u7709\u6311 = 0.48;
+          if (\u653B\u5411 > 0) {
+            \u5DE6\u81C2X = -1.25 * Math.abs(\u5288);
+            \u5DE6\u81C2Z = 1.45 * Math.max(0.15, \u65A9 * \u6536 + \u84C4 * 0.3);
+            \u5DE6\u8098X = -0.12;
+            \u53F3\u81C2Z = -0.35;
+          } else {
+            \u53F3\u81C2X = -1.25 * Math.abs(\u5288);
+            \u53F3\u81C2Z = -1.45 * Math.max(0.15, \u65A9 * \u6536 + \u84C4 * 0.3);
+            \u53F3\u8098X = -0.12;
+            \u5DE6\u81C2Z = 0.35;
+          }
+        }
+      } else if (\u662F\u6253\u6655) {
+        \u6D6E\u9AD8 = 0.26 * \u6D6E\u9AD8\u500D;
+        \u4F53\u6B6AZ = Math.sin(t * 5.2) * 0.28;
+        \u4F53\u4EF0X = Math.cos(t * 4.4) * 0.2;
+        \u5934\u504FY = Math.sin(t * 6) * 0.95;
+        \u5934\u6B6AZ = Math.cos(t * 7.2) * 0.56 * \u72E0\u5EA6;
+        \u5934\u4EF0X = Math.sin(t * 5.5) * 0.32;
+        \u77B3\u770BX = Math.sin(t * 10) * 0.5;
+        \u77B3\u770BY = Math.cos(t * 10) * 0.42;
+        \u5DE6\u95ED = 0.52;
+        \u53F3\u95ED = 0.14;
+        \u5F20\u5634 = 0.48;
+        \u5DE6\u81C2Z = 0.38 + Math.sin(t * 8) * 0.24;
+        \u53F3\u81C2Z = -0.38 - Math.sin(t * 8) * 0.24;
+        \u5DE6\u81C2X = Math.cos(t * 7) * 0.35;
+        \u53F3\u81C2X = -Math.cos(t * 7) * 0.35;
+      } else if (\u662F\u649E\u8F66) {
+        \u6D6E\u9AD8 = 0.38 * \u6D6E\u9AD8\u500D + Math.abs(Math.sin(t * 14)) * 0.18;
+        \u4F53\u4EF0X = Math.sin(t * 16) * 0.55;
+        \u4F53\u6B6AZ = Math.cos(t * 14) * 0.58;
+        \u4F53\u504FY = t * 8.5;
+        \u5934\u6B6AZ = Math.sin(t * 19) * 0.65;
+        \u5934\u504FY = Math.cos(t * 17) * 0.68;
+        \u5F20\u5634 = 0.72;
+        \u5DE6\u81C2Z = 1.1 + Math.sin(t * 22) * 0.4;
+        \u53F3\u81C2Z = -1.1 - Math.cos(t * 22) * 0.4;
+        \u5DE6\u817FX = Math.sin(t * 18) * 0.52;
+        \u53F3\u817FX = -Math.sin(t * 18) * 0.52;
+      } else if (\u662F\u51B2\u7EBF) {
+        \u663E\u793A\u5E7D\u706B = true;
+        \u5E7D\u706B\u5F3A = 0.85;
+        this.\u5E86\u795D\u81EA\u8F6C\u89D2 += dt * 4.4;
+        \u6D6E\u9AD8 = (0.64 + Math.sin(t * 4.5) * 0.14) * \u6D6E\u9AD8\u500D;
+        \u4F53\u504FY = this.\u5E86\u795D\u81EA\u8F6C\u89D2;
+        \u4F53\u4EF0X = -0.08;
+        \u5934\u6B6AZ = Math.sin(t * 5.2) * 0.28 * \u72E0\u5EA6;
+        \u7709\u6311 = 0.36;
+        \u5F20\u5634 = 0.18;
+        \u5DE6\u81C2X = -2.25;
+        \u5DE6\u81C2Z = 0.52 + Math.sin(t * 8) * 0.18;
+        \u53F3\u81C2X = -2.25;
+        \u53F3\u81C2Z = -0.52 - Math.sin(t * 8) * 0.18;
+        \u5DE6\u817FX = 0.22 + Math.sin(t * 7) * 0.15;
+        \u53F3\u817FX = 0.22 - Math.sin(t * 7) * 0.15;
+      } else if (\u662F\u98DE\u5929 || !!\u73AF\u5883?.\u662F\u5426\u817E\u7A7A) {
+        \u6D6E\u9AD8 = 0.56 * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = 0.34;
+        \u4F53\u6B6AZ = -\u4FA7\u504F * 0.32;
+        \u5934\u4EF0X = -0.32;
+        \u5934\u6B6AZ = -\u4FA7\u504F * 0.24;
+        \u5DE6\u81C2Z = 1.28;
+        \u5DE6\u81C2X = -0.18;
+        \u53F3\u81C2Z = -1.28;
+        \u53F3\u81C2X = -0.18;
+        \u5DE6\u817FX = 0.48 + Math.sin(t * 4.8) * 0.08;
+        \u53F3\u817FX = 0.48 - Math.sin(t * 4.8) * 0.08;
+      } else if (\u662F\u6025\u5239) {
+        \u6D6E\u9AD8 = 0.24 * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = -0.36;
+        \u5934\u4EF0X = 0.24;
+        \u5934\u6B6AZ = 0.26 * \u72E0\u5EA6;
+        \u5DE6\u81C2Z = 0.92;
+        \u5DE6\u81C2X = 0.28;
+        \u53F3\u81C2Z = -0.92;
+        \u53F3\u81C2X = 0.28;
+        \u5DE6\u817FX = -0.52;
+        \u5DE6\u819DX = 0.28;
+        \u53F3\u817FX = -0.44;
+        \u53F3\u819DX = 0.22;
+      } else if (\u662F\u5632\u8BBD) {
+        const \u52FE = Math.sin(t * 6.5);
+        \u6D6E\u9AD8 = (0.3 + Math.sin(t * 3) * 0.05) * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = 0.16;
+        \u4F53\u6B6AZ = -0.14;
+        \u5934\u504FY = Math.sin(t * 2.5) * 0.22;
+        \u5934\u6B6AZ = 0.36 * \u72E0\u5EA6;
+        \u77B3\u770BX = 0.15;
+        \u7709\u6311 = 0.32;
+        \u5F20\u5634 = 0.15;
+        \u5DE6\u81C2X = -1.18 + \u52FE * 0.2;
+        \u5DE6\u81C2Z = 0.26;
+        \u5DE6\u8098X = -0.65 + \u52FE * 0.24;
+        \u53F3\u81C2X = 0.2;
+        \u53F3\u81C2Z = -0.22;
+      } else if (\u662F\u7B11\u8BDD) {
+        const \u6296 = Math.sin(t * 16);
+        \u6D6E\u9AD8 = (0.3 + Math.abs(Math.sin(t * 8)) * 0.07) * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = -0.14 + \u6296 * 0.07;
+        \u5934\u4EF0X = -0.22 + \u6296 * 0.12;
+        \u5934\u504FY = Math.sin(t * 9.5) * 0.38;
+        \u5934\u6B6AZ = Math.cos(t * 9.5) * 0.34 * \u72E0\u5EA6;
+        \u5F20\u5634 = 0.38 + Math.abs(\u6296) * 0.35;
+        \u5DE6\u81C2X = -0.35 + \u6296 * 0.25;
+        \u5DE6\u81C2Z = 0.42;
+        \u5DE6\u8098X = -0.95;
+        \u53F3\u81C2X = -0.35 - \u6296 * 0.25;
+        \u53F3\u81C2Z = -0.42;
+        \u53F3\u8098X = -0.95;
+      } else if (\u662F\u8DF3\u821E) {
+        const \u62CD = t * 5.2;
+        const \u8DF3 = Math.abs(Math.sin(\u62CD));
+        const \u5207 = Math.sin(\u62CD) >= 0 ? 1 : -1;
+        \u6D6E\u9AD8 = (0.24 + \u8DF3 * 0.18) * \u6D6E\u9AD8\u500D;
+        \u4F53\u6B6AZ = \u5207 * 0.14;
+        \u4F53\u504FY = Math.sin(\u62CD * 0.5) * 0.22;
+        \u5934\u6B6AZ = -\u5207 * 0.4 * \u72E0\u5EA6;
+        \u5934\u504FY = \u5207 * 0.28;
+        \u5DE6\u81C2X = -1.48 + \u5207 * 0.32;
+        \u5DE6\u81C2Z = 0.46;
+        \u5DE6\u8098X = -0.25;
+        \u53F3\u81C2X = -1.48 - \u5207 * 0.32;
+        \u53F3\u81C2Z = -0.46;
+        \u53F3\u8098X = -0.25;
+        \u5DE6\u817FX = \u5207 * 0.28;
+        \u53F3\u817FX = -\u5207 * 0.28;
+      } else if (\u52A0\u901F\u4E2D || \u6709\u6C28\u6C14) {
+        \u663E\u793A\u5E7D\u706B = true;
+        \u5E7D\u706B\u5F3A = \u662F\u5927\u55B7 || \u6709\u6C28\u6C14 ? 1 : \u662F\u53CC\u55B7 ? 0.72 : 0.45;
+        const \u731B = \u662F\u5927\u55B7 || \u6709\u6C28\u6C14 ? 1 : \u662F\u53CC\u55B7 ? 0.78 : 0.55;
+        \u6D6E\u9AD8 = (0.34 + Math.sin(t * 9.5) * 0.04) * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = 0.3 * \u731B;
+        \u4F53\u6B6AZ = -\u4FA7\u504F * 0.34;
+        \u5934\u4EF0X = -0.26 * \u731B;
+        \u5934\u504FY = \u4FA7\u504F * 0.36;
+        \u5934\u6B6AZ = Math.sin(t * 7.5) * 0.16 * \u72E0\u5EA6 - \u4FA7\u504F * 0.14;
+        \u7709\u6311 = 0.3 * \u731B;
+        \u5DE6\u81C2X = 0.55 * \u731B;
+        \u5DE6\u81C2Z = 0.34 + \u731B * 0.22;
+        \u53F3\u81C2X = 0.55 * \u731B;
+        \u53F3\u81C2Z = -0.34 - \u731B * 0.22;
+        \u5DE6\u817FX = 0.58 * \u731B + Math.sin(t * 14) * 0.08;
+        \u53F3\u817FX = 0.58 * \u731B - Math.sin(t * 14) * 0.08;
+      } else if (\u662F\u5DE6\u62D0 || \u662F\u53F3\u62D0 || Math.abs(\u4FA7\u504F) > 0.14) {
+        const \u5F2F\u5411 = \u662F\u5DE6\u62D0 ? 1 : \u662F\u53F3\u62D0 ? -1 : Math.sign(\u4FA7\u504F);
+        const \u5EA6 = \u662F\u5DE6\u62D0 || \u662F\u53F3\u62D0 ? 0.85 : Math.min(1, Math.abs(\u4FA7\u504F));
+        \u4F53\u4EF0X = 0.16 * \u901F\u5EA6\u6BD4;
+        \u4F53\u6B6AZ = -\u5F2F\u5411 * 0.32 * \u5EA6;
+        \u4F53\u504FY = \u5F2F\u5411 * 0.2 * \u5EA6;
+        \u5934\u504FY = \u5F2F\u5411 * 0.52 * \u5EA6;
+        \u5934\u6B6AZ = \u5F2F\u5411 * 0.22 * \u72E0\u5EA6 * \u5EA6;
+        \u77B3\u770BX = \u5F2F\u5411 * 0.46;
+        \u5DE6\u81C2Z = 0.28 + \u5F2F\u5411 * 0.32 * \u5EA6;
+        \u53F3\u81C2Z = -0.28 + \u5F2F\u5411 * 0.32 * \u5EA6;
+        \u5DE6\u81C2X = 0.22 * \u901F\u5EA6\u6BD4;
+        \u53F3\u81C2X = 0.22 * \u901F\u5EA6\u6BD4;
+        \u5DE6\u817FZ = 0.06 - \u5F2F\u5411 * 0.18 * \u5EA6;
+        \u53F3\u817FZ = -0.06 - \u5F2F\u5411 * 0.18 * \u5EA6;
+      } else if (\u662F\u884C\u8D70 || !\u662F\u5F85\u673A && \u901F\u5EA6\u6BD4 > 0.08) {
+        const \u6B65\u6BD4 = \u662F\u884C\u8D70 ? Math.max(0.5, \u901F\u5EA6\u6BD4) : \u901F\u5EA6\u6BD4;
+        \u6D6E\u9AD8 = (0.28 + Math.sin(t * 3.4) * 0.04) * \u6D6E\u9AD8\u500D;
+        \u4F53\u4EF0X = Math.min(0.22, \u6B65\u6BD4 * 0.16);
+        \u4F53\u6B6AZ = Math.sin(t * 2.8) * 0.04;
+        \u5934\u4EF0X = -Math.min(0.16, \u6B65\u6BD4 * 0.1);
+        \u5934\u6B6AZ = this.\u5F53\u524D\u6B6A\u5934 * 0.45 + Math.sin(t * 1.9) * 0.05;
+        \u5934\u504FY = this.\u5F53\u524D\u626D\u5934 * 0.45;
+        \u5DE6\u81C2X = 0.18 * \u6B65\u6BD4 + Math.sin(t * 3.4) * 0.12;
+        \u53F3\u81C2X = 0.18 * \u6B65\u6BD4 - Math.sin(t * 3.4) * 0.12;
+        \u5DE6\u81C2Z = 0.14 + \u6B65\u6BD4 * 0.08;
+        \u53F3\u81C2Z = -0.14 - \u6B65\u6BD4 * 0.08;
+      } else {
+        const \u547C = \u73AF\u89C6 ? \u73AF\u89C6.\u547C\u5438 : Math.sin(t * 1.8);
+        \u6D6E\u9AD8 = (0.28 + \u547C * 0.03) * \u6D6E\u9AD8\u500D;
+        \u5934\u504FY = (\u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.65 : 0) + this.\u5F53\u524D\u626D\u5934 * 0.35;
+        \u5934\u4EF0X = \u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.32 : 0;
+        \u5934\u6B6AZ = (\u73AF\u89C6 ? \u73AF\u89C6.\u6B6A\u5934Z * 0.42 : 0) + this.\u5F53\u524D\u6B6A\u5934 * 0.45;
+        \u77B3\u770BX = \u73AF\u89C6 ? \u73AF\u89C6.\u8F6C\u5934Y * 0.45 : Math.sin(t * 0.85) * 0.28;
+        \u77B3\u770BY = \u73AF\u89C6 ? \u73AF\u89C6.\u62AC\u5934X * 0.24 : 0;
+        \u5DE6\u81C2Z = 0.11 + \u547C * 0.025;
+        \u53F3\u81C2Z = -0.11 - \u547C * 0.025;
+        \u5DE6\u81C2X = 0.05 + \u547C * 0.02;
+        \u53F3\u81C2X = 0.05 + \u547C * 0.02;
+      }
+      const \u5730\u9AD8 = \u83B7\u53D6\u5C40\u90E8\u5730\u9762\u9AD8\u5EA6(0, 0, \u73AF\u5883);
+      const \u975E\u5012 = \u662F\u6B7B\u4EA1 ? 0 : 1;
+      const \u5B9E\u9645\u6D6E\u9AD8 = Math.max(0, \u5730\u9AD8 + \u6D6E\u9AD8 * k);
+      this.\u6D6E\u8EAB\u67A2.position.set(
+        \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.1 * k * \u975E\u5012,
+        \u5B9E\u9645\u6D6E\u9AD8,
+        -\u60EF\u6027\u6001.\u7EB5\u62C9 * 0.08 * k * \u975E\u5012
+      );
+      this.\u6D6E\u8EAB\u67A2.rotation.set(
+        \u4F53\u4EF0X - \u60EF\u6027\u6001.\u7EB5\u62C9 * 0.08 * \u975E\u5012,
+        \u4F53\u504FY,
+        \u4F53\u6B6AZ + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.12 * \u975E\u5012
+      );
+      const \u5782\u538B\u5C3AY = Math.max(0.75, Math.min(1.22, \u8EAF\u5E72\u538BY + \u60EF\u6027\u6001.\u5782\u538B * 0.14 * \u975E\u5012));
+      const \u6A2A\u5C55\u5C3AXZ = Math.max(0.82, Math.min(1.25, \u8EAF\u5E72\u80D6XZ / Math.sqrt(\u5782\u538B\u5C3AY)));
+      this.\u8EAF\u5E72\u67A2.scale.set(\u6A2A\u5C55\u5C3AXZ, \u5782\u538B\u5C3AY, \u6A2A\u5C55\u5C3AXZ);
+      this.\u5934\u67A2.rotation.set(\u5934\u4EF0X, \u5934\u504FY, \u5934\u6B6AZ);
+      this.\u9888\u67A2.rotation.set(0, 0, -\u4F53\u6B6AZ * 0.16);
+      const \u77B3\u9650X = Math.max(-0.032, Math.min(0.032, \u77B3\u770BX * 0.046)) * k;
+      const \u77B3\u9650Y = Math.max(-0.018, Math.min(0.018, \u77B3\u770BY * 0.028)) * k;
+      this.\u5DE6\u76EE\u77B3\u67A2.position.set(\u77B3\u9650X, \u77B3\u9650Y, 0.028 * k);
+      this.\u53F3\u76EE\u77B3\u67A2.position.set(\u77B3\u9650X, \u77B3\u9650Y, 0.028 * k);
+      this.\u5DE6\u4E0A\u7751.rotation.x = -0.92 + Math.max(0, Math.min(1, \u5DE6\u95ED)) * 0.8;
+      this.\u53F3\u4E0A\u7751.rotation.x = -0.92 + Math.max(0, Math.min(1, \u53F3\u95ED)) * 0.8;
+      this.\u5DE6\u7709\u67A2.position.y = (0.132 + \u7709\u6311 * 0.028) * k;
+      this.\u53F3\u7709\u67A2.position.y = (0.132 + \u7709\u6311 * 0.028) * k;
+      this.\u5DE6\u7709\u67A2.rotation.z = -\u7709\u6311 * 0.16;
+      this.\u53F3\u7709\u67A2.rotation.z = \u7709\u6311 * 0.16;
+      this.\u53E3\u7F1D\u6846.scale.y = 1 + \u5F20\u5634 * 5.2;
+      this.\u4E0B\u5507\u74E3.position.y = (-0.014 - \u5F20\u5634 * 0.034) * k;
+      this.\u5DE6\u81C2\u67A2.rotation.set(\u5DE6\u81C2X, \u5DE6\u81C2Y, \u5DE6\u81C2Z + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.14 * \u975E\u5012);
+      this.\u5DE6\u8098\u67A2.rotation.set(\u5DE6\u8098X, 0, 0);
+      this.\u5DE6\u624B\u67A2.rotation.z = Math.sin(t * 3.4) * 0.08 * \u975E\u5012;
+      this.\u53F3\u81C2\u67A2.rotation.set(\u53F3\u81C2X, \u53F3\u81C2Y, \u53F3\u81C2Z + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.14 * \u975E\u5012);
+      this.\u53F3\u8098\u67A2.rotation.set(\u53F3\u8098X, 0, 0);
+      this.\u53F3\u624B\u67A2.rotation.z = -Math.sin(t * 3.4) * 0.08 * \u975E\u5012;
+      this.\u5DE6\u817F\u67A2.rotation.set(\u5DE6\u817FX, 0, \u5DE6\u817FZ + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.18 * \u975E\u5012);
+      this.\u5DE6\u819D\u67A2.rotation.set(\u5DE6\u819DX, 0, 0);
+      this.\u53F3\u817F\u67A2.rotation.set(\u53F3\u817FX, 0, \u53F3\u817FZ + \u60EF\u6027\u6001.\u79BB\u5FC3\u7529 * 0.18 * \u975E\u5012);
+      this.\u53F3\u819D\u67A2.rotation.set(\u53F3\u819DX, 0, 0);
+      this.\u66F4\u65B0\u653B\u51FB\u8F68\u8FF9(
+        \u662F\u653B\u51FB,
+        \u662F\u666E\u653B ? 1 : \u653B\u5411,
+        \u653B\u8F68\u8FF9\u8FDB,
+        3003583,
+        10090212,
+        1.05 * k,
+        1.15 * k,
+        \u662F\u666E\u653B ? 0.06 : 0.18
+      );
+      this.\u7729\u6655\u7B26\u73AF.visible = \u662F\u6253\u6655;
+      if (\u662F\u6253\u6655) {
+        this.\u7729\u6655\u7B26\u73AF.rotation.y = t * 4.6;
+        this.\u7729\u6655\u7B26\u73AF.position.y = (0.46 + Math.sin(t * 7.2) * 0.04) * k;
+      }
+      for (const \u70B9 of this.\u5E7D\u706B\u7FA4) {
+        \u70B9.\u7F51\u683C.visible = \u663E\u793A\u5E7D\u706B;
+        if (\u663E\u793A\u5E7D\u706B) {
+          const a = t * \u70B9.\u901F\u7387 + \u70B9.\u76F8\u4F4D;
+          \u70B9.\u7F51\u683C.position.set(
+            Math.cos(a) * \u70B9.\u534A\u5F84,
+            \u70B9.\u9AD8\u504F + Math.sin(a * 1.7) * 0.22 * k,
+            Math.sin(a) * \u70B9.\u534A\u5F84
+          );
+          \u70B9.\u7F51\u683C.rotation.y = a * 2;
+          \u70B9.\u6750\u8D28.opacity = (0.45 + 0.45 * Math.sin(a * 2.3)) * \u5E7D\u706B\u5F3A;
+        }
+      }
+      const \u55B7\u6B8B\u5F71 = (\u662F\u52A0\u901F\u5927\u7C7B2) => \u662F\u52A0\u901F\u5927\u7C7B2 && !\u662F\u6B7B\u4EA1 && !\u91CD\u521B.\u6FC0\u6D3B;
+      if (\u55B7\u6B8B\u5F71(\u52A0\u901F\u4E2D || \u6709\u6C28\u6C14)) {
+        this.\u6B8B\u5F71\u55B7\u53D1\u8BA1\u65F6 -= dt;
+        if (this.\u6B8B\u5F71\u55B7\u53D1\u8BA1\u65F6 <= 0) {
+          this.\u6B8B\u5F71\u55B7\u53D1\u8BA1\u65F6 = \u662F\u5927\u55B7 || \u6709\u6C28\u6C14 ? 0.045 : 0.075;
+          for (const \u69FD of this.\u6B8B\u5F71\u961F\u5217) {
+            if (\u69FD.\u5B58\u6D3B\u65F6\u95F4 >= \u69FD.\u5BFF\u547D) {
+              this.\u6D6E\u8EAB\u67A2.updateWorldMatrix(true, false);
+              this.\u6D6E\u8EAB\u67A2.getWorldPosition(_\u4E34\u65F6\u4F4D);
+              this.\u6D6E\u8EAB\u67A2.getWorldQuaternion(_\u4E34\u65F6\u65CB);
+              this.\u6A21\u578B\u7EC4.getWorldScale(_\u4E34\u65F6\u5C3A);
+              _\u4E34\u65F6\u540E.set(0, 0, -1).applyQuaternion(_\u4E34\u65F6\u65CB).normalize();
+              \u69FD.\u4E16\u754C\u5750\u6807.copy(_\u4E34\u65F6\u4F4D);
+              \u69FD.\u4E16\u754C\u56DB\u5143\u6570.copy(_\u4E34\u65F6\u65CB);
+              \u69FD.\u603B\u7F29\u653E.copy(_\u4E34\u65F6\u5C3A);
+              \u69FD.\u540E\u79FB\u65B9\u5411.copy(_\u4E34\u65F6\u540E);
+              \u69FD.\u5B58\u6D3B\u65F6\u95F4 = 0;
+              \u69FD.\u5BFF\u547D = \u662F\u5927\u55B7 || \u6709\u6C28\u6C14 ? 0.28 : 0.2;
+              break;
+            }
+          }
+        }
+      }
+      for (const \u69FD of this.\u6B8B\u5F71\u961F\u5217) {
+        if (\u69FD.\u5B58\u6D3B\u65F6\u95F4 < \u69FD.\u5BFF\u547D) {
+          \u69FD.\u5B58\u6D3B\u65F6\u95F4 += dt;
+          const \u8FDB = Math.min(1, \u69FD.\u5B58\u6D3B\u65F6\u95F4 / \u69FD.\u5BFF\u547D);
+          const \u900F = (1 - \u8FDB) * (\u662F\u52A0\u901F\u5927\u7C7B(\u52A0\u901F\u4E2D, \u6709\u6C28\u6C14) ? 0.34 : 0.22);
+          \u69FD.\u7EC4.visible = \u900F > 0.015;
+          if (\u69FD.\u7EC4.visible) {
+            _\u4E34\u65F6\u4F4D.copy(\u69FD.\u4E16\u754C\u5750\u6807).addScaledVector(\u69FD.\u540E\u79FB\u65B9\u5411, \u8FDB * (\u662F\u52A0\u901F\u5927\u7C7B(\u52A0\u901F\u4E2D, \u6709\u6C28\u6C14) ? 1.85 : 0.85));
+            this.\u6A21\u578B\u7EC4.worldToLocal(_\u4E34\u65F6\u4F4D);
+            this.\u6A21\u578B\u7EC4.getWorldQuaternion(_\u4E34\u65F6\u65CB);
+            \u69FD.\u7EC4.position.copy(_\u4E34\u65F6\u4F4D);
+            \u69FD.\u7EC4.quaternion.copy(_\u4E34\u65F6\u65CB).invert().multiply(\u69FD.\u4E16\u754C\u56DB\u5143\u6570);
+            \u69FD.\u7EC4.scale.setScalar(1 - \u8FDB * 0.14);
+            \u69FD.\u888D\u6750.opacity = \u900F;
+            \u69FD.\u5934\u6750.opacity = \u900F * 0.88;
+          }
+        } else {
+          \u69FD.\u7EC4.visible = false;
+        }
+      }
+    }
+  };
+  function \u662F\u52A0\u901F\u5927\u7C7B(\u52A0\u901F\u4E2D, \u6709\u6C28\u6C14) {
+    return \u52A0\u901F\u4E2D || \u6709\u6C28\u6C14;
+  }
+
   // src/core/baseEntities.ts
   var \u6240\u6709\u9884\u8BBE\u6A21\u578B = [
     () => new \u4E11\u9EC4\u86E4\u87C6\u6A21\u578B(),
@@ -58841,6 +61935,7 @@ void main() {
     () => new \u534A\u9A6C\u4EBA\u6A21\u578B(),
     () => new \u66B4\u8D70\u9AB7\u9AC5\u6A21\u578B(),
     () => new \u6930\u5B50\u4FDD\u9F84\u7403\u6A21\u578B(),
+    () => new \u7EB8\u672D\u5F1F\u6A21\u578B(),
     () => new \u718A\u732B\u8B66\u5BDF\u6A21\u578B(),
     () => new \u72D7\u718A\u8B66\u5B98\u6A21\u578B()
   ];
@@ -58849,21 +61944,24 @@ void main() {
   function \u83B7\u53D6\u52A8\u4F5C\u9884\u89C8\u914D\u7F6E(\u52A8\u4F5C) {
     switch (\u52A8\u4F5C) {
       case "\u5F85\u673A":
-        return { \u901F\u5EA6: 0, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 2, \u91C7\u6837\u5E27\u7387: 24 };
+        return { \u901F\u5EA6: 0, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 3.6, \u91C7\u6837\u5E27\u7387: 24 };
+      case "\u884C\u8D70":
+        return { \u901F\u5EA6: 18, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 1.6, \u91C7\u6837\u5E27\u7387: 24 };
       case "\u5632\u8BBD":
       case "\u7B11\u8BDD":
       case "\u8DF3\u821E":
       case "\u541F\u5531":
         return { \u901F\u5EA6: 0, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 2, \u91C7\u6837\u5E27\u7387: 24 };
       case "\u5DE6\u62D0":
-        return { \u901F\u5EA6: 34, \u8F6C\u5411\u89D2: 0.9, \u65F6\u957F: 1.5, \u91C7\u6837\u5E27\u7387: 24 };
+        return { \u901F\u5EA6: 30, \u8F6C\u5411\u89D2: 0.9, \u65F6\u957F: 1.5, \u91C7\u6837\u5E27\u7387: 24 };
       case "\u53F3\u62D0":
-        return { \u901F\u5EA6: 34, \u8F6C\u5411\u89D2: -0.9, \u65F6\u957F: 1.5, \u91C7\u6837\u5E27\u7387: 24 };
+        return { \u901F\u5EA6: 30, \u8F6C\u5411\u89D2: -0.9, \u65F6\u957F: 1.5, \u91C7\u6837\u5E27\u7387: 24 };
       case "\u6025\u505C":
       case "\u7729\u6655":
       case "\u5E86\u795D":
-      case "\u6B7B\u4EA1":
         return { \u901F\u5EA6: 0, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 1.5, \u91C7\u6837\u5E27\u7387: 24 };
+      case "\u6B7B\u4EA1":
+        return { \u901F\u5EA6: 0, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 1.35, \u91C7\u6837\u5E27\u7387: 24 };
       case "\u5C0F\u52A0\u901F":
         return { \u901F\u5EA6: 30, \u8F6C\u5411\u89D2: 0, \u65F6\u957F: 1.5, \u91C7\u6837\u5E27\u7387: 24 };
       case "\u4E2D\u52A0\u901F":
@@ -59000,7 +62098,7 @@ void main() {
   var W = 420;
   var H = 520;
   var ALIAS = {
-    \u5F85\u673A: "walk",
+    \u5F85\u673A: "idle",
     \u884C\u8D70: "walk",
     \u5632\u8BBD: "taunt",
     \u7B11\u8BDD: "joke",

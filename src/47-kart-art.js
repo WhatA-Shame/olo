@@ -21,6 +21,7 @@ export const KART_ART = {
   monkey: 'images/portrait/monkey.png',
   mushroom: 'images/portrait/mushroom.png',
   panda: 'images/portrait/panda.png',
+  paperboy: 'images/portrait/paperboy.png',
   scallion: 'images/portrait/scallion.png',
   skeleton: 'images/portrait/skeleton.png',
   slime: 'images/portrait/slime.png',

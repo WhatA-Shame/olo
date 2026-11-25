@@ -7,7 +7,7 @@ import { kartDecode } from '../src/47-kart-decode.js';
 
 const W = 420, H = 520;
 // 原版中文动作名 → .bin 里的英文名（和 tools/glb2kart.mjs 的 ANIM_ALIAS 一致）
-const ALIAS = { 待机: 'walk', 行走: 'walk', 嘲讽: 'taunt', 笑话: 'joke', 跳舞: 'dance', 左拐: 'turnL', 右拐: 'turnR',
+const ALIAS = { 待机: 'idle', 行走: 'walk', 嘲讽: 'taunt', 笑话: 'joke', 跳舞: 'dance', 左拐: 'turnL', 右拐: 'turnR',
   急停: 'stop', 眩晕: 'stun', 小加速: 'accelS', 中加速: 'accelM', 大加速: 'accelL', 失控: 'spin',
   庆祝: 'cheer', 滞空: 'air', 左攻击: 'attackL', 右攻击: 'attackR', 普通攻击: 'attack',
   复活: 'revive', 死亡: 'die', 吟唱: 'chant', 跑起来: 'run', 撞车震飞: 'fall', 起步抖动: 'start' };

@@ -25,8 +25,7 @@ window.__kartActions = 所有标准动作;
 // i = 模型序号；full = true 连卡丁车特有的"跑起来/撞车震飞"一起导，false 只导标准动作
 //
 // 这套对应关系写在 src/47-kart.js 的 animate 里（状态 → 片段），改这边记得同步改那边：
-//   idle        → 空着（包里缺真正的待机，下一个包补；现在标记成"待机"的其实是行走）
-//   move        → 小加速      move+被减速 → 行走（也就是现在这个"待机"片段）
+//   idle        → 待机        move → 小加速      move+被减速 → 行走（待机和行走已经拆开）
 //   move+加速   → 中加速 / 大加速
 //   attack      → 普通攻击    attack2 → 右攻击
 //   cast_s1     → 左攻击      cast_s2 → 右攻击      ult/channel → 吟唱

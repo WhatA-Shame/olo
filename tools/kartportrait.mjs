@@ -52,6 +52,7 @@ const IDS = [
   'horseman',
   'skeleton',
   'coconut',
+  'paperboy',
   'panda',
   'bear',
 ];

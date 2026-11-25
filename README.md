@@ -132,22 +132,22 @@ node tools/glb2hero.mjs "模型.glb" src/45-<name>-mesh.js --scale 2.0 --rotY 27
 
 > 还没做的：法线贴图（`normalMap`）与 PBR 粗糙度通道。当前只接了 basecolor，光照仍走引擎原有的卡通分段着色。
 
-### 原版角色皮（「搞怪卡丁车」那 20 个模型）
+### 原版角色皮（「搞怪卡丁车」那 21 个模型）
 
-选将台花名册里除了 7 个正式英雄，还挂了 20 张「原版角色皮」卡（丑黄蛤蟆、多脚纸箱、杯杯菇……）。
+选将台花名册里除了 7 个正式英雄，还挂了 21 张「原版角色皮」卡（丑黄蛤蟆、多脚纸箱、杯杯菇、纸札弟……）。
 它们**用的就是卡丁车工程里的原版模型**，不是重画的：从那边 `src/core/entities/*.ts` 里由 `glbExporter` 导成 GLB，
 再转成本引擎的紧凑数据块。技能包是借的（`KART_SPECS` 里的 `kit`），外观/名字/立绘换掉。
 
 | 层 | 说明 |
 | --- | --- |
 | `.kart/entry.js` | 浏览器端导出入口，暴露 `window.__kartExport(i)`（模型类要用 canvas 画贴图，只能在浏览器里跑） |
-| `tools/kartexport.mjs` | 起静态服务器 + 无头 Chrome，逐个模型导成 `.kart/glb/NN-名字.glb`（导整套 20 段标准动作） |
+| `tools/kartexport.mjs` | 起静态服务器 + 无头 Chrome，逐个模型导成 `.kart/glb/NN-名字.glb`（导整套 21 段标准动作） |
 | `tools/glb2kart.mjs` | GLB → `dist/kart/<id>.bin` + 同名 `.png`：**节点层级直接当骨架**，每个模型 1~5 张贴图拼成一张图集、UV 重映射，量化打包。带 `JOINTS_0` 的 primitive 走 glTF skin，**四骨权重原样保留** |
 | `src/47-kart-decode.js` | 运行时解码器（顶点/骨架/动画），所有角色共用 |
 | `src/47-kart.js` | `KART_SPECS` 登记表 + `preloadKart(id)` + `animate()`（引擎状态 → 片段名） |
 
 ```bash
-node tools/kartbuild.mjs              # 一条命令重建全部 20 个（打包导出器 → 导 GLB → 转 .bin → 重打包 + 烘立绘）
+node tools/kartbuild.mjs              # 一条命令重建全部 21 个（打包导出器 → 导 GLB → 转 .bin → 重打包 + 烘立绘）
 node tools/kartbuild.mjs --only=frog  # 只重做一个（参数是皮 id，不是模型中文名）
 node tools/kartbuild.mjs --no-art     # 跳过立绘烘焙
 node tools/herocheck.mjs yeque --skin=frog   # 选皮进对局验证（36 项，含动作档位与表情）
@@ -199,15 +199,15 @@ chrome --headless --screenshot=out.png --virtual-time-budget=15000 \
 
 #### 动作：21 段标准动作怎么对应到引擎状态
 
-卡丁车那边 `所有标准动作` 就是 20 段，`--full` 再加它特有的「跑起来 / 撞车震飞」。**全部照搬，不自己编动作**，
+卡丁车那边 `所有标准动作` 现在是 21 段（待机和行走已经拆开），`--full` 再加它特有的「跑起来 / 撞车震飞」。**全部照搬，不自己编动作**，
 对应关系只有两处，改一边记得改另一边：`tools/glb2kart.mjs` 的 `ANIM_ALIAS`（中文名 → 片段名）和
 `src/47-kart.js` 的 `animate()`（状态 → 片段）。
 
 | 引擎状态 | 用的片段 | 触发场景 |
 | --- | --- | --- |
-| `idle` | **空着** | 这批包里没有真正的待机（标成"待机"的其实是行走），等新包补 |
+| `idle` | 待机 | 真正的原地待机（3.6 秒环视），新包已经补上 |
 | `move` | 小加速 | 常规行走一律用小加速 |
-| `move` + 减速 buff | 行走 | 只有被减速影响时才用行走 |
+| `move` + 减速 buff | 行走 | 只有被减速影响时才用真行走（新包拆出来的那段） |
 | `move` + 移速 ≥1.2×基础 / ≥1.55×基础 | 中加速 / 大加速 | 加速类 buff、冲刺 |
 | `move` + 急转（>5rad/s） | 左拐 / 右拐 | 只占开头 0.45 秒，不然像原地打转 |
 | 走→停的那一瞬 | 急停 | 只占开头 0.6 秒 |
@@ -225,12 +225,12 @@ chrome --headless --screenshot=out.png --virtual-time-budget=15000 \
 表情是对局里的真实状态（`rt.act = 'emote_xxx'`），一走动/攻击就被打断。
 
 **换新动作包时**：把新包放进 `.kart/`，确认中文动作名没变，跑 `node tools/kartbuild.mjs` 就行。
-`glb2kart.mjs` 会自动判断"有『待机』没『行走』= 老包，待机其实是行走"，新包一旦带上真正的待机 + 行走，
+`glb2kart.mjs` 会自动判断"有『待机』没『行走』= 老包，待机其实是行走"；新包已经带上真正的待机 + 行走，
 `idle` 就自动接上，不用改代码。
 
 几个踩过的坑：
 
-- **不能打进 bundle**：20 个角色、每个 20 段动作，`dist/kart` 加起来 43MB，会让首页从 6.5MB 涨到 50MB。
+- **不能打进 bundle**：21 个角色、每个 21 段动作，`dist/kart` 加起来 60MB，会让首页从 6.5MB 涨到 66MB。
   所以走运行时 `fetch` + `registerModel()` 动态登记，一局只拉玩家那一个（1.4~2.9MB）。
 - **贴图不能只烘顶点色**：每个顶点只采一个颜色，512×512 的条纹会退化成模糊环带，模型看着像打了蜡。
   现在是 `.bin` 里存图集尺寸、同目录 `.png` 存图集，走引擎现成的 `uMap`；顶点色只放 `baseColorFactor`。

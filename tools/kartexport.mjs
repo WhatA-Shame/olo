@@ -156,7 +156,19 @@ const main = async () => {
       console.log(`  = 跳过 ${nm}（已存在）`);
       continue;
     }
-    const raw = await ev(`window.__kartExport(${i}, ${FULL})`, true);
+    // 一次 Runtime.evaluate 把整个 base64 字符串带回来，会在 4MB 左右把 CDP 卡死
+    // （半马人新包 3.2MB GLB → 4.3MB base64，主线程空转、promise 永远不 resolve）。
+    // 所以先让页面把结果挂到 window，再分片取回来自己拼。
+    const len = await ev(
+      `window.__kartExport(${i}, ${FULL}).then(s => (window.__kartPayload = s, s.length))`,
+      true
+    );
+    const CHUNK = 256 * 1024;
+    let raw = '';
+    for (let p = 0; p < len; p += CHUNK) {
+      raw += await ev(`window.__kartPayload.slice(${p}, ${Math.min(len, p + CHUNK)})`);
+    }
+    await ev('window.__kartPayload = null');
     const o = JSON.parse(raw);
     const buf = Buffer.from(o.data, 'base64');
     fs.writeFileSync(file, buf);
