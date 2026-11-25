@@ -1206,12 +1206,16 @@ const Hn = (n, t) => B0(n, "#ffffff", t),
 
 let HB = 0;
 
-function Kh(n, t, e = "sf-ico") {
+function Kh(n, t, e = "sf-ico", vb = null) {
   const s = `sfi${(HB++).toString(36)}-`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" class="${e}" aria-hidden="true" focusable="false">${t.replace(/@/g, s)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb ?? `0 0 ${n} ${n}`}" class="${e}" aria-hidden="true" focusable="false">${t.replace(/@/g, s)}</svg>`;
 }
 
 function dn(n, t, e) {
+  // 背景那团发光圆要留在投影外面：它本来只是"让物件从底色里浮起来"的一层柔光，
+  // 一起进 filter 的话会被 feDropShadow 再糊一次，特写下能看见一圈脏雾。
+  const gw = (e.match(/<circle[^>]*url\(#@gw\)[^>]*\/>/) || [""])[0],
+    bd = gw ? e.replace(gw, "") : e;
   return Kh(
     64,
     `<defs>${Vo("bg", 32, 27, 48, [
@@ -1219,12 +1223,18 @@ function dn(n, t, e) {
       [0.5, n[1]],
       [1, n[2]],
     ])}${Vo("vg", 32, 32, 46, [
-      [0.6, "#000", 0],
-      [1, "#000", 0.5],
+      [0.62, "#000", 0],
+      [1, "#000", 0.44],
     ])}${fn("gl", 0, 0, 0, 30, [
-      [0, "#fff", 0.24],
+      [0, "#fff", 0.22],
       [1, "#fff", 0],
-    ])}${t}</defs><rect width="64" height="64" fill="url(#@bg)"/>${e}<rect width="64" height="64" fill="url(#@vg)"/><path d="M0 0H64V19Q32 31 0 19Z" fill="url(#@gl)"/>`,
+    ])}<filter id="@ds" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="#04070e" flood-opacity=".62"/></filter>${Vo("fs", 32, 54, 19, [
+      [0, "#04070e", 0.46],
+      [0.55, "#04070e", 0.16],
+      [1, "#04070e", 0],
+    ])}${t}</defs><rect width="64" height="64" fill="url(#@bg)"/><ellipse cx="32" cy="54" rx="19" ry="5" fill="url(#@fs)"/>${gw}<g filter="url(#@ds)">${bd}</g><rect width="64" height="64" fill="url(#@vg)"/><path d="M0 0H64V19Q32 31 0 19Z" fill="url(#@gl)"/>`,
+    "sf-ico",
+    "4 4 56 56",
   );
 }
 

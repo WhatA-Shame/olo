@@ -14,11 +14,16 @@ import { kartSpec } from './47-kart.js';
 import { $8, EB, G8, Hf, Jn, V8, Wx, X8, Zn, _e, j8, po, z } from './32-ui.js';
 import { B0, C2, Hn, Ia, K1, KB, Kh, Ln, Mi, Mr, Pe, Vo, We, Wo, _4, ak, dn, ek, fn, hn, ik, je, ln, ok, sk, w3, w4, xe } from './33-data-2.js';
 
+// 装备图标的轮廓：本色压暗 45% 的软边，不是黑线。
+// 全局原语 Pe() 画的是 #070b16 黑描边，装备这边一律不用它——深色背景上一圈黑边最显廉价；
+// 同色暗边只负责把形状从底色里"托"出来，受光面另外描一条白亮边（eL）。
+const eP = (n, w = 1.2) => `stroke="${Ln(n, 0.55)}" stroke-width="${(w * 0.8).toFixed(2)}" stroke-linejoin="round"`;
+
 const tH = {
   slippers: (n) => {
     const t = B0(n, "#e9c873", 0.6),
       e = (i) =>
-        `<path d="${i}" fill="none" stroke="${xe}" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><path d="${i}" fill="none" stroke="${Hn(t, 0.35)}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+        `<path d="${i}" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/><path d="${i}" fill="none" stroke="${Hn(t, 0.35)}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
     let s = "";
     for (let i = 13; i <= 49; i += 4.5) s += `M${i} 43.5L${i + 3} 51.5`;
     return dn(
@@ -31,10 +36,10 @@ const tH = {
       We("g", 32, 36, 28) +
         `<path d="M1 24H9M0 33H7M2 42H6" stroke="${Hn(n, 0.45)}" stroke-width="1.8" stroke-linecap="round" opacity=".65"/>` +
         e("M14 42Q10 25 21 22Q30 20.5 31.5 31") +
-        `<path d="M8 46Q8 42 12 42H46Q52 42 56.5 37.5Q60 41 58 47Q55.5 53.5 48 53.5H13Q8 53.5 8 49.5Z" fill="url(#@sl)" ${Pe(1.4)}/><path d="${s}" stroke="${Ln(t, 0.55)}" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><path d="M10.5 44H47Q52 44 55.5 41" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity=".45"/>` +
+        `<path d="M8 46Q8 42 12 42H46Q52 42 56.5 37.5Q60 41 58 47Q55.5 53.5 48 53.5H13Q8 53.5 8 49.5Z" fill="url(#@sl)" ${eP(n, 1.4)}/><path d="${s}" stroke="${Ln(t, 0.55)}" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><path d="M10.5 44H47Q52 44 55.5 41" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity=".45"/>` +
         e("M23 42Q25 31 31.5 31Q39 33 45 42") +
         e("M41 42Q45 33.5 51.5 39") +
-        `<circle cx="31.5" cy="31" r="3.2" fill="${Hn(t, 0.5)}" ${Pe(1.1)}/>`,
+        `<circle cx="31.5" cy="31" r="3.2" fill="${Hn(t, 0.5)}" ${eP(n, 1.1)}/>`,
     );
   },
   liberation_shoes: (n) =>
@@ -42,7 +47,7 @@ const tH = {
       n,
       w4("pl", 16, 10, 30, 36),
       "",
-      `<path d="M17 13H28V28.5L22.5 34L17 28.5Z" fill="url(#@pl)" ${Pe(1.1)}/><path d="M22.5 15V31" stroke="#ffffff" stroke-width="1" opacity=".7"/><path d="M37 36.5L44 40Q49 42.5 49 48V51H35.5Z" fill="url(#@pl)" ${Pe(1.1)}/><circle cx="19.5" cy="15.5" r="1" fill="${xe}"/><circle cx="25.5" cy="15.5" r="1" fill="${xe}"/><circle cx="39" cy="48" r="1" fill="${xe}"/><circle cx="45.5" cy="48" r="1" fill="${xe}"/><path d="M11.5 3.5H33.5L31.5 9.5H13.5Z" fill="${Hn(n, 0.45)}" ${Pe(1.1)}/>`,
+      `<path d="M17 13H28V28.5L22.5 34L17 28.5Z" fill="url(#@pl)" ${eP(n, 1.1)}/><path d="M22.5 15V31" stroke="#ffffff" stroke-width="1" opacity=".7"/><path d="M37 36.5L44 40Q49 42.5 49 48V51H35.5Z" fill="url(#@pl)" ${eP(n, 1.1)}/><circle cx="19.5" cy="15.5" r="1" fill="#070b16" fill-opacity=".55"/><circle cx="25.5" cy="15.5" r="1" fill="#070b16" fill-opacity=".55"/><circle cx="39" cy="48" r="1" fill="#070b16" fill-opacity=".55"/><circle cx="45.5" cy="48" r="1" fill="#070b16" fill-opacity=".55"/><path d="M11.5 3.5H33.5L31.5 9.5H13.5Z" fill="${Hn(n, 0.45)}" ${eP(n, 1.1)}/>`,
     ),
   canvas_shoes: (n) =>
     C2(
@@ -61,7 +66,7 @@ const tH = {
         [1, Hn(n, 0.55)],
       ]),
       `<path d="M0 50H9M3 44H9" stroke="${Hn(n, 0.5)}" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>`,
-      `<path d="M25 27Q9 23 2 9Q13 14 25 18Z" fill="url(#@wg)" ${Pe(1.1)}/><path d="M25 32Q11 31 3 21Q13 24.5 25 25.5Z" fill="url(#@wg)" ${Pe(1.1)}/><path d="M25 37Q14 38.5 7 32.5Q15 33.5 25 32Z" fill="url(#@wg)" ${Pe(1.1)}/><circle cx="25.5" cy="27.5" r="3" fill="#f3cf85" ${Pe(1)}/>`,
+      `<path d="M25 27Q9 23 2 9Q13 14 25 18Z" fill="url(#@wg)" ${eP(n, 1.1)}/><path d="M25 32Q11 31 3 21Q13 24.5 25 25.5Z" fill="url(#@wg)" ${eP(n, 1.1)}/><path d="M25 37Q14 38.5 7 32.5Q15 33.5 25 32Z" fill="url(#@wg)" ${eP(n, 1.1)}/><circle cx="25.5" cy="27.5" r="3" fill="#f3cf85" ${eP(n, 1)}/>`,
     ),
   // ══ 下面是"现代市井"的十个形制，按外形分族，所有装备都指到其中之一 ══
   // 一件手绘图标是 20~40 行 SVG，63 件挨个画不现实；同族共用一套画法、只换配色，
@@ -71,15 +76,11 @@ const tH = {
   blunt: (n) =>
     dn(
       Mi(n),
-      fn('bd', 18, 8, 48, 56, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.8),
+      fn('bd', 18, 8, 48, 56, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 26) +
-        `<path d="M20.5 52.5L44 15.5" stroke="${xe}" stroke-width="13" stroke-linecap="round"/><path d="M20.5 52.5L44 15.5" stroke="url(#@bd)" stroke-width="10" stroke-linecap="round"/>` +
+        `<path d="M20.5 52.5L44 15.5" stroke="${Ln(n, 0.5)}" stroke-width="13" stroke-linecap="round"/><path d="M20.5 52.5L44 15.5" stroke="url(#@bd)" stroke-width="10" stroke-linecap="round"/>` +
         `<path d="M23.5 48.5L27 43M28.5 40.5L32 35" stroke="${Ln(n, 0.45)}" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>` +
-        `<circle cx="44.5" cy="14.5" r="7.4" fill="url(#@bd)" ${Pe(1.4)}/><circle cx="42.4" cy="12.4" r="2.2" fill="#ffffff" opacity=".55"/>` +
+        `<circle cx="44.5" cy="14.5" r="7.4" fill="url(#@bd)" ${eP(n, 1.4)}/><circle cx="42.4" cy="12.4" r="2.2" fill="#ffffff" opacity=".55"/>` +
         `<path d="M24 49L28.6 42" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
     ),
 
@@ -87,14 +88,10 @@ const tH = {
   bottle: (n) =>
     dn(
       Mi(n),
-      fn('bt', 22, 12, 44, 58, [
-        [0, Hn(n, 0.55)],
-        [0.45, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('bt', 21, 33, 45, 33, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 33, 38, 24) +
-        `<path d="M28 8h10v6.5c0 3 4.5 5.5 4.5 10V53c0 2.6-2 4.5-4.5 4.5H28c-2.6 0-4.5-1.9-4.5-4.5V24.5c0-4.5 4.5-7 4.5-10Z" fill="url(#@bt)" ${Pe(1.4)}/>` +
-        `<path d="M25.5 6.5h15v4.5h-15z" fill="${Ln(n, 0.5)}" ${Pe(1.2)}/>` +
+        `<path d="M28 8h10v6.5c0 3 4.5 5.5 4.5 10V53c0 2.6-2 4.5-4.5 4.5H28c-2.6 0-4.5-1.9-4.5-4.5V24.5c0-4.5 4.5-7 4.5-10Z" fill="url(#@bt)" ${eP(n, 1.4)}/>` +
+        `<path d="M25.5 6.5h15v4.5h-15z" fill="${Ln(n, 0.5)}" ${eP(n, 1.2)}/>` +
         `<path d="M23.5 31h19v11h-19z" fill="#f4f7fb" opacity=".85"/>` +
         `<path d="M27 36.5h12" stroke="${Ln(n, 0.55)}" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>` +
         `<path d="M27.5 22.5v26" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`,
@@ -104,14 +101,10 @@ const tH = {
   can: (n) =>
     dn(
       Mi(n),
-      fn('cn', 20, 14, 46, 56, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('cn', 20, 34, 46, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 34, 24) +
-        `<path d="M22 17h20v30c0 3.4-2.2 5.6-5.6 5.6H27.6C24.2 52.6 22 50.4 22 47Z" fill="url(#@cn)" ${Pe(1.4)}/>` +
-        `<ellipse cx="32" cy="17" rx="10" ry="3.6" fill="${Hn(n, 0.55)}" ${Pe(1.3)}/>` +
+        `<path d="M22 17h20v30c0 3.4-2.2 5.6-5.6 5.6H27.6C24.2 52.6 22 50.4 22 47Z" fill="url(#@cn)" ${eP(n, 1.4)}/>` +
+        `<ellipse cx="32" cy="17" rx="10" ry="3.6" fill="${Hn(n, 0.55)}" ${eP(n, 1.3)}/>` +
         `<ellipse cx="32" cy="17" rx="5.6" ry="1.9" fill="${Ln(n, 0.35)}"/>` +
         `<path d="M22 27h20v13H22z" fill="#f4f7fb" opacity=".9"/>` +
         `<path d="M26 33.5h12" stroke="${Ln(n, 0.5)}" stroke-width="1.7" stroke-linecap="round" opacity=".75"/>` +
@@ -122,13 +115,9 @@ const tH = {
   brick: (n) =>
     dn(
       Mi(n),
-      fn('brk', 12, 20, 52, 50, [
-        [0, Hn(n, 0.45)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('brk', 12, 35, 52, 35, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 34, 24) +
-        `<path d="M12 24l20-9 20 9v18l-20 9-20-9z" fill="url(#@brk)" ${Pe(1.5)}/>` +
+        `<path d="M12 24l20-9 20 9v18l-20 9-20-9z" fill="url(#@brk)" ${eP(n, 1.5)}/>` +
         `<path d="M12 24l20 9 20-9M32 33v18" stroke="${Ln(n, 0.5)}" stroke-width="1.4" opacity=".75"/>` +
         `<path d="M17 26.5l11-5 11 5" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".45"/>` +
         `<path d="M22 38l6 2.6M36 40.6l6-2.6" stroke="${Ln(n, 0.45)}" stroke-width="1.2" opacity=".6"/>`,
@@ -138,13 +127,9 @@ const tH = {
   cloth: (n) =>
     dn(
       Mi(n),
-      fn('cl', 14, 18, 50, 54, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('cl', 14, 36, 50, 36, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 34, 24) +
-        `<path d="M15 22c0-3 2-5 5-5h24c3 0 5 2 5 5v20c0 3-2 5-5 5H20c-3 0-5-2-5-5z" fill="url(#@cl)" ${Pe(1.5)}/>` +
+        `<path d="M15 22c0-3 2-5 5-5h24c3 0 5 2 5 5v20c0 3-2 5-5 5H20c-3 0-5-2-5-5z" fill="url(#@cl)" ${eP(n, 1.5)}/>` +
         `<path d="M15 27c6 3.5 11 3.5 17 0s11-3.5 17 0M15 33c6 3.5 11 3.5 17 0s11-3.5 17 0M15 39c6 3.5 11 3.5 17 0s11-3.5 17 0" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1.3" opacity=".7"/>` +
         `<path d="M15 24.5c6 3.5 11 3.5 17 0s11-3.5 17 0" fill="none" stroke="#ffffff" stroke-width="1.2" opacity=".45"/>`,
     ),
@@ -153,15 +138,11 @@ const tH = {
   shield: (n) =>
     dn(
       Mi(n),
-      fn('sh', 14, 12, 50, 56, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.8),
+      fn('sh', 14, 32, 50, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 26) +
-        `<path d="M32 9l17 6v16c0 11-7.5 18-17 22-9.5-4-17-11-17-22V15z" fill="url(#@sh)" ${Pe(1.6)}/>` +
+        `<path d="M32 9l17 6v16c0 11-7.5 18-17 22-9.5-4-17-11-17-22V15z" fill="url(#@sh)" ${eP(n, 1.6)}/>` +
         `<path d="M32 14.5l11.5 4v12.5c0 7.5-5 12.5-11.5 15.5-6.5-3-11.5-8-11.5-15.5V18.5z" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".5"/>` +
-        `<path d="M26.5 24h11v8.5h-11z" fill="#cfe6ff" opacity=".55" ${Pe(1.1)}/>` +
+        `<path d="M26.5 24h11v8.5h-11z" fill="#cfe6ff" opacity=".55" ${eP(n, 1.1)}/>` +
         `<path d="M22 40h20" stroke="${Ln(n, 0.5)}" stroke-width="1.5" opacity=".6"/>`,
     ),
 
@@ -169,13 +150,9 @@ const tH = {
   horn: (n) =>
     dn(
       Mi(n),
-      fn('hn', 10, 16, 54, 48, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.8),
+      fn('hn', 10, 32, 54, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 30, 32, 26) +
-        `<path d="M14 27h8l20-13v36L22 37h-8z" fill="url(#@hn)" ${Pe(1.5)}/>` +
+        `<path d="M14 27h8l20-13v36L22 37h-8z" fill="url(#@hn)" ${eP(n, 1.5)}/>` +
         `<path d="M46 19c4 3 4 11 0 14" fill="none" stroke="${Hn(n, 0.5)}" stroke-width="2.4" stroke-linecap="round"/>` +
         `<path d="M51 15c6.5 5 6.5 19 0 24" fill="none" stroke="${Hn(n, 0.4)}" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>` +
         `<path d="M18 27v10" stroke="#ffffff" stroke-width="1.5" opacity=".5"/>`,
@@ -185,14 +162,10 @@ const tH = {
   box: (n) =>
     dn(
       Mi(n),
-      fn('bx', 12, 22, 52, 52, [
-        [0, Hn(n, 0.45)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('bx', 12, 36, 52, 36, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 34, 24) +
-        `<path d="M14 26h36v22c0 2.5-1.5 4-4 4H18c-2.5 0-4-1.5-4-4z" fill="url(#@bx)" ${Pe(1.5)}/>` +
-        `<path d="M12 20h40v7H12z" fill="${Hn(n, 0.4)}" ${Pe(1.4)}/>` +
+        `<path d="M14 26h36v22c0 2.5-1.5 4-4 4H18c-2.5 0-4-1.5-4-4z" fill="url(#@bx)" ${eP(n, 1.5)}/>` +
+        `<path d="M12 20h40v7H12z" fill="${Hn(n, 0.4)}" ${eP(n, 1.4)}/>` +
         `<path d="M27 34h10v4h-10zM30 30h4v12h-4z" fill="#f4f7fb" opacity=".92"/>` +
         `<path d="M18 29v17" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>`,
     ),
@@ -201,14 +174,10 @@ const tH = {
   mask: (n) =>
     dn(
       Mi(n),
-      fn('mk', 14, 14, 50, 54, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.8),
+      fn('mk', 14, 34, 50, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 26) +
-        `<path d="M32 10c9.5 0 16 5 16 13v9c0 10-7 16-16 22-9-6-16-12-16-22v-9c0-8 6.5-13 16-13z" fill="url(#@mk)" ${Pe(1.6)}/>` +
-        `<path d="M20.5 27h23v9h-23z" fill="#0a1128" opacity=".85" ${Pe(1.2)}/>` +
+        `<path d="M32 10c9.5 0 16 5 16 13v9c0 10-7 16-16 22-9-6-16-12-16-22v-9c0-8 6.5-13 16-13z" fill="url(#@mk)" ${eP(n, 1.6)}/>` +
+        `<path d="M20.5 27h23v9h-23z" fill="#0a1128" opacity=".85" ${eP(n, 1.2)}/>` +
         `<path d="M24 31.5h6M34 31.5h6" stroke="${Hn(n, 0.6)}" stroke-width="2.4" stroke-linecap="round"/>` +
         `<path d="M26 42h12" stroke="${Ln(n, 0.5)}" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>`,
     ),
@@ -217,11 +186,7 @@ const tH = {
   bike: (n) =>
     dn(
       Mi(n),
-      fn('bk', 12, 20, 52, 50, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('bk', 12, 36, 52, 36, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 36, 24) +
         `<circle cx="20" cy="44" r="8.5" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="3.4"/><circle cx="44" cy="44" r="8.5" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="3.4"/>` +
         `<path d="M20 44l9-14h11l4 14" fill="none" stroke="url(#@bk)" stroke-width="4.2" stroke-linecap="round"/>` +
@@ -237,42 +202,43 @@ const tH = {
   knuckle: (n) =>
     dn(
       Mi(n),
-      fn('kn', 10, 24, 54, 48, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('kn', 8, 30, 56, 30, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 34, 24) +
-        `<path d="M13 25h38c2.4 0 4 1.6 4 4v12c0 2.4-1.6 4-4 4H13c-2.4 0-4-1.6-4-4V29c0-2.4 1.6-4 4-4Z" fill="url(#@kn)" ${Pe(1.5)}/>` +
-        `<circle cx="17.5" cy="35" r="4.4" fill="${xe}"/><circle cx="28" cy="35" r="4.4" fill="${xe}"/><circle cx="38.5" cy="35" r="4.4" fill="${xe}"/><circle cx="49" cy="35" r="4.4" fill="${xe}"/>` +
-        `<path d="M12 28.5h40" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".45"/>`,
+        // 四个指环：环身用同一套渐变，环内是"透过去的暗"，比四个黑洞洞好看
+        [15, 26, 37, 48]
+          .map(
+            (x) =>
+              `<circle cx="${x}" cy="36" r="5.4" fill="none" stroke="url(#@kn)" stroke-width="4.6"/><circle cx="${x}" cy="36" r="5.4" fill="none" stroke="${Ln(n, 0.62)}" stroke-width=".7" opacity=".55"/>`,
+          )
+          .join('') +
+        // 掌托：横过来压在四个环上
+        `<path d="M12 21h40c1.8 0 3 1.2 3 3v6c0 1.8-1.2 3-3 3H12c-1.8 0-3-1.2-3-3v-6c0-1.8 1.2-3 3-3Z" fill="url(#@kn)" ${eP(n, 1.3)}/>` +
+        `<path d="M12.5 23.5h39" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".55"/>` +
+        `<path d="M12.5 30h39" stroke="${Ln(n, 0.5)}" stroke-width="1" stroke-linecap="round" opacity=".5"/>` +
+        `<path d="M20 40.5a5.4 5.4 0 0 0 3.4 1.2" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity=".4"/>`,
     ),
 
-  // 钢钉：扁头 + 尖身
+  // 钢钉：扁圆钉帽 + 带棱的锥身
   nail: (n) =>
     dn(
       Mi(n),
-      fn('nl', 24, 12, 40, 52, [
-        [0, Hn(n, 0.55)],
-        [0.5, n],
-        [1, Ln(n, 0.45)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('nl', 26, 8, 41, 8, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 22) +
-        `<path d="M22 10h20v7H22z" fill="${Hn(n, 0.5)}" ${Pe(1.4)}/>` +
-        `<path d="M28.5 17h7v25L32 54l-3.5-12z" fill="url(#@nl)" ${Pe(1.3)}/>` +
-        `<path d="M30 19v23" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".5"/>` +
-        `<path d="M22 12.5h20" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>`,
+        // 钉帽是个压扁的圆柱：顶面椭圆 + 一圈侧壁
+        `<ellipse cx="32" cy="13" rx="13.5" ry="4.6" fill="${Hn(n, 0.4)}" ${eP(n, 1.2)}/>` +
+        `<path d="M18.5 13v4.2a13.5 4.6 0 0 0 27 0V13a13.5 4.6 0 0 1-27 0Z" fill="${Ln(n, 0.28)}" ${eP(n, 1.1)}/>` +
+        `<ellipse cx="32" cy="13" rx="9" ry="2.9" fill="${Hn(n, 0.72)}" opacity=".55"/>` +
+        // 锥身：左亮右暗，中间一条高光
+        `<path d="M27.4 17.6h9.2v23.2L32 54.5l-4.6-13.7z" fill="url(#@nl)" ${eP(n, 1.1)}/>` +
+        `<path d="M30.2 19v20.5" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".6"/>` +
+        `<path d="M35.4 19v19.5L32 51" stroke="${Ln(n, 0.45)}" stroke-width="1.1" stroke-linecap="round" opacity=".5" fill="none"/>`,
     ),
 
   // 弹弓：Y 形叉 + 皮筋
   sling: (n) =>
     dn(
       Mi(n),
-      fn('sl', 18, 12, 46, 54, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('sl', 18, 30, 46, 30, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 30, 24) +
         `<path d="M32 55V33" stroke="${Ln(n, 0.4)}" stroke-width="7.5" stroke-linecap="round"/><path d="M32 55V33" stroke="url(#@sl)" stroke-width="5" stroke-linecap="round"/>` +
         `<path d="M32 34C32 24 23 20 20.5 13" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="7" stroke-linecap="round"/><path d="M32 34C32 24 23 20 20.5 13" fill="none" stroke="url(#@sl)" stroke-width="4.4" stroke-linecap="round"/>` +
@@ -285,18 +251,14 @@ const tH = {
   chain: (n) =>
     dn(
       Mi(n),
-      fn('ch', 12, 12, 52, 52, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('ch', 12, 32, 52, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 24) +
         [0, 1, 2, 3, 4]
           .map((i) => {
             const x = 14 + i * 9,
               y = 50 - i * 9,
               c = i % 2 ? Hn(n, 0.45) : Ln(n, 0.15);
-            return `<ellipse cx="${x}" cy="${y}" rx="7.6" ry="4.8" transform="rotate(-45 ${x} ${y})" fill="none" stroke="${xe}" stroke-width="4.4"/><ellipse cx="${x}" cy="${y}" rx="7.6" ry="4.8" transform="rotate(-45 ${x} ${y})" fill="none" stroke="${c}" stroke-width="2.6"/>`;
+            return `<ellipse cx="${x}" cy="${y}" rx="7.6" ry="4.8" transform="rotate(-45 ${x} ${y})" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="4.4"/><ellipse cx="${x}" cy="${y}" rx="7.6" ry="4.8" transform="rotate(-45 ${x} ${y})" fill="none" stroke="${c}" stroke-width="2.6"/>`;
           })
           .join('') +
         `<ellipse cx="14" cy="50" rx="7.6" ry="4.8" transform="rotate(-45 14 50)" fill="none" stroke="#ffffff" stroke-width="1" opacity=".4"/>`,
@@ -306,16 +268,12 @@ const tH = {
   wrench: (n) =>
     dn(
       Mi(n),
-      fn('wr', 20, 8, 44, 56, [
-        [0, Hn(n, 0.55)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('wr', 26, 8, 40, 8, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 30, 24) +
         `<path d="M32 20v32" stroke="${Ln(n, 0.4)}" stroke-width="9" stroke-linecap="round"/><path d="M32 20v32" stroke="url(#@wr)" stroke-width="6.4" stroke-linecap="round"/>` +
-        `<path d="M24 8h16v5.5h-5.2v6.2H29.2V13.5H24Z" fill="url(#@wr)" ${Pe(1.4)}/>` +
+        `<path d="M24 8h16v5.5h-5.2v6.2H29.2V13.5H24Z" fill="url(#@wr)" ${eP(n, 1.4)}/>` +
         `<path d="M24 8h16v5.5h-5.2v6.2H29.2V13.5H24Z" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1" opacity=".6"/>` +
-        `<circle cx="32" cy="42" r="2.6" fill="${xe}" opacity=".7"/>` +
+        `<circle cx="32" cy="42" r="2.6" fill="#070b16" fill-opacity=".55" opacity=".7"/>` +
         `<path d="M28.5 24v18" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
     ),
 
@@ -323,14 +281,10 @@ const tH = {
   hammer: (n) =>
     dn(
       Mi(n),
-      fn('hm', 12, 10, 52, 28, [
-        [0, Hn(n, 0.55)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.8),
+      fn('hm', 12, 20, 52, 20, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 26, 26) +
         `<path d="M31 24v31" stroke="${Ln(n, 0.45)}" stroke-width="8" stroke-linecap="round"/><path d="M31 24v31" stroke="url(#@hm)" stroke-width="5.6" stroke-linecap="round"/>` +
-        `<path d="M13 11h38c1.6 0 2.6 1 2.6 2.6v11c0 1.6-1 2.6-2.6 2.6H13c-1.6 0-2.6-1-2.6-2.6v-11C10.4 12 11.4 11 13 11Z" fill="url(#@hm)" ${Pe(1.6)}/>` +
+        `<path d="M13 11h38c1.6 0 2.6 1 2.6 2.6v11c0 1.6-1 2.6-2.6 2.6H13c-1.6 0-2.6-1-2.6-2.6v-11C10.4 12 11.4 11 13 11Z" fill="url(#@hm)" ${eP(n, 1.6)}/>` +
         `<path d="M16 14.5h32" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>` +
         `<path d="M31 47h4" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>`,
     ),
@@ -339,18 +293,14 @@ const tH = {
   dumbbell: (n) =>
     dn(
       Mi(n),
-      fn('db', 6, 18, 58, 46, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('db', 6, 32, 58, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 24) +
         `<path d="M22 32h20" stroke="${Ln(n, 0.4)}" stroke-width="7" stroke-linecap="round"/>` +
         `<path d="M22 32h20" stroke="${Hn(n, 0.35)}" stroke-width="4" stroke-linecap="round"/>` +
-        `<rect x="12" y="18" width="11" height="28" rx="3.4" fill="url(#@db)" ${Pe(1.5)}/>` +
-        `<rect x="41" y="18" width="11" height="28" rx="3.4" fill="url(#@db)" ${Pe(1.5)}/>` +
-        `<rect x="5" y="25" width="6" height="14" rx="2.2" fill="${Hn(n, 0.3)}" ${Pe(1.1)}/>` +
-        `<rect x="53" y="25" width="6" height="14" rx="2.2" fill="${Hn(n, 0.3)}" ${Pe(1.1)}/>` +
+        `<rect x="12" y="18" width="11" height="28" rx="3.4" fill="url(#@db)" ${eP(n, 1.5)}/>` +
+        `<rect x="41" y="18" width="11" height="28" rx="3.4" fill="url(#@db)" ${eP(n, 1.5)}/>` +
+        `<rect x="5" y="25" width="6" height="14" rx="2.2" fill="${Hn(n, 0.3)}" ${eP(n, 1.1)}/>` +
+        `<rect x="53" y="25" width="6" height="14" rx="2.2" fill="${Hn(n, 0.3)}" ${eP(n, 1.1)}/>` +
         `<path d="M15 22v20M44 22v20" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
     ),
 
@@ -358,15 +308,11 @@ const tH = {
   gun: (n) =>
     dn(
       Mi(n),
-      fn('gn', 14, 18, 56, 50, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.55)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('gn', 14, 34, 56, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 24) +
-        `<path d="M14 22h26c2 0 3 1 3 3v9c0 2-1 3-3 3H14c-2 0-3-1-3-3v-9c0-2 1-3 3-3Z" fill="url(#@gn)" ${Pe(1.5)}/>` +
-        `<path d="M43 26h13v5H43z" fill="${Ln(n, 0.25)}" ${Pe(1.2)}/>` +
-        `<path d="M20 37l-4 16h10l4-16z" fill="${Hn(n, 0.35)}" ${Pe(1.3)}/>` +
+        `<path d="M14 22h26c2 0 3 1 3 3v9c0 2-1 3-3 3H14c-2 0-3-1-3-3v-9c0-2 1-3 3-3Z" fill="url(#@gn)" ${eP(n, 1.5)}/>` +
+        `<path d="M43 26h13v5H43z" fill="${Ln(n, 0.25)}" ${eP(n, 1.2)}/>` +
+        `<path d="M20 37l-4 16h10l4-16z" fill="${Hn(n, 0.35)}" ${eP(n, 1.3)}/>` +
         `<path d="M29 37l2 9h7l-1-9z" fill="${Ln(n, 0.3)}" opacity=".8"/>` +
         `<path d="M16 26h22" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>` +
         `<circle cx="40" cy="30" r="1.6" fill="#ffffff" opacity=".6"/>`,
@@ -376,13 +322,9 @@ const tH = {
   coat: (n) =>
     dn(
       Mi(n),
-      fn('ct', 10, 12, 54, 52, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('ct', 10, 32, 54, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 24) +
-        `<path d="M23 13l9-4 9 4 11 7-5 12-5-3.5V53H22V28.5L17 32 12 20z" fill="url(#@ct)" ${Pe(1.5)}/>` +
+        `<path d="M23 13l9-4 9 4 11 7-5 12-5-3.5V53H22V28.5L17 32 12 20z" fill="url(#@ct)" ${eP(n, 1.5)}/>` +
         `<path d="M27 14l5 9 5-9" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="1.6" stroke-linejoin="round"/>` +
         `<path d="M32 23v29" stroke="${Ln(n, 0.45)}" stroke-width="1.4" opacity=".7"/>` +
         `<path d="M22 34h20M22 42h20" stroke="${Ln(n, 0.4)}" stroke-width="1.1" opacity=".45"/>` +
@@ -393,14 +335,10 @@ const tH = {
   mesh: (n) =>
     dn(
       Mi(n),
-      fn('ms', 12, 14, 52, 50, [
-        [0, Hn(n, 0.45)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.7),
+      fn('ms', 12, 32, 52, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 24) +
         [[22, 24], [42, 24], [32, 34], [22, 44], [42, 44]]
-          .map(([x, y]) => `<path d="${hn(x, y, 9.5, 0.1)}" fill="none" stroke="${xe}" stroke-width="3.4"/><path d="${hn(x, y, 9.5, 0.1)}" fill="none" stroke="${Hn(n, 0.3)}" stroke-width="1.7"/>`)
+          .map(([x, y]) => `<path d="${hn(x, y, 9.5, 0.1)}" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="3.4"/><path d="${hn(x, y, 9.5, 0.1)}" fill="none" stroke="${Hn(n, 0.3)}" stroke-width="1.7"/>`)
           .join('') +
         `<rect x="11" y="13" width="42" height="38" rx="2.5" fill="none" stroke="${Ln(n, 0.35)}" stroke-width="2.4"/>` +
         `<path d="M13 17h38" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity=".35"/>`,
@@ -410,14 +348,10 @@ const tH = {
   helmet: (n) =>
     dn(
       Mi(n),
-      fn('hl', 10, 14, 54, 42, [
-        [0, Hn(n, 0.55)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.8),
+      fn('hl', 10, 28, 54, 28, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 30, 26) +
-        `<path d="M14 33a18 18 0 0 1 36 0Z" fill="url(#@hl)" ${Pe(1.5)}/>` +
-        `<path d="M8 33h48c1.4 0 2.4 1 2.4 2.4v2.2c0 1.4-1 2.4-2.4 2.4H8c-1.4 0-2.4-1-2.4-2.4v-2.2C5.6 34 6.6 33 8 33Z" fill="${Hn(n, 0.35)}" ${Pe(1.4)}/>` +
+        `<path d="M14 33a18 18 0 0 1 36 0Z" fill="url(#@hl)" ${eP(n, 1.5)}/>` +
+        `<path d="M8 33h48c1.4 0 2.4 1 2.4 2.4v2.2c0 1.4-1 2.4-2.4 2.4H8c-1.4 0-2.4-1-2.4-2.4v-2.2C5.6 34 6.6 33 8 33Z" fill="${Hn(n, 0.35)}" ${eP(n, 1.4)}/>` +
         `<path d="M32 15v18" stroke="${Ln(n, 0.4)}" stroke-width="1.6" opacity=".6"/>` +
         `<path d="M18 26c2-6 8-9 14-9" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".45"/>` +
         `<path d="M24 41v6M40 41v6" stroke="${Ln(n, 0.3)}" stroke-width="1.4" opacity=".55"/>`,
@@ -427,16 +361,12 @@ const tH = {
   vest: (n) =>
     dn(
       Mi(n),
-      fn('vs', 12, 12, 52, 52, [
-        [0, Hn(n, 0.5)],
-        [0.5, n],
-        [1, Ln(n, 0.5)],
-      ]) + je('gw', Hn(n, 0.4), 0.75),
+      fn('vs', 12, 32, 52, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
       We('gw', 32, 32, 24) +
-        `<path d="M23 11l9 6 9-6 9 6v38H14V17z" fill="url(#@vs)" ${Pe(1.5)}/>` +
+        `<path d="M23 11l9 6 9-6 9 6v38H14V17z" fill="url(#@vs)" ${eP(n, 1.5)}/>` +
         `<path d="M32 17v38" stroke="${Ln(n, 0.45)}" stroke-width="1.5" opacity=".7"/>` +
         `<path d="M17 30h12M35 30h12" stroke="${Ln(n, 0.4)}" stroke-width="1.6" opacity=".55"/>` +
-        `<path d="M18 40h11v9H18zM35 40h11v9H35z" fill="${Ln(n, 0.3)}" opacity=".55" ${Pe(1)}/>` +
+        `<path d="M18 40h11v9H18zM35 40h11v9H35z" fill="${Ln(n, 0.3)}" opacity=".55" ${eP(n, 1)}/>` +
         `<path d="M23 13l4 5" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
     ),
 };

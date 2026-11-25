@@ -1106,6 +1106,8 @@ const main = async () => {
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='攻击'); t&&t.click(); return 1;})()`);
       await sleep(400);
       await shot('shop-attack', { x: 0, y: 0, width: 1088, height: 615 }, 1.6);
+      // 图标特写：格子只有 68px，缩略图看不出描边/高光，放大 5 倍单独存一张
+      await shot('shop-attack-zoom', { x: 172, y: 92, width: 205, height: 112 }, 5);
       // 法术 / 防御：图标按"形制"分族，这两页最能看出同族有没有撞成一片
       await ev(`(()=>{const t=[...document.querySelectorAll('.sf-tab')].find(e=>e.textContent.trim()==='法术'); t&&t.click(); return 1;})()`);
       await sleep(400);
