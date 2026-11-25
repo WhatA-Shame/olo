@@ -73,116 +73,455 @@ const tH = {
   // 视觉上仍然是"一套里的"。要单独美化某一件，就在 tH 里加同名键覆盖 tHx。
 
   // 棍棒：警棍 / 钢管 / 铁链 / 指虎 / 扳手 / 球棒 / 大锤 / 撬棍 / 哑铃 / 钢钉
-  blunt: (n) =>
-    dn(
+  // 棍棒族：同一根"杆"，靠长度/角度/粗细和末端零件分出不同武器。
+  // v 由 tHx 的第二项给：0 警棍 1 钢管 2 伸缩警棍 3 撬棍 4 球棒 5 大铁锤 6 拆迁大锤
+  blunt: (n, v = 0) => {
+    const g = 'url(#@bd)',
+      rod = (x1, y1, x2, y2, w) =>
+        `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${Ln(n, 0.68)}" stroke-width="${(w + 2.6).toFixed(1)}" stroke-linecap="round" opacity=".45"/><path d="M${x1} ${y1}L${x2} ${y2}" stroke="${g}" stroke-width="${w}" stroke-linecap="round"/>`,
+      hi = (x1, y1, x2, y2, o = 0.5) =>
+        `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity="${o}"/>`;
+    let s;
+    if (v === 0) {
+      // 警棍：直棍 + 握把防滑纹 + 端帽
+      s = rod(21, 53, 43, 17, 9) + hi(23.5, 49, 30, 38) +
+        `<circle cx="44" cy="16" r="6.6" fill="${g}" ${eP(n, 1.1)}/>` +
+        `<path d="M22.5 50.5l4-7M26.5 44l4-7" stroke="${Ln(n, 0.5)}" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>`;
+    } else if (v === 1) {
+      // 钢管：又长又细，两头是空心的开口
+      s = rod(25, 55, 38, 9, 8) +
+        `<ellipse cx="38" cy="9.5" rx="3.6" ry="1.9" fill="${Ln(n, 0.55)}"/><ellipse cx="25" cy="54.5" rx="3.6" ry="1.9" fill="${Ln(n, 0.55)}"/>` +
+        hi(27.5, 48, 36, 18, 0.55);
+    } else if (v === 2) {
+      // 伸缩警棍：两节，中间一个台阶
+      s = rod(19, 54, 30, 36, 11) + rod(30, 36, 45, 13, 7.4) +
+        `<circle cx="30" cy="36" r="5.4" fill="${Ln(n, 0.22)}" ${eP(n, 1)}/>` +
+        hi(21.5, 50, 28.5, 40, 0.5);
+    } else if (v === 3) {
+      // 撬棍：顶端弯钩，底端扁头
+      s = rod(22, 52, 40, 18, 7.4) +
+        `<path d="M40 18q3-7 10-6" fill="none" stroke="${Ln(n, 0.68)}" stroke-width="9.4" stroke-linecap="round" opacity=".45"/><path d="M40 18q3-7 10-6" fill="none" stroke="${g}" stroke-width="7" stroke-linecap="round"/>` +
+        `<path d="M17.5 54.5l7-4.4 3 5.2-7.6 3.4z" fill="${g}" ${eP(n, 1.1)}/>` +
+        hi(24, 48, 37, 23);
+    } else if (v === 4) {
+      // 棒球棍：细柄到粗头的锥形
+      s = `<path d="M23 55c-3-3-2-6 1-9l14-16c3-4 8-6 11-3s2 8-2 11L33 52c-3 3-7 5-10 3Z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<path d="M45 30c3-3 6-4 8-2" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>` +
+        `<path d="M24.5 52l3-4M28 47l3-4M31.5 42l3-4" stroke="${Ln(n, 0.5)}" stroke-width="1.4" stroke-linecap="round" opacity=".6"/>`;
+    } else if (v === 5) {
+      // 大铁锤：竖柄 + 横锤头
+      s = rod(31, 26, 31, 56, 8) +
+        `<path d="M13 11h38c1.6 0 2.6 1 2.6 2.6v11c0 1.6-1 2.6-2.6 2.6H13c-1.6 0-2.6-1-2.6-2.6v-11C10.4 12 11.4 11 13 11Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M16 14.5h32" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>` +
+        `<path d="M13 24.5h38" stroke="${Ln(n, 0.55)}" stroke-width="1.1" opacity=".55"/>`;
+    } else {
+      // 拆迁大锤：两头都是锤面，柄更长
+      s = rod(32, 24, 32, 58, 8) +
+        `<path d="M8 12h14v13H8zM42 12h14v13H42z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<path d="M22 15h10M22 22h10M32 15h10M32 22h10" stroke="${Ln(n, 0.5)}" stroke-width="1.1" opacity=".55"/>` +
+        `<path d="M10.5 15h9" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('bd', 18, 8, 48, 56, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 32, 26) +
-        `<path d="M20.5 52.5L44 15.5" stroke="${Ln(n, 0.5)}" stroke-width="13" stroke-linecap="round"/><path d="M20.5 52.5L44 15.5" stroke="url(#@bd)" stroke-width="10" stroke-linecap="round"/>` +
-        `<path d="M23.5 48.5L27 43M28.5 40.5L32 35" stroke="${Ln(n, 0.45)}" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>` +
-        `<circle cx="44.5" cy="14.5" r="7.4" fill="url(#@bd)" ${eP(n, 1.4)}/><circle cx="42.4" cy="12.4" r="2.2" fill="#ffffff" opacity=".55"/>` +
-        `<path d="M24 49L28.6 42" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
-    ),
+      fn('bd', 8, 8, 56, 56, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 32, 26) + s,
+    );
+  },
 
   // 瓶装：敌敌畏 / 杀虫喷雾 / 防狼喷雾 / 二锅头 / 藿香正气水 / 药酒罐 / 野生狗奶
-  bottle: (n) =>
-    dn(
-      Mi(n),
-      fn('bt', 21, 33, 45, 33, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 33, 38, 24) +
-        `<path d="M28 8h10v6.5c0 3 4.5 5.5 4.5 10V53c0 2.6-2 4.5-4.5 4.5H28c-2.6 0-4.5-1.9-4.5-4.5V24.5c0-4.5 4.5-7 4.5-10Z" fill="url(#@bt)" ${eP(n, 1.4)}/>` +
-        `<path d="M25.5 6.5h15v4.5h-15z" fill="${Ln(n, 0.5)}" ${eP(n, 1.2)}/>` +
+  // 瓶装族：0 细颈农药瓶 1 喷罐 2 提手大桶 3 小药瓶 4 奶瓶 5 二踢脚
+  bottle: (n, v = 0) => {
+    const g = 'url(#@bt)';
+    let s;
+    if (v === 0) {
+      // 敌敌畏 / 二锅头：细长颈 + 大标签
+      s = `<path d="M28 8h10v6.5c0 3 4.5 5.5 4.5 10V53c0 2.6-2 4.5-4.5 4.5H28c-2.6 0-4.5-1.9-4.5-4.5V24.5c0-4.5 4.5-7 4.5-10Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M25.5 6.5h15v4.5h-15z" fill="${Ln(n, 0.5)}" ${eP(n, 1.1)}/>` +
         `<path d="M23.5 31h19v11h-19z" fill="#f4f7fb" opacity=".85"/>` +
         `<path d="M27 36.5h12" stroke="${Ln(n, 0.55)}" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>` +
-        `<path d="M27.5 22.5v26" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`,
-    ),
+        `<path d="M27.5 22.5v26" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`;
+    } else if (v === 1) {
+      // 杀虫喷雾 / 防狼喷雾：矮胖罐 + 喷头 + 扳机
+      s = `<path d="M23 20h18v30c0 2.6-2 4.4-4.4 4.4H27.4C25 54.4 23 52.6 23 50Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M25.5 14h13v6.4h-13z" fill="${Ln(n, 0.35)}" ${eP(n, 1.1)}/>` +
+        `<path d="M38.5 15.5h8v3.4h-8z" fill="${Hn(n, 0.35)}" ${eP(n, 1)}/>` +
+        `<path d="M36 19h4.6v6H36z" fill="${Ln(n, 0.25)}"/>` +
+        `<path d="M23 30h18v12H23z" fill="#f4f7fb" opacity=".8"/>` +
+        `<path d="M27 36h10" stroke="${Ln(n, 0.5)}" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>` +
+        `<path d="M26 24v24" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".38"/>`;
+    } else if (v === 2) {
+      // 浓敌敌畏：带提手的大桶
+      s = `<path d="M18 22h28v27c0 3.4-2.6 6-6 6H24c-3.4 0-6-2.6-6-6Z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M24 15h16v7H24z" fill="${Ln(n, 0.4)}" ${eP(n, 1.1)}/>` +
+        `<path d="M40 17q6 1 6 8" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="2.6" stroke-linecap="round"/>` +
+        `<path d="M19 33h26v13H19z" fill="#f4f7fb" opacity=".82"/>` +
+        `<circle cx="32" cy="39.5" r="4.6" fill="${Ln(n, 0.45)}" opacity=".55"/>` +
+        `<path d="M29 39.5h6M32 36.5v6" stroke="#f4f7fb" stroke-width="1.2"/>` +
+        `<path d="M21 26v20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".35"/>`;
+    } else if (v === 3) {
+      // 藿香正气水 / 药酒罐：矮方瓶 + 小盖
+      s = `<path d="M23 24h18v24c0 3-2.2 5.2-5.2 5.2H28.2C25.2 53.2 23 51 23 48Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M28 16h8v8h-8z" fill="${Ln(n, 0.38)}" ${eP(n, 1.1)}/>` +
+        `<path d="M26.5 13h11v3.4h-11z" fill="${Hn(n, 0.4)}" ${eP(n, 1)}/>` +
+        `<path d="M23.5 33h17v10h-17z" fill="#f4f7fb" opacity=".8"/>` +
+        `<path d="M27.5 38h9" stroke="${Ln(n, 0.5)}" stroke-width="1.4" stroke-linecap="round" opacity=".7"/>` +
+        `<path d="M26 27v17" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".36"/>`;
+    } else if (v === 4) {
+      // 野生狗奶：奶瓶 + 奶嘴
+      s = `<path d="M25 24h14v25c0 2.8-2 4.8-4.8 4.8h-4.4C27 53.8 25 51.8 25 49Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M27.5 17h9v7.4h-9z" fill="${Ln(n, 0.32)}" ${eP(n, 1.1)}/>` +
+        `<path d="M28.5 12.5q3.5-4 7 0l1.5 5h-10z" fill="${Hn(n, 0.5)}" ${eP(n, 1)}/>` +
+        `<path d="M25.5 31h13v13h-13z" fill="#f4f7fb" opacity=".82"/>` +
+        `<path d="M29 34h6M29 38h6M29 42h6" stroke="${Ln(n, 0.45)}" stroke-width="1.2" opacity=".6"/>` +
+        `<path d="M27.5 26v20" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".38"/>`;
+    } else if (v === 5) {
+      // 二踢脚：红纸筒 + 引线
+      s = `<path d="M26 18h12v34c0 1.6-1 2.6-2.6 2.6h-6.8C27 54.6 26 53.6 26 52Z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<path d="M26 26h12M26 42h12" stroke="${Ln(n, 0.55)}" stroke-width="2" opacity=".7"/>` +
+        `<path d="M26 33h12v8H26z" fill="#f4f7fb" opacity=".75"/>` +
+        `<path d="M32 18q0-6 6-7" fill="none" stroke="${Ln(n, 0.35)}" stroke-width="1.6" stroke-linecap="round"/>` +
+        `<circle cx="39" cy="10.5" r="1.6" fill="${Hn(n, 0.6)}"/>` +
+        `<path d="M28.5 21v29" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".35"/>`;
+    } else if (v === 6) {
+      // 二锅头：细长颈 + 红标签 + 金属盖
+      s = `<path d="M27 12h10v8c0 2 5 4 5 9v22c0 2.6-2 4.4-4.6 4.4H26.6C24 55.4 22 53.6 22 51V29c0-5 5-7 5-9Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M26.5 8h11v5h-11z" fill="${Hn(n, 0.45)}" ${eP(n, 1.1)}/>` +
+        `<path d="M22 34h20v10H22z" fill="#d9403c" opacity=".92"/>` +
+        `<path d="M26 39h12" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>` +
+        `<path d="M25 20v26" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".35"/>`;
+    } else if (v === 7) {
+      // 防狼喷雾：小矮罐 + 按压头 + 喷嘴
+      s = `<path d="M25 26h14v22c0 2.6-1.8 4.4-4.4 4.4h-5.2C26.8 52.4 25 50.6 25 48Z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<path d="M27.5 20h9v6h-9z" fill="${Ln(n, 0.35)}" ${eP(n, 1)}/>` +
+        `<path d="M31 16h6v4h-6z" fill="${Hn(n, 0.4)}" ${eP(n, 1)}/>` +
+        `<path d="M37 17.5h5v2.4h-5z" fill="${Ln(n, 0.2)}"/>` +
+        `<path d="M25.5 30h13v9h-13z" fill="#f4f7fb" opacity=".8"/>` +
+        `<path d="M28 34h8" stroke="${Ln(n, 0.45)}" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>` +
+        `<path d="M27 28v18" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>`;
+    } else {
+      // 药酒罐：广口罐 + 木塞 + 泡在里面的药材
+      s = `<path d="M20 24h24v22c0 3.6-2.4 6-6 6H26c-3.6 0-6-2.4-6-6Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M23 17h18v7H23z" fill="${Ln(n, 0.4)}" ${eP(n, 1.1)}/>` +
+        `<path d="M25.5 13h13v4h-13z" fill="${Hn(n, 0.35)}" ${eP(n, 1)}/>` +
+        `<ellipse cx="32" cy="24" rx="12" ry="3.4" fill="${Ln(n, 0.18)}" opacity=".75"/>` +
+        `<circle cx="27" cy="40" r="3.2" fill="${Ln(n, 0.45)}" opacity=".7"/><circle cx="37" cy="44" r="2.4" fill="${Ln(n, 0.45)}" opacity=".7"/>` +
+        `<path d="M22.5 30v14" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".35"/>`;
+    }
+    return dn(
+      Mi(n),
+      fn('bt', 18, 34, 46, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 36, 24) + s,
+    );
+  },
 
   // 罐筒：红牛 / 奶粉罐 / 充电宝 / 保温壶 / 煤气罐 / 消防栓 / 红糖姜茶
-  can: (n) =>
-    dn(
-      Mi(n),
-      fn('cn', 20, 34, 46, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 34, 24) +
-        `<path d="M22 17h20v30c0 3.4-2.2 5.6-5.6 5.6H27.6C24.2 52.6 22 50.4 22 47Z" fill="url(#@cn)" ${eP(n, 1.4)}/>` +
-        `<ellipse cx="32" cy="17" rx="10" ry="3.6" fill="${Hn(n, 0.55)}" ${eP(n, 1.3)}/>` +
+  // 罐筒族：0 饮料罐 1 六罐装 2 矮胖奶粉罐 3 保温壶 4 煤气钢瓶 5 消防栓 6 马克杯 7 充电宝
+  can: (n, v = 0) => {
+    const g = 'url(#@cn)';
+    let s;
+    if (v === 0) {
+      // 红牛：标准易拉罐，拉环朝上
+      s = `<path d="M22 17h20v30c0 3.4-2.2 5.6-5.6 5.6H27.6C24.2 52.6 22 50.4 22 47Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<ellipse cx="32" cy="17" rx="10" ry="3.6" fill="${Hn(n, 0.55)}" ${eP(n, 1.1)}/>` +
         `<ellipse cx="32" cy="17" rx="5.6" ry="1.9" fill="${Ln(n, 0.35)}"/>` +
         `<path d="M22 27h20v13H22z" fill="#f4f7fb" opacity=".9"/>` +
         `<path d="M26 33.5h12" stroke="${Ln(n, 0.5)}" stroke-width="1.7" stroke-linecap="round" opacity=".75"/>` +
-        `<path d="M25.5 22v22" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`,
-    ),
-
-  // 块状：板砖 / 水泥墩
-  brick: (n) =>
-    dn(
+        `<path d="M25.5 22v22" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".4"/>`;
+    } else if (v === 1) {
+      // 六罐装：三罐一排、外面裹一层透明膜
+      s = [0, 1, 2, 3, 4, 5]
+        .map((i) => {
+          const x = 12 + (i % 3) * 14,
+            y = 24 + Math.floor(i / 3) * 18;
+          return `<rect x="${x}" y="${y}" width="12" height="16" rx="3" fill="${g}" ${eP(n, 0.9)}/><rect x="${x + 2}" y="${y + 4}" width="8" height="7" fill="#f4f7fb" opacity=".75"/>`;
+        })
+        .join('') +
+        `<path d="M10 22h44v38H10z" fill="#ffffff" opacity=".1" ${eP(n, 1)}/>` +
+        `<path d="M10 40h44" stroke="#ffffff" stroke-width="1.4" opacity=".3"/>`;
+    } else if (v === 2) {
+      // 奶粉罐：矮胖，宽盖
+      s = `<path d="M17 26h30v20c0 3.6-2.4 5.8-5.8 5.8H22.8C19.4 51.8 17 49.6 17 46Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<ellipse cx="32" cy="26" rx="15" ry="5" fill="${Hn(n, 0.45)}" ${eP(n, 1.2)}/>` +
+        `<ellipse cx="32" cy="24.5" rx="11" ry="3.4" fill="${Hn(n, 0.72)}" opacity=".7"/>` +
+        `<path d="M17 34h30v11H17z" fill="#f4f7fb" opacity=".88"/>` +
+        `<path d="M22 39.5h20" stroke="${Ln(n, 0.5)}" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>` +
+        `<path d="M20.5 30v16" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity=".38"/>`;
+    } else if (v === 3) {
+      // 保温壶：细高，带杯盖和侧把手
+      s = `<path d="M25 22h14v28c0 3-2 5-5 5h-4c-3 0-5-2-5-5Z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<path d="M23.5 13h17v9h-17z" fill="${Hn(n, 0.35)}" ${eP(n, 1.2)}/>` +
+        `<path d="M24.5 15.5h15" stroke="#ffffff" stroke-width="1.3" opacity=".45"/>` +
+        `<path d="M39 26q6 2 6 9t-6 9" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="2.8" stroke-linecap="round"/>` +
+        `<path d="M25 32h14v10H25z" fill="#f4f7fb" opacity=".8"/>` +
+        `<path d="M27.5 26v22" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".4"/>`;
+    } else if (v === 4) {
+      // 煤气罐：圆肩 + 顶部提手 + 阀门
+      s = `<path d="M21 30q0-8 11-8t11 8v16c0 3.6-2.4 6-6 6H27c-3.6 0-6-2.4-6-6Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M28 15h8v7h-8z" fill="${Ln(n, 0.3)}" ${eP(n, 1)}/>` +
+        `<path d="M25 17q7-6 14 0" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="2.2" stroke-linecap="round"/>` +
+        `<path d="M21 34h22v9H21z" fill="#f4f7fb" opacity=".72"/>` +
+        `<path d="M23.5 30v16" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".34"/>`;
+    } else if (v === 5) {
+      // 消防栓：红壳 + 顶盖 + 两侧出水口
+      s = `<path d="M24 22h16v28c0 2.8-1.8 4.6-4.6 4.6h-6.8C25.8 54.6 24 52.8 24 50Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M22.5 14h19v8h-19z" fill="${Hn(n, 0.3)}" ${eP(n, 1.2)}/>` +
+        `<path d="M27 10h10v4H27z" fill="${Ln(n, 0.35)}" ${eP(n, 1)}/>` +
+        `<ellipse cx="17" cy="32" rx="5" ry="4.2" fill="${Ln(n, 0.25)}" ${eP(n, 1)}/>` +
+        `<ellipse cx="47" cy="32" rx="5" ry="4.2" fill="${Ln(n, 0.25)}" ${eP(n, 1)}/>` +
+        `<path d="M24 40h16v8H24z" fill="#f4f7fb" opacity=".7"/>` +
+        `<path d="M26.5 26v20" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".34"/>`;
+    } else if (v === 6) {
+      // 红糖姜茶：马克杯 + 侧把手
+      s = `<path d="M20 24h24v20c0 3.6-2.4 6-6 6H26c-3.6 0-6-2.4-6-6Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<ellipse cx="32" cy="24" rx="12" ry="4" fill="${Hn(n, 0.4)}" ${eP(n, 1.1)}/>` +
+        `<ellipse cx="32" cy="24" rx="8.6" ry="2.6" fill="${Ln(n, 0.18)}" opacity=".7"/>` +
+        `<path d="M44 28q7 1.5 7 8t-7 8" fill="none" stroke="${Ln(n, 0.42)}" stroke-width="3.4" stroke-linecap="round"/>` +
+        `<path d="M20 33h24v8H20z" fill="#f4f7fb" opacity=".7"/>` +
+        `<path d="M23 28v16" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity=".36"/>`;
+    } else {
+      // 充电宝：扁长方体 + USB 口 + 电量灯
+      s = `<path d="M18 22h28c1.8 0 3 1.2 3 3v18c0 1.8-1.2 3-3 3H18c-1.8 0-3-1.2-3-3V25c0-1.8 1.2-3 3-3Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M15 27h34" stroke="#ffffff" stroke-width="1.3" opacity=".35"/>` +
+        `<path d="M24 33h5v5h-5zM32 33h5v5h-5z" fill="${Ln(n, 0.35)}" ${eP(n, 0.8)}/>` +
+        `<path d="M41 34h3v3h-3z" fill="${Ln(n, 0.2)}"/>` +
+        `<circle cx="21" cy="42" r="1.5" fill="${Hn(n, 0.7)}"/><circle cx="26" cy="42" r="1.5" fill="${Hn(n, 0.7)}"/><circle cx="31" cy="42" r="1.5" fill="${Ln(n, 0.3)}"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('brk', 12, 35, 52, 35, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 34, 24) +
-        `<path d="M12 24l20-9 20 9v18l-20 9-20-9z" fill="url(#@brk)" ${eP(n, 1.5)}/>` +
-        `<path d="M12 24l20 9 20-9M32 33v18" stroke="${Ln(n, 0.5)}" stroke-width="1.4" opacity=".75"/>` +
-        `<path d="M17 26.5l11-5 11 5" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".45"/>` +
-        `<path d="M22 38l6 2.6M36 40.6l6-2.6" stroke="${Ln(n, 0.45)}" stroke-width="1.2" opacity=".6"/>`,
-    ),
+      fn('cn', 16, 34, 48, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 34, 24) + s,
+    );
+  },
 
-  // 布/被：棉袄 / 沙发垫 / 棉被 / 席梦思 / 雨衣 / 灭火毯 / 铁丝网 / 十斤大棉被
-  cloth: (n) =>
-    dn(
+  // 块状族：0 板砖 1 水泥墩
+  brick: (n, v = 0) => {
+    const g = 'url(#@brk)';
+    let s;
+    if (v === 0) {
+      // 板砖：斜放的砖 + 两个减重孔
+      s = `<path d="M12 26l20-9 20 9v16l-20 9-20-9z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M12 26l20 9 20-9M32 35v16" stroke="${Ln(n, 0.5)}" stroke-width="1.3" opacity=".7"/>` +
+        `<ellipse cx="24" cy="31" rx="4" ry="2.6" fill="${Ln(n, 0.45)}" opacity=".75"/>` +
+        `<ellipse cx="40" cy="31" rx="4" ry="2.6" fill="${Ln(n, 0.45)}" opacity=".75"/>` +
+        `<path d="M17 27.5l11-5 11 5" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".42"/>`;
+    } else {
+      // 水泥墩：上窄下宽的墩子 + 斜切面
+      s = `<path d="M20 14h24l8 38H12z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M20 14h24l2 9H18z" fill="${Hn(n, 0.28)}" ${eP(n, 1.1)}/>` +
+        `<path d="M12 52h40" stroke="${Ln(n, 0.5)}" stroke-width="2" stroke-linecap="round"/>` +
+        `<path d="M24 26h16M22 36h20" stroke="${Ln(n, 0.4)}" stroke-width="1.2" opacity=".5"/>` +
+        `<path d="M22 20l4 26" stroke="#ffffff" stroke-width="1.4" opacity=".32"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('cl', 14, 36, 50, 36, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 34, 24) +
-        `<path d="M15 22c0-3 2-5 5-5h24c3 0 5 2 5 5v20c0 3-2 5-5 5H20c-3 0-5-2-5-5z" fill="url(#@cl)" ${eP(n, 1.5)}/>` +
-        `<path d="M15 27c6 3.5 11 3.5 17 0s11-3.5 17 0M15 33c6 3.5 11 3.5 17 0s11-3.5 17 0M15 39c6 3.5 11 3.5 17 0s11-3.5 17 0" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1.3" opacity=".7"/>` +
-        `<path d="M15 24.5c6 3.5 11 3.5 17 0s11-3.5 17 0" fill="none" stroke="#ffffff" stroke-width="1.2" opacity=".45"/>`,
-    ),
+      fn('brk', 10, 12, 54, 54, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 34, 24) + s,
+    );
+  },
 
-  // 盾/门/盆：防暴盾牌 / 防盗门 / 不锈钢大盆
-  shield: (n) =>
-    dn(
+  cloth: (n, v = 0) => {
+    const g = 'url(#@cl)';
+    let s;
+    if (v === 0) {
+      // 沙发垫：一块方垫 + 四角缝线
+      s = `<path d="M14 24c0-3 2-5 5-5h26c3 0 5 2 5 5v18c0 3-2 5-5 5H19c-3 0-5-2-5-5z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M14 30c6 3 11 3 17 0s11-3 17 0M14 38c6 3 11 3 17 0s11-3 17 0" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1.2" opacity=".55"/>` +
+        `<path d="M19 21h26" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".45"/>` +
+        `<circle cx="20" cy="45" r="1.6" fill="${Ln(n, 0.4)}"/><circle cx="44" cy="45" r="1.6" fill="${Ln(n, 0.4)}"/>`;
+    } else if (v === 1) {
+      // 棉被：两层叠在一起，上层翻边
+      s = `<path d="M13 36c0-2.6 1.8-4.4 4.4-4.4h29.2c2.6 0 4.4 1.8 4.4 4.4v10c0 2.6-1.8 4.4-4.4 4.4H17.4C14.8 50.4 13 48.6 13 46Z" fill="${Ln(n, 0.25)}" ${eP(n, 1.2)}/>` +
+        `<path d="M15 24c0-2.6 1.8-4.4 4.4-4.4h25.2c2.6 0 4.4 1.8 4.4 4.4v9c0 2.6-1.8 4.4-4.4 4.4H19.4C16.8 33.4 15 31.6 15 29Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M19 22h25" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".45"/>` +
+        `<path d="M15 29c5 2.6 10 2.6 15 0s10-2.6 15 0" fill="none" stroke="${Ln(n, 0.5)}" stroke-width="1.2" opacity=".5"/>`;
+    } else if (v === 2) {
+      // 席梦思：三层厚垫 + 绗缝纽扣
+      s = `<path d="M12 22h40v26H12z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M12 30h40M12 40h40" stroke="${Ln(n, 0.5)}" stroke-width="1.3" opacity=".55"/>` +
+        `<path d="M12 23.5h40" stroke="#ffffff" stroke-width="1.5" opacity=".4"/>` +
+        [0, 1, 2, 3].map((i) => `<circle cx="${19 + i * 8.6}" cy="${26 + (i % 2) * 4}" r="1.5" fill="${Ln(n, 0.4)}" opacity=".7"/>`).join('') +
+        [0, 1, 2, 3].map((i) => `<circle cx="${19 + i * 8.6}" cy="${36 + (i % 2) * 4}" r="1.5" fill="${Ln(n, 0.4)}" opacity=".7"/>`).join('');
+    } else if (v === 3) {
+      // 十斤大棉被：蓬松的一团 + 捆绳
+      s = `<path d="M13 26q6-8 19-8t19 8v14q-6 8-19 8t-19-8z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M13 33q6 5 19 5t19-5" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="1.2" opacity=".5"/>` +
+        `<path d="M22 18v30M42 18v30" stroke="${Ln(n, 0.55)}" stroke-width="2.4" opacity=".75"/>` +
+        `<path d="M22 18v30M42 18v30" stroke="${Hn(n, 0.4)}" stroke-width="1.1" opacity=".5"/>` +
+        `<path d="M16 24q4-4 10-5" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".45"/>`;
+    } else {
+      // 灭火毯：卷起来 + 绑带
+      s = `<path d="M18 18h26c2.6 0 4.4 1.8 4.4 4.4v22c0 2.6-1.8 4.4-4.4 4.4H18z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<ellipse cx="18" cy="33" rx="5" ry="16.4" fill="${Ln(n, 0.2)}" ${eP(n, 1.2)}/>` +
+        `<ellipse cx="18" cy="33" rx="2.2" ry="9" fill="${Ln(n, 0.45)}" opacity=".8"/>` +
+        `<path d="M26 20v26M36 20v26" stroke="${Ln(n, 0.5)}" stroke-width="2" opacity=".6"/>` +
+        `<path d="M21 20h22" stroke="#ffffff" stroke-width="1.4" opacity=".4"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('sh', 14, 32, 50, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 32, 26) +
-        `<path d="M32 9l17 6v16c0 11-7.5 18-17 22-9.5-4-17-11-17-22V15z" fill="url(#@sh)" ${eP(n, 1.6)}/>` +
-        `<path d="M32 14.5l11.5 4v12.5c0 7.5-5 12.5-11.5 15.5-6.5-3-11.5-8-11.5-15.5V18.5z" fill="none" stroke="#ffffff" stroke-width="1.3" opacity=".5"/>` +
-        `<path d="M26.5 24h11v8.5h-11z" fill="#cfe6ff" opacity=".55" ${eP(n, 1.1)}/>` +
-        `<path d="M22 40h20" stroke="${Ln(n, 0.5)}" stroke-width="1.5" opacity=".6"/>`,
-    ),
+      fn('cl', 12, 18, 52, 50, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 34, 24) + s,
+    );
+  },
 
-  // 喇叭：大喇叭 / 广场舞音响 / 收音机 / 唢呐 / 弹弓
-  horn: (n) =>
-    dn(
+  // 盾门族：0 防暴盾牌 1 防盗门 2 不锈钢大盆
+  shield: (n, v = 0) => {
+    const g = 'url(#@sh)';
+    let s;
+    if (v === 0) {
+      // 防暴盾牌：透明盾面 + 观察窗 + 把手
+      s = `<path d="M32 9l17 6v16c0 11-7.5 18-17 22-9.5-4-17-11-17-22V15z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M32 13.5l12.5 4.4v13c0 8-5.5 13.5-12.5 16.6-7-3.1-12.5-8.6-12.5-16.6v-13z" fill="${Hn(n, 0.2)}" opacity=".45"/>` +
+        `<path d="M25 24h14v9H25z" fill="#cfe6ff" opacity=".55" ${eP(n, 1)}/>` +
+        `<path d="M22 40h20" stroke="${Ln(n, 0.5)}" stroke-width="1.6" opacity=".55"/>`;
+    } else if (v === 1) {
+      // 防盗门：门板 + 门把手 + 锁孔 + 合页
+      s = `<path d="M18 12h28v42H18z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M21 16h22v20H21z" fill="${Ln(n, 0.18)}" ${eP(n, 1)}/>` +
+        `<path d="M21 40h22v11H21z" fill="${Ln(n, 0.1)}" ${eP(n, 1)}/>` +
+        `<path d="M41 32h4.6" stroke="${Hn(n, 0.55)}" stroke-width="2.6" stroke-linecap="round"/>` +
+        `<circle cx="41.5" cy="38" r="1.8" fill="${Ln(n, 0.45)}"/>` +
+        `<path d="M18 20h-3M18 46h-3" stroke="${Ln(n, 0.4)}" stroke-width="2" stroke-linecap="round"/>` +
+        `<path d="M22 17h20" stroke="#ffffff" stroke-width="1.4" opacity=".4"/>`;
+    } else {
+      // 不锈钢大盆：圆盆 + 双耳 + 卷边
+      s = `<path d="M12 26h40c0 12-7.5 22-20 22S12 38 12 26Z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<ellipse cx="32" cy="26" rx="20" ry="6" fill="${Hn(n, 0.35)}" ${eP(n, 1.2)}/>` +
+        `<ellipse cx="32" cy="26" rx="15.5" ry="4" fill="${Ln(n, 0.28)}" opacity=".75"/>` +
+        `<path d="M8 24q4 3 4 8M56 24q-4 3-4 8" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="2.6" stroke-linecap="round"/>` +
+        `<path d="M18 32q4 10 14 12" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".45"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('hn', 10, 32, 54, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 30, 32, 26) +
-        `<path d="M14 27h8l20-13v36L22 37h-8z" fill="url(#@hn)" ${eP(n, 1.5)}/>` +
-        `<path d="M46 19c4 3 4 11 0 14" fill="none" stroke="${Hn(n, 0.5)}" stroke-width="2.4" stroke-linecap="round"/>` +
-        `<path d="M51 15c6.5 5 6.5 19 0 24" fill="none" stroke="${Hn(n, 0.4)}" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>` +
-        `<path d="M18 27v10" stroke="#ffffff" stroke-width="1.5" opacity=".5"/>`,
-    ),
+      fn('sh', 10, 10, 54, 54, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 32, 26) + s,
+    );
+  },
 
-  // 盒子：饭盒 / 急救箱 / 闹钟 / 冷风机 / 大锅菜
-  box: (n) =>
-    dn(
+  horn: (n, v = 0) => {
+    const g = 'url(#@hn)';
+    let s;
+    if (v === 0) {
+      // 大喇叭：锥形口 + 短握把
+      s = `<path d="M14 27h8l20-13v36L22 37h-8z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<ellipse cx="42" cy="32" rx="4.6" ry="18" fill="${Hn(n, 0.32)}" ${eP(n, 1.1)}/>` +
+        `<path d="M42 17.5q4 6.5 4 14.5t-4 14.5" fill="none" stroke="${Hn(n, 0.55)}" stroke-width="1.6" opacity=".8"/>` +
+        `<path d="M18 27v10" stroke="#ffffff" stroke-width="1.5" opacity=".5"/>` +
+        `<path d="M23 24l14-9" stroke="#ffffff" stroke-width="1.2" opacity=".35"/>`;
+    } else if (v === 1) {
+      // 广场舞音响：方箱 + 两个喇叭单元 + 提手
+      s = `<path d="M15 20h34v32H15z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<circle cx="32" cy="32" r="9" fill="${Ln(n, 0.3)}" ${eP(n, 1.1)}/>` +
+        `<circle cx="32" cy="32" r="4.2" fill="${Hn(n, 0.2)}" ${eP(n, 0.9)}/>` +
+        `<circle cx="32" cy="45" r="3.4" fill="${Ln(n, 0.3)}" ${eP(n, 0.9)}/>` +
+        `<path d="M25 15h14v5H25z" fill="${Ln(n, 0.2)}" ${eP(n, 1)}/>` +
+        `<path d="M18 24v24" stroke="#ffffff" stroke-width="1.5" opacity=".35"/>`;
+    } else if (v === 2) {
+      // 收音机：横箱 + 天线 + 旋钮 + 刻度
+      s = `<path d="M13 26h38v22H13z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M16 29h18v16H16z" fill="${Ln(n, 0.2)}" ${eP(n, 0.9)}/>` +
+        `<path d="M18 33h14M18 37h14M18 41h10" stroke="${Hn(n, 0.5)}" stroke-width="1.2" opacity=".75"/>` +
+        `<circle cx="42" cy="35" r="4.4" fill="${Hn(n, 0.25)}" ${eP(n, 1)}/>` +
+        `<path d="M42 35l2.6-2" stroke="${Ln(n, 0.4)}" stroke-width="1.4" stroke-linecap="round"/>` +
+        `<path d="M40 22l8-9" stroke="${Ln(n, 0.4)}" stroke-width="1.8" stroke-linecap="round"/>` +
+        `<path d="M45 44h4M15 44h26" stroke="${Ln(n, 0.35)}" stroke-width="1.4" opacity=".6"/>`;
+    } else {
+      // 唢呐：细锥管 + 喇叭口 + 哨片
+      s = `<path d="M29 12h6v24h-6z" fill="${g}" ${eP(n, 1.1)}/>` +
+        `<path d="M30.5 36h3v6h-3z" fill="${Ln(n, 0.3)}"/>` +
+        `<path d="M26 42h12l4 10H22z" fill="${g}" ${eP(n, 1.2)}/>` +
+        `<path d="M22 52h20" stroke="${Ln(n, 0.5)}" stroke-width="2" stroke-linecap="round"/>` +
+        `<path d="M28 8h8v4h-8z" fill="${Hn(n, 0.45)}" ${eP(n, 1)}/>` +
+        `<path d="M31 14v20" stroke="#ffffff" stroke-width="1.4" opacity=".45"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('bx', 12, 36, 52, 36, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 34, 24) +
-        `<path d="M14 26h36v22c0 2.5-1.5 4-4 4H18c-2.5 0-4-1.5-4-4z" fill="url(#@bx)" ${eP(n, 1.5)}/>` +
-        `<path d="M12 20h40v7H12z" fill="${Hn(n, 0.4)}" ${eP(n, 1.4)}/>` +
-        `<path d="M27 34h10v4h-10zM30 30h4v12h-4z" fill="#f4f7fb" opacity=".92"/>` +
-        `<path d="M18 29v17" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>`,
-    ),
+      fn('hn', 12, 12, 52, 52, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 32, 24) + s,
+    );
+  },
 
-  // 头盔/面罩：安全帽 / 防毒面具 / 防弹衣 / 防暴服
-  mask: (n) =>
-    dn(
+  // 盒子族：0 饭盒 1 急救箱 2 闹钟 3 冷风机 4 大锅 5 纸箱
+  box: (n, v = 0) => {
+    const g = 'url(#@bx)';
+    let s;
+    if (v === 0) {
+      // 饭盒：方盒 + 扣盖 + 提手
+      s = `<path d="M14 28h36v20c0 2.6-1.6 4.2-4.2 4.2H18.2C15.6 52.2 14 50.6 14 48Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M12 22h40v7H12z" fill="${Hn(n, 0.3)}" ${eP(n, 1.2)}/>` +
+        `<path d="M27 25h10v2.6H27z" fill="${Ln(n, 0.3)}"/>` +
+        `<path d="M32 17q5 0 5 5" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="2" stroke-linecap="round"/>` +
+        `<path d="M18 31v15" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>`;
+    } else if (v === 1) {
+      // 急救箱：白箱 + 红十字 + 提手
+      s = `<path d="M13 26h38v24H13z" fill="#eef4fb" ${eP(n, 1.3)}/>` +
+        `<path d="M13 26h38v7H13z" fill="${g}" opacity=".8" ${eP(n, 1.1)}/>` +
+        `<path d="M29 34h6v4h-6zM30 32h4v8h-4z" fill="#d9403c"/>` +
+        `<path d="M25 20h14v6H25z" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="2.4" stroke-linecap="round"/>` +
+        `<path d="M13 40h38" stroke="${Ln(n, 0.3)}" stroke-width="1" opacity=".4"/>`;
+    } else if (v === 2) {
+      // 闹钟：圆钟 + 双铃 + 指针
+      s = `<circle cx="32" cy="34" r="16" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<circle cx="32" cy="34" r="12.6" fill="#f4f7fb" opacity=".92"/>` +
+        `<path d="M32 34V25M32 34l6 4" stroke="${Ln(n, 0.45)}" stroke-width="2.2" stroke-linecap="round"/>` +
+        `<circle cx="32" cy="34" r="1.8" fill="${Ln(n, 0.5)}"/>` +
+        `<path d="M21 22q-4-5 1-8M43 22q4-5-1-8" fill="none" stroke="${Ln(n, 0.35)}" stroke-width="3" stroke-linecap="round"/>` +
+        `<path d="M24 50l-3 6M40 50l3 6" stroke="${Ln(n, 0.35)}" stroke-width="2.6" stroke-linecap="round"/>`;
+    } else if (v === 3) {
+      // 冷风机：方机 + 出风格栅 + 水口
+      s = `<path d="M15 18h34v34H15z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M19 22h26v18H19z" fill="${Ln(n, 0.22)}" ${eP(n, 1)}/>` +
+        [0, 1, 2, 3, 4].map((i) => `<path d="M20 ${24 + i * 3.4}h24" stroke="${Hn(n, 0.45)}" stroke-width="1.3" opacity=".7"/>`).join('') +
+        `<circle cx="26" cy="45" r="3.2" fill="${Ln(n, 0.28)}" ${eP(n, 0.9)}/>` +
+        `<circle cx="38" cy="45" r="3.2" fill="${Ln(n, 0.28)}" ${eP(n, 0.9)}/>`;
+    } else if (v === 4) {
+      // 大锅菜：铁锅 + 盖 + 双耳
+      s = `<path d="M12 28h40c0 12-7 22-20 22S12 40 12 28Z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M8 26h48v4H8z" fill="${Hn(n, 0.28)}" ${eP(n, 1.2)}/>` +
+        `<path d="M22 20q10-6 20 0" fill="none" stroke="${Ln(n, 0.4)}" stroke-width="3" stroke-linecap="round"/>` +
+        `<path d="M16 32q4 10 16 10" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>`;
+    } else {
+      // 红牛整箱：纸箱 + 封箱胶带 + 提手孔
+      s = `<path d="M12 26h40v24H12z" fill="${g}" ${eP(n, 1.3)}/>` +
+        `<path d="M12 26l6-7h40l-6 7z" fill="${Hn(n, 0.3)}" ${eP(n, 1.1)}/>` +
+        `<path d="M32 19v31" stroke="#f4f7fb" stroke-width="3.4" opacity=".7"/>` +
+        `<path d="M18 33h7v4h-7zM39 33h7v4h-7z" fill="${Ln(n, 0.35)}"/>` +
+        `<path d="M14 44h36" stroke="${Ln(n, 0.4)}" stroke-width="1.2" opacity=".5"/>`;
+    }
+    return dn(
       Mi(n),
-      fn('mk', 14, 34, 50, 34, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 32, 26) +
-        `<path d="M32 10c9.5 0 16 5 16 13v9c0 10-7 16-16 22-9-6-16-12-16-22v-9c0-8 6.5-13 16-13z" fill="url(#@mk)" ${eP(n, 1.6)}/>` +
-        `<path d="M20.5 27h23v9h-23z" fill="#0a1128" opacity=".85" ${eP(n, 1.2)}/>` +
-        `<path d="M24 31.5h6M34 31.5h6" stroke="${Hn(n, 0.6)}" stroke-width="2.4" stroke-linecap="round"/>` +
-        `<path d="M26 42h12" stroke="${Ln(n, 0.5)}" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>`,
-    ),
+      fn('bx', 10, 18, 54, 52, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 34, 24) + s,
+    );
+  },
 
-  // 车：电动车
+  // 面罩族：0 防毒面具 1 防暴服（带护板）
+  mask: (n, v = 0) => {
+    const g = 'url(#@mk)';
+    let s;
+    if (v === 0) {
+      // 防毒面具：大镜片 + 侧滤罐 + 呼吸阀
+      s = `<path d="M32 10c9.5 0 16 5 16 13v9c0 10-7 16-16 22-9-6-16-12-16-22v-9c0-8 6.5-13 16-13z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M20.5 24h23v10h-23z" fill="#0a1128" opacity=".82" ${eP(n, 1.1)}/>` +
+        `<path d="M24 29h6M34 29h6" stroke="${Hn(n, 0.6)}" stroke-width="2.4" stroke-linecap="round"/>` +
+        `<circle cx="32" cy="44" r="5" fill="${Ln(n, 0.25)}" ${eP(n, 1.1)}/>` +
+        `<circle cx="32" cy="44" r="2" fill="${Ln(n, 0.5)}"/>` +
+        `<path d="M48 30q5 1 5 6" fill="none" stroke="${Ln(n, 0.35)}" stroke-width="2.4" stroke-linecap="round"/>`;
+    } else {
+      // 防暴服：马甲 + 胸前护板 + 肩扣
+      s = `<path d="M23 11l9 6 9-6 9 6v38H14V17z" fill="${g}" ${eP(n, 1.4)}/>` +
+        `<path d="M21 22h22v13H21z" fill="${Ln(n, 0.22)}" ${eP(n, 1.1)}/>` +
+        `<path d="M21 40h22v12H21z" fill="${Ln(n, 0.18)}" ${eP(n, 1.1)}/>` +
+        `<path d="M32 17v38" stroke="${Ln(n, 0.45)}" stroke-width="1.6" opacity=".65"/>` +
+        `<path d="M25 15l3 4M39 15l-3 4" stroke="${Hn(n, 0.5)}" stroke-width="1.6" stroke-linecap="round"/>` +
+        `<path d="M17 26h4M43 26h4" stroke="${Ln(n, 0.4)}" stroke-width="1.6" opacity=".6"/>`;
+    }
+    return dn(
+      Mi(n),
+      fn('mk', 12, 12, 52, 52, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
+      We('gw', 32, 32, 26) + s,
+    );
+  },
+
   bike: (n) =>
     dn(
       Mi(n),
@@ -319,17 +658,28 @@ const tH = {
     ),
 
   // 外套：棉袄 / 雨衣
-  coat: (n) =>
-    dn(
+  // 外套族：0 棉袄（绗缝） 1 雨衣（连帽 + 反光条）
+  coat: (n, v = 0) => {
+    const g = 'url(#@ct)';
+    const s =
+      v === 0
+        ? `<path d="M23 13l9-4 9 4 11 7-5 12-5-3.5V53H22V28.5L17 32 12 20z" fill="${g}" ${eP(n, 1.4)}/>` +
+          `<path d="M27 14l5 9 5-9" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="1.6" stroke-linejoin="round"/>` +
+          `<path d="M32 23v29" stroke="${Ln(n, 0.45)}" stroke-width="1.4" opacity=".7"/>` +
+          `<path d="M22 34h20M22 42h20" stroke="${Ln(n, 0.4)}" stroke-width="1.1" opacity=".5"/>` +
+          `<path d="M26 30h4M34 30h4M26 38h4M34 38h4" stroke="${Ln(n, 0.35)}" stroke-width="1" opacity=".55"/>` +
+          `<path d="M23 15l-6 6" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`
+        : `<path d="M32 9c5.5 0 9 3.4 9 8.4 0 3-1.4 5-3.4 6.6H26.4C24.4 22.4 23 20.4 23 17.4 23 12.4 26.5 9 32 9Z" fill="${Ln(n, 0.22)}" ${eP(n, 1.2)}/>` +
+          `<path d="M26.4 24h11.2l9.4 5.6-4.6 11-4.6-3.2V55H26V37.4l-4.6 3.2-4.6-11z" fill="${g}" ${eP(n, 1.4)}/>` +
+          `<path d="M26 36h12" stroke="#f4f7fb" stroke-width="2.6" opacity=".55"/>` +
+          `<path d="M32 26v28" stroke="${Ln(n, 0.45)}" stroke-width="1.4" opacity=".6"/>` +
+          `<path d="M26.5 12.5c2-2 9-2 11 0" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>`;
+    return dn(
       Mi(n),
       fn('ct', 10, 32, 54, 32, [[0, Hn(n, 0.46)], [0.18, Hn(n, 0.04)], [0.52, Ln(n, 0.16)], [1, Ln(n, 0.74)]]) + je('gw', Hn(n, 0.5), 0.34),
-      We('gw', 32, 32, 24) +
-        `<path d="M23 13l9-4 9 4 11 7-5 12-5-3.5V53H22V28.5L17 32 12 20z" fill="url(#@ct)" ${eP(n, 1.5)}/>` +
-        `<path d="M27 14l5 9 5-9" fill="none" stroke="${Ln(n, 0.45)}" stroke-width="1.6" stroke-linejoin="round"/>` +
-        `<path d="M32 23v29" stroke="${Ln(n, 0.45)}" stroke-width="1.4" opacity=".7"/>` +
-        `<path d="M22 34h20M22 42h20" stroke="${Ln(n, 0.4)}" stroke-width="1.1" opacity=".45"/>` +
-        `<path d="M23 15l-6 6" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>`,
-    ),
+      We('gw', 32, 32, 24) + s,
+    );
+  },
 
   // 铁丝网：菱形网格
   mesh: (n) =>
@@ -376,89 +726,96 @@ const tH = {
 // 归类原则看"这件东西长什么样"，不看它的属性类别：
 // 一根铁棍就是棍，一瓶药水就是瓶，不管它加的是物攻还是法强。
 const tHx = {
-  // ── 棍棒：有杆、有握把的东西 ──
-  baton: 'blunt',
-  steel_pipe: 'blunt',
-  police_baton: 'blunt',
-  wrench: 'wrench',
-  baseball_bat: 'blunt',
-  chain_whip: 'chain',
-  knuckle: 'knuckle',
-  slingshot: 'sling',
-  steel_nail: 'nail',
-  dumbbell: 'dumbbell',
-  nail_gun: 'gun',
-  sledgehammer: 'hammer',
-  pry_bar: 'blunt',
-  demolition_hammer: 'hammer',
+  // 值是 '形制' 或 ['形制', 变体号]。变体号让同一个形制画出不同的东西，
+  // 不然一页商店里会排出一列一模一样的棍子/罐子。
+  // ── 棍棒：同一根杆，靠长度/粗细/末端零件区分 ──
+  baton: ['blunt', 0],
+  steel_pipe: ['blunt', 1],
+  police_baton: ['blunt', 2],
+  pry_bar: ['blunt', 3],
+  baseball_bat: ['blunt', 4],
+  sledgehammer: ['blunt', 5],
+  demolition_hammer: ['blunt', 6],
 
-  // ── 瓶装液体：敌敌畏、喷雾、酒、药水 ──
-  ddvp: 'bottle',
-  ddvp_concentrate: 'bottle',
-  spray_can: 'bottle',
-  pepper_spray: 'bottle',
-  firecracker: 'bottle',
-  baijiu: 'bottle',
-  herb_jar: 'bottle',
-  huoxiang: 'bottle',
-  wild_dog_milk: 'bottle',
+  // ── 瓶装：细颈瓶 / 喷罐 / 大桶 / 小药瓶 / 奶瓶 / 炮仗 / 白酒 / 按压喷雾 / 泡酒罐 ──
+  ddvp: ['bottle', 0],
+  baijiu: ['bottle', 6],
+  ddvp_concentrate: ['bottle', 2],
+  spray_can: ['bottle', 1],
+  pepper_spray: ['bottle', 7],
+  huoxiang: ['bottle', 3],
+  herb_jar: ['bottle', 8],
+  wild_dog_milk: ['bottle', 4],
+  firecracker: ['bottle', 5],
 
-  // ── 罐筒：饮料罐、奶粉罐、壶、钢瓶、消防栓 ──
-  red_bull: 'can',
-  red_bull_pack: 'can',
-  milk_powder: 'can',
-  power_bank: 'can',
-  thermos: 'can',
-  gas_tank: 'can',
-  fire_hydrant: 'can',
-  ginger_tea: 'can',
+  // ── 罐筒：易拉罐 / 六罐装 / 奶粉罐 / 保温壶 / 钢瓶 / 消防栓 / 马克杯 / 充电宝 ──
+  red_bull: ['can', 0],
+  red_bull_pack: ['can', 1],
+  milk_powder: ['can', 2],
+  thermos: ['can', 3],
+  gas_tank: ['can', 4],
+  fire_hydrant: ['can', 5],
+  ginger_tea: ['can', 6],
+  power_bank: ['can', 7],
 
-  // ── 块状：板砖、水泥 ──
-  brick: 'brick',
-  concrete_block: 'brick',
+  // ── 块状 ──
+  brick: ['brick', 0],
+  concrete_block: ['brick', 1],
 
-  // ── 布被：衣、垫、被、毯、网 ──
-  padded_coat: 'coat',
-  raincoat: 'coat',
-  cushion: 'cloth',
-  quilt: 'cloth',
-  mattress: 'cloth',
-  big_quilt: 'cloth',
-  fire_blanket: 'cloth',
+  // ── 布被 / 外套 / 铁网 ──
+  cushion: ['cloth', 0],
+  quilt: ['cloth', 1],
+  mattress: ['cloth', 2],
+  big_quilt: ['cloth', 3],
+  fire_blanket: ['cloth', 4],
+  padded_coat: ['coat', 0],
+  raincoat: ['coat', 1],
   barbed_fence: 'mesh',
 
-  // ── 盾门盆：挡在身前的一大片 ──
-  riot_shield: 'shield',
-  iron_door: 'shield',
-  steel_basin: 'shield',
+  // ── 盾门盆 ──
+  riot_shield: ['shield', 0],
+  iron_door: ['shield', 1],
+  steel_basin: ['shield', 2],
 
-  // ── 喇叭音响：往外发声的 ──
-  megaphone: 'horn',
-  speaker: 'horn',
-  radio: 'horn',
-  suona: 'horn',
+  // ── 喇叭音响 ──
+  megaphone: ['horn', 0],
+  speaker: ['horn', 1],
+  radio: ['horn', 2],
+  suona: ['horn', 3],
 
-  // ── 盒子：饭盒、箱子、机器、锅 ──
-  lunchbox: 'box',
-  first_aid_kit: 'box',
-  alarm_clock: 'box',
-  air_cooler: 'box',
-  big_pot: 'box',
-  red_bull_case: 'box',
+  // ── 盒子：饭盒 / 急救箱 / 闹钟 / 冷风机 / 大锅 / 纸箱 ──
+  lunchbox: ['box', 0],
+  first_aid_kit: ['box', 1],
+  alarm_clock: ['box', 2],
+  air_cooler: ['box', 3],
+  big_pot: ['box', 4],
+  red_bull_case: ['box', 5],
 
-  // ── 头面护具：帽子、面罩、马甲 ──
+  // ── 头面护具 ──
+  gas_mask: ['mask', 0],
+  riot_armor: ['mask', 1],
   hard_hat: 'helmet',
-  gas_mask: 'mask',
   bulletproof_vest: 'vest',
-  riot_armor: 'vest',
 
-  // ── 车 ──
+  // ── 一件一个形制 ──
+  knuckle: 'knuckle',
+  steel_nail: 'nail',
+  slingshot: 'sling',
+  chain_whip: 'chain',
+  wrench: 'wrench',
+  nail_gun: 'gun',
+  dumbbell: 'dumbbell',
   e_bike: 'bike',
 };
 
 function Po(n) {
-  const f = tH[n] ?? tH[tHx[n]] ?? tH.box;
-  return f(ln[n].color);
+  // tHx 的值可以是 'blunt'，也可以是 ['blunt', 3]：后者是同一形制下的变体
+  // （同一根杆画成警棍/钢管/撬棍/球棒……），不然一页商店里会排出一列一模一样的东西。
+  const e = tHx[n],
+    k = Array.isArray(e) ? e[0] : e,
+    v = Array.isArray(e) ? e[1] : 0,
+    f = tH[n] ?? tH[k] ?? tH.box;
+  return f(ln[n].color, v);
 }
 
 const Ye = 'fill="currentColor"',
