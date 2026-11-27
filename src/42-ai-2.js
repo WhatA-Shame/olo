@@ -14,7 +14,7 @@ import { Se, ea, f5, lm } from './02-data.js';
 import { p8, yo } from './21-core-4.js';
 import { kartSpec } from './47-kart.js';
 import { BG, S1, t6 } from './40-ui-8.js';
-import { E1, Fk, JG, KG, Kp, MV, Ms, SV, T1, Uk, VG, XG, YG, a6, bV, d6, dV, e5, e6, f6, hV, jG, kV, n6, nV, qG, sV, se, t5, uV, vV, wV, ye, zk } from './41-ai.js';
+import { E1, Fk, JG, KG, Kp, MV, Ms, SV, T1, Uk, VG, XG, YG, a6, bV, d6, dV, e5, e6, f6, hV, jG, kV, monkeyAnnoyPeel, n6, nV, qG, sV, se, slimeHandlePuddle, t5, uV, vV, wV, xuesongHandleScoop, xuesongPickUltTarget, ye, zk } from './41-ai.js';
 
 class TV {
   interval;
@@ -79,6 +79,7 @@ class TV {
   seenSince = new Map();
   seenLast = new Map();
   dodgeRoll = new Map();
+  peelDodgeRoll = new Map();
   safeAt = -99;
   safe = { x: 0, y: 0 };
   anchorLane = null;
@@ -109,7 +110,7 @@ class TV {
       (this.team = t.team),
       (this.brain = vV(t)),
       (this.geo = this.brain.geo),
-      (this.ranged = Se[this.heroId].attackType === "ranged"),
+      (this.ranged = Se[this.heroId].attackType !== "melee" || this.heroId === "monkey"),
       (this.home = t.map.bases[t.team].fountain),
       (this.foeHome = t.map.bases[t.enemyTeam].fountain),
       (this.lastHp = t.hero.hp),
@@ -129,8 +130,13 @@ class TV {
           this.label = "recall";
           return;
         }
+        // 雪松大招举起敌人期间优先走完整拉回连招（喊队友+2技能跳回+最大控制丢回）
+        if (this.heroId === "xuesong" && e5(e, "xuesong_scoop") && xuesongHandleScoop(this)) return;
+        // 黄色史莱姆大招滩开期间优先反吸敌人并拖回塔下或队友身边
+        if (this.heroId === "slime" && e5(e, "slime_puddle") && slimeHandlePuddle(this)) return;
         this.dodge() ||
           this.survive() ||
+          this.stompPeel() ||
           (this.finish(), !this.sustain() && (this.combat() || this.assist() || this.doTask()));
       }
     }
@@ -155,6 +161,7 @@ class TV {
       o = this.time,
       r = Math.hypot(t - this.tripX, e - this.tripY),
       l = Math.hypot(a.pos.x - this.tripX, a.pos.y - this.tripY) < 3;
+    const peelCheck = (f) => this.willDodgePeel(f.id);
     (r > s || l || this.route === null || o - this.routeAt > 4) &&
       ((this.tripX = t),
       (this.tripY = e),
@@ -162,7 +169,7 @@ class TV {
       (this.routeIdx = 0),
       (Ms.x = t),
       (Ms.y = e),
-      (this.route = this.diving ? null : this.v.safePath(Ms)));
+      (this.route = this.diving ? null : this.v.safePath(Ms, 1, peelCheck)));
     const c = this.route;
     if (!c) {
       this.act.moveTo(this.tripX, this.tripY, i);
@@ -178,6 +185,7 @@ class TV {
     this.act.moveTo(f.x, f.y, i);
   }
   doTask() {
+    if (this.heroId === "monkey" && monkeyAnnoyPeel(this)) return;
     const t = this.brain.taskOf(this.heroId);
     switch (t.kind) {
       case "jungle":
@@ -442,6 +450,79 @@ class TV {
       e
     );
   }
+  willDodgePeel(t) {
+    let e = this.peelDodgeRoll.get(t);
+    if (e === void 0) {
+      this.peelDodgeRoll.size > 64 && this.peelDodgeRoll.clear();
+      // 大多数已成型的香蕉皮会尽量躲开，保留少数失误踩上去的可能（约 13%~24%）
+      const chance = Math.max(0.76, Math.min(0.88, 0.72 + this.prof.dodge * 0.18));
+      e = this.v.rng.chance(chance);
+      this.peelDodgeRoll.set(t, e);
+    }
+    return e;
+  }
+  stompPeel() {
+    const t = this.v,
+      e = this.me;
+    if (t.busy() || this.forceFightId >= 0) return !1;
+    if (this.hpR < Math.max(0.36, this.style.fleeHp + 0.12)) return !1;
+    const areas = t.hostileAreas();
+    if (areas.length === 0) return !1;
+    const spd = Math.max(1, e.stats.moveSpeed);
+    let best = null,
+      bestDist = 1 / 0;
+    for (let k = 0; k < areas.length; k++) {
+      const f = areas[k];
+      if (f.visual !== "monkey_peel") continue;
+      const armDur = f.armDur ?? 1,
+        left = armDur - f.age;
+      if (left <= 0.14) continue;
+      const dist = Math.hypot(f.pos.x - e.pos.x, f.pos.y - e.pos.y);
+      if (dist > 5.6 || dist >= bestDist) continue;
+      const trig = f.radius + e.radius,
+        need = Math.max(0, dist - (trig - 0.12)),
+        eta = need / spd;
+      // 必须能在成型前稳妥踩到，不然过去反倒送晕
+      if (eta > left - 0.14) continue;
+      if (this.nearFoeFountain(f.pos, 1.5) || t.enemyStructureCovering(f.pos, 0.8)) continue;
+      if (!t.lineClear(e.pos, f.pos)) continue;
+      // 安全判断：敌方英雄正守在皮旁边且己方处于劣势或血量偏低时不强踩
+      let unsafe = !1;
+      for (let fi = 0; fi < this.foes.length; fi++) {
+        const foe = this.foes[fi];
+        if (Math.hypot(foe.pos.x - f.pos.x, foe.pos.y - f.pos.y) < 3.2 && (this.adv < 0.85 || this.hpR < 0.55)) {
+          unsafe = !0;
+          break;
+        }
+      }
+      if (unsafe) continue;
+      // 路上不要穿过另一片已经生效的香蕉皮
+      const dx = f.pos.x - e.pos.x,
+        dy = f.pos.y - e.pos.y,
+        len2 = dx * dx + dy * dy;
+      if (len2 > 0.01) {
+        for (let ai = 0; ai < areas.length; ai++) {
+          const other = areas[ai];
+          if (other === f || other.visual !== "monkey_peel" || other.age < (other.armDur ?? 1) - 0.12) continue;
+          const pr = Math.max(0, Math.min(1, ((other.pos.x - e.pos.x) * dx + (other.pos.y - e.pos.y) * dy) / len2)),
+            cx = e.pos.x + dx * pr - other.pos.x,
+            cy = e.pos.y + dy * pr - other.pos.y,
+            or = other.radius + e.radius + 0.25;
+          if (cx * cx + cy * cy < or * or) {
+            unsafe = !0;
+            break;
+          }
+        }
+      }
+      if (unsafe) continue;
+      best = f;
+      bestDist = dist;
+    }
+    if (!best) return !1;
+    this.act.moveTo(best.pos.x, best.pos.y, !0);
+    this.label = "stomp-peel";
+    return !0;
+  }
   dodge() {
     const t = this.v,
       e = this.me,
@@ -449,9 +530,49 @@ class TV {
     if (t.busy()) return !1;
     let i = 0,
       a = 0,
-      o = !1;
-    const r = Math.max(1, e.stats.moveSpeed);
+      o = !1,
+      peelOnly = !0;
+    const r = Math.max(1, e.stats.moveSpeed),
+      fx = Math.cos(e.facing),
+      fy = Math.sin(e.facing),
+      ord = t.orderState();
     for (const f of t.hostileAreas()) {
+      if (f.visual === "monkey_peel") {
+        const armDur = f.armDur ?? 1,
+          left = armDur - f.age,
+          h = e.pos.x - f.pos.x,
+          u = e.pos.y - f.pos.y,
+          m = Math.hypot(h, u),
+          trig = f.radius + e.radius,
+          need = Math.max(0, m - (trig - 0.12)),
+          canStomp = left > 0.14 && need / r <= left - 0.14;
+        // 还没成型且能抢踩的留给 stompPeel 去踩；已成型或来不及踩掉的尽量绕开
+        if (canStomp) continue;
+        const warn = trig + 0.95;
+        if (m >= warn || !this.willDodgePeel(f.id)) continue;
+        const rx = m > 0.05 ? h / m : -fx,
+          ry = m > 0.05 ? u / m : -fy,
+          toward = -(rx * fx + ry * fy);
+        // 紧贴危险圈或正朝香蕉皮走过去时侧身绕开
+        if (m >= trig + 0.38 && (ord === 0 || toward < 0.22)) continue;
+        let tx = -ry,
+          ty = rx;
+        const lx = e.pos.x + tx * 1.4,
+          ly = e.pos.y + ty * 1.4,
+          rx2 = e.pos.x - tx * 1.4,
+          ry2 = e.pos.y - ty * 1.4,
+          okL = t.walkable({ x: lx, y: ly }),
+          okR = t.walkable({ x: rx2, y: ry2 });
+        if (okL !== okR) {
+          if (!okL) ((tx = -tx), (ty = -ty));
+        } else if (tx * fx + ty * fy < -tx * fx - ty * fy) {
+          ((tx = -tx), (ty = -ty));
+        }
+        const pushW = m < trig + 0.28 ? 0.9 : 0.45,
+          tangW = m < trig + 0.28 ? 0.65 : 1.05;
+        ((i += (rx * pushW + tx * tangW) * 1.35), (a += (ry * pushW + ty * tangW) * 1.35), (o = !0));
+        continue;
+      }
       const d = BG[f.visual];
       if ((d !== "incoming" && d !== "damage") || f.followUnitId >= 0 || f.age < s.reaction) continue;
       const h = e.pos.x - f.pos.x,
@@ -471,13 +592,13 @@ class TV {
         if (s.dodge >= 0.9 && p > 0.1 && a6(this, y, v)) return ((this.label = "dodge"), !0);
         continue;
       }
-      ((i += y), (a += v), (o = !0));
+      ((i += y), (a += v), (o = !0), (peelOnly = !1));
     }
     for (const f of t.hostileCones())
       f.age < s.reaction ||
         (JG(e.pos, e.radius, f, this.home, this.canStand, t5) &&
           this.willDodge(f.id) &&
-          ((i += t5.x * 2), (a += t5.y * 2), (o = !0)));
+          ((i += t5.x * 2), (a += t5.y * 2), (o = !0), (peelOnly = !1)));
     for (const f of t.hostileProjectiles()) {
       if (f.targetId !== -1 || f.speed <= 0 || f.traveled / f.speed < s.reaction * 0.5) continue;
       const d = e.pos.x - f.pos.x,
@@ -495,13 +616,16 @@ class TV {
         t.walkable(Ms) || ((y = -y), (v = -v)),
         (i += y * 1.5),
         (a += v * 1.5),
-        (o = !0));
+        (o = !0),
+        (peelOnly = !1));
     }
     if (!o) return !1;
-    const l = ye(this.home, e.pos) || 1;
-    ((i += ((this.home.x - e.pos.x) / l) * 0.3), (a += ((this.home.y - e.pos.y) / l) * 0.3));
+    if (!peelOnly) {
+      const l = ye(this.home, e.pos) || 1;
+      ((i += ((this.home.x - e.pos.x) / l) * 0.3), (a += ((this.home.y - e.pos.y) / l) * 0.3));
+    }
     const c = Math.hypot(i, a);
-    return c < 0.001 ? !1 : (this.act.moveDir(i / c, a / c, !0), (this.label = "dodge"), !0);
+    return c < 0.001 ? !1 : (this.act.moveDir(i / c, a / c, !0), (this.label = peelOnly ? "dodge-peel" : "dodge"), !0);
   }
   survive() {
     const t = this.time;
@@ -518,17 +642,21 @@ class TV {
         !this.diving &&
         (this.towerOnMe || this.tankers === 0 || this.tankHp < 450),
       i = this.nearFoe !== null && this.nearFoeD < 12,
-      a = this.style.fleeHp;
+      pbEff = this.heroId === "paperboy" && e5(this.me, "paperboy_effigy_ready"),
+      nmUlt = this.heroId === "niumo" && e5(this.me, "niumo_ult"),
+      cowUlt = this.heroId === "cow" && (e5(this.me, "cow_giant") || e5(this.me, "cow_stomp_ready")),
+      a = pbEff ? 0.03 : nmUlt ? 0.08 : cowUlt ? 0.09 : this.style.fleeHp,
+      fleeAdv = pbEff ? 0.34 : nmUlt ? 0.5 : cowUlt ? 0.48 : se.advFlee;
     let o = t < this.fleeUntil;
     if (
       (o
         ? i &&
-          (this.adv < se.advFlee * 1.2 || this.hpR < a) &&
+          (this.adv < fleeAdv * 1.2 || this.hpR < a) &&
           (this.fleeUntil = Math.max(this.fleeUntil, t + 0.6))
         : (((this.hpR < a && (i || this.inFoeRange || this.dmgRate > 0)) ||
-            (i && this.adv < se.advFlee) ||
-            (this.heroesOnMe > 0 && this.nearFoeD < 9 && this.adv < se.advPressed) ||
-            (i && this.danger >= 1 && this.adv < 1.1 && this.prof.awareness > 0)) &&
+            (i && this.adv < fleeAdv) ||
+            (!pbEff && this.heroesOnMe > 0 && this.nearFoeD < 9 && this.adv < se.advPressed) ||
+            (!pbEff && i && this.danger >= 1 && this.adv < 1.1 && this.prof.awareness > 0)) &&
             (o = !0),
           o && (this.fleeUntil = t + se.fleeHold)),
       o)
@@ -601,6 +729,11 @@ class TV {
       (this.safe.y = this.home.y));
     const r = Math.hypot(i, a) || 1;
     ((i /= r), (a /= r));
+    // 葱仔仔逃跑时若正在喷大招罚站，立刻按二段主动中断然后撒腿跑
+    if (this.heroId === "scallion" && e5(e, "scallion_beam") && !t.busy() && t.skillReady("ult")) {
+      this.act.castSelf("ult");
+      return;
+    }
     const l = this.nearFoe !== null && this.nearFoeD < 8.5,
       c = this.prof.escapeSense;
     if (
@@ -692,6 +825,12 @@ class TV {
   }
   engageDist(t) {
     const e = this.me;
+    if (this.heroId === "cow") {
+      const ultReady = this.v.skillReady("ult"),
+        ms = ultReady ? (e.stats.moveSpeed || 5.5) * (e5(e, "cow_exhaust") ? 2.1 : 1.28) : e.stats.moveSpeed || 5.5,
+        kickR = Math.max(4.0, Math.min(13.0, 5.5 + (ms - 4.5) * 0.95));
+      return e.stats.attackRange + t.radius + 2.5 + (this.v.skillReady("s2") || ultReady ? kickR : 0);
+    }
     if (this.ranged) return e.stats.attackRange + t.radius + 2.5;
     const s = f6[this.heroId],
       i = s && this.v.skillReady(s.slot) ? s.reach : 0;
@@ -730,9 +869,13 @@ class TV {
       const r = ye(t.pos, o.pos),
         l = o.hp / o.stats.maxHp;
       let c = 2 - r / 6 + (1 - l) * 2.2;
-      const f = Se[o.heroId].role;
+      const f = Se[o.heroId].role,
+        xsCaught =
+          e5(o, "xuesong_lifted") || (o.id === this.brain.xsTargetId && this.time < this.brain.xsTargetUntil);
       if (
         ((f === "mage" || f === "marksman") && (c += this.style.diveBackline),
+        this.heroId === "xuesong" && t.skills.ult.level > 0 && t.skills.ult.cd <= 0.5 && (c += f === "tank" ? -3.5 : 3.2),
+        xsCaught && (c += 6.5),
         o.id === this.brain.focusId && this.inMood(MV, this.prof.focus) && (c += 1.5),
         o.id === this.fightTargetId && this.time < this.fightUntil + 1 && (c += 0.8),
         o.id === this.forceFightId && (c += 10),
@@ -767,15 +910,50 @@ class TV {
       r = this.advantageAt(o.x, o.y);
     this.fightAdv = r;
     let l = (se.advAllIn * this.style.engage) / this.prof.aggression;
+    this.heroId === "paperboy" && (l *= e5(e, "paperboy_effigy_ready") ? 0.68 : 0.86);
+    this.heroId === "niumo" && (l *= e5(e, "niumo_ult") ? 0.62 : 0.8);
+    // 大脚牛：有大或变大期间非常凶，哪怕满血甚至刚深蹲力竭也敢直接进场开大开团
+    if (this.heroId === "cow" && (s.skillReady("ult") || e5(e, "cow_giant") || e5(e, "cow_stomp_ready")) && this.hpR >= 0.42) {
+      l *= this.foes.length >= 2 && this.friendsNear >= 1 ? 0.56 : 0.68;
+    }
+    // 小肥石：中后期人多聚集时有大招主动跳团开团
+    if (this.heroId === "stone" && s.skillReady("ult") && this.hpR >= 0.46 && this.foes.length >= 2 && (this.friendsNear >= 1 || this.adv >= 0.92)) {
+      let clustered = 0;
+      for (const f of this.foes) ye(f.pos, t.pos) <= 4.0 && clustered++;
+      if (clustered >= 2) l *= 0.64;
+    }
+    // 雪松：有大且目标是非坦克或可抓人时主动找机会贴近铲人
+    if (this.heroId === "xuesong" && s.skillReady("ult") && xuesongPickUltTarget(this, !0)) {
+      l *= 0.65;
+    }
+    // 黄色史莱姆：撞墙窗口或有大招时敢贴脸硬吃控制反吸开团
+    if (this.heroId === "slime" && (e5(e, "slime_wall_bounce") || s.skillReady("ult"))) {
+      l *= 0.72;
+    }
+    // 队友配合雪松大招抓回来的目标：果断集火跟上输出
+    const xsCaught = e5(t, "xuesong_lifted") || (t.id === this.brain.xsTargetId && i < this.brain.xsTargetUntil);
+    xsCaught && (l *= 0.6);
     t.id === this.brain.focusId
       ? (l *= se.followUp)
       : !this.style.initiator && this.friendsNear >= 2 && this.brain.focusId < 0 && (l *= se.waitForEngage);
     const c = i < this.shakenUntil;
     c && (l *= se.shakenFactor);
     const f = i < this.fightUntil && this.fightTargetId === t.id,
-      d = a <= e.stats.attackRange + t.radius + 1,
+      d =
+        this.heroId === "paperboy"
+          ? a <= 8.3
+          : this.heroId === "niumo"
+            ? a <= 6.5
+            : a <= e.stats.attackRange + t.radius + 1,
       h = this.heroesOnMe > 0 || (e.inCombat && i - e.lastHitTime < 1.2),
-      u = this.engageDist(t),
+      u =
+        xsCaught
+          ? Math.max(13.5, this.engageDist(t))
+          : this.heroId === "paperboy"
+            ? Math.max(8.4, this.engageDist(t))
+            : this.heroId === "niumo"
+              ? Math.max(6.8, this.engageDist(t))
+              : this.engageDist(t),
       m = this.killable(t),
       x = this.killWindow(t);
     let p = !1,
@@ -813,6 +991,10 @@ class TV {
   fight(t, e, s) {
     const i = this.v,
       a = this.me;
+    if (this.heroId === "niumo" && e5(a, "niumo_march")) {
+      this.label = "fight";
+      return;
+    }
     ((this.label = s ? "fight" : "trade"), i.busy() || (s ? nV(this, t) : Uk(this, t)));
     const o = a.stats.attackRange + t.radius;
     if (
@@ -848,12 +1030,69 @@ class TV {
     const e = this.v,
       s = this.me,
       i = this.act;
-    if (!this.prof.orbwalk || e.attackWindup()) {
+    if (e.attackWindup()) {
       i.attack(t.id);
       return;
     }
-    const a = e.attackCooldown(),
-      o = this.meleeThreat();
+    const a = e.attackCooldown();
+    if (this.heroId === "paperboy") {
+      const dist = ye(s.pos, t.pos),
+        suonaOn = e5(s, "paperboy_suona"),
+        meleeFoe = this.meleeThreat() || (t.stats.attackRange < 4 && dist < 5.6 ? t : null);
+      // 面对近战：始终保持 5.0~7.4m 距离，边退边用唢呐与普攻风筝骚扰
+      if (meleeFoe) {
+        const md = ye(s.pos, meleeFoe.pos);
+        if (md < 5.0 && (a > this.interval * 0.45 || suonaOn || md < 3.6)) {
+          let r = s.pos.x - meleeFoe.pos.x,
+            l = s.pos.y - meleeFoe.pos.y;
+          const c = Math.hypot(r, l) || 1,
+            f = ye(this.home, s.pos) || 1;
+          ((r = r / c + ((this.home.x - s.pos.x) / f) * 0.45), (l = l / c + ((this.home.y - s.pos.y) / f) * 0.45));
+          const d = Math.hypot(r, l) || 1;
+          ((Ms.x = s.pos.x + (r / d) * 2.2), (Ms.y = s.pos.y + (l / d) * 2.2));
+          if (e.walkable(Ms) && !e.enemyStructureCovering(Ms, 0)) {
+            i.moveDir(r / d, l / d);
+            return;
+          }
+        }
+        if (a <= this.interval * 0.7 || dist > 7.4) {
+          i.attack(t.id);
+          return;
+        }
+      } else if (t.stats.attackRange >= 4) {
+        // 面对远程：卡在 6.2~8.1m 唢呐与射程外边缘拉扯，绝不硬站撸
+        const dx = s.pos.x - t.pos.x,
+          dy = s.pos.y - t.pos.y,
+          c = Math.hypot(dx, dy) || 1;
+        if (dist < 6.0 && (a > this.interval * 0.45 || suonaOn)) {
+          const f = ye(this.home, s.pos) || 1,
+            rx = dx / c + ((this.home.x - s.pos.x) / f) * 0.35,
+            ry = dy / c + ((this.home.y - s.pos.y) / f) * 0.35,
+            d = Math.hypot(rx, ry) || 1;
+          ((Ms.x = s.pos.x + (rx / d) * 2.0), (Ms.y = s.pos.y + (ry / d) * 2.0));
+          if (e.walkable(Ms) && !e.enemyStructureCovering(Ms, 0)) {
+            i.moveDir(rx / d, ry / d);
+            return;
+          }
+        } else if (dist >= 6.0 && dist <= 8.1 && a > this.interval * 0.55) {
+          const dir = Math.sin(this.time * 1.9 + s.id) >= 0 ? 1 : -1,
+            sx = (-dy / c) * dir,
+            sy = (dx / c) * dir;
+          ((Ms.x = s.pos.x + sx * 1.8), (Ms.y = s.pos.y + sy * 1.8));
+          if (e.walkable(Ms) && !e.enemyStructureCovering(Ms, 0)) {
+            i.moveDir(sx, sy);
+            return;
+          }
+        }
+      }
+      i.attack(t.id);
+      return;
+    }
+    if (!this.prof.orbwalk) {
+      i.attack(t.id);
+      return;
+    }
+    const o = this.meleeThreat();
     if (!o || a <= this.interval * 0.7) {
       i.attack(t.id);
       return;
@@ -875,6 +1114,18 @@ class TV {
     i.moveDir(r / d, l / d);
   }
   assist() {
+    if (
+      this.heroId !== "xuesong" &&
+      this.hpR >= 0.35 &&
+      this.brain.xsTargetId >= 0 &&
+      this.time < this.brain.xsTargetUntil
+    ) {
+      const dp = this.brain.xsDrop,
+        dd = ye(this.me.pos, dp);
+      if (dd > 4.5 && dd <= 22 && !this.v.enemyStructureCovering(dp, 0.5)) {
+        return (this.travel(dp.x, dp.y, 2.5), (this.label = "assist:xuesong"), !0);
+      }
+    }
     if (this.hpR < 0.5) return !1;
     const t = this.v,
       e = this.me,
@@ -987,6 +1238,7 @@ function zV(n, t) {
 class NV {
   n;
   clear;
+  clearNoPoop;
   base;
   obstacles = [];
   gScore;
@@ -1004,7 +1256,7 @@ class NV {
   lastPathPartial = !1;
   constructor(t) {
     const e = Math.round((ss * 2) / Vi) + 1;
-    ((this.n = e), (this.base = zV(t, e)), (this.clear = new Float32Array(this.base)));
+    ((this.n = e), (this.base = zV(t, e)), (this.clear = new Float32Array(this.base)), (this.clearNoPoop = new Float32Array(this.base)));
     const s = e * e;
     ((this.gScore = new Float32Array(s)),
       (this.parent = new Int32Array(s)),
@@ -1069,7 +1321,7 @@ class NV {
   lineOfSight(t, e, s, i) {
     return this.trace(this.base, t, e, s, i, 0);
   }
-  stamp(t, e, s, i, a) {
+  stamp(t, e, s, i, a, grid = this.clear) {
     const o = this.n,
       r = t.r + p6,
       l = Math.max(e, Math.floor((t.x - r + ss) * ha)),
@@ -1082,13 +1334,15 @@ class NV {
         const x = -ss + m * Vi - t.x,
           p = Math.hypot(x, u) - t.r,
           g = h * o + m;
-        p < this.clear[g] && (this.clear[g] = p);
+        p < grid[g] && (grid[g] = p);
       }
     }
   }
-  addObstacle(t, e, s, i) {
-    const a = { id: t, x: e, y: s, r: i };
-    (this.obstacles.push(a), this.stamp(a, 0, 0, this.n - 1, this.n - 1));
+  addObstacle(t, e, s, i, tag = "") {
+    const a = { id: t, x: e, y: s, r: i, tag };
+    (this.obstacles.push(a),
+      this.stamp(a, 0, 0, this.n - 1, this.n - 1, this.clear),
+      tag !== "poop" && this.stamp(a, 0, 0, this.n - 1, this.n - 1, this.clearNoPoop));
   }
   removeObstacle(t) {
     const e = this.obstacles.findIndex((f) => f.id === t);
@@ -1103,9 +1357,25 @@ class NV {
       c = Math.min(i - 1, Math.ceil((s.y + a + ss) * ha));
     for (let f = l; f <= c; f++) {
       const d = f * i;
-      for (let h = o; h <= r; h++) this.clear[d + h] = this.base[d + h];
+      for (let h = o; h <= r; h++) {
+        this.clear[d + h] = this.base[d + h];
+        this.clearNoPoop[d + h] = this.base[d + h];
+      }
     }
-    for (const f of this.obstacles) this.stamp(f, o, l, r, c);
+    for (const f of this.obstacles) {
+      this.stamp(f, o, l, r, c, this.clear);
+      f.tag !== "poop" && this.stamp(f, o, l, r, c, this.clearNoPoop);
+    }
+  }
+  withNoPoop(active, fn) {
+    if (!active) return fn();
+    const prev = this.clear;
+    this.clear = this.clearNoPoop;
+    try {
+      return fn();
+    } finally {
+      this.clear = prev;
+    }
   }
   moveWithCollision(t, e, s, i) {
     const a = Math.hypot(e, s);
@@ -1442,8 +1712,8 @@ function x6(n) {
           m = u.pos.x - f,
           x = u.pos.y - d,
           p = m * m + x * x,
-          g = u.rt.sight;
-        if (!(p > g * g) && !(l && u.bushId !== r.bushId && p > i)) {
+          g = u.rt.highSight ? Math.max(u.rt.sight, 26) : u.rt.sight;
+        if (!(p > g * g) && !(l && !u.rt.highSight && u.bushId !== r.bushId && p > i)) {
           c = !0;
           break;
         }
@@ -1585,26 +1855,28 @@ class jV {
     return !!e && e.kind === "hero" && e.team === this.team && e.h.controller !== null;
   }
   walkable(t, e) {
-    return this.sim.nav.isFree(t.x, t.y, e ?? this.self.rt.navR);
+    return this.sim.nav.withNoPoop(this.self.heroId === "maggot", () => this.sim.nav.isFree(t.x, t.y, e ?? this.self.rt.navR));
   }
   lineClear(t, e, s) {
-    return this.sim.nav.segmentFree(t.x, t.y, e.x, e.y, s ?? this.self.rt.navR);
+    return this.sim.nav.withNoPoop(this.self.heroId === "maggot", () => this.sim.nav.segmentFree(t.x, t.y, e.x, e.y, s ?? this.self.rt.navR));
   }
   nearestWalkable(t) {
     const e = { x: t.x, y: t.y };
-    return (this.sim.nav.nearestFree(t.x, t.y, this.self.rt.navR, e), e);
+    return (this.sim.nav.withNoPoop(this.self.heroId === "maggot", () => this.sim.nav.nearestFree(t.x, t.y, this.self.rt.navR, e)), e);
   }
   pathDistance(t) {
     const e = this.self.pos,
       s = this.sim.nav,
       i = this.self.rt.navR;
-    if (s.segmentFree(e.x, e.y, t.x, t.y, i)) return Math.hypot(t.x - e.x, t.y - e.y);
-    const a = s.findPath(e.x, e.y, t.x, t.y, i);
-    if (!a || a.length === 0) return 1 / 0;
-    const o = a[a.length - 1];
-    return Math.hypot(o.x - t.x, o.y - t.y) > 2 ? 1 / 0 : UV(e, a);
+    return s.withNoPoop(this.self.heroId === "maggot", () => {
+      if (s.segmentFree(e.x, e.y, t.x, t.y, i)) return Math.hypot(t.x - e.x, t.y - e.y);
+      const a = s.findPath(e.x, e.y, t.x, t.y, i);
+      if (!a || a.length === 0) return 1 / 0;
+      const o = a[a.length - 1];
+      return Math.hypot(o.x - t.x, o.y - t.y) > 2 ? 1 / 0 : UV(e, a);
+    });
   }
-  safePath(t, e = 1) {
+  safePath(t, e = 1, peelFilter = null) {
     this.refresh();
     const s = this.self.pos,
       i = this.sim.nav,
@@ -1619,6 +1891,19 @@ class jV {
         Math.hypot(t.x - f.pos.x, t.y - f.pos.y) - 0.4,
       )),
         d > f.radius + 1 && o.push({ x: f.pos.x, y: f.pos.y, r: d }));
+    }
+    for (const f of this.sim.areas) {
+      if (f.dead || f.team === this.team || f.visual !== "monkey_peel") continue;
+      if (f.age < (f.armDur ?? 1) - 0.15) continue;
+      if (!this.perceivesPoint(f.pos.x, f.pos.y, f.radius)) continue;
+      if (peelFilter && !peelFilter(f)) continue;
+      let d = f.radius + this.self.radius + 0.55;
+      d = Math.min(
+        d,
+        Math.hypot(s.x - f.pos.x, s.y - f.pos.y) - 0.35,
+        Math.hypot(t.x - f.pos.x, t.y - f.pos.y) - 0.35,
+      );
+      d > 0.6 && o.push({ x: f.pos.x, y: f.pos.y, r: d });
     }
     const r = this.map.bases[this.enemyTeam],
       l = Math.min(
@@ -1682,10 +1967,22 @@ class jV {
   skillReady(t) {
     const e = this.self,
       s = e.skills[t];
-    if (!e.alive || s.level <= 0 || s.cd > 0 || e.mana < s.cost || e.rt.stunned || (!em(t) && e.rt.silenced))
-      return !1;
+    const isWallBounce = e.heroId === "slime" && t === "s2" && e.buffs.some((b) => b.id === "slime_wall_bounce");
+    if (!e.alive || s.level <= 0 || (s.cd > 0 && !isWallBounce) || e.rt.stunned) return !1;
+    const h = em(t) ? null : Se[e.heroId].skills[t],
+      isRecast = !!(h && h.recastBuff && e.buffs.some((b) => b.id === h.recastBuff)),
+      canBypassRoot =
+        (isRecast &&
+          (e.buffs.some((b) => b.id === "xuesong_pole") ||
+            e.buffs.some((b) => b.id === "scallion_beam") ||
+            e.buffs.some((b) => b.id === "slime_ball_charge"))) ||
+        isWallBounce ||
+        e.buffs.some((b) => b.id === "stone_train") ||
+        e.buffs.some((b) => b.id === "cow_squat"),
+      canBypassSilence = isRecast && e.buffs.some((b) => b.id === "scallion_beam");
+    if ((!isRecast && !isWallBounce && e.mana < s.cost) || (!em(t) && e.rt.silenced && !canBypassSilence)) return !1;
     const i = Wk(e.heroId, t);
-    return i.movement && e.rt.rooted ? !1 : !(i.canCast && i.canCast(this.sim, e) !== null);
+    return i.movement && e.rt.rooted && !canBypassRoot ? !1 : !(i.canCast && i.canCast(this.sim, e) !== null);
   }
   orderState() {
     const t = this.self;
@@ -2182,7 +2479,7 @@ function Bm(n, t, e) {
 
 function Hl(n) {
   const t = n.rt;
-  ((t.moveMode = Qh), (t.path = null), (t.stuck = 0));
+  ((t.moveMode = Qh), (t.path = null), (t.pathTime = -999), (t.stuck = 0));
 }
 
 function aW(n, t, e) {
@@ -2192,20 +2489,23 @@ function aW(n, t, e) {
 
 function Ph(n, t, e, s, i) {
   const a = t.rt,
-    o = n.nav;
-  if (
-    ((a.goalX = e),
-    (a.goalY = s),
-    (a.pathTime = n.state.time),
-    (a.pathIdx = 0),
-    (a.stuck = 0),
-    !i && o.segmentFree(t.pos.x, t.pos.y, e, s, a.navR))
-  ) {
-    a.path = [{ x: e, y: s }];
-    return;
-  }
-  const r = o.findPath(t.pos.x, t.pos.y, e, s, a.navR);
-  ((a.path = r && r.length > 0 ? r : [{ x: e, y: s }]), (!r || o.lastPathPartial) && (a.pathTime += nW));
+    o = n.nav,
+    noPoop = t.heroId === "maggot";
+  o.withNoPoop(noPoop, () => {
+    if (
+      ((a.goalX = e),
+      (a.goalY = s),
+      (a.pathTime = n.state.time),
+      (a.pathIdx = 0),
+      (a.stuck = 0),
+      !i && o.segmentFree(t.pos.x, t.pos.y, e, s, a.navR))
+    ) {
+      a.path = [{ x: e, y: s }];
+      return;
+    }
+    const r = o.findPath(t.pos.x, t.pos.y, e, s, a.navR);
+    ((a.path = r && r.length > 0 ? r : [{ x: e, y: s }]), (!r || o.lastPathPartial) && (a.pathTime += nW));
+  });
 }
 
 function oW(n, t, e, s) {
@@ -2217,19 +2517,22 @@ function Yk(n, t, e) {
     i = s.path;
   if (!i) return !1;
   const a = n.nav,
+    noPoop = t.heroId === "maggot",
     o = t.stats.moveSpeed * e;
   let r = o;
   const l = t.pos.x,
     c = t.pos.y;
-  for (; r > 1e-6 && s.pathIdx < i.length;) {
-    const m = i[s.pathIdx],
-      x = m.x - t.pos.x,
-      p = m.y - t.pos.y,
-      g = Math.hypot(x, p);
-    g <= r
-      ? (g > 1e-6 && a.moveWithCollision(t.pos, x, p, s.navR), (r -= g), s.pathIdx++)
-      : (a.moveWithCollision(t.pos, (x / g) * r, (p / g) * r, s.navR), (r = 0));
-  }
+  a.withNoPoop(noPoop, () => {
+    for (; r > 1e-6 && s.pathIdx < i.length;) {
+      const m = i[s.pathIdx],
+        x = m.x - t.pos.x,
+        p = m.y - t.pos.y,
+        g = Math.hypot(x, p);
+      g <= r
+        ? (g > 1e-6 && a.moveWithCollision(t.pos, x, p, s.navR), (r -= g), s.pathIdx++)
+        : (a.moveWithCollision(t.pos, (x / g) * r, (p / g) * r, s.navR), (r = 0));
+    }
+  });
   const f = t.pos.x - l,
     d = t.pos.y - c,
     h = Math.hypot(f, d);
@@ -2249,13 +2552,15 @@ function lW(n, t, e) {
   const s = t.rt,
     i = n.nav,
     a = -s.dirY,
-    o = s.dirX,
-    r = i.clearanceAt(t.pos.x, t.pos.y),
-    l = i.clearanceAt(t.pos.x + a * t1, t.pos.y + o * t1),
-    c = i.clearanceAt(t.pos.x - a * t1, t.pos.y - o * t1);
-  if (Math.max(l, c) - r < rW) return !1;
-  const f = l >= c ? e : -e;
-  return i.moveWithCollision(t.pos, a * f, o * f, s.navR);
+    o = s.dirX;
+  return i.withNoPoop(t.heroId === "maggot", () => {
+    const r = i.clearanceAt(t.pos.x, t.pos.y),
+      l = i.clearanceAt(t.pos.x + a * t1, t.pos.y + o * t1),
+      c = i.clearanceAt(t.pos.x - a * t1, t.pos.y - o * t1);
+    if (Math.max(l, c) - r < rW) return !1;
+    const f = l >= c ? e : -e;
+    return i.moveWithCollision(t.pos, a * f, o * f, s.navR);
+  });
 }
 
 function cW(n, t, e) {
@@ -2264,7 +2569,8 @@ function cW(n, t, e) {
     const i = t.stats.moveSpeed * e,
       a = t.pos.x,
       o = t.pos.y;
-    (n.nav.moveWithCollision(t.pos, s.dirX * i, s.dirY * i, s.navR), (t.facing = Math.atan2(s.dirY, s.dirX)));
+    (n.nav.withNoPoop(t.heroId === "maggot", () => n.nav.moveWithCollision(t.pos, s.dirX * i, s.dirY * i, s.navR)),
+      (t.facing = Math.atan2(s.dirY, s.dirX)));
     const r = t.pos.x - a,
       l = t.pos.y - o,
       c = r * r + l * l;
@@ -2282,8 +2588,13 @@ function dy(n, t, e, s, i) {
     c = o - a.pathTime,
     f = a.path;
   if (f === null) {
-    if (c < v6) return;
-    Ph(n, t, e, s, !1);
+    if (c < 0) return;
+    if (c < v6) {
+      if (t.kind === "hero") Ph(n, t, e, s, !1);
+      else if (n.nav.withNoPoop(t.heroId === "maggot", () => n.nav.segmentFree(t.pos.x, t.pos.y, e, s, a.navR)))
+        ((a.goalX = e), (a.goalY = s), (a.path = [{ x: e, y: s }]), (a.pathIdx = 0), (a.stuck = 0));
+      else return;
+    } else Ph(n, t, e, s, !1);
   } else
     c > 2 || (c >= v6 && r * r + l * l > y6 * y6)
       ? Ph(n, t, e, s, !1)
@@ -2299,7 +2610,7 @@ function Kk(n, t, e, s, i) {
   const l = Math.min(r, t.stats.moveSpeed * i),
     c = t.pos.x,
     f = t.pos.y;
-  n.nav.moveWithCollision(t.pos, (a / r) * l, (o / r) * l, t.rt.navR);
+  n.nav.withNoPoop(t.heroId === "maggot", () => n.nav.moveWithCollision(t.pos, (a / r) * l, (o / r) * l, t.rt.navR));
   const d = t.pos.x - c,
     h = t.pos.y - f;
   return d * d + h * h > 1e-10 ? ((t.facing = Math.atan2(o, a)), (t.rt.moved = !0), !0) : !1;
@@ -2308,10 +2619,11 @@ function Kk(n, t, e, s, i) {
 function hy(n, t, e, s) {
   const i = t.rt;
   return (
-    n.nav.nearestFree(e, s, i.navR, t.pos, fy),
+    n.nav.withNoPoop(t.heroId === "maggot", () => n.nav.nearestFree(e, s, i.navR, t.pos, fy)),
     (t.prevPos.x = t.pos.x),
     (t.prevPos.y = t.pos.y),
     (i.path = null),
+    (i.pathTime = -999),
     i.moveMode === Fm && (i.moveMode = Qh),
     n.grid.rebuild(n.units),
     t.pos
@@ -2347,8 +2659,10 @@ function Zk(n, t, e, s) {
   i.dash === e &&
     ((i.dash = null),
     e.ignoreWalls &&
-      !n.nav.isFree(t.pos.x, t.pos.y, i.navR - 0.05) &&
-      n.nav.nearestFree(t.pos.x, t.pos.y, i.navR, t.pos, fy),
+      n.nav.withNoPoop(t.heroId === "maggot", () => {
+        !n.nav.isFree(t.pos.x, t.pos.y, i.navR - 0.05) &&
+          n.nav.nearestFree(t.pos.x, t.pos.y, i.navR, t.pos, fy);
+      }),
     e.onEnd && e.onEnd(s));
 }
 
@@ -2376,7 +2690,7 @@ function py(n, t, e) {
     const l = Math.min(i.left, i.speed * e);
     (i.ignoreWalls
       ? ((t.pos.x += i.dirX * l), (t.pos.y += i.dirY * l))
-      : n.nav.moveStraight(t.pos, i.dirX, i.dirY, l, s.navR) < l - 1e-4 && (r = "wall"),
+      : n.nav.withNoPoop(t.heroId === "maggot", () => n.nav.moveStraight(t.pos, i.dirX, i.dirY, l, s.navR)) < l - 1e-4 && (r = "wall"),
       (i.left -= l),
       !r && i.left <= 1e-6 && (r = "arrived"));
   }
@@ -2405,7 +2719,12 @@ function py(n, t, e) {
 const _6 = [];
 
 function w6(n) {
-  return n.alive && n.kind !== "tower" && n.kind !== "core" && n.rt.dash === null;
+  if (!n.alive || n.kind === "tower" || n.kind === "core" || n.rt.dash !== null) return !1;
+  for (let i = 0; i < n.buffs.length; i++) {
+    const id = n.buffs[i].id;
+    if (id === "slime_cling" || id === "slime_puddle" || id === "slime_absorbed") return !1;
+  }
+  return !0;
 }
 
 function hW(n) {
@@ -2487,6 +2806,8 @@ const uW = 2.5,
     // 护盾效率 / 治疗加成：给别人套盾、奶人时的乘数
     shieldPower: 0,
     healPower: 0,
+    attackRange: 0,
+    armorShred: 0,
   };
 
 function gW() {
@@ -2517,6 +2838,8 @@ function gW() {
     (pe.hpPct = 0),
     (pe.hpToAdPct = 0),
     (pe.shieldPower = 0),
-    (pe.healPower = 0));
+    (pe.healPower = 0),
+    (pe.attackRange = 0),
+    (pe.armorShred = 0));
 }
 export { RV, Qh, Jh, ry, N3, h6, G0, F3, Ok, CV, LV, NV, Oi, ly, Wk, tu, BV, ql, HV, jk, em, x6, jV, eu, qV, Zo, Xk, XV, KV, ZV, QV, JV, tW, Ss, cy, Ui, fy, Bm, Hl, aW, oW, cW, dy, Kk, hy, uy, iu, py, hW, uW, pW, mW, M6, pe, gW };

@@ -43,4 +43,20 @@ const png = path.join(root, 'dist', 'images', 'beian-gongan.png');
 drop(png);
 fs.copyFileSync(path.join(root, 'images', 'beian-gongan.png'), png);
 
+const syncDir = (srcDir, dstDir) => {
+  if (!fs.existsSync(srcDir)) return;
+  fs.mkdirSync(dstDir, { recursive: true });
+  for (const name of fs.readdirSync(srcDir)) {
+    const s = path.join(srcDir, name);
+    const d = path.join(dstDir, name);
+    const st = fs.statSync(s);
+    if (!st.isFile()) continue;
+    if (fs.existsSync(d) && fs.statSync(d).size === st.size) continue;
+    drop(d);
+    fs.copyFileSync(s, d);
+  }
+};
+syncDir(path.join(root, 'kart'), path.join(root, 'dist', 'kart'));
+syncDir(path.join(root, 'images', 'portrait'), path.join(root, 'dist', 'images', 'portrait'));
+
 console.log(`完成: dist/index.html (${(html.length / 1024 / 1024).toFixed(2)} MB)`);

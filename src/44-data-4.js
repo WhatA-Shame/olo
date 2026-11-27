@@ -9,7 +9,7 @@
 //   G6                    damage
 //
 // 由 tools/split.mjs 自动生成；手改后若重新生成会被覆盖。
-import { v0 } from './01-audio.js';
+import { rn, v0 } from './01-audio.js';
 import { Nh, Se, kr } from './02-data.js';
 import { zT } from './04-audio-2.js';
 import { MI } from './16-render-5.js';
@@ -22,8 +22,8 @@ import { QH, XH } from './36-ui-4.js';
 import { $a, E0, FG } from './40-ui-8.js';
 import { WG, rf } from './41-ai.js';
 import { JV, KV, NV, Oi, QV, RV, Ss, XV, Xk, Zo, hW, iu, jV, qV, ql, tu, x6 } from './42-ai-2.js';
-import { kartSpec, preloadKart } from './47-kart.js';
-import { $j, AW, Aj, Ba, CW, Cj, Cs, Dh, Fj, Gj, HW, Hm, Jj, Kj, Lj, O6, Oj, Pr, Qj, Uj, Va, Vj, Wj, Wm, Wn, Xj, YW, Yj, Zj, _o, am, aq, by, ds, eq, fW, fj, gS, hj, ia, iq, jW, jj, my, nS, oa, om, qj, sq, tq, tr, vS, wo, xS, yS, zW, zh } from './43-data-3.js';
+import { heroKartId, kartSpec, preloadKart } from './47-kart.js';
+import { $j, AW, Aj, Ba, Bo, CW, Cj, Cs, Dh, FW, Fj, Gj, HW, Hm, Jj, Kj, Lj, O6, Oj, Pr, Qj, Uj, Va, Vj, Wj, Wm, Wn, Xj, YW, Yj, Zj, _o, am, aq, by, ds, eq, fW, fj, gS, hj, ia, iq, jW, jj, my, nS, oa, om, qj, sq, tq, tr, vS, wo, xS, yS, zW, zh } from './43-data-3.js';
 
 Oi("panyue", "ult", {
   movement: !0,
@@ -485,6 +485,11 @@ tu("niumo", {
     const k = Math.min(1, Math.max(0, (t.stats.maxHp - NMP.hpBase) / NMP.hpSpan));
     s.mult *= NMP.dmgMin + (NMP.dmgMax - NMP.dmgMin) * k;
   },
+  // 开大状态下普攻带有火焰层数的敌人时，标记本次普攻为消耗层数的致命一击（驱动专属处决动作）
+  onBasicAttackStart(n, t, e) {
+    const isExec = !!(e && !Ss(e) && Ba(t, "niumo_ult") && (Dh(e, "niumo_flame")?.stacks ?? 0) > 0);
+    t.h._nmExecUntil = isExec ? n.state.time + Math.max(0.85, t.animDur || 0.9) : 0;
+  },
   // 大招期间：普攻吃掉目标身上所有火焰层数，每层追加伤害并回血
   onBasicAttackHit(n, t, e) {
     if (Ss(e) || !Ba(t, "niumo_ult")) return;
@@ -493,26 +498,46 @@ tu("niumo", {
     const st = b.stacks,
       lv = nmUltLv(t);
     (Va(n, e, "niumo_flame"),
-      ds(n, "niumo_burst", e.pos, t.team, { unitId: t.id, targetId: e.id }),
+      ds(n, "niumo_burst", e.pos, t.team, { unitId: t.id, targetId: e.id, stacks: st }),
       zh(n, t, e, st * (Nh(NMSU, "perStack", lv) + Nh(NMSU, "adRatio", lv) * t.stats.ad), "magic", "ult"),
       xS(n, t, t, t.stats.maxHp * Nh(NMSU, "healPerStack", lv) * st));
+  },
+  // 大招期间击杀敌方英雄：刷新烈焰牛魔变身与免控持续时间
+  onKill(n, t, victim) {
+    if (!t.alive || !victim || victim.kind !== "hero" || !Ba(t, "niumo_ult")) return;
+    const dur = t.h._nmUltDur || Nh(NMSU, "duration", nmUltLv(t));
+    (Wn(n, t, "niumo_ult", { duration: dur, sourceId: t.id, merge: "replace" }),
+      Wn(n, t, "unstoppable", { duration: dur, sourceId: t.id, key: "niumo_ult", merge: "replace" }),
+      ds(n, "niumo_ult_start", t.pos, t.team, { unitId: t.id, duration: dur, refresh: !0 }));
   },
 });
 
 Oi("niumo", "s1", {
+  noAnim: !0,
+  lockTime: 0.38,
   cast(n) {
-    const { sim: t, caster: e } = n;
-    Wm(n, n.def.castTime * 0.4, () => {
-      const from = Cs(e.pos),
-        dir = Cs(n.dir),
-        len = n.range,
-        hw = n.width * 0.5;
+    const { sim: t, caster: e } = n,
+      from = Cs(e.pos),
+      dir = Cs(n.dir),
+      len = n.range,
+      wid = n.width,
+      hw = wid * 0.5,
+      windup = n.def.castTime || 0.3;
+    // 0.3 秒前摇：立刻摆出重劈蓄力并铺直线矩形预警，0.3 秒整劈落
+    (vS(t, e, "cast_s1", 0.56, !0),
+      ds(t, "niumo_s1_warn", from, e.team, {
+        unitId: e.id,
+        dir,
+        radius: len,
+        width: wid,
+        duration: windup,
+      }));
+    Wm(n, windup, () => {
       ds(t, "niumo_s1_slash", from, e.team, {
         unitId: e.id,
         dir,
         radius: len,
-        // 视觉角度有个下限：太窄的锥形 decal / 弧光在俯视角度下几乎看不见
-        angle: Math.max(0.5, Math.atan2(hw, len) * 2),
+        width: wid,
       });
       for (const u of nmLine(t, from, dir, len, hw, ia(e.team)))
         wo(n, u, oa(n, "damage", { ad: "adRatio" }), "physical");
@@ -549,15 +574,20 @@ Oi("niumo", "s2", {
       dmg = (n.val("sprayDmg") + n.val("sprayAd") * e.stats.ad) * (8 / segs),
       // 叠层节奏也不变：每 3 段叠一次，整段下来还是 8 次
       stackEvery = segs / 8,
-      // 「烈焰行军」边喷边往前走：位移由脚本自己推（上一版上了 root，结果连自己的前进也锁住了）。
-      // 玩家不能自己操控方向 —— 移动指令在 Aj 里被 noSteerUntil 吞掉。
+      // 「烈焰行军」边喷边朝锁定方向前进：期间免控、禁止转向与普攻
       march = e.stats.moveSpeed * 0.45,
       // 火锥贴花得跟着人走：每 0.2 秒重铺一张短命锥，靠重叠维持「一直在喷」
-      coneEvery = Math.max(1, Math.round(0.2 / tick));
-    // 只上免控，不上定身（定身会把脚本自己的前进一起锁掉）
-    (Wn(t, e, "unstoppable", { duration: dur, sourceId: e.id, key: "niumo_march" }),
+      coneEvery = Math.max(1, Math.round(0.2 / tick)),
+      lockFacing = Math.atan2(dir.y, dir.x);
+    // 立刻清空旧的移动/普攻指令并缴械，挂上 niumo_march（免控 + 禁普攻）并锁死朝向
+    ((e.rt.moveMode = 0),
+      (e.h.atkOrder = !1),
+      (e.targetId = -1),
+      Zj(t, e, dur),
+      Wn(t, e, "niumo_march", { duration: dur, sourceId: e.id, key: "niumo_march", merge: "replace" }),
       (e.rt.noSteerUntil = t.state.time + dur),
-      (e.facing = Math.atan2(dir.y, dir.x)));
+      (e.facing = lockFacing),
+      vS(t, e, "cast_s2", dur, !0));
     let left = dur,
       i = 0;
     const step = () => {
@@ -570,7 +600,7 @@ Oi("niumo", "s2", {
         idx = i++,
         stack = idx % stackEvery === 0,
         cone = idx % coneEvery === 0;
-      ((e.facing = Math.atan2(dir.y, dir.x)),
+      ((e.facing = lockFacing),
         ds(t, "niumo_s2_spray", from, e.team, {
           unitId: e.id,
           dir,
@@ -602,14 +632,15 @@ Oi("niumo", "ult", {
       tick = n.val("trailTick"),
       tdur = n.val("trailDur"),
       tdps = n.val("trailDps"),
-      fdps = nmFlameDps(e);
-    (ds(t, "niumo_ult_start", e.pos, e.team, { unitId: e.id, duration: dur }),
+      fdps = nmFlameDps(e),
+      gen = (e.h._nmUltGen = (e.h._nmUltGen || 0) + 1);
+    ((e.h._nmUltDur = dur),
+      ds(t, "niumo_ult_start", e.pos, e.team, { unitId: e.id, duration: dur }),
       Wn(t, e, "niumo_ult", { duration: dur, sourceId: e.id, merge: "replace" }),
-      Wn(t, e, "unstoppable", { duration: dur, sourceId: e.id, key: "niumo_ult" }));
-    // 每隔 trailTick 在脚下留一团火，自己烧一会儿再灭
-    let left = dur;
+      Wn(t, e, "unstoppable", { duration: dur, sourceId: e.id, key: "niumo_ult", merge: "replace" }));
+    // 只要 niumo_ult 还在（含击杀刷新续期），每隔 trailTick 在脚下留一团火
     const step = () => {
-      if (!e.alive) return;
+      if (!e.alive || e.h._nmUltGen !== gen || !Ba(e, "niumo_ult")) return;
       const p = Cs(e.pos);
       (Zo(t, {
         visual: "niumo_trail",
@@ -626,10 +657,3415 @@ Oi("niumo", "ult", {
               (zh(s, e, u, tdps, "magic", "ult"), nmFlame(s, e, u, fdps));
         },
       }),
-        (left -= tick),
-        left > 1e-6 && t.schedule(tick, step));
+        t.schedule(tick, step));
     };
     step();
+  },
+});
+
+const XSP = Se.xuesong.passive.values;
+
+tu("xuesong", {
+  // 被动「警告铁锹」：攻速减少 70%
+  statMods(n, t, e) {
+    e.asPct -= XSP.asPenalty;
+  },
+  // 普攻变为前方锥形范围伤害并眩晕所有命中敌人
+  onBasicAttackHit(n, t, e) {
+    const dx = e.pos.x - t.pos.x,
+      dy = e.pos.y - t.pos.y,
+      d = Math.hypot(dx, dy),
+      dir = d > 1e-4 ? { x: dx / d, y: dy / d } : { x: Math.cos(t.facing), y: Math.sin(t.facing) },
+      coneRad = (XSP.coneAngle * Math.PI) / 180,
+      range = Math.max(t.stats.attackRange, d + 0.4);
+    ds(n, "xuesong_basic_cone", t.pos, t.team, {
+      unitId: t.id,
+      dir,
+      radius: range,
+      angle: coneRad,
+    });
+    !Ss(e) && e.alive && Gj(n, e, XSP.stunDur, t);
+    const splashDmg = t.stats.ad * XSP.aoeRatio;
+    for (const u of $j(n, t.pos, dir, range, coneRad, ia(t.team, { exclude: e }))) {
+      if (!u.alive) continue;
+      (gS(n, t, u, splashDmg, "physical"), Gj(n, u, XSP.stunDur, t));
+    }
+  },
+});
+
+Oi("xuesong", "s1", {
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    // 二段：抛沙子（高额法伤 + 强力致盲 + 沙暴特效）
+    if (n.isRecast) {
+      Va(t, e, "xuesong_sand");
+      const dst = Cs(n.targetPos),
+        rad = n.radius;
+      (Qj(e, dst),
+        vS(t, e, "cast_s1", 0.32, !1),
+        ds(t, "xuesong_sand_throw", e.pos, e.team, { unitId: e.id, to: dst, targetPos: dst, radius: rad }));
+      const dmg = oa(n, "damage", { ap: "apRatio" }),
+        blindDur = n.val("blindDur");
+      Wm(n, 0.26, () => {
+        ds(t, "xuesong_sand_burst", dst, e.team, { unitId: e.id, radius: rad });
+        for (const u of Pr(t, dst, rad, ia(e.team))) {
+          if (!u.alive) continue;
+          (wo(n, u, dmg, "magic"), Wn(t, u, "blind", { duration: blindDur, sourceId: e.id }));
+        }
+      });
+      return;
+    }
+    // 一段：原地花 2 秒反复撬地铲沙，挖出 60 秒阻挡通行的凹陷沙坑
+    const digTime = n.val("digTime"),
+      pitR = n.val("pitRadius"),
+      pitDur = n.val("pitDur"),
+      holdDur = n.val("holdDur"),
+      fx = Math.cos(e.facing),
+      fy = Math.sin(e.facing),
+      pitPos = { x: e.pos.x + fx * (pitR + e.radius + 0.15), y: e.pos.y + fy * (pitR + e.radius + 0.15) };
+    t.nav.nearestFree(pitPos.x, pitPos.y, 0.6, pitPos);
+    e.h._xsDigZone && (Xk(t, e.h._xsDigZone), (e.h._xsDigZone = null));
+    const digZone = Zo(t, {
+      visual: "xuesong_dig_mound",
+      owner: e,
+      pos: pitPos,
+      radius: pitR,
+      duration: digTime + 0.08,
+    });
+    e.h._xsDigZone = digZone;
+    const clearDig = (sim, unit) => {
+      if (unit.h._xsDigZone === digZone) {
+        Xk(sim, digZone);
+        unit.h._xsDigZone = null;
+      }
+    };
+    (Wn(t, e, "root", { duration: digTime, sourceId: e.id, key: "xuesong_dig", merge: "replace" }),
+      Wn(t, e, "xuesong_dig", {
+        duration: digTime,
+        sourceId: e.id,
+        key: "xuesong_dig",
+        merge: "replace",
+        onRemove: clearDig,
+        onExpire: clearDig,
+      }),
+      Zj(t, e, digTime),
+      (e.rt.lockUntil = t.state.time + digTime),
+      vS(t, e, "channel", digTime, !0),
+      ds(t, "xuesong_dig_start", pitPos, e.team, { unitId: e.id, duration: digTime, radius: pitR }));
+    Wm(
+      n,
+      digTime,
+      () => {
+        (Va(t, e, "xuesong_dig"), clearDig(t, e));
+        const obsId = `xs_pit_${e.id}_${Math.round(t.state.time * 100)}`;
+        t.nav.addObstacle(obsId, pitPos.x, pitPos.y, pitR, "pit");
+        // 把坑里站着的活单位安全挤到坑边，避免卡死在不可通行区域里
+        for (const u of Pr(t, pitPos, pitR + 1.4)) {
+          if (Ss(u) || !u.alive) continue;
+          const ox = u.pos.x - pitPos.x,
+            oy = u.pos.y - pitPos.y,
+            dist = Math.hypot(ox, oy),
+            need = pitR + u.radius + 0.2;
+          if (dist < need) {
+            const nx = dist > 1e-4 ? ox / dist : -fx,
+              ny = dist > 1e-4 ? oy / dist : -fy;
+            Xj(t, u, { x: pitPos.x + nx * need, y: pitPos.y + ny * need });
+          }
+        }
+        Zo(t, {
+          visual: "xuesong_pit",
+          owner: e,
+          pos: pitPos,
+          radius: pitR,
+          duration: pitDur,
+          onEnd() {
+            t.nav.removeObstacle(obsId);
+          },
+        });
+        ds(t, "xuesong_pit_open", pitPos, e.team, { unitId: e.id, radius: pitR });
+        const fullCd = e.skills.s1.cdMax;
+        Wn(t, e, "xuesong_sand", {
+          duration: holdDur,
+          sourceId: e.id,
+          merge: "replace",
+          onExpire(sim, unit) {
+            unit.skills.s1.cd = Math.max(unit.skills.s1.cd, fullCd);
+          },
+        });
+        e.skills.s1.cd = 0.15;
+      },
+      !0,
+    );
+  },
+});
+
+Oi("xuesong", "s2", {
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    // 二段：选落点跳下来，落地给周围友军加护盾
+    if (n.isRecast) {
+      Va(t, e, "xuesong_pole");
+      const dst = Cs(n.targetPos),
+        leapTime = n.val("leapTime"),
+        shieldR = n.val("shieldRadius"),
+        shieldVal = n.val("shield") + n.val("hpRatio") * e.stats.maxHp,
+        shieldDur = n.val("shieldDur");
+      Qj(e, dst);
+      fW(t, e, dst.x, dst.y, leapTime, () => {
+        if (!e.alive) return;
+        const land = Cs(e.pos);
+        ds(t, "xuesong_s2_land", land, e.team, { unitId: e.id, radius: shieldR });
+        for (const u of Pr(t, land, shieldR, (a) => a.team === e.team && a.kind === "hero"))
+          jj(t, u, shieldVal, shieldDur, e, "xuesong_s2");
+      });
+      return;
+    }
+    // 一段：原地撑起变为不可选中并开大视野（最多 8 秒）
+    const maxDur = n.val("maxDur"),
+      fullCd = e.skills.s2.cdMax;
+    e.h._xsPoleZone && (Xk(t, e.h._xsPoleZone), (e.h._xsPoleZone = null));
+    const ring = Zo(t, {
+      visual: "xuesong_pole_ring",
+      owner: e,
+      pos: Cs(e.pos),
+      radius: 2.2,
+      duration: maxDur,
+    });
+    e.h._xsPoleZone = ring;
+    ds(t, "xuesong_pole_up", e.pos, e.team, { unitId: e.id, duration: maxDur });
+    Wn(t, e, "xuesong_pole", {
+      duration: maxDur,
+      sourceId: e.id,
+      merge: "replace",
+      onRemove(sim, unit) {
+        unit.h._xsPoleZone && (Xk(sim, unit.h._xsPoleZone), (unit.h._xsPoleZone = null));
+      },
+      onExpire(sim, unit) {
+        (unit.h._xsPoleZone && (Xk(sim, unit.h._xsPoleZone), (unit.h._xsPoleZone = null)),
+          (unit.skills.s2.cd = Math.max(unit.skills.s2.cd, fullCd)));
+      },
+    });
+    e.skills.s2.cd = 0.2;
+  },
+});
+
+function xsUltSlam(sim, caster, landPos, radius, dmg, stunDur) {
+  ds(sim, "xuesong_ult_land", landPos, caster.team, { unitId: caster.id, radius });
+  for (const u of Pr(sim, landPos, radius, ia(caster.team))) {
+    if (!u.alive) continue;
+    (zh(sim, caster, u, dmg, "magic", "ult"), Gj(sim, u, stunDur, caster));
+  }
+}
+
+Oi("xuesong", "ult", {
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    // 二段：将举起的敌人投掷到身边任意位置，落地造成伤害和眩晕
+    if (n.isRecast) {
+      const tid = e.h._xsScoopId ?? -1,
+        target = tid >= 0 ? t.byId.get(tid) : null,
+        dst = Cs(n.targetPos),
+        landR = n.val("landRadius"),
+        dmg = oa(n, "damage", { ap: "apRatio" }),
+        stunDur = n.val("stunDur");
+      ((e.h._xsScoopId = -1),
+        Va(t, e, "xuesong_scoop"),
+        Qj(e, dst),
+        vS(t, e, "cast_ult", 0.34, !1),
+        ds(t, "xuesong_ult_throw", e.pos, e.team, { unitId: e.id, targetId: tid, to: dst, targetPos: dst }));
+      if (target && target.alive) {
+        Va(t, target, "xuesong_lifted");
+        fW(t, target, dst.x, dst.y, 0.36, () => {
+          const land = target.alive ? Cs(target.pos) : dst;
+          xsUltSlam(t, e, land, landR, dmg, stunDur);
+        });
+      }
+      return;
+    }
+    // 一段：伸长手臂用铁锹铲起一名敌方英雄高举压制 2.5 秒
+    const target = n.target;
+    if (!target || !target.alive) return;
+    const holdDur = n.val("holdDur"),
+      landR = n.val("landRadius"),
+      dmg = oa(n, "damage", { ap: "apRatio" }),
+      stunDur = n.val("stunDur"),
+      fullCd = e.skills.ult.cdMax,
+      lifted = Wn(t, target, "xuesong_lifted", { duration: holdDur, sourceId: e.id, merge: "replace" });
+    if (!lifted) return;
+    const tipPos = () => ({
+      x: e.pos.x + Math.cos(e.facing) * 1.45,
+      y: e.pos.y + Math.sin(e.facing) * 1.45,
+    });
+    ((e.h._xsScoopId = target.id),
+      ds(t, "xuesong_ult_scoop", target.pos, e.team, { unitId: e.id, targetId: target.id }),
+      Xj(t, target, tipPos()),
+      vS(t, e, "cast_ult", 0.22, !1));
+    Wn(t, e, "xuesong_scoop", {
+      duration: holdDur,
+      sourceId: e.id,
+      merge: "replace",
+      tickInterval: 0.05,
+      onTick(sim, unit) {
+        const tgt = sim.byId.get(unit.h._xsScoopId);
+        if (!tgt || !tgt.alive || !Ba(tgt, "xuesong_lifted")) {
+          ((unit.h._xsScoopId = -1), Va(sim, unit, "xuesong_scoop"), (unit.skills.ult.cd = Math.max(unit.skills.ult.cd, fullCd)));
+          return;
+        }
+        Xj(sim, tgt, {
+          x: unit.pos.x + Math.cos(unit.facing) * 1.45,
+          y: unit.pos.y + Math.sin(unit.facing) * 1.45,
+        });
+      },
+      onRemove(sim, unit) {
+        const id = unit.h._xsScoopId ?? -1;
+        if (id >= 0) {
+          unit.h._xsScoopId = -1;
+          const tgt = sim.byId.get(id);
+          tgt && Va(sim, tgt, "xuesong_lifted");
+        }
+      },
+      onExpire(sim, unit) {
+        const id = unit.h._xsScoopId ?? -1;
+        unit.h._xsScoopId = -1;
+        const tgt = id >= 0 ? sim.byId.get(id) : null;
+        if (tgt && tgt.alive) {
+          Va(sim, tgt, "xuesong_lifted");
+          xsUltSlam(sim, unit, Cs(tgt.pos), landR, dmg, stunDur);
+        }
+        unit.skills.ult.cd = Math.max(unit.skills.ult.cd, fullCd);
+      },
+    });
+    e.skills.ult.cd = 0.2;
+  },
+});
+
+const STP = Se.stone.passive.values;
+
+function stoneThrowLand(sim, caster, dst, rad, dmg, knockup) {
+  ds(sim, "stone_throw_land", dst, caster.team, { unitId: caster.id, radius: rad });
+  for (const u of Pr(sim, dst, rad, ia(caster.team))) {
+    if (!u.alive) continue;
+    wo({ sim, caster, slot: "s2" }, u, dmg, "physical");
+    knockup > 0 && yS(sim, u, knockup, caster);
+  }
+}
+
+function stoneCorpseReady(sim, unit) {
+  if (!unit.alive) return;
+  const corpseDur = unit.h._stCorpseDur ?? 5,
+    fullCd = unit.h._stS2FullCd ?? unit.skills.s2.cdMax;
+  unit.h._stLockId = -1;
+  Ba(unit, "stone_tether") && Va(sim, unit, "stone_tether");
+  Wn(sim, unit, "stone_corpse", {
+    duration: corpseDur,
+    sourceId: unit.id,
+    merge: "replace",
+    onExpire(s, u) {
+      u.skills.s2.cd = Math.max(u.skills.s2.cd, fullCd);
+    },
+  });
+  unit.skills.s2.cd = 0.15;
+  ds(sim, "stone_corpse_ready", unit.pos, unit.team, { unitId: unit.id });
+}
+
+function stoneSyncGainsBuff(sim, unit) {
+  const g = unit.h.stoneGains;
+  if (!g || g.stacks <= 0 || !unit.alive) return;
+  const ex = Dh(unit, "stone_gains");
+  if (ex) {
+    ex.stacks = g.stacks;
+    ex.value = g.hp;
+    ex.timeLeft = 1 / 0;
+  } else {
+    const b = Wn(sim, unit, "stone_gains", {
+      duration: 1 / 0,
+      maxStacks: 999,
+      stacks: g.stacks,
+      value: g.hp,
+      sourceId: unit.id,
+      key: "stone_gains",
+      merge: "replace",
+    });
+    b && (b.stacks = g.stacks);
+  }
+}
+
+function stoneGrantStacks(sim, unit, count, lv) {
+  if (!unit || count <= 0) return;
+  const vals = Se.stone.skills.s1.values,
+    idx = Math.max(0, Math.min(vals.hpPerStack.length - 1, (lv || Math.max(1, unit.skills.s1.level)) - 1)),
+    g = unit.h.stoneGains ?? (unit.h.stoneGains = { hp: 0, armor: 0, ad: 0, stacks: 0 });
+  g.stacks += count;
+  g.hp = Math.round((g.hp + vals.hpPerStack[idx] * count) * 10) / 10;
+  g.armor = Math.round((g.armor + vals.armorPerStack[idx] * count) * 10) / 10;
+  g.ad = Math.round((g.ad + vals.adPerStack[idx] * count) * 10) / 10;
+  stoneSyncGainsBuff(sim, unit);
+  _o(sim, unit);
+}
+
+tu("stone", {
+  statMods(n, t, e) {
+    const g = t.h.stoneGains;
+    if (!g) return;
+    ((e.hp += g.hp), (e.armor += g.armor), (e.ad += g.ad));
+  },
+  onSpawn(n, t) {
+    if (t.h.stoneGains && t.h.stoneGains.stacks > 0) {
+      stoneSyncGainsBuff(n, t);
+      _o(n, t);
+    }
+  },
+  modifyDamageTaken(n, t, e, s) {
+    (s.crit && (s.amount *= 1 - STP.critRed),
+      Ba(t, "stone_train") && (s.amount *= 1 + (t.h._stTrainVuln ?? 0.3)));
+  },
+  modifyBasicAttack(n, t, e, s) {
+    !Ss(e) && Ba(t, "stone_passive") && (s.bonus += STP.bonusDmg + STP.adRatio * t.stats.ad);
+  },
+  onBasicAttackHit(n, t, e) {
+    if (Ss(e) || !Ba(t, "stone_passive")) return;
+    (Va(n, t, "stone_passive"),
+      (t.h._stPassCd = STP.cd),
+      ds(n, "stone_passive_hit", e.pos, t.team, { unitId: t.id, targetId: e.id }));
+  },
+  onTick(n, t, e) {
+    if (!t.alive) return;
+    if (t.h.stoneGains && t.h.stoneGains.stacks > 0 && !Ba(t, "stone_gains")) stoneSyncGainsBuff(n, t);
+    if (!Ba(t, "stone_passive")) {
+      const left = (t.h._stPassCd ?? 0) - e;
+      if (left <= 0) {
+        t.h._stPassCd = 0;
+        Wn(n, t, "stone_passive", { duration: 1 / 0, sourceId: t.id, merge: "replace" });
+      } else t.h._stPassCd = left;
+    }
+    if ((t.h._stLockId ?? -1) >= 0 && Ba(t, "stone_tether")) {
+      const tgt = n.byId.get(t.h._stLockId);
+      (!tgt || !tgt.alive) && stoneCorpseReady(n, t);
+    }
+  },
+  onKill(n, t, victim) {
+    if (!t.alive || !victim || !Ba(t, "stone_train")) return;
+    const vals = Se.stone.skills.s1.values,
+      bonus = victim.kind === "hero" ? vals.killBonusHero : vals.killBonusUnit;
+    stoneGrantStacks(n, t, bonus, t.h._stTrainLv || Math.max(1, t.skills.s1.level));
+    ds(n, "stone_train_done", t.pos, t.team, { unitId: t.id });
+  },
+  onTakedown(n, t, e) {
+    e && e.id === t.h._stLockId && Ba(t, "stone_tether") && stoneCorpseReady(n, t);
+  },
+});
+
+Oi("stone", "s1", {
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    if (n.isRecast) {
+      Va(t, e, "stone_train");
+      return;
+    }
+    const maxDur = n.val("maxDur"),
+      vuln = n.val("vuln"),
+      fullCd = e.skills.s1.cdMax,
+      trainLv = n.level;
+    e.h._stTrainVuln = vuln;
+    e.h._stTrainLv = trainLv;
+    const zone = Zo(t, { visual: "stone_train_ring", owner: e, pos: Cs(e.pos), radius: 1.9, duration: maxDur });
+    let settled = !1,
+      ticksGiven = 0;
+    const finish = (sim, unit, completed) => {
+      if (settled) return;
+      settled = !0;
+      zone && Xk(sim, zone);
+      if (completed && unit.alive && ticksGiven < maxDur) {
+        const rem = maxDur - ticksGiven;
+        ticksGiven = maxDur;
+        stoneGrantStacks(sim, unit, rem, trainLv);
+      }
+      unit.alive && ds(sim, "stone_train_done", unit.pos, unit.team, { unitId: unit.id });
+      unit.skills.s1.cd = Math.max(unit.skills.s1.cd, fullCd);
+    };
+    Wn(t, e, "stone_train", {
+      duration: maxDur,
+      sourceId: e.id,
+      merge: "replace",
+      tickInterval: 1,
+      onTick(sim, unit) {
+        if (!unit.alive || ticksGiven >= maxDur) return;
+        ticksGiven++;
+        stoneGrantStacks(sim, unit, 1, trainLv);
+      },
+      onRemove(sim, unit) {
+        finish(sim, unit, !1);
+      },
+      onExpire(sim, unit) {
+        finish(sim, unit, !0);
+      },
+    });
+    e.skills.s1.cd = 0.45;
+  },
+});
+
+Oi("stone", "s2", {
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      throwDmg = oa(n, "throwDmg", { ad: "adRatio" }),
+      landR = n.val("landRadius"),
+      knockup = n.val("knockup");
+    // 二段：抓起尸体投掷，范围伤害 + 击飞
+    if (n.isRecast) {
+      Va(t, e, "stone_corpse");
+      const dst = Cs(n.targetPos);
+      (Qj(e, dst),
+        vS(t, e, "cast_s2", 0.28, !1),
+        ds(t, "stone_throw", Cs(e.pos), e.team, { unitId: e.id, to: dst }),
+        Wm(n, 0.34, () => {
+          stoneThrowLand(t, e, dst, landR, throwDmg, knockup);
+        }));
+      return;
+    }
+    const target = n.target;
+    if (!target || !target.alive) return;
+    (Qj(e, target.pos),
+      vS(t, e, "cast_s2", 0.24, !1),
+      Wn(t, e, "attack_speed", {
+        value: n.val("asBonus"),
+        duration: n.val("asDur"),
+        sourceId: e.id,
+        key: "stone_s2",
+        merge: "replace",
+      }));
+    // 对敌方英雄：减速 50%，3 秒内被其移动或传送带着走，期间持续普攻，阵亡解锁尸体投掷
+    if (target.kind === "hero") {
+      const lockDur = n.val("lockDur"),
+        slowVal = n.val("slow"),
+        corpseDur = n.val("corpseDur"),
+        fullCd = e.skills.s2.cdMax;
+      ((e.h._stLockId = target.id),
+        (e.h._stCorpseDur = corpseDur),
+        (e.h._stS2FullCd = fullCd),
+        tr(t, target, slowVal, lockDur, e, "stone_s2"),
+        Wn(t, target, "stone_locked", { duration: lockDur, sourceId: e.id, merge: "replace" }),
+        ds(t, "stone_tether", target.pos, e.team, { unitId: e.id, targetId: target.id }),
+        (e.targetId = target.id),
+        (e.h.atkOrder = !0));
+      const cleanup = (sim, unit) => {
+        const id = unit.h._stLockId ?? -1;
+        if (id < 0) return;
+        const tgt = sim.byId.get(id);
+        tgt && Va(sim, tgt, "stone_locked");
+        if (!tgt || !tgt.alive) {
+          stoneCorpseReady(sim, unit);
+          return;
+        }
+        unit.h._stLockId = -1;
+      };
+      Wn(t, e, "stone_tether", {
+        duration: lockDur,
+        sourceId: e.id,
+        value: target.id,
+        merge: "replace",
+        tickInterval: 0.05,
+        onTick(sim, unit) {
+          const id = unit.h._stLockId ?? -1;
+          if (id < 0) return;
+          const tgt = sim.byId.get(id);
+          if (!tgt || !tgt.alive) {
+            stoneCorpseReady(sim, unit);
+            return;
+          }
+          if (!unit.alive || unit.rt.dash) return;
+          const dx = unit.pos.x - tgt.pos.x,
+            dy = unit.pos.y - tgt.pos.y,
+            d = Math.hypot(dx, dy),
+            maxGap = unit.radius + tgt.radius + 0.55;
+          if (d > maxGap) {
+            const nx = d > 1e-4 ? dx / d : -Math.cos(tgt.facing),
+              ny = d > 1e-4 ? dy / d : -Math.sin(tgt.facing);
+            (Xj(sim, unit, { x: tgt.pos.x + nx * maxGap, y: tgt.pos.y + ny * maxGap }), Qj(unit, tgt.pos));
+          }
+          if (unit.targetId !== tgt.id && !unit.rt.stunned) ((unit.targetId = tgt.id), (unit.h.atkOrder = !0));
+        },
+        onRemove: cleanup,
+        onExpire: cleanup,
+      });
+      return;
+    }
+    // 对非英雄单位：史诗野怪原地猛砸，小兵与普通野怪直接抓起投掷
+    const isEpic = target.kind === "monster" && !!rn[target.monsterType]?.epic;
+    if (isEpic) {
+      (stoneThrowLand(t, e, Cs(target.pos), landR, throwDmg, 0),
+        tr(t, target, n.val("slow"), 2, e, "stone_s2"));
+      return;
+    }
+    const throwRange = n.val("throwRange");
+    let dst = null,
+      bestD = 1 / 0;
+    for (const h of t.state.heroes) {
+      if (h.team === e.team || !h.alive) continue;
+      const d = Math.hypot(h.pos.x - e.pos.x, h.pos.y - e.pos.y);
+      d <= throwRange && d < bestD && ((bestD = d), (dst = Cs(h.pos)));
+    }
+    if (!dst) {
+      const dist = Math.min(6.2, throwRange);
+      dst = { x: e.pos.x + n.dir.x * dist, y: e.pos.y + n.dir.y * dist };
+      t.nav.nearestFree(dst.x, dst.y, 0.5, dst);
+    }
+    ds(t, "stone_throw", Cs(target.pos), e.team, { unitId: e.id, targetId: target.id, to: dst });
+    fW(t, target, dst.x, dst.y, 0.34, () => {
+      const land = target.alive ? Cs(target.pos) : dst;
+      stoneThrowLand(t, e, land, landR, throwDmg, knockup);
+    });
+  },
+});
+
+Oi("stone", "ult", {
+  movement: !0,
+  noAnim: !0,
+  lockTime: 0,
+  aimLead: $a("stone", "ult", "leapTime"),
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    Ba(e, "stone_train") && Va(t, e, "stone_train");
+    const leapTime = n.val("leapTime"),
+      slow = n.val("slow"),
+      slowDur = n.val("slowDur"),
+      red = n.val("reduction"),
+      drDur = n.val("drDur"),
+      a = ia(e.team);
+    let tele = null;
+    fW(t, e, n.targetPos.x, n.targetPos.y, leapTime, (res) => {
+      if ((Va(t, e, "unstoppable", "stone_ult"), res !== "arrived" || !e.alive)) {
+        tele && Xk(t, tele);
+        return;
+      }
+      const land = Cs(e.pos),
+        dmg = oa(n, "damage", { ad: "adRatio", hp: "hpRatio" });
+      ds(t, "stone_ult_land", land, e.team, { unitId: e.id, radius: n.radius });
+      for (const u of Pr(t, land, n.radius, a)) {
+        if (!u.alive) continue;
+        (wo(n, u, dmg, "physical"), tr(t, u, slow, slowDur, e, "stone_ult"));
+      }
+      Wn(t, e, "dmg_reduction", {
+        value: red,
+        duration: drDur,
+        sourceId: e.id,
+        key: "stone_ult",
+        merge: "replace",
+      });
+    });
+    const d = e.rt.dash,
+      dst = d ? { x: d.toX, y: d.toY } : Cs(e.pos);
+    (Wn(t, e, "unstoppable", { duration: leapTime + aq, sourceId: e.id, key: "stone_ult", merge: "replace" }),
+      (tele = Zo(t, { visual: "telegraph", owner: e, pos: dst, radius: n.radius, duration: leapTime })));
+  },
+});
+
+const SCP = Se.scallion.passive.values,
+  SCS1 = Se.scallion.skills.s1;
+
+function scallionLineUnits(sim, origin, dx, dy, len, halfW, enemyTeam) {
+  const mid = { x: origin.x + dx * len * 0.5, y: origin.y + dy * len * 0.5 },
+    cand = Pr(sim, mid, len * 0.5 + halfW + 1.5, enemyTeam),
+    out = [];
+  for (let i = 0; i < cand.length; i++) {
+    const u = cand[i];
+    if (!u.alive) continue;
+    const rx = u.pos.x - origin.x,
+      ry = u.pos.y - origin.y,
+      proj = rx * dx + ry * dy;
+    if (proj < -u.radius || proj > len + u.radius) continue;
+    const perp = Math.abs(rx * dy - ry * dx);
+    if (perp <= halfW + u.radius) out.push(u);
+  }
+  return out;
+}
+
+function fireScallionSlash(sim, caster, dirX, dirY, isPassive) {
+  const lv = Math.max(1, caster.skills.s1.level),
+    vals = SCS1.values,
+    len = SCS1.cast.range,
+    w = SCS1.cast.width,
+    l = Math.hypot(dirX, dirY) || 1,
+    dx = dirX / l,
+    dy = dirY / l,
+    rawDmg = (vals.damage[lv - 1] + vals.adRatio * caster.stats.ad) * (isPassive ? vals.passiveRatio : 1),
+    shred = vals.shred[lv - 1],
+    endPos = { x: caster.pos.x + dx * len, y: caster.pos.y + dy * len },
+    ctx = { sim, caster, slot: "s1" },
+    hits = scallionLineUnits(sim, caster.pos, dx, dy, len, w * 0.5, ia(caster.team));
+  ds(sim, "scallion_s1_slash", caster.pos, caster.team, {
+    unitId: caster.id,
+    from: Cs(caster.pos),
+    to: endPos,
+    width: w,
+    passive: isPassive,
+  });
+  for (let i = 0; i < hits.length; i++) {
+    const u = hits[i];
+    wo(ctx, u, rawDmg, "physical");
+    if (u.alive && !Ss(u)) {
+      Wn(sim, u, "scallion_shred", {
+        duration: vals.shredDur,
+        value: shred,
+        stacks: 1,
+        maxStacks: vals.maxStacks,
+        sourceId: caster.id,
+        key: "scallion_shred",
+      });
+    }
+  }
+}
+
+tu("scallion", {
+  statMods(n, t, e) {
+    const gl = Dh(t, "scallion_glide");
+    gl && (e.movePct += gl.value);
+    const boost = Dh(t, "scallion_boost");
+    boost && ((e.asPct += boost.value), (e.attackRange += t.h._scBoostRange ?? 1.8));
+  },
+  onTick(n, t, e) {
+    if (!t.alive) return;
+    const moved =
+      t.rt.moved ||
+      (t.pos.x - t.prevPos.x) * (t.pos.x - t.prevPos.x) + (t.pos.y - t.prevPos.y) * (t.pos.y - t.prevPos.y) > 4e-4;
+    if (t.inCombat || Ba(t, "scallion_beam")) {
+      t.h._scGlide = 0;
+    } else if (moved) {
+      t.h._scGlide = Math.min(SCP.rampSec, (t.h._scGlide ?? 0) + e);
+    } else {
+      t.h._scGlide = Math.max(0, (t.h._scGlide ?? 0) - e * 3.2);
+    }
+    const ratio = (t.h._scGlide ?? 0) / SCP.rampSec,
+      lvRatio = Math.min(1, Math.max(0, (t.level - 1) / 14)),
+      cap = SCP.minHaste + lvRatio * (SCP.maxHaste - SCP.minHaste),
+      haste = ratio * cap;
+    if (haste > 0.006) {
+      const pct = Math.max(1, Math.round(ratio * 100)),
+        ex = Dh(t, "scallion_glide");
+      if (ex) {
+        ((ex.value = haste), (ex.stacks = pct), (ex.timeLeft = 0.45), (ex.duration = 0.45));
+      } else {
+        const b = Wn(n, t, "scallion_glide", {
+          duration: 0.45,
+          value: haste,
+          stacks: pct,
+          maxStacks: 100,
+          sourceId: t.id,
+          key: "scallion_glide",
+          merge: "replace",
+        });
+        b && (b.stacks = pct);
+      }
+      if (Math.abs(haste - (t.h._scGlideLast ?? -1)) >= 0.012) {
+        ((t.h._scGlideLast = haste), _o(n, t));
+      }
+    } else if (Ba(t, "scallion_glide")) {
+      (Va(n, t, "scallion_glide"), (t.h._scGlideLast = 0), _o(n, t));
+    }
+  },
+  onBasicAttackHit(n, t, e) {
+    if (!t.alive) return;
+    e &&
+      ds(n, "scallion_basic_whip", t.pos, t.team, {
+        unitId: t.id,
+        from: Cs(t.pos),
+        to: Cs(e.pos),
+        range: t.stats.attackRange,
+      });
+    if (t.skills.s1.level <= 0) return;
+    const hitsReq = SCS1.values.hitsToProc,
+      cnt = (t.h._scS1Cnt ?? 0) + 1;
+    if (cnt < hitsReq) {
+      t.h._scS1Cnt = cnt;
+      const ex = Dh(t, "scallion_s1_cnt");
+      if (ex) {
+        ((ex.stacks = cnt), (ex.timeLeft = 8), (ex.duration = 8));
+      } else {
+        const b = Wn(n, t, "scallion_s1_cnt", {
+          duration: 8,
+          stacks: cnt,
+          maxStacks: hitsReq - 1,
+          sourceId: t.id,
+          key: "scallion_s1_cnt",
+          merge: "replace",
+        });
+        b && (b.stacks = cnt);
+      }
+      return;
+    }
+    ((t.h._scS1Cnt = 0), Va(n, t, "scallion_s1_cnt"));
+    const dx = e ? e.pos.x - t.pos.x : Math.cos(t.facing),
+      dy = e ? e.pos.y - t.pos.y : Math.sin(t.facing);
+    fireScallionSlash(n, t, dx, dy, !0);
+  },
+});
+
+Oi("scallion", "s1", {
+  cast(n) {
+    fireScallionSlash(n.sim, n.caster, n.dir.x, n.dir.y, !1);
+  },
+});
+
+Oi("scallion", "s2", {
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    e.h._scBoostRange = n.val("rangeBonus");
+    (Wn(t, e, "scallion_boost", {
+      duration: n.val("duration"),
+      value: n.val("asBonus"),
+      sourceId: e.id,
+      key: "scallion_boost",
+      merge: "replace",
+    }),
+      ds(t, "scallion_s2_burst", e.pos, e.team, { unitId: e.id }));
+  },
+});
+
+Oi("scallion", "ult", {
+  movement: !0,
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    if (n.isRecast) {
+      Va(t, e, "scallion_beam");
+      return;
+    }
+    const from = Cs(e.pos),
+      dur = n.val("duration"),
+      beamLen = n.val("beamLength"),
+      beamW = n.val("beamWidth"),
+      tickDmg = oa(n, "tickDamage", { ad: "adRatio" }),
+      curHpPct = n.val("curHpPct") || 0,
+      slow = n.val("slow"),
+      slowDur = n.val("slowDur"),
+      turnRate = n.val("turnRate"),
+      enemyTeam = ia(e.team),
+      fullCd = e.skills.ult.cdMax;
+    // 1. 闪现到距离内目标点
+    const dx0 = n.targetPos.x - from.x,
+      dy0 = n.targetPos.y - from.y,
+      dist0 = Math.hypot(dx0, dy0),
+      maxR = n.range;
+    const rawDst =
+        dist0 > maxR && dist0 > 1e-4
+          ? { x: from.x + (dx0 / dist0) * maxR, y: from.y + (dy0 / dist0) * maxR }
+          : { x: n.targetPos.x, y: n.targetPos.y },
+      landed = Cs(Xj(t, e, rawDst));
+    ds(t, "scallion_ult_blink", from, e.team, { unitId: e.id, from, to: landed });
+    // 2. 确定葱击波初始朝向（优先自动瞄准射程内最近的敌方英雄，否则沿闪现方向）
+    let aim = dist0 > 0.25 ? Math.atan2(dy0, dx0) : e.facing,
+      bestD = beamLen + 2.5;
+    for (let i = 0; i < t.heroes.length; i++) {
+      const h = t.heroes[i];
+      if (!h.alive || h.team !== enemyTeam || h.rt.untargetable) continue;
+      const d = Math.hypot(h.pos.x - landed.x, h.pos.y - landed.y);
+      if (d < bestD) {
+        bestD = d;
+        aim = Math.atan2(h.pos.y - landed.y, h.pos.x - landed.x);
+      }
+    }
+    ((e.facing = aim), (e.h._scBeamAim = aim), (e.rt.disarmUntil = Math.max(e.rt.disarmUntil, t.state.time + dur)));
+    const zone = Zo(t, { visual: "scallion_ult_beam", owner: e, pos: landed, radius: 1.85, duration: dur });
+    let tickCount = 0,
+      settled = !1;
+    const emitBeam = (dealDmg) => {
+      if (!e.alive) return;
+      const bx = Math.cos(e.facing),
+        by = Math.sin(e.facing),
+        endPos = { x: e.pos.x + bx * beamLen, y: e.pos.y + by * beamLen };
+      ds(t, "scallion_beam_tick", e.pos, e.team, {
+        unitId: e.id,
+        from: Cs(e.pos),
+        to: endPos,
+        width: beamW,
+      });
+      if (!dealDmg) return;
+      const hits = scallionLineUnits(t, e.pos, bx, by, beamLen, beamW * 0.5, enemyTeam);
+      for (let i = 0; i < hits.length; i++) {
+        const u = hits[i];
+        if (!u.alive) continue;
+        const pctDmg = curHpPct > 0 ? (u.kind === "monster" ? Math.min(260, u.hp * curHpPct) : u.hp * curHpPct) : 0;
+        (wo(n, u, tickDmg + pctDmg, "physical"), u.alive && tr(t, u, slow, slowDur, e, "scallion_ult"));
+      }
+    };
+    const cleanup = (sim, unit) => {
+      if (settled) return;
+      settled = !0;
+      zone && Xk(sim, zone);
+      unit.rt.disarmUntil = Math.min(unit.rt.disarmUntil, sim.state.time);
+      unit.skills.ult.cd = Math.max(unit.skills.ult.cd, fullCd);
+    };
+    Wn(t, e, "scallion_beam", {
+      duration: dur,
+      sourceId: e.id,
+      key: "scallion_beam",
+      merge: "replace",
+      tickInterval: 0.05,
+      onTick(sim, unit) {
+        if (!unit.alive) return;
+        unit.rt.disarmUntil = Math.max(unit.rt.disarmUntil, sim.state.time + 0.12);
+        // 按限速缓慢把激光转向玩家/AI 指定的方向
+        let diff = (unit.h._scBeamAim ?? unit.facing) - unit.facing;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        const maxStep = turnRate * 0.05;
+        unit.facing += Math.max(-maxStep, Math.min(maxStep, diff));
+        tickCount++;
+        const doDmg = tickCount % 5 === 0,
+          doVfx = doDmg || tickCount % 2 === 0;
+        doVfx && emitBeam(doDmg);
+      },
+      onExpire: cleanup,
+      onRemove: cleanup,
+    });
+    // 允许 0.25 秒后再次按大招主动提前中断
+    e.skills.ult.cd = 0.25;
+    // 落地瞬间立刻喷第一跳激光
+    emitBeam(!0);
+  },
+});
+
+const PBP = Se.paperboy.passive.values,
+  PB_CC = ["stun", "airborne", "root", "silence", "slow", "blind", "xuesong_lifted"],
+  pbTmpPos = { x: 0, y: 0 };
+
+function paperboyFindTower(sim, unit) {
+  if (unit.h._pbLastTowerId >= 0) {
+    const t = sim.byId.get(unit.h._pbLastTowerId);
+    if (t && t.alive && t.kind === "tower" && t.team === unit.team) return t;
+  }
+  let best = null,
+    bestD2 = 1 / 0;
+  for (let i = 0; i < sim.units.length; i++) {
+    const u = sim.units[i];
+    if (!u.alive || u.kind !== "tower" || u.team !== unit.team) continue;
+    const dx = u.pos.x - unit.pos.x,
+      dy = u.pos.y - unit.pos.y,
+      d2 = dx * dx + dy * dy;
+    if (d2 < bestD2) {
+      bestD2 = d2;
+      best = u;
+    }
+  }
+  return best || sim.cores[unit.team] || null;
+}
+
+function paperboyOrbitPos(sim, unit, anchor, ang, out) {
+  const rad = 3.6,
+    tx = anchor.pos.x + Math.cos(ang) * rad,
+    ty = anchor.pos.y + Math.sin(ang) * rad;
+  sim.nav.nearestFree(tx, ty, unit.rt.navR, out);
+  return out;
+}
+
+function paperboySpawnEffigy(sim, unit) {
+  const anchor = paperboyFindTower(sim, unit);
+  if (!anchor) return;
+  if (unit.h._pbEffigyZone) {
+    Xk(sim, unit.h._pbEffigyZone);
+    unit.h._pbEffigyZone = null;
+  }
+  const ang = unit.h._pbEffigyAng ?? 0,
+    start = paperboyOrbitPos(sim, unit, anchor, ang, { x: anchor.pos.x, y: anchor.pos.y }),
+    zone = Zo(sim, {
+      visual: "paperboy_effigy",
+      owner: unit,
+      pos: start,
+      radius: 1.35,
+      duration: 1 / 0,
+    });
+  ((unit.h._pbEffigyZone = zone),
+    (unit.h._pbEffigyAng = ang),
+    (unit.h._pbEffigyReadyAt = 0),
+    Va(sim, unit, "paperboy_effigy_cd"),
+    Wn(sim, unit, "paperboy_effigy_ready", {
+      duration: 1 / 0,
+      sourceId: unit.id,
+      key: "paperboy_effigy_ready",
+      merge: "replace",
+    }));
+}
+
+function paperboyAddGloom(sim, caster, target, stacks) {
+  if (!target.alive || Ss(target) || stacks <= 0) return;
+  Wn(sim, target, "paperboy_gloom", {
+    duration: 1 / 0,
+    stacks,
+    maxStacks: 99,
+    sourceId: caster.id,
+    key: "paperboy_gloom",
+  });
+}
+
+function paperboyDetonateGloom(sim, caster, center, radius, hitSet) {
+  const enemyTeam = ia(caster.team),
+    ctx = { sim, caster, slot: "passive" };
+  for (const u of Pr(sim, center, radius, enemyTeam)) {
+    if (!u.alive || hitSet.has(u.id)) continue;
+    const gl = Dh(u, "paperboy_gloom");
+    if (!gl || gl.stacks <= 0) continue;
+    hitSet.add(u.id);
+    const dmg = u.stats.maxHp * gl.stacks * PBP.pctPerStack;
+    (Va(sim, u, "paperboy_gloom"),
+      ds(sim, "paperboy_gloom_burst", u.pos, caster.team, { unitId: caster.id, targetId: u.id }),
+      wo(ctx, u, dmg, "true"));
+  }
+}
+
+tu("paperboy", {
+  onSpawn(n, t) {
+    t.h._pbEffigyReadyAt === void 0 && (t.h._pbEffigyReadyAt = 0);
+    t.h._pbLastTowerId === void 0 && (t.h._pbLastTowerId = -1);
+    if (!t.h._pbEffigyZone) {
+      const rem = t.h._pbEffigyReadyAt - n.state.time;
+      if (rem <= 0) paperboySpawnEffigy(n, t);
+      else
+        Wn(n, t, "paperboy_effigy_cd", {
+          duration: rem,
+          sourceId: t.id,
+          key: "paperboy_effigy_cd",
+          merge: "replace",
+        });
+    } else if (!Ba(t, "paperboy_effigy_ready")) {
+      Wn(n, t, "paperboy_effigy_ready", {
+        duration: 1 / 0,
+        sourceId: t.id,
+        key: "paperboy_effigy_ready",
+        merge: "replace",
+      });
+    }
+  },
+  onTick(n, t, e) {
+    if (t.h._pbEffigyReadyAt === void 0) t.h._pbEffigyReadyAt = 0;
+    if (t.alive) {
+      let nearId = -1,
+        nearD2 = 16 * 16;
+      for (let i = 0; i < n.units.length; i++) {
+        const u = n.units[i];
+        if (!u.alive || u.kind !== "tower" || u.team !== t.team) continue;
+        const dx = u.pos.x - t.pos.x,
+          dy = u.pos.y - t.pos.y,
+          d2 = dx * dx + dy * dy;
+        if (d2 < nearD2) {
+          nearD2 = d2;
+          nearId = u.id;
+        }
+      }
+      nearId >= 0 && (t.h._pbLastTowerId = nearId);
+    }
+    if (!t.h._pbEffigyZone) {
+      if (n.state.time >= t.h._pbEffigyReadyAt) paperboySpawnEffigy(n, t);
+    } else {
+      const z = t.h._pbEffigyZone,
+        anchor = paperboyFindTower(n, t);
+      if (anchor) {
+        t.h._pbEffigyAng = (t.h._pbEffigyAng ?? 0) + e * 0.75;
+        paperboyOrbitPos(n, t, anchor, t.h._pbEffigyAng, pbTmpPos);
+        const dx = pbTmpPos.x - z.pos.x,
+          dy = pbTmpPos.y - z.pos.y,
+          d = Math.hypot(dx, dy),
+          step = Math.min(d, 6.5 * e);
+        d > 0.02 && ((z.pos.x += (dx / d) * step), (z.pos.y += (dy / d) * step));
+      }
+    }
+    if (Ba(t, "paperboy_suona") && !Dh(t, "shield", "paperboy_s1")) Va(n, t, "paperboy_suona");
+  },
+  onLethal(n, t) {
+    const z = t.h._pbEffigyZone;
+    if (!z) return !1;
+    const deathPos = Cs(t.pos),
+      effigyPos = Cs(z.pos);
+    (Xk(n, z), (t.h._pbEffigyZone = null), Va(n, t, "paperboy_effigy_ready"));
+    const effCd =
+      PBP.effigyCd -
+      Math.min(1, Math.max(0, (t.level - 1) / 14)) * (PBP.effigyCd - (PBP.effigyCdMin ?? PBP.effigyCd));
+    ((t.h._pbEffigyReadyAt = n.state.time + effCd),
+      Wn(n, t, "paperboy_effigy_cd", {
+        duration: effCd,
+        sourceId: t.id,
+        key: "paperboy_effigy_cd",
+        merge: "replace",
+      }));
+    const ratio = PBP.minHeal + Math.min(1, Math.max(0, (t.level - 1) / 14)) * (PBP.maxHeal - PBP.minHeal),
+      healed = Math.max(1, t.stats.maxHp * ratio);
+    ((t.hp = healed),
+      qj(n, t, PB_CC),
+      Va(n, t, "paperboy_suona"),
+      Va(n, t, "shield", "paperboy_s1"));
+    const landed = Cs(Xj(n, t, effigyPos));
+    n.emit({ type: "heal", targetId: t.id, amount: healed, pos: landed });
+    ds(n, "paperboy_effigy_shatter", deathPos, t.team, { unitId: t.id, to: landed, radius: PBP.radius });
+    const hitSet = new Set();
+    (paperboyDetonateGloom(n, t, deathPos, PBP.radius, hitSet),
+      paperboyDetonateGloom(n, t, landed, PBP.radius, hitSet));
+    return !0;
+  },
+});
+
+Oi("paperboy", "s1", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dur = n.val("duration"),
+      rad = n.val("radius"),
+      stacksPerSec = n.val("stacksPerSec") + Math.floor((e.level - 1) / 4),
+      shieldVal = oa(n, "shield", { hp: "hpRatio" });
+    if (e.h._pbSuonaZone) {
+      Xk(t, e.h._pbSuonaZone);
+      e.h._pbSuonaZone = null;
+    }
+    const zone = Zo(t, {
+      visual: "paperboy_suona_ring",
+      owner: e,
+      pos: e.pos,
+      radius: rad,
+      duration: dur,
+      follow: e,
+    });
+    e.h._pbSuonaZone = zone;
+    const pulse = (sim, unit) => {
+      if (!unit.alive) return;
+      ds(sim, "paperboy_suona_pulse", unit.pos, unit.team, { unitId: unit.id, radius: rad });
+      for (const u of Pr(sim, unit.pos, rad, ia(unit.team))) paperboyAddGloom(sim, unit, u, stacksPerSec);
+    };
+    const cleanup = (sim, unit) => {
+      if (zone) Xk(sim, zone);
+      unit.h._pbSuonaZone === zone && (unit.h._pbSuonaZone = null);
+    };
+    Wn(t, e, "shield", {
+      duration: dur,
+      value: shieldVal,
+      sourceId: e.id,
+      key: "paperboy_s1",
+      merge: "replace",
+      onRemove(sim, unit) {
+        Va(sim, unit, "paperboy_suona");
+      },
+    });
+    Wn(t, e, "paperboy_suona", {
+      duration: dur,
+      sourceId: e.id,
+      key: "paperboy_suona",
+      merge: "replace",
+      tickInterval: 1,
+      onTick(sim, unit) {
+        if (!unit.alive || !Dh(unit, "shield", "paperboy_s1")) {
+          Va(sim, unit, "paperboy_suona");
+          return;
+        }
+        pulse(sim, unit);
+      },
+      onExpire: cleanup,
+      onRemove: cleanup,
+    });
+    pulse(t, e);
+  },
+});
+
+Oi("paperboy", "s2", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      tgt = n.target ?? e,
+      immuneDur = n.val("immuneDur"),
+      hasteVal = n.val("haste"),
+      hasteDur = n.val("hasteDur"),
+      spd = n.val("speed"),
+      applyCrane = (sim, ally) => {
+        if (ally && ally.alive) {
+          (qj(sim, ally, PB_CC),
+            Wn(sim, ally, "paperboy_crane_guard", {
+              duration: immuneDur,
+              sourceId: e.id,
+              key: "paperboy_crane_guard",
+              merge: "replace",
+            }),
+            Vj(sim, ally, hasteVal, hasteDur, e, "paperboy_s2"),
+            ds(sim, "paperboy_crane_hit", ally.pos, e.team, { unitId: e.id, targetId: ally.id }));
+        }
+        if (e.alive && (!ally || ally.id !== e.id)) {
+          (Vj(sim, e, hasteVal, hasteDur, e, "paperboy_s2"),
+            ds(sim, "paperboy_crane_hit", e.pos, e.team, { unitId: e.id, targetId: e.id }));
+        }
+      };
+    if (tgt.id === e.id) {
+      applyCrane(t, e);
+      return;
+    }
+    FW(t, {
+      visual: "paperboy_crane",
+      owner: e,
+      from: e.pos,
+      target: tgt,
+      speed: spd,
+      radius: 0.35,
+      onHit(sim, _p, ally) {
+        applyCrane(sim, ally);
+      },
+    });
+  },
+});
+
+Oi("paperboy", "ult", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      tgt = n.target ?? e;
+    if (!tgt || !tgt.alive) return;
+    const isSelf = tgt.id === e.id,
+      dur = n.val("duration"),
+      share = isSelf ? 0 : n.val("share"),
+      breakRange = n.val("breakRange");
+    if (e.h._pbBindTargetId >= 0) {
+      const prev = t.byId.get(e.h._pbBindTargetId);
+      if (prev) {
+        const pb = Dh(prev, "paperboy_bound");
+        pb && pb.sourceId === e.id && Va(t, prev, "paperboy_bound");
+      }
+    }
+    e.h._pbBindTargetId = tgt.id;
+    Wn(t, tgt, "paperboy_bound", {
+      duration: dur,
+      value: share,
+      sourceId: e.id,
+      key: "paperboy_bound",
+      merge: "replace",
+    });
+    const cleanup = (sim, unit) => {
+      const ally = sim.byId.get(tgt.id);
+      if (ally) {
+        const pb = Dh(ally, "paperboy_bound");
+        pb && pb.sourceId === unit.id && Va(sim, ally, "paperboy_bound");
+      }
+      unit.h._pbBindTargetId === tgt.id && (unit.h._pbBindTargetId = -1);
+    };
+    Wn(t, e, "paperboy_bind", {
+      duration: dur,
+      value: share,
+      sourceId: tgt.id,
+      key: "paperboy_bind",
+      merge: "replace",
+      tickInterval: 0.25,
+      onTick(sim, unit) {
+        const ally = sim.byId.get(tgt.id);
+        if (
+          !unit.alive ||
+          !ally ||
+          !ally.alive ||
+          (!isSelf && Math.hypot(ally.pos.x - unit.pos.x, ally.pos.y - unit.pos.y) > breakRange)
+        ) {
+          Va(sim, unit, "paperboy_bind");
+          return;
+        }
+        ds(sim, "paperboy_bind_tick", unit.pos, unit.team, {
+          unitId: unit.id,
+          from: Cs(unit.pos),
+          to: Cs(ally.pos),
+        });
+      },
+      onExpire: cleanup,
+      onRemove: cleanup,
+    });
+    ds(t, "paperboy_bind_tick", e.pos, e.team, {
+      unitId: e.id,
+      from: Cs(e.pos),
+      to: Cs(tgt.pos),
+    });
+  },
+});
+
+const MGP = Se.maggot.passive.values,
+  MG_TIER_R = [0, 1.05, 1.55, 2.15],
+  MG_TIER_OBSR = [0, 0.85, 1.32, 1.88],
+  MG_TIER_DUR = [0, MGP.smallDur, MGP.medDur, MGP.largeDur],
+  MG_TIER_VIS = ["", "maggot_poop_s", "maggot_poop_m", "maggot_poop_l"],
+  MG_TIER_W = [0, 1, 2, 4];
+
+function maggotPoopList(sim) {
+  return sim._maggotPoops ?? (sim._maggotPoops = []);
+}
+
+function maggotEase(u) {
+  const c = Math.max(0, Math.min(1, u));
+  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
+}
+
+function maggotRemovePoop(sim, rec) {
+  if (!rec || rec.removed) return;
+  rec.removed = !0;
+  if (rec.hasObs) {
+    sim.nav.removeObstacle(rec.obsId);
+    rec.hasObs = !1;
+  }
+  const list = maggotPoopList(sim),
+    idx = list.indexOf(rec);
+  idx >= 0 && list.splice(idx, 1);
+  rec.zone && Xk(sim, rec.zone);
+}
+
+function maggotPushUnitsOut(sim, pos, obsR) {
+  for (const u of Pr(sim, pos, obsR + 1.35)) {
+    if (!u.alive || Ss(u) || u.heroId === "maggot") continue;
+    const ox = u.pos.x - pos.x,
+      oy = u.pos.y - pos.y,
+      dist = Math.hypot(ox, oy),
+      need = obsR + u.radius + 0.18;
+    if (dist < need) {
+      const nx = dist > 1e-4 ? ox / dist : 1,
+        ny = dist > 1e-4 ? oy / dist : 0;
+      Xj(sim, u, { x: pos.x + nx * need, y: pos.y + ny * need });
+    }
+  }
+}
+
+function maggotSetObs(sim, rec, active) {
+  if (rec.removed) return;
+  if (active && !rec.hasObs) {
+    sim.nav.addObstacle(rec.obsId, rec.pos.x, rec.pos.y, rec.obsR, "poop");
+    rec.hasObs = !0;
+    maggotPushUnitsOut(sim, rec.pos, rec.obsR);
+  } else if (!active && rec.hasObs) {
+    sim.nav.removeObstacle(rec.obsId);
+    rec.hasObs = !1;
+  }
+}
+
+function maggotTryStartMerges(sim, owner) {
+  const list = maggotPoopList(sim);
+  // 严格按合成规则发起丝滑融合动画：
+  // 1) 金色大粪污吸收靠近的小粪污刷新时长
+  // 2) 两坨小粪污 -> 滑向中点合成一坨中粪污
+  // 3) 两坨中粪污 -> 滑向中点合成一坨金色大粪污
+  for (let i = 0; i < list.length; i++) {
+    const p3 = list[i];
+    if (p3.removed || p3.state !== "idle" || p3.tier !== 3) continue;
+    for (let j = 0; j < list.length; j++) {
+      const p1 = list[j];
+      if (p1.removed || p1.state !== "idle" || p1.tier !== 1) continue;
+      if (Math.hypot(p3.pos.x - p1.pos.x, p3.pos.y - p1.pos.y) <= p3.radius + p1.radius + 1.85) {
+        maggotSetObs(sim, p1, !1);
+        p1.state = "merging";
+        p1.mergeRole = "absorb_into";
+        p1.mergeTarget = p3;
+        p1.animT = 0;
+        p1.animDur = 0.3;
+        p1.startX = p1.pos.x;
+        p1.startY = p1.pos.y;
+        p1.endX = p3.pos.x;
+        p1.endY = p3.pos.y;
+        p1.mergeOwner = owner;
+      }
+    }
+  }
+  const pairMerge = (tier, nextTier, extraDist, dur) => {
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i];
+      if (a.removed || a.state !== "idle" || a.tier !== tier) continue;
+      let best = null,
+        bestD = 1e9;
+      for (let j = i + 1; j < list.length; j++) {
+        const b = list[j];
+        if (b.removed || b.state !== "idle" || b.tier !== tier) continue;
+        const d = Math.hypot(a.pos.x - b.pos.x, a.pos.y - b.pos.y);
+        if (d <= a.radius + b.radius + extraDist && d < bestD) {
+          bestD = d;
+          best = b;
+        }
+      }
+      if (!best) continue;
+      const mid = { x: (a.pos.x + best.pos.x) * 0.5, y: (a.pos.y + best.pos.y) * 0.5 };
+      sim.nav.withNoPoop(!0, () => sim.nav.nearestFree(mid.x, mid.y, 0.7, mid));
+      maggotSetObs(sim, a, !1);
+      maggotSetObs(sim, best, !1);
+      a.state = "merging";
+      a.mergeRole = "primary";
+      a.mergePartner = best;
+      a.mergeNextTier = nextTier;
+      a.mergeOwner = owner;
+      a.animT = 0;
+      a.animDur = dur;
+      a.startX = a.pos.x;
+      a.startY = a.pos.y;
+      a.endX = mid.x;
+      a.endY = mid.y;
+      best.state = "merging";
+      best.mergeRole = "secondary";
+      best.mergePartner = a;
+      best.animT = 0;
+      best.animDur = dur;
+      best.startX = best.pos.x;
+      best.startY = best.pos.y;
+      best.endX = mid.x;
+      best.endY = mid.y;
+    }
+  };
+  pairMerge(1, 2, 1.85, 0.34);
+  pairMerge(2, 3, 2.05, 0.38);
+}
+
+function maggotUpdatePoops(sim, dt) {
+  if (sim._mgPoopLastTick === sim.state.time) return;
+  sim._mgPoopLastTick = sim.state.time;
+  const list = maggotPoopList(sim);
+  let needCheckOwner = null;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const p = list[i];
+    if (p.removed) continue;
+    if (p.state === "sucking") {
+      p.animT += dt / p.animDur;
+      const caster = sim.byId.get(p.suckOwnerId);
+      if (caster && caster.alive) {
+        p.endX = caster.pos.x + p.suckOffX;
+        p.endY = caster.pos.y + p.suckOffY;
+      }
+      const k = maggotEase(p.animT);
+      p.pos.x = p.startX + (p.endX - p.startX) * k;
+      p.pos.y = p.startY + (p.endY - p.startY) * k;
+      if (p.zone) {
+        p.zone.pos.x = p.pos.x;
+        p.zone.pos.y = p.pos.y;
+      }
+      if (p.animT >= 1) {
+        sim.nav.withNoPoop(!0, () => sim.nav.nearestFree(p.pos.x, p.pos.y, 0.7, p.pos));
+        if (p.zone) {
+          p.zone.pos.x = p.pos.x;
+          p.zone.pos.y = p.pos.y;
+        }
+        p.state = "idle";
+        maggotSetObs(sim, p, !0);
+        if (caster) needCheckOwner = caster;
+      }
+    } else if (p.state === "merging") {
+      if (p.mergeRole === "absorb_into") {
+        const tgt = p.mergeTarget;
+        if (!tgt || tgt.removed) {
+          p.state = "idle";
+          maggotSetObs(sim, p, !0);
+          continue;
+        }
+        p.endX = tgt.pos.x;
+        p.endY = tgt.pos.y;
+        p.animT += dt / p.animDur;
+        const k = maggotEase(p.animT);
+        p.pos.x = p.startX + (p.endX - p.startX) * k;
+        p.pos.y = p.startY + (p.endY - p.startY) * k;
+        if (p.zone) {
+          p.zone.pos.x = p.pos.x;
+          p.zone.pos.y = p.pos.y;
+        }
+        if (p.animT >= 1) {
+          const own = p.mergeOwner ?? sim.byId.get(p.ownerId);
+          maggotRemovePoop(sim, p);
+          if (tgt.zone) {
+            tgt.zone.timeLeft = MGP.largeDur;
+            tgt.zone.duration = MGP.largeDur;
+          }
+          own && ds(sim, "maggot_poop_merge", tgt.pos, own.team, { unitId: own.id, tier: 3 });
+        }
+      } else {
+        p.animT += dt / p.animDur;
+        const k = maggotEase(p.animT);
+        p.pos.x = p.startX + (p.endX - p.startX) * k;
+        p.pos.y = p.startY + (p.endY - p.startY) * k;
+        if (p.zone) {
+          p.zone.pos.x = p.pos.x;
+          p.zone.pos.y = p.pos.y;
+        }
+        if (p.mergeRole === "primary" && p.animT >= 1) {
+          const partner = p.mergePartner,
+            mid = { x: p.endX, y: p.endY },
+            nextTier = p.mergeNextTier,
+            own = p.mergeOwner ?? sim.byId.get(p.ownerId);
+          maggotRemovePoop(sim, partner);
+          maggotRemovePoop(sim, p);
+          if (own) {
+            maggotSpawnPoop(sim, own, mid, nextTier, !0);
+            ds(sim, "maggot_poop_merge", mid, own.team, { unitId: own.id, tier: nextTier });
+            needCheckOwner = own;
+          }
+        }
+      }
+    }
+  }
+  needCheckOwner && maggotTryStartMerges(sim, needCheckOwner);
+}
+
+function maggotSpawnPoop(sim, owner, rawPos, tier, skipMerge = !1) {
+  const t = Math.max(1, Math.min(3, tier | 0)),
+    pos = { x: rawPos.x, y: rawPos.y };
+  sim.nav.withNoPoop(!0, () => sim.nav.nearestFree(pos.x, pos.y, 0.7, pos));
+  const seq = (sim._maggotPoopSeq = (sim._maggotPoopSeq ?? 0) + 1),
+    obsId = `mg_poop_${seq}`,
+    r = MG_TIER_R[t],
+    obsR = MG_TIER_OBSR[t],
+    dur = MG_TIER_DUR[t],
+    list = maggotPoopList(sim);
+  const rec = {
+      id: seq,
+      ownerId: owner.id,
+      team: owner.team,
+      tier: t,
+      pos: Cs(pos),
+      radius: r,
+      obsR,
+      obsId,
+      hasObs: !1,
+      state: "idle",
+      animT: 0,
+      animDur: 0.34,
+      startX: pos.x,
+      startY: pos.y,
+      endX: pos.x,
+      endY: pos.y,
+      zone: null,
+      removed: !1,
+    },
+    zone = Zo(sim, {
+      visual: MG_TIER_VIS[t],
+      owner,
+      pos,
+      radius: r,
+      duration: dur,
+      tickInterval: 0.05,
+      onTick(s) {
+        maggotUpdatePoops(s, 0.05);
+      },
+      onEnd() {
+        if (!rec.removed) {
+          rec.removed = !0;
+          if (rec.hasObs) {
+            sim.nav.removeObstacle(obsId);
+            rec.hasObs = !1;
+          }
+          const idx = list.indexOf(rec);
+          idx >= 0 && list.splice(idx, 1);
+        }
+      },
+    });
+  rec.zone = zone;
+  maggotSetObs(sim, rec, !0);
+  list.push(rec);
+  !skipMerge && maggotTryStartMerges(sim, owner);
+  return rec;
+}
+
+function maggotSyncUltCost(unit) {
+  const u = unit && unit.skills && unit.skills.ult;
+  if (!u || u.level <= 0) return;
+  const lv = Math.max(0, Math.min(Se.maggot.skills.ult.manaCost.length - 1, u.level - 1)),
+    base = Se.maggot.skills.ult.manaCost[lv] ?? 45,
+    power = unit.h._mgLastPower || 0,
+    manaMult = Se.maggot.skills.ult.values.ultManaMult ?? 1.8;
+  u.cost = Math.round(base * Math.pow(manaMult, power));
+}
+
+tu("maggot", {
+  onConsumeItem(n, t) {
+    if (!t.alive) return;
+    Wn(n, t, "maggot_digest", {
+      duration: MGP.digestDelay,
+      sourceId: t.id,
+      key: "maggot_digest",
+      merge: "replace",
+    });
+    Kj(n, MGP.digestDelay, () => {
+      if (!t.alive) return;
+      ds(n, "maggot_fart", t.pos, t.team, { unitId: t.id });
+      maggotSpawnPoop(n, t, t.pos, 1);
+    });
+  },
+  onTick(n, t, e) {
+    maggotUpdatePoops(n, e || 0.05);
+    if (!t.alive) {
+      t.h._mgLastPower && ((t.h._mgLastPower = 0), Va(n, t, "maggot_aura"), _o(n, t));
+      t.h._mgNearSmall = 0;
+      t.h._mgNearMed = 0;
+      t.h._mgNearLarge = 0;
+      maggotSyncUltCost(t);
+      return;
+    }
+    const list = maggotPoopList(n),
+      rad = MGP.auraRadius;
+    let power = 0,
+      nSmall = 0,
+      nMed = 0,
+      nLarge = 0;
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      if (p.removed) continue;
+      if (Math.hypot(p.pos.x - t.pos.x, p.pos.y - t.pos.y) <= rad + p.radius) {
+        power += MG_TIER_W[p.tier] || 1;
+        if (p.tier === 1) nSmall++;
+        else if (p.tier === 2) nMed++;
+        else if (p.tier >= 3) nLarge++;
+      }
+    }
+    t.h._mgNearSmall = nSmall;
+    t.h._mgNearMed = nMed;
+    t.h._mgNearLarge = nLarge;
+    power = Math.min(MGP.maxPower, power);
+    const prev = t.h._mgLastPower || 0;
+    if (power > 0) {
+      const ex = Dh(t, "maggot_aura");
+      if (ex && ex.stacks === power) {
+        ex.timeLeft = 0.6;
+      } else {
+        const b = Wn(n, t, "maggot_aura", {
+          duration: 0.6,
+          value: MGP.asPerPower,
+          stacks: power,
+          maxStacks: MGP.maxPower,
+          sourceId: t.id,
+          key: "maggot_aura",
+          merge: "replace",
+        });
+        b && (b.stacks = power);
+        t.h._mgLastPower = power;
+        _o(n, t);
+      }
+    } else if (prev > 0 || Ba(t, "maggot_aura")) {
+      Va(n, t, "maggot_aura");
+      t.h._mgLastPower = 0;
+      _o(n, t);
+    }
+    maggotSyncUltCost(t);
+  },
+  onBasicAttackLaunch(n, t, e) {
+    if (!e || !e.alive) return;
+    const nSmall = t.h._mgNearSmall || 0,
+      nMed = t.h._mgNearMed || 0,
+      nLarge = t.h._mgNearLarge || 0;
+    // 身边有小粪污：普攻由1块变成2块（额外+1块小粑粑）；中粪污额外+2块小粑粑；金色大粪污额外+1块金色粑粑
+    const extraBrown = Math.min(6, nSmall * 1 + nMed * 2),
+      extraGold = Math.min(3, nLarge * 1);
+    if (extraBrown + extraGold <= 0) return;
+    const dx = e.pos.x - t.pos.x,
+      dy = e.pos.y - t.pos.y,
+      dl = Math.hypot(dx, dy) || 1,
+      px = -dy / dl,
+      py = dx / dl,
+      spd = t.rt.atk.projSpeed || 28;
+    let idx = 0;
+    const fireCrumb = (isGold) => {
+      const slot = ++idx,
+        side = (slot % 2 === 1 ? 1 : -1) * (0.28 + Math.floor((slot - 1) / 2) * 0.14);
+      Kj(n, slot * 0.055, () => {
+        if (!t.alive || !e.alive) return;
+        const from = { x: t.pos.x + px * side, y: t.pos.y + py * side };
+        FW(n, {
+          visual: isGold ? "maggot_basic_gold" : "maggot_basic",
+          owner: t,
+          from,
+          target: e,
+          speed: spd * (isGold ? 1.06 : 0.98),
+          radius: 0.25,
+          onHit(sim, _p, target) {
+            if (!target.alive) return;
+            if (Ss(target)) {
+              gS(sim, t, target, t.stats.ad * (isGold ? 0.35 : 0.2), "magic");
+              return;
+            }
+            const pct = isGold ? MGP.hpPctPerPower * 3.0 : MGP.hpPctPerPower * 1.15;
+            let dmg = target.stats.maxHp * pct;
+            if (target.kind === "monster") dmg = Math.min(dmg, MGP.monsterCapPerPower * (isGold ? 2.6 : 1.1));
+            gS(sim, t, target, dmg, "magic");
+            ds(sim, isGold ? "maggot_onhit_gold" : "maggot_onhit", target.pos, t.team, {
+              unitId: t.id,
+              targetId: target.id,
+            });
+          },
+        });
+      });
+    };
+    for (let i = 0; i < extraBrown; i++) fireCrumb(!1);
+    for (let i = 0; i < extraGold; i++) fireCrumb(!0);
+  },
+});
+
+Oi("maggot", "s1", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dur = n.val("duration"),
+      tickInterval = 0.2,
+      tickDmg = oa(n, "tickDamage", { ap: "apRatio" }) * (tickInterval / 0.25),
+      coatTicks = Math.max(1, Math.round(n.val("coatSec") / tickInterval)),
+      len = n.range,
+      halfW = n.width * 0.5,
+      enemyTeam = ia(e.team);
+    e.facing = Math.atan2(n.dir.y, n.dir.x);
+    const sprayTick = (sim, unit) => {
+      if (!unit.alive) return;
+      // 喷吐方向始终跟随活蛆当前头的朝向实时旋转
+      const dirX = Math.cos(unit.facing),
+        dirY = Math.sin(unit.facing);
+      ds(sim, "maggot_spray_tick", unit.pos, unit.team, {
+        unitId: unit.id,
+        dir: { x: dirX, y: dirY },
+        range: len,
+      });
+      const hits = scallionLineUnits(sim, unit.pos, dirX, dirY, len, halfW, enemyTeam);
+      for (const u of hits) {
+        wo(n, u, tickDmg, "magic");
+        if (u.alive) {
+          const b = Wn(sim, u, "maggot_coated", {
+            duration: 4,
+            stacks: 1,
+            maxStacks: coatTicks,
+            sourceId: unit.id,
+            key: "maggot_coated",
+          });
+          if (b && b.stacks >= coatTicks) {
+            Va(sim, u, "maggot_coated");
+            maggotSpawnPoop(sim, unit, u.pos, 1);
+          }
+        }
+      }
+    };
+    Wn(t, e, "maggot_spray", {
+      duration: dur,
+      sourceId: e.id,
+      key: "maggot_spray",
+      merge: "replace",
+      tickInterval,
+      onTick: sprayTick,
+    });
+    sprayTick(t, e);
+  },
+});
+
+Oi("maggot", "s2", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      rad = n.val("radius"),
+      poseDur = n.val("poseDur"),
+      list = maggotPoopList(t),
+      found = [];
+    Wn(t, e, "maggot_vacuum", {
+      duration: poseDur,
+      sourceId: e.id,
+      key: "maggot_vacuum",
+      merge: "replace",
+    });
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      if (!p.removed && p.state !== "merging" && Math.hypot(p.pos.x - e.pos.x, p.pos.y - e.pos.y) <= rad + p.radius) {
+        found.push(p);
+      }
+    }
+    const sources = found.map((p) => Cs(p.pos));
+    ds(t, "maggot_vacuum", e.pos, e.team, { unitId: e.id, radius: rad, sources });
+    if (found.length === 0) return;
+    const baseOffX = Math.cos(e.facing) * 1.4,
+      baseOffY = Math.sin(e.facing) * 1.4;
+    for (let i = 0; i < found.length; i++) {
+      const p = found[i],
+        ang = (i / Math.max(1, found.length)) * Math.PI * 2,
+        ringR = found.length === 1 ? 0 : 0.45;
+      maggotSetObs(t, p, !1);
+      p.state = "sucking";
+      p.suckOwnerId = e.id;
+      p.suckOffX = baseOffX + Math.cos(ang) * ringR;
+      p.suckOffY = baseOffY + Math.sin(ang) * ringR;
+      p.animT = 0;
+      p.animDur = 0.44;
+      p.startX = p.pos.x;
+      p.startY = p.pos.y;
+      p.endX = e.pos.x + p.suckOffX;
+      p.endY = e.pos.y + p.suckOffY;
+    }
+  },
+});
+
+Oi("maggot", "ult", {
+  aimLead: $a("maggot", "ult", "delay"),
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dst = Cs(n.targetPos),
+      delay = n.val("delay"),
+      rad = n.radius,
+      power = e.h._mgLastPower || 0,
+      dmgMult = Math.pow(n.val("ultDmgMult") || 1.5, power);
+    ds(t, "maggot_ult_launch", e.pos, e.team, { unitId: e.id, from: Cs(e.pos), to: dst });
+    Zo(t, { visual: "telegraph", owner: e, pos: dst, radius: rad, duration: delay });
+    Kj(t, delay, () => {
+      const dmg = oa(n, "damage", { ad: "adRatio", ap: "apRatio" }) * dmgMult,
+        slow = n.val("slow"),
+        slowDur = n.val("slowDur");
+      ds(t, "maggot_ult_splat", dst, e.team, { unitId: e.id, radius: rad });
+      for (const u of Pr(t, dst, rad, ia(e.team))) {
+        wo(n, u, dmg, "magic");
+        u.alive && tr(t, u, slow, slowDur, e, "maggot_ult");
+      }
+      maggotSpawnPoop(t, e, dst, 1);
+    });
+  },
+});
+
+const HMP = Se.horseman.passive.values;
+
+function horsemanClearKickZone(sim, unit) {
+  if (unit.h._hmKickZone) {
+    Xk(sim, unit.h._hmKickZone);
+    unit.h._hmKickZone = null;
+  }
+}
+
+function horsemanReleaseKick(sim, unit, dir, level, chargeFrac, width) {
+  const def = Se.horseman.skills.s1,
+    minR = Nh(def, "minRatio", level),
+    fullDmg = Nh(def, "damage", level) + unit.stats.ad * Nh(def, "adRatio", level),
+    baseDmg = fullDmg * (minR + (1 - minR) * chargeFrac),
+    minRange = Nh(def, "minRange", level),
+    maxRange = Nh(def, "maxRange", level),
+    curRange = minRange + (maxRange - minRange) * chargeFrac,
+    curWidth = width || def.cast.width || 2.3,
+    minStun = Nh(def, "minStun", level),
+    maxStun = Nh(def, "stunDur", level),
+    stun = minStun + (maxStun - minStun) * chargeFrac,
+    minKnock = Nh(def, "minKnock", level),
+    maxKnock = Nh(def, "knockDist", level),
+    knock = minKnock + (maxKnock - minKnock) * chargeFrac,
+    fullCharged = chargeFrac >= 0.98,
+    dl = Math.hypot(dir.x, dir.y) || 1,
+    nx = dir.x / dl,
+    ny = dir.y / dl,
+    ndir = { x: nx, y: ny };
+  // 蓄力时屁股已经对准目标方向，松手直接猛蹬
+  unit.facing = Math.atan2(-ny, -nx);
+  vS(sim, unit, "cast_s1", 0.52, !0);
+  ds(sim, "horseman_kick_blast", unit.pos, unit.team, {
+    unitId: unit.id,
+    dir: ndir,
+    range: curRange,
+    width: curWidth,
+    power: chargeFrac,
+  });
+  const hits = scallionLineUnits(sim, unit.pos, nx, ny, curRange, curWidth * 0.5, ia(unit.team));
+  for (const u of hits) {
+    const isCrit = fullCharged && !Ss(u) && unit.stats.critChance > 0 && sim.rng.next() < unit.stats.critChance,
+      dmg = isCrit ? baseDmg * unit.stats.critDamage : baseDmg;
+    sim.fx(isCrit ? "hit_crit" : "hit_physical", u.pos, unit.team, { unitId: unit.id, targetId: u.id });
+    Bo(sim, unit, u, dmg, "physical", "skill", "s1", isCrit);
+    if (u.alive && !Ss(u)) {
+      Gj(sim, u, stun, unit);
+      Yj(sim, u, { x: u.pos.x + nx * 12, y: u.pos.y + ny * 12 }, knock, 16 + chargeFrac * 6);
+    }
+  }
+}
+
+function horsemanChargeImpact(sim, unit, target, dirX, dirY, mult, isPrimary) {
+  if (!target || !target.alive) return;
+  const st = unit.stats,
+    isStruct = Ss(target),
+    isCrit = !isStruct && st.critChance > 0 && sim.rng.next() < st.critChance,
+    dmg = st.ad * mult * (isCrit ? st.critDamage : 1);
+  sim.fx(isCrit ? "hit_crit" : "hit_physical", target.pos, unit.team, { unitId: unit.id, targetId: target.id });
+  ds(sim, "horseman_charge_hit", target.pos, unit.team, { unitId: unit.id, targetId: target.id });
+  Bo(sim, unit, target, dmg, "physical", "basic", null, isCrit);
+  if (target.alive && !isStruct) {
+    // 主目标沿冲刺方向狠狠顶飞，侧边沿途敌人往斜前方撞开
+    const relX = target.pos.x - unit.pos.x,
+      relY = target.pos.y - unit.pos.y,
+      cross = dirX * relY - dirY * relX,
+      sideSign = cross >= 0 ? 1 : -1,
+      px = -dirY * sideSign,
+      py = dirX * sideSign,
+      kx = isPrimary ? dirX : dirX * 0.58 + px * 0.82,
+      ky = isPrimary ? dirY : dirY * 0.58 + py * 0.82,
+      kdist = isPrimary ? HMP.knockDist : HMP.sideKnock;
+    Yj(sim, target, { x: target.pos.x + kx * 12, y: target.pos.y + ky * 12 }, kdist, 18);
+    yS(sim, target, HMP.knockAir, unit);
+  }
+}
+
+function horsemanSyncBar(t) {
+  const full = Ba(t, "horseman_charge"),
+    ratio = full ? 1 : Math.max(0, Math.min(1, (t.h._hmMoveT || 0) / Math.max(0.1, HMP.runTime)));
+  t.chargeBar = { ratio, full };
+}
+
+tu("horseman", {
+  onSpawn(n, t) {
+    t.h._hmMoveT = 0;
+    t.h._hmStopT = 0;
+    t.h._hmLastX = t.pos.x;
+    t.h._hmLastY = t.pos.y;
+    t.h._hmStepAcc = 0;
+    t.h._hmKickZone = null;
+    horsemanSyncBar(t);
+  },
+  statMods(n, t, e) {
+    if (Ba(t, "horseman_charge")) e.attackRange += HMP.bonusRange;
+  },
+  onTick(n, t, e) {
+    if (!t.alive) {
+      horsemanClearKickZone(n, t);
+      t.h._hmMoveT = 0;
+      t.h._hmStopT = 0;
+      t.chargeBar = { ratio: 0, full: !1 };
+      return;
+    }
+    const lx = t.h._hmLastX ?? t.pos.x,
+      ly = t.h._hmLastY ?? t.pos.y,
+      dist = Math.hypot(t.pos.x - lx, t.pos.y - ly);
+    t.h._hmLastX = t.pos.x;
+    t.h._hmLastY = t.pos.y;
+    const moving =
+      dist > e * 0.65 &&
+      !t.rt.rooted &&
+      !t.rt.stunned &&
+      t.rt.windupLeft <= 0 &&
+      !Ba(t, "horseman_kick_charge");
+    if (moving) {
+      t.h._hmStopT = 0;
+      if (!Ba(t, "horseman_charge")) {
+        t.h._hmMoveT = Math.min(HMP.runTime, (t.h._hmMoveT || 0) + e);
+        const secs = Math.min(4, Math.floor(t.h._hmMoveT));
+        if (t.h._hmMoveT >= HMP.runTime) {
+          Va(n, t, "horseman_momentum");
+          Wn(n, t, "horseman_charge", {
+            duration: 1 / 0,
+            sourceId: t.id,
+            key: "horseman_charge",
+            merge: "replace",
+          });
+          ds(n, "horseman_charge_ready", t.pos, t.team, { unitId: t.id });
+        } else if (secs >= 1) {
+          const mb = Dh(t, "horseman_momentum");
+          if (!mb || mb.stacks !== secs) {
+            Wn(n, t, "horseman_momentum", {
+              duration: 1 / 0,
+              stacks: secs,
+              maxStacks: 5,
+              sourceId: t.id,
+              key: "horseman_momentum",
+              merge: "replace",
+            });
+          }
+        }
+      }
+      if (Ba(t, "horseman_trample") || Ba(t, "horseman_charge")) {
+        t.h._hmStepAcc = (t.h._hmStepAcc || 0) + e;
+        const stepGap = Ba(t, "horseman_trample") ? 0.14 : 0.22;
+        if (t.h._hmStepAcc >= stepGap) {
+          t.h._hmStepAcc = 0;
+          ds(n, "horseman_trample_step", t.pos, t.team, { unitId: t.id, big: Ba(t, "horseman_trample") ? 1 : 0 });
+        }
+      }
+    } else {
+      t.h._hmStopT = (t.h._hmStopT || 0) + e;
+      if (Ba(t, "horseman_charge")) {
+        if (t.h._hmStopT >= 0.95) {
+          Va(n, t, "horseman_charge");
+          t.h._hmMoveT = 0;
+        }
+      } else if (t.h._hmStopT >= 0.35) {
+        t.h._hmMoveT = 0;
+        Ba(t, "horseman_momentum") && Va(n, t, "horseman_momentum");
+      }
+    }
+    horsemanSyncBar(t);
+  },
+  onBasicAttackStart(n, t, target) {
+    t.h._hmMoveT = 0;
+    t.h._hmStopT = 0;
+    Ba(t, "horseman_momentum") && Va(n, t, "horseman_momentum");
+    if (!Ba(t, "horseman_charge")) {
+      horsemanSyncBar(t);
+      return;
+    }
+    Va(n, t, "horseman_charge");
+    horsemanSyncBar(t);
+    const ms = t.stats.moveSpeed,
+      // 移速越快伤害越高，没有上限
+      bonus = HMP.minBonus + Math.max(0, ms - HMP.msFloor) * HMP.msScale,
+      mult = 1 + bonus;
+    const dx = target && target.alive ? target.pos.x - t.pos.x : Math.cos(t.facing),
+      dy = target && target.alive ? target.pos.y - t.pos.y : Math.sin(t.facing),
+      dist = Math.hypot(dx, dy) || 1,
+      nx = dx / dist,
+      ny = dy / dist,
+      dir = { x: nx, y: ny },
+      dashDist = Math.max(HMP.minDash, Math.min(HMP.maxDash, dist + 1.8)),
+      dashSpeed = Math.max(HMP.dashSpeed, ms * 3.1),
+      dashDur = dashDist / Math.max(1, dashSpeed),
+      fromPos = Cs(t.pos),
+      toPos = { x: fromPos.x + nx * dashDist, y: fromPos.y + ny * dashDist },
+      hitSet = new Set();
+    Wn(n, t, "horseman_dashing", {
+      duration: dashDur + 0.1,
+      sourceId: t.id,
+      key: "horseman_dashing",
+      merge: "replace",
+    });
+    ds(n, "horseman_charge_dash", fromPos, t.team, {
+      unitId: t.id,
+      from: fromPos,
+      to: toPos,
+    });
+    // Hm 会取消普攻前摇，因此冲锋碰撞本身直接完成此次普攻的伤害与撞飞
+    Hm(n, t, {
+      dir,
+      distance: dashDist,
+      speed: dashSpeed,
+      anim: "dash",
+      hitRadius: HMP.hitRadius || t.radius + 1.05,
+      filter: ia(t.team),
+      onHit(u) {
+        if (hitSet.has(u.id)) return !1;
+        hitSet.add(u.id);
+        horsemanChargeImpact(n, t, u, nx, ny, mult, !!target && u.id === target.id);
+        // 返回 false：不停下来，冲刺过程撞开沿途所有敌人
+        return !1;
+      },
+      onEnd() {
+        Va(n, t, "horseman_dashing");
+        if (target && target.alive && !hitSet.has(target.id)) {
+          const rem = Math.hypot(target.pos.x - t.pos.x, target.pos.y - t.pos.y);
+          if (rem <= t.radius + target.radius + 1.8) {
+            hitSet.add(target.id);
+            horsemanChargeImpact(n, t, target, nx, ny, mult, !0);
+          }
+        }
+      },
+    });
+  },
+  onSkillCast(n, t, slot) {
+    if (slot !== "s1" && slot !== "s2" && slot !== "ult") return;
+    const ultLv = t.skills.ult.level;
+    if (ultLv <= 0) return;
+    const spd = Nh(Se.horseman.skills.ult, "passiveSpeed", ultLv),
+      dur = Nh(Se.horseman.skills.ult, "passiveDur", ultLv);
+    Vj(n, t, spd, dur, t, "horseman_stride");
+  },
+  onKill(n, t, victim) {
+    if (!victim || victim.kind !== "hero" || t.skills.ult.level <= 0) return;
+    if (t.skills.ult.cd > 0) {
+      O6(t, "ult");
+      ds(n, "horseman_trample_reset", t.pos, t.team, { unitId: t.id });
+    }
+  },
+});
+
+Oi("horseman", "s1", {
+  lockTime: 0,
+  noAnim: !0,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      fullCharge = n.val("fullCharge"),
+      maxCharge = n.val("maxCharge"),
+      dl = Math.hypot(n.dir.x, n.dir.y) || 1,
+      nx = n.dir.x / dl,
+      ny = n.dir.y / dl;
+    if (n.isRecast) {
+      const elapsed = Math.max(0, t.state.time - (e.h._hmKickStart ?? t.state.time)),
+        p = Math.max(0, Math.min(1, elapsed / Math.max(0.1, fullCharge))),
+        cdMax = e.h._hmKickCd || e.skills.s1.cdMax;
+      e.h._hmKickReleased = !0;
+      Va(t, e, "horseman_kick_charge");
+      horsemanClearKickZone(t, e);
+      horsemanReleaseKick(t, e, { x: nx, y: ny }, n.level, p, n.width);
+      e.skills.s1.cd = cdMax;
+      return;
+    }
+    const cdMax = e.skills.s1.cdMax;
+    e.skills.s1.cd = 0;
+    e.h._hmKickStart = t.state.time;
+    e.h._hmKickDir = { x: nx, y: ny };
+    e.h._hmKickCd = cdMax;
+    e.h._hmKickLvl = n.level;
+    e.h._hmKickWidth = n.width || Se.horseman.skills.s1.cast.width;
+    e.h._hmKickReleased = !1;
+    // 蓄力立刻打断普攻与移动指令，防止边蓄力边扭头平A
+    e.h.atkOrder = !1;
+    e.targetId = -1;
+    e.rt.windupLeft = 0;
+    e.rt.windupTarget = -1;
+    e.rt.act === "attack" && (e.rt.act = null);
+    // 蓄力一开始就把屁股对准技能方向
+    e.facing = Math.atan2(-ny, -nx);
+    horsemanClearKickZone(t, e);
+    e.h._hmKickZone = Zo(t, {
+      visual: "horseman_kick_zone",
+      owner: e,
+      followUnitId: e.id,
+      pos: Cs(e.pos),
+      radius: 2.2,
+      duration: maxCharge,
+    });
+    Wn(t, e, "horseman_kick_charge", {
+      duration: maxCharge,
+      sourceId: e.id,
+      key: "horseman_kick_charge",
+      merge: "replace",
+      tickInterval: 0.08,
+      onTick(sim, unit) {
+        if (!unit.alive || unit.rt.stunned || unit.rt.silenced) {
+          unit.h._hmKickReleased = !0;
+          Va(sim, unit, "horseman_kick_charge");
+          horsemanClearKickZone(sim, unit);
+          unit.skills.s1.cd = Math.min(cdMax, 2.2);
+          return;
+        }
+        if (unit.h._hmKickDir) {
+          unit.facing = Math.atan2(-unit.h._hmKickDir.y, -unit.h._hmKickDir.x);
+        }
+      },
+      onExpire(sim, unit) {
+        horsemanClearKickZone(sim, unit);
+        if (unit.h._hmKickReleased || !unit.alive) return;
+        unit.h._hmKickReleased = !0;
+        const fDir = unit.h._hmKickDir || { x: -Math.cos(unit.facing), y: -Math.sin(unit.facing) };
+        horsemanReleaseKick(sim, unit, fDir, unit.h._hmKickLvl || 1, 1, unit.h._hmKickWidth || 2.3);
+        unit.skills.s1.cd = unit.h._hmKickCd || cdMax;
+      },
+      onRemove(sim, unit) {
+        horsemanClearKickZone(sim, unit);
+        if (!unit.h._hmKickReleased) {
+          unit.skills.s1.cd = Math.min(unit.h._hmKickCd || cdMax, 2.2);
+        }
+      },
+    });
+  },
+});
+
+Oi("horseman", "s2", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      rad = n.val("radius"),
+      dmg = oa(n, "damage", { ap: "apRatio", ad: "adRatio" }),
+      weaken = n.val("weaken"),
+      weakDur = n.val("weakDur"),
+      immuneDur = n.val("immuneDur");
+    // 立刻解除自身减速、定身与沉默，获得持续控制免疫
+    qj(t, e, ["slow", "root", "silence"]);
+    Wn(t, e, "horseman_neigh_guard", {
+      duration: immuneDur,
+      sourceId: e.id,
+      key: "horseman_neigh_guard",
+      merge: "replace",
+    });
+    ds(t, "horseman_neigh", e.pos, e.team, { unitId: e.id, radius: rad });
+    for (const u of Pr(t, e.pos, rad, ia(e.team))) {
+      wo(n, u, dmg, "magic");
+      u.alive &&
+        !Ss(u) &&
+        Wn(t, u, "horseman_weak", {
+          duration: weakDur,
+          value: weaken,
+          sourceId: e.id,
+          key: "horseman_weak",
+          merge: "replace",
+        });
+    }
+  },
+});
+
+Oi("horseman", "ult", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      burst = n.val("burstSpeed"),
+      endSpd = n.val("endSpeed"),
+      dur = n.val("duration");
+    ds(t, "horseman_trample_start", e.pos, e.team, { unitId: e.id, radius: 3.2 });
+    Vj(t, e, burst, 0.3, e, "horseman_trample");
+    Wn(t, e, "horseman_trample", {
+      duration: dur,
+      value: burst,
+      sourceId: e.id,
+      key: "horseman_trample",
+      merge: "replace",
+      tickInterval: 0.15,
+      onTick(sim, unit, buff) {
+        if (!unit.alive) return;
+        const frac = Math.max(0, Math.min(1, buff.timeLeft / Math.max(0.1, dur))),
+          cur = endSpd + (burst - endSpd) * Math.pow(frac, 1.25);
+        buff.value = cur;
+        Vj(sim, unit, cur, 0.28, unit, "horseman_trample");
+      },
+      onExpire(sim, unit) {
+        Va(sim, unit, "haste", "horseman_trample");
+      },
+      onRemove(sim, unit) {
+        Va(sim, unit, "haste", "horseman_trample");
+      },
+    });
+  },
+});
+
+const CWP = Se.cow.passive.values;
+
+function cowSyncGainsBuff(sim, unit) {
+  const g = unit.h.cowGains;
+  if (!g || g.stacks <= 0) return;
+  const b = Wn(sim, unit, "cow_gains", {
+    duration: 1 / 0,
+    sourceId: unit.id,
+    maxStacks: 999,
+    stacks: 1,
+    key: "cow_gains",
+    merge: "replace",
+  });
+  b && (b.stacks = g.stacks);
+}
+
+function cowGrantStacks(sim, unit, count, lv) {
+  if (!unit.h.cowGains) unit.h.cowGains = { stacks: 0, ad: 0, moveSpeed: 0, cdr: 0 };
+  const g = unit.h.cowGains,
+    vals = Se.cow.skills.s1.values,
+    idx = Math.max(0, Math.min(vals.adPerStack.length - 1, (lv || 1) - 1));
+  g.stacks += count;
+  g.ad = Math.round((g.ad + vals.adPerStack[idx] * count) * 100) / 100;
+  g.moveSpeed = Math.round((g.moveSpeed + vals.msPerStack[idx] * count) * 10000) / 10000;
+  g.cdr = Math.round((g.cdr + vals.cdrPerStack[idx] * count) * 10000) / 10000;
+  cowSyncGainsBuff(sim, unit);
+  _o(sim, unit);
+}
+
+function cowClearGiantZone(sim, unit) {
+  unit.h._cowGiantZone && (Xk(sim, unit.h._cowGiantZone), (unit.h._cowGiantZone = null));
+}
+
+function cowCrossesTower(sim, sx, sy, ex, ey) {
+  const dx = ex - sx,
+    dy = ey - sy,
+    lenSq = dx * dx + dy * dy;
+  if (lenSq < 1e-4) return !1;
+  for (let i = 0; i < sim.units.length; i++) {
+    const u = sim.units[i];
+    if (!u.alive || (u.kind !== "tower" && u.kind !== "core")) continue;
+    const t = Math.max(0, Math.min(1, ((u.pos.x - sx) * dx + (u.pos.y - sy) * dy) / lenSq)),
+      px = sx + dx * t - u.pos.x,
+      py = sy + dy * t - u.pos.y,
+      r = u.radius + 0.55;
+    if (px * px + py * py < r * r) return !0;
+  }
+  return !1;
+}
+
+function cowTryStride(sim, unit) {
+  const rt = unit.rt;
+  if (rt.rooted || rt.stunned || rt.dash !== null || (unit.h._cowStrideCd || 0) > 0) return;
+  let dx = 0,
+    dy = 0,
+    savedGoal = null;
+  if (rt.moveMode === 1) {
+    dx = rt.dirX;
+    dy = rt.dirY;
+  } else if (rt.moveMode === 2) {
+    const gx = rt.goalX - unit.pos.x,
+      gy = rt.goalY - unit.pos.y,
+      gd = Math.hypot(gx, gy);
+    if (gd < 0.85) return;
+    dx = gx / gd;
+    dy = gy / gd;
+    savedGoal = { x: rt.goalX, y: rt.goalY };
+  } else return;
+  const dl = Math.hypot(dx, dy);
+  if (dl < 0.1) return;
+  dx /= dl;
+  dy /= dl;
+
+  const navR = rt.navR,
+    sx = unit.pos.x,
+    sy = unit.pos.y,
+    probe1 = sim.nav.sample(sim.nav.clear, sx + dx * 0.88, sy + dy * 0.88),
+    probe2 = sim.nav.sample(sim.nav.clear, sx + dx * 1.32, sy + dy * 1.32);
+  if (probe1 >= navR + 0.04 && probe2 >= navR + 0.04) return;
+
+  const ms = unit.stats.moveSpeed || 5.5,
+    maxCross = Math.min(CWP.maxCross, Math.max(1.5, CWP.baseCross + Math.max(0, ms - CWP.msFloor) * CWP.msScale));
+  let sawBlock = !1,
+    landX = 0,
+    landY = 0,
+    landD = 0;
+  for (let d = 0.75; d <= maxCross; d += 0.3) {
+    const tx = sx + dx * d,
+      ty = sy + dy * d,
+      clr = sim.nav.sample(sim.nav.clear, tx, ty);
+    if (clr < navR + 0.04) {
+      sawBlock = !0;
+    } else if (sawBlock && sim.nav.isFree(tx, ty, navR + 0.08)) {
+      landX = tx;
+      landY = ty;
+      landD = d;
+      break;
+    }
+  }
+  if (!sawBlock || landD <= 0) return;
+  if (cowCrossesTower(sim, sx, sy, landX, landY)) return;
+
+  const fromPos = Cs(unit.pos),
+    dur = Math.max(0.18, Math.min(0.38, landD / Math.max(11, ms * 2.3)));
+  unit.h._cowStrideCd = CWP.cd;
+  Wn(sim, unit, "cow_stride", { duration: dur + 0.08, sourceId: unit.id, key: "cow_stride", merge: "replace" });
+  ds(sim, "cow_stride", fromPos, unit.team, { unitId: unit.id, from: fromPos, to: { x: landX, y: landY } });
+  fW(sim, unit, landX, landY, dur, () => {
+    Va(sim, unit, "cow_stride");
+    if (savedGoal && unit.alive && !unit.rt.rooted && !unit.rt.stunned && unit.rt.moveMode === 0) {
+      unit.rt.moveMode = 2;
+      unit.rt.goalX = savedGoal.x;
+      unit.rt.goalY = savedGoal.y;
+    }
+  });
+}
+
+tu("cow", {
+  statMods(n, t, e) {
+    const g = t.h.cowGains;
+    if (g) {
+      e.ad += g.ad;
+      e.moveFlat += g.moveSpeed;
+      e.cdr += g.cdr;
+    }
+    const ex = Dh(t, "cow_exhaust");
+    if (ex) e.movePct -= ex.value || 0.4;
+    const gi = Dh(t, "cow_giant");
+    if (gi) {
+      const lv = Math.max(1, Math.min(3, gi.value || t.skills.ult.level || 1)),
+        uv = Se.cow.skills.ult.values;
+      e.hp += uv.bonusHp[lv - 1];
+      e.movePct += uv.bonusMs[lv - 1];
+    }
+  },
+  onSpawn(n, t) {
+    t.h._cowStrideCd = 0;
+    cowClearGiantZone(n, t);
+    t.chargeBar = null;
+    if (t.h.cowGains && t.h.cowGains.stacks > 0) {
+      cowSyncGainsBuff(n, t);
+      _o(n, t);
+    }
+  },
+  onTick(n, t, e) {
+    if (!t.alive) {
+      cowClearGiantZone(n, t);
+      t.chargeBar = null;
+      return;
+    }
+    if (t.h.cowGains && t.h.cowGains.stacks > 0 && !Ba(t, "cow_gains")) cowSyncGainsBuff(n, t);
+    if ((t.h._cowStrideCd || 0) > 0) t.h._cowStrideCd = Math.max(0, t.h._cowStrideCd - e);
+    if (t.h._cowGiantZone) {
+      if (Ba(t, "cow_giant")) {
+        t.h._cowGiantZone.pos.x = t.pos.x;
+        t.h._cowGiantZone.pos.y = t.pos.y;
+      } else cowClearGiantZone(n, t);
+    }
+    const sq = Dh(t, "cow_squat");
+    if (sq) {
+      const ratio = Math.max(0, Math.min(1, (sq.duration - sq.timeLeft) / Math.max(0.1, sq.duration)));
+      t.chargeBar = { ratio, full: ratio >= 0.98 };
+    } else if (t.chargeBar) {
+      t.chargeBar = null;
+    }
+    cowTryStride(n, t);
+  },
+});
+
+Oi("cow", "s1", {
+  noAnim: !0,
+  lockTime: 0,
+  cast(n) {
+    const { sim: t, caster: e } = n;
+    if (n.isRecast) {
+      Va(t, e, "cow_squat");
+      return;
+    }
+    const maxDur = n.val("maxDur"),
+      exDur = n.val("exhaustDur"),
+      exPerStack = n.val("exhaustPerStack") || 0,
+      exSlow = n.val("exhaustSlow"),
+      fullCd = e.skills.s1.cdMax,
+      squatLv = n.level,
+      zone = Zo(t, { visual: "cow_squat_ring", owner: e, pos: Cs(e.pos), radius: 2.0, duration: maxDur });
+    let settled = !1,
+      ticksGiven = 0;
+    const finish = (sim, unit, completed) => {
+      if (settled) return;
+      settled = !0;
+      zone && Xk(sim, zone);
+      unit.chargeBar = null;
+      if (completed && unit.alive && ticksGiven < maxDur) {
+        const rem = maxDur - ticksGiven;
+        ticksGiven = maxDur;
+        cowGrantStacks(sim, unit, rem, squatLv);
+      }
+      if (unit.alive) {
+        ds(sim, "cow_squat_done", unit.pos, unit.team, { unitId: unit.id });
+        if (!Ba(unit, "cow_giant")) {
+          const curStacks = unit.h.cowGains?.stacks ?? 0,
+            totalExDur = Math.round((exDur + curStacks * exPerStack) * 100) / 100;
+          Wn(sim, unit, "cow_exhaust", {
+            duration: totalExDur,
+            value: exSlow,
+            sourceId: unit.id,
+            key: "cow_exhaust",
+            merge: "replace",
+          });
+        }
+      }
+      unit.skills.s1.cd = Math.max(unit.skills.s1.cd, fullCd);
+    };
+    Wn(t, e, "cow_squat", {
+      duration: maxDur,
+      sourceId: e.id,
+      key: "cow_squat",
+      merge: "replace",
+      tickInterval: 1,
+      onTick(sim, unit) {
+        if (!unit.alive || ticksGiven >= maxDur) return;
+        ticksGiven++;
+        cowGrantStacks(sim, unit, 1, squatLv);
+      },
+      onRemove(sim, unit) {
+        finish(sim, unit, !1);
+      },
+      onExpire(sim, unit) {
+        finish(sim, unit, !0);
+      },
+    });
+    e.skills.s1.cd = 0.45;
+  },
+});
+
+Oi("cow", "s2", {
+  movement: !0,
+  noAnim: !0,
+  cast(n) {
+    const { sim: t, caster: e, target: tgt } = n;
+    if (!tgt || !tgt.alive) return;
+    Ba(e, "cow_squat") && Va(t, e, "cow_squat");
+    const fromPos = Cs(e.pos),
+      dx = tgt.pos.x - fromPos.x,
+      dy = tgt.pos.y - fromPos.y,
+      dist = Math.hypot(dx, dy) || 1,
+      nx = dx / dist,
+      ny = dy / dist,
+      stopOff = Math.max(0.4, e.radius + tgt.radius * 0.65),
+      travel = Math.max(0.3, dist - stopOff),
+      tx = fromPos.x + nx * travel,
+      ty = fromPos.y + ny * travel,
+      ms = e.stats.moveSpeed || 5.5,
+      dur = Math.max(0.16, Math.min(0.42, travel / Math.max(18, ms * 3.1))),
+      baseDmg = oa(n, "damage", { ad: "adRatio" }),
+      knock = n.val("knockDist");
+    Wn(t, e, "cow_flykick", { duration: dur + 0.12, sourceId: e.id, key: "cow_flykick", merge: "replace" });
+    ds(t, "cow_flykick_dash", fromPos, e.team, { unitId: e.id, from: fromPos, to: { x: tx, y: ty } });
+    fW(t, e, tx, ty, dur, (reason) => {
+      Va(t, e, "cow_flykick");
+      if (reason !== "arrived" || !e.alive || !tgt.alive || tgt.rt.untargetable) return;
+      const critMult = Math.max(1.5, e.stats.critDamage || 1.75),
+        finalDmg = baseDmg * critMult;
+      t.fx("hit_crit", tgt.pos, e.team, { unitId: e.id, targetId: tgt.id });
+      ds(t, "cow_flykick_hit", tgt.pos, e.team, { unitId: e.id, targetId: tgt.id });
+      Bo(t, e, tgt, finalDmg, "physical", "skill", "s2", !0);
+      if (tgt.alive && !Ss(tgt)) {
+        Yj(t, tgt, { x: tgt.pos.x + nx * 8, y: tgt.pos.y + ny * 8 }, knock, 16);
+      }
+    });
+  },
+});
+
+Oi("cow", "ult", {
+  noAnim: !0,
+  lockTime: 0.14,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      lv = n.level;
+    if (n.isRecast) {
+      const st = Dh(e, "cow_stomp_ready");
+      if (!st) return;
+      const rad = n.val("stompRadius"),
+        dmg = oa(n, "stompDamage", { ad: "adRatio" }),
+        stun = n.val("stompStun");
+      vS(t, e, "cast_ult", 0.46, !0);
+      ds(t, "cow_ult_stomp", e.pos, e.team, { unitId: e.id, radius: rad });
+      const hits = Pr(t, e.pos, rad, ia(e.team));
+      for (let i = 0; i < hits.length; i++) {
+        const u = hits[i];
+        if (!u.alive || Ss(u)) continue;
+        Bo(t, e, u, dmg, "physical", "skill", "ult");
+        u.alive && Gj(t, u, stun, e);
+      }
+      st.stacks--;
+      if (st.stacks > 0) {
+        e.skills.ult.cd = 0.65;
+      } else {
+        const fullCd = e.h._cowUltFullCd || e.skills.ult.cdMax;
+        Va(t, e, "cow_stomp_ready");
+        e.skills.ult.cd = Math.max(e.skills.ult.cd, fullCd);
+      }
+      return;
+    }
+
+    const giantDur = n.val("giantDur"),
+      bonusHp = n.val("bonusHp"),
+      stompWin = n.val("stompWindow"),
+      maxStomps = n.val("maxStomps"),
+      fullCd = e.skills.ult.cdMax;
+    e.h._cowUltFullCd = fullCd;
+    // 立刻移除力竭状态
+    Ba(e, "cow_exhaust") && Va(t, e, "cow_exhaust");
+    vS(t, e, "cast_ult", 0.45, !0);
+    Wn(t, e, "cow_giant", {
+      duration: giantDur,
+      value: lv,
+      sourceId: e.id,
+      key: "cow_giant",
+      merge: "replace",
+      onExpire(sim, unit) {
+        cowClearGiantZone(sim, unit);
+      },
+      onRemove(sim, unit) {
+        cowClearGiantZone(sim, unit);
+      },
+    });
+    // 获得最大生命值并立刻回复等量生命
+    _o(t, e);
+    e.hp = Math.min(e.stats.maxHp, e.hp + bonusHp);
+    cowClearGiantZone(t, e);
+    e.h._cowGiantZone = Zo(t, { visual: "cow_giant_aura", owner: e, pos: Cs(e.pos), radius: 2.35, duration: giantDur });
+    ds(t, "cow_ult_grow", e.pos, e.team, { unitId: e.id, radius: n.val("stompRadius") });
+
+    const sb = Wn(t, e, "cow_stomp_ready", {
+      duration: stompWin,
+      sourceId: e.id,
+      maxStacks: maxStomps,
+      stacks: maxStomps,
+      key: "cow_stomp_ready",
+      merge: "replace",
+      onExpire(sim, unit) {
+        unit.skills.ult.cd = Math.max(unit.skills.ult.cd, unit.h._cowUltFullCd || fullCd);
+      },
+      onRemove(sim, unit) {
+        unit.skills.ult.cd = Math.max(unit.skills.ult.cd, unit.h._cowUltFullCd || fullCd);
+      },
+    });
+    sb && (sb.stacks = maxStomps);
+    e.skills.ult.cd = 0.55;
+  },
+});
+
+const MKP = Se.monkey.passive.values,
+  MKS1 = Se.monkey.skills.s1.values,
+  MKS2 = Se.monkey.skills.s2.values,
+  MKU = Se.monkey.skills.ult.values;
+
+function monkeySyncAmmoBuff(sim, unit) {
+  const ch = unit.h._mkS1Charges ?? 0;
+  if (ch <= 0 || unit.skills.s1.level <= 0) {
+    Ba(unit, "monkey_peel_ammo") && Va(sim, unit, "monkey_peel_ammo");
+    return;
+  }
+  const ex = Dh(unit, "monkey_peel_ammo");
+  if (ex) {
+    ex.stacks = ch;
+    ex.timeLeft = 99999;
+    ex.duration = 99999;
+  } else {
+    const b = Wn(sim, unit, "monkey_peel_ammo", {
+      duration: 99999,
+      maxStacks: MKS1.maxCharges,
+      stacks: ch,
+      sourceId: unit.id,
+      key: "monkey_peel_ammo",
+      merge: "replace",
+    });
+    b && (b.stacks = ch);
+  }
+}
+
+function monkeySyncStickLenBuff(sim, unit) {
+  const st = unit.h.monkeyStickStacks || 0;
+  if (st <= 0) return;
+  unit.h.monkeyStickBonus = +(st * MKU.lenPerStack).toFixed(2);
+  const ex = Dh(unit, "monkey_stick_len");
+  if (ex) {
+    ex.stacks = st;
+    ex.timeLeft = 99999;
+    ex.duration = 99999;
+  } else {
+    const b = Wn(sim, unit, "monkey_stick_len", {
+      duration: 99999,
+      maxStacks: 999,
+      stacks: st,
+      sourceId: unit.id,
+      key: "monkey_stick_len",
+      merge: "replace",
+    });
+    b && (b.stacks = st);
+  }
+}
+
+function monkeySpawnPeel(sim, caster, pos) {
+  if (!caster.h._mkPeels) caster.h._mkPeels = [];
+  const list = caster.h._mkPeels;
+  // 清理已经失效的香蕉皮记录
+  for (let i = list.length - 1; i >= 0; i--) {
+    if (!list[i].active) list.splice(i, 1);
+  }
+  while (list.length >= MKP.maxPeels) {
+    const oldest = list.shift();
+    if (oldest && oldest.active) {
+      oldest.active = !1;
+      oldest.zone && Xk(sim, oldest.zone);
+    }
+  }
+  const pt = Cs(pos);
+  sim.nav.nearestFree(pt.x, pt.y, 0.35, pt);
+  const rec = { active: !0, zone: null, armAt: sim.state.time + (MKP.armDur ?? 1) };
+  rec.zone = Zo(sim, {
+    visual: "monkey_peel",
+    owner: caster,
+    pos: pt,
+    radius: MKP.peelRadius,
+    duration: MKP.peelDur,
+    tickInterval: 0.06,
+    onTick(s, z) {
+      if (!rec.active) return;
+      const foes = Pr(s, z.pos, z.radius, ia(caster.team));
+      let victim = null;
+      for (let i = 0; i < foes.length; i++) {
+        const u = foes[i];
+        if (!u.alive || Ss(u) || u.rt.untargetable) continue;
+        if (!victim || (u.kind === "hero" && victim.kind !== "hero")) victim = u;
+      }
+      if (!victim) return;
+      rec.active = !1;
+      Xk(s, z);
+      const idx = list.indexOf(rec);
+      idx >= 0 && list.splice(idx, 1);
+      // 落地 1 秒以内还没生效：被敌人踩到直接踩烂消除，不触发眩晕与伤害
+      if (s.state.time < rec.armAt) {
+        ds(s, "monkey_peel_stomp", z.pos, caster.team, { unitId: caster.id, targetId: victim.id, pos: Cs(z.pos) });
+        return;
+      }
+      // 落地 1 秒后已生效：眩晕 0.8 秒并打断施法/引导
+      Gj(s, victim, MKP.stunDur, caster);
+      if (victim.rt) {
+        victim.rt.act !== null && (victim.rt.act = null);
+        victim.kind === "hero" && victim.h && (victim.h.pendingCast = null);
+      }
+      // 一技能被动：踩到香蕉皮额外造成魔法伤害
+      const s1Lv = caster.skills.s1.level;
+      if (s1Lv > 0 && victim.alive) {
+        const dmg = Nh(Se.monkey.skills.s1, "peelDmg", s1Lv) + caster.stats.ad * MKS1.adRatio;
+        zh(s, caster, victim, dmg, "magic", "s1");
+      }
+      ds(s, "monkey_peel_slip", victim.pos, caster.team, { unitId: caster.id, targetId: victim.id, pos: Cs(z.pos) });
+    },
+    onEnd() {
+      rec.active = !1;
+      const idx = list.indexOf(rec);
+      idx >= 0 && list.splice(idx, 1);
+    },
+  });
+  rec.zone.armDur = MKP.armDur ?? 1;
+  list.push(rec);
+}
+
+function monkeyPointSegDist(px, py, ax, ay, bx, by) {
+  const vx = bx - ax,
+    vy = by - ay,
+    lenSq = vx * vx + vy * vy;
+  if (lenSq < 1e-6) return Math.hypot(px - ax, py - ay);
+  const t = Math.max(0, Math.min(1, ((px - ax) * vx + (py - ay) * vy) / lenSq));
+  return Math.hypot(px - (ax + vx * t), py - (ay + vy * t));
+}
+
+tu("monkey", {
+  statMods(n, t, e) {
+    const perm = t.h.monkeyStickBonus || 0;
+    if (perm > 0) e.attackRange += perm;
+    const ub = Dh(t, "monkey_ult");
+    if (ub) {
+      const lv = Math.max(1, Math.min(3, ub.value || t.skills.ult.level || 1)),
+        pct = MKU.rangePct[lv - 1];
+      e.attackRange += (Se.monkey.base.attackRange + perm) * pct;
+      e.movePct -= MKU.selfSlow;
+    }
+  },
+  onSpawn(n, t) {
+    t.h._mkBananaTimer = 0;
+    if (t.skills.s1.level > 0 && t.h._mkS1Charges === void 0) {
+      t.h._mkS1Charges = MKS1.maxCharges;
+      t.h._mkS1Regen = 0;
+    }
+    monkeySyncAmmoBuff(n, t);
+    if ((t.h.monkeyStickStacks || 0) > 0) {
+      monkeySyncStickLenBuff(n, t);
+      _o(n, t);
+    }
+    t.chargeBar = { ratio: 0, full: !1 };
+  },
+  onTick(n, t, e) {
+    if (!t.alive) {
+      t.chargeBar = null;
+      return;
+    }
+    // 永久棍长增益图标保活
+    if ((t.h.monkeyStickStacks || 0) > 0 && !Ba(t, "monkey_stick_len")) monkeySyncStickLenBuff(n, t);
+
+    // 一技能 3 层充能管理
+    const s1Lv = t.skills.s1.level;
+    if (s1Lv > 0) {
+      if (t.h._mkS1Charges === void 0) {
+        t.h._mkS1Charges = MKS1.maxCharges;
+        t.h._mkS1Regen = 0;
+      }
+      const regenMax = Math.max(1.5, Nh(Se.monkey.skills.s1, "recharge", s1Lv) * (1 - t.stats.cdr));
+      if (t.h._mkS1Charges < MKS1.maxCharges) {
+        t.h._mkS1Regen = (t.h._mkS1Regen || 0) + e;
+        if (t.h._mkS1Regen >= regenMax) {
+          t.h._mkS1Regen -= regenMax;
+          t.h._mkS1Charges = Math.min(MKS1.maxCharges, t.h._mkS1Charges + 1);
+          if (t.h._mkS1Charges >= MKS1.maxCharges) t.h._mkS1Regen = 0;
+          if (t.h._mkS1Charges > 0 && t.skills.s1.cd > 0.45) t.skills.s1.cd = 0;
+        }
+      } else {
+        t.h._mkS1Regen = 0;
+      }
+      if (t.h._mkS1Charges === 0) {
+        const left = Math.max(0.05, regenMax - (t.h._mkS1Regen || 0));
+        t.skills.s1.cd = left;
+        t.skills.s1.cdMax = regenMax;
+      }
+      monkeySyncAmmoBuff(n, t);
+    }
+
+    // 被动：每 9 秒先吃 1 秒香蕉，吃完回 8% 生命（或满血爆发加速）并顺手往轮椅下丢香蕉皮
+    t.h._mkBananaTimer = (t.h._mkBananaTimer || 0) + e;
+    if (t.h._mkBananaTimer >= MKP.interval && !Ba(t, "monkey_eating")) {
+      t.h._mkBananaTimer -= MKP.interval;
+      Wn(n, t, "monkey_eating", {
+        duration: 1.0,
+        sourceId: t.id,
+        key: "monkey_eating",
+        merge: "replace",
+        onExpire(sim, unit) {
+          if (!unit.alive) return;
+          const isFull = unit.hp >= unit.stats.maxHp - 1;
+          if (isFull) {
+            Vj(sim, unit, MKP.hastePct, MKP.hasteDur, unit, "monkey_banana_haste");
+            Wn(sim, unit, "monkey_banana_haste", {
+              duration: MKP.hasteDur,
+              sourceId: unit.id,
+              key: "monkey_banana_haste",
+              merge: "replace",
+            });
+          } else {
+            xS(sim, unit, unit, unit.stats.maxHp * MKP.healPct, !0);
+          }
+          ds(sim, "monkey_banana_eat", unit.pos, unit.team, { unitId: unit.id, fullHp: isFull });
+          monkeySpawnPeel(sim, unit, unit.pos);
+        },
+      });
+    }
+
+    // 黄条显示：开大期间显示大招剩余时间（前三棍必暴击阶段亮红），吃香蕉期间满格闪亮，平时显示吃香蕉倒计时进度
+    const ub = Dh(t, "monkey_ult");
+    if (ub) {
+      t.chargeBar = { ratio: Math.max(0.05, ub.timeLeft / Math.max(0.1, ub.duration)), full: (ub.stacks || 0) > 0 };
+    } else if (Ba(t, "monkey_eating")) {
+      t.chargeBar = { ratio: 1, full: !0 };
+    } else {
+      const r = Math.max(0, Math.min(1, (t.h._mkBananaTimer || 0) / MKP.interval));
+      t.chargeBar = { ratio: r, full: r >= 0.96 };
+    }
+  },
+  modifyBasicAttack(n, t, e, s) {
+    // 大招前三棍必定暴击（对非建筑目标）
+    if (!Ss(e)) {
+      const ub = Dh(t, "monkey_ult");
+      if (ub && (ub.stacks || 0) > 0) s.forceCrit = !0;
+    }
+  },
+  onBasicAttackHit(n, t, e) {
+    if (!t.alive) return;
+    const ub = Dh(t, "monkey_ult");
+    if (!ub) return;
+    const lv = Math.max(1, Math.min(3, ub.value || t.skills.ult.level || 1)),
+      extraDmg = MKU.bonusDmg[lv - 1] + t.stats.ad * MKU.adRatio,
+      isCritSwing = (ub.stacks || 0) > 0,
+      dx = e ? e.pos.x - t.pos.x : Math.cos(t.facing),
+      dy = e ? e.pos.y - t.pos.y : Math.sin(t.facing),
+      dl = Math.hypot(dx, dy) || 1,
+      nx = dx / dl,
+      ny = dy / dl,
+      sweepLen = Math.max(t.stats.attackRange + 0.8, 3.8),
+      halfW = MKU.sweepWidth * 0.5,
+      endPos = { x: t.pos.x + nx * sweepLen, y: t.pos.y + ny * sweepLen };
+
+    ds(n, "monkey_ult_sweep", t.pos, t.team, {
+      unitId: t.id,
+      from: Cs(t.pos),
+      to: endPos,
+      width: MKU.sweepWidth,
+    });
+
+    const foes = Pr(n, { x: t.pos.x + nx * sweepLen * 0.5, y: t.pos.y + ny * sweepLen * 0.5 }, sweepLen * 0.5 + 2.2, ia(t.team));
+    for (let i = 0; i < foes.length; i++) {
+      const u = foes[i];
+      if (!u.alive || u.rt.untargetable) continue;
+      if (e && u.id === e.id) {
+        if (!Ss(u)) {
+          zh(n, t, u, extraDmg, "physical", "ult");
+          u.alive && Yj(n, u, { x: u.pos.x + nx * 10, y: u.pos.y + ny * 10 }, MKU.knockDist, 18);
+        }
+        continue;
+      }
+      const dist = monkeyPointSegDist(u.pos.x, u.pos.y, t.pos.x, t.pos.y, endPos.x, endPos.y);
+      if (dist <= halfW + u.radius) {
+        if (Ss(u)) {
+          zh(n, t, u, extraDmg * 0.5, "physical", "ult");
+        } else {
+          const crit = isCritSwing || (t.stats.critChance > 0 && n.rng.next() < t.stats.critChance),
+            dmg = t.stats.ad * (crit ? t.stats.critDamage : 1) + extraDmg;
+          n.fx(crit ? "hit_crit" : "hit_physical", u.pos, t.team, { unitId: t.id, targetId: u.id });
+          Bo(n, t, u, dmg, "physical", "basic", "ult", crit);
+          if (u.alive) Yj(n, u, { x: u.pos.x + nx * 10, y: u.pos.y + ny * 10 }, MKU.knockDist, 18);
+        }
+      }
+    }
+
+    // 消耗 1 次必暴击计数，大招持续时间内其余效果继续生效直到时间结束
+    if (ub.stacks > 0) ub.stacks--;
+  },
+  onKill(n, t, victim) {
+    if (!t.alive || !victim || !Ba(t, "monkey_ult")) return;
+    const gain = victim.kind === "hero" ? MKU.heroStacks : victim.kind === "minion" ? MKU.minionStacks : 0;
+    if (gain <= 0) return;
+    t.h.monkeyStickStacks = (t.h.monkeyStickStacks || 0) + gain;
+    t.h.monkeyStickBonus = +(t.h.monkeyStickStacks * MKU.lenPerStack).toFixed(2);
+    monkeySyncStickLenBuff(n, t);
+    _o(n, t);
+    ds(n, "monkey_stick_grow", t.pos, t.team, {
+      unitId: t.id,
+      stacks: t.h.monkeyStickStacks,
+      bonus: t.h.monkeyStickBonus,
+      gain,
+    });
+  },
+});
+
+Oi("monkey", "s1", {
+  canCast(n, t) {
+    if (t.h._mkS1Charges === void 0) {
+      t.h._mkS1Charges = MKS1.maxCharges;
+      t.h._mkS1Regen = 0;
+    }
+    return t.h._mkS1Charges > 0 ? null : "cooldown";
+  },
+  cast(n) {
+    const { sim: t, caster: e, origin: org, targetPos: dst } = n,
+      lv = n.level;
+    if (e.h._mkS1Charges === void 0) {
+      e.h._mkS1Charges = MKS1.maxCharges;
+      e.h._mkS1Regen = 0;
+    }
+    e.h._mkS1Charges = Math.max(0, e.h._mkS1Charges - 1);
+    const regenMax = Math.max(1.5, Nh(Se.monkey.skills.s1, "recharge", lv) * (1 - e.stats.cdr));
+    if (e.h._mkS1Charges > 0) {
+      e.skills.s1.cd = 0.45;
+      e.skills.s1.cdMax = 0.45;
+    } else {
+      e.skills.s1.cd = Math.max(0.05, regenMax - (e.h._mkS1Regen || 0));
+      e.skills.s1.cdMax = regenMax;
+    }
+    monkeySyncAmmoBuff(t, e);
+
+    const land = Cs(dst);
+    t.nav.nearestFree(land.x, land.y, 0.35, land);
+    const dist = Math.hypot(land.x - org.x, land.y - org.y),
+      dur = Math.max(0.14, Math.min(0.5, dist / MKS1.travelSpeed));
+    e.h._mkPeelsInFlight = (e.h._mkPeelsInFlight || 0) + 1;
+    ds(t, "monkey_peel_throw", org, e.team, { unitId: e.id, from: Cs(org), to: land, dur });
+    Kj(t, dur, () => {
+      e.h._mkPeelsInFlight = Math.max(0, (e.h._mkPeelsInFlight || 1) - 1);
+      monkeySpawnPeel(t, e, land);
+    });
+  },
+});
+
+Oi("monkey", "s2", {
+  cast(n) {
+    const { sim: t, caster: e, origin: org, targetPos: dst } = n,
+      land = Cs(dst);
+    t.nav.nearestFree(land.x, land.y, 0.5, land);
+    const dx = land.x - org.x,
+      dy = land.y - org.y,
+      dist = Math.hypot(dx, dy) || 0.01,
+      nx = dx / dist,
+      ny = dy / dist,
+      dur = Math.max(0.14, Math.min(0.46, dist / MKS2.speed)),
+      dmg = oa(n, "damage", { ad: "adRatio" }),
+      knockup = n.val("knockup"),
+      width = n.val("width"),
+      pillarR = n.val("pillarRadius"),
+      pillarDur = n.val("pillarDur"),
+      hitIds = new Set();
+
+    Wn(t, e, "monkey_stick_out", {
+      duration: dur + pillarDur,
+      sourceId: e.id,
+      key: "monkey_stick_out",
+      merge: "replace",
+    });
+    ds(t, "monkey_stick_throw", org, e.team, { unitId: e.id, from: Cs(org), to: land, dur });
+
+    const steps = 4;
+    for (let s = 1; s <= steps; s++) {
+      const f0 = (s - 1) / steps,
+        f1 = s / steps,
+        ax = org.x + dx * f0,
+        ay = org.y + dy * f0,
+        bx = org.x + dx * f1,
+        by = org.y + dy * f1;
+      Kj(t, dur * f1, () => {
+        const mid = { x: (ax + bx) * 0.5, y: (ay + by) * 0.5 },
+          rad = Math.hypot(bx - ax, by - ay) * 0.5 + width + 1.0,
+          foes = Pr(t, mid, rad, ia(e.team));
+        for (let i = 0; i < foes.length; i++) {
+          const u = foes[i];
+          if (!u.alive || Ss(u) || u.rt.untargetable || hitIds.has(u.id)) continue;
+          if (monkeyPointSegDist(u.pos.x, u.pos.y, ax, ay, bx, by) <= width * 0.5 + u.radius) {
+            hitIds.add(u.id);
+            zh(t, e, u, dmg, "physical", "s2");
+            u.alive && yS(t, u, knockup, e);
+          }
+        }
+      });
+    }
+
+    // 落到目的地后插地变粗变大，形成阻隔地形
+    Kj(t, dur, () => {
+      const obsId = `mk_pillar_${e.id}_${Math.round(t.state.time * 100)}_${Math.round(land.x * 10)}`;
+      t.nav.addObstacle(obsId, land.x, land.y, pillarR, "pillar");
+      // 击飞落点内还没被命中的敌人，并把站柱子里的所有单位安全挤到柱子外圈
+      for (const u of Pr(t, land, pillarR + 1.3)) {
+        if (!u.alive || Ss(u)) continue;
+        if (u.team !== e.team && !u.rt.untargetable && !hitIds.has(u.id)) {
+          hitIds.add(u.id);
+          zh(t, e, u, dmg, "physical", "s2");
+          u.alive && yS(t, u, knockup, e);
+        }
+        const ox = u.pos.x - land.x,
+          oy = u.pos.y - land.y,
+          d = Math.hypot(ox, oy),
+          need = pillarR + u.radius + 0.18;
+        if (d < need) {
+          const px = d > 1e-4 ? ox / d : -nx,
+            py = d > 1e-4 ? oy / d : -ny;
+          Xj(t, u, { x: land.x + px * need, y: land.y + py * need });
+        }
+      }
+      Zo(t, {
+        visual: "monkey_pillar",
+        owner: e,
+        pos: land,
+        radius: pillarR,
+        duration: pillarDur,
+        onEnd() {
+          t.nav.removeObstacle(obsId);
+        },
+      });
+      ds(t, "monkey_pillar_slam", land, e.team, { unitId: e.id, radius: pillarR });
+    });
+  },
+});
+
+Oi("monkey", "ult", {
+  lockTime: 0.1,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      lv = n.level,
+      dur = n.val("duration"),
+      critCount = n.val("critAttacks");
+    vS(t, e, "cast_ult", 0.42, !0);
+    const ub = Wn(t, e, "monkey_ult", {
+      duration: dur,
+      value: lv,
+      maxStacks: critCount,
+      stacks: critCount,
+      sourceId: e.id,
+      key: "monkey_ult",
+      merge: "replace",
+    });
+    ub && (ub.stacks = critCount);
+    _o(t, e);
+    ds(t, "monkey_ult_start", e.pos, e.team, { unitId: e.id, radius: e.stats.attackRange });
+  },
+});
+
+const SLP = Se.slime.passive.values,
+  SLS2 = Se.slime.skills.s2.values;
+
+function slimeClearPuddleZone(sim, unit) {
+  if (unit.h._slPuddleZone && !unit.h._slPuddleZone.dead) {
+    unit.h._slPuddleZone.dead = !0;
+  }
+  unit.h._slPuddleZone = null;
+}
+
+function slimeReleaseAbsorbed(sim, unit) {
+  const list = unit.h._slAbsorbed;
+  if (!list || list.length === 0) return;
+  for (let i = 0; i < list.length; i++) {
+    const v = sim.byId.get(list[i].id);
+    if (v && v.alive) Va(sim, v, "slime_absorbed");
+  }
+  list.length = 0;
+}
+
+function slimeGrantWallBounce(sim, unit) {
+  if (!unit.alive) return;
+  Wn(sim, unit, "slime_wall_bounce", {
+    duration: SLP.wallWindow,
+    sourceId: unit.id,
+    key: "slime_wall_bounce",
+    merge: "replace",
+  });
+  ds(sim, "slime_wall_hit", unit.pos, unit.team, { unitId: unit.id });
+}
+
+function slimeLaunchBall(sim, unit, dir, lv, chargeP) {
+  const p = Math.max(0, Math.min(1, chargeP)),
+    dl = Math.hypot(dir.x, dir.y) || 1,
+    nx = dir.x / dl,
+    ny = dir.y / dl,
+    s2Def = Se.slime.skills.s2,
+    minDmg = Nh(s2Def, "minDamage", lv),
+    maxDmg = Nh(s2Def, "damage", lv),
+    dmg = minDmg + (maxDmg - minDmg) * p + unit.stats.ap * SLS2.apRatio + unit.stats.maxHp * SLS2.hpRatio,
+    dist = SLS2.minRange + (SLS2.maxRange - SLS2.minRange) * p,
+    speed = SLS2.minSpeed + (SLS2.maxSpeed - SLS2.minSpeed) * p,
+    airDur = SLS2.minAir + (SLS2.maxAir - SLS2.minAir) * p,
+    startPos = Cs(unit.pos),
+    endPos = { x: startPos.x + nx * dist, y: startPos.y + ny * dist };
+  unit.facing = Math.atan2(ny, nx);
+  Wn(sim, unit, "slime_ball_dash", {
+    duration: dist / Math.max(1, speed) + 0.12,
+    sourceId: unit.id,
+    key: "slime_ball_dash",
+    merge: "replace",
+  });
+  ds(sim, "slime_ball_launch", startPos, unit.team, {
+    unitId: unit.id,
+    from: startPos,
+    to: endPos,
+    charge: p,
+  });
+  Hm(sim, unit, {
+    dirX: nx,
+    dirY: ny,
+    distance: dist,
+    speed,
+    hitRadius: SLS2.hitRadius,
+    filter: (u) => Ui(unit, u) && !Ss(u),
+    onHit(u) {
+      Xm(sim, u, airDur, unit);
+      Bo(sim, unit, u, dmg, "magic", "skill", "s2");
+      ds(sim, "slime_ball_hit", u.pos, unit.team, { unitId: unit.id, targetId: u.id, charge: p });
+      return !1;
+    },
+    onEnd() {
+      Va(sim, unit, "slime_ball_dash");
+    },
+  });
+}
+
+tu("slime", {
+  onSpawn(n, t) {
+    t.h._slRegen = [];
+    t.h._slHealAcc = 0;
+    t.h._slHealTimer = 0;
+    t.h._slClingId = -1;
+    t.h._slAbsorbed = [];
+    t.h._slPuddleZone = null;
+  },
+  onDamageTaken(n, e, t, p, f) {
+    if (!e.alive || !f || f.dtype !== "physical" || p <= 0) return;
+    const lvT = Math.max(0, Math.min(1, ((e.level || 1) - 1) / 14)),
+      pct = SLP.minPct + (SLP.maxPct - SLP.minPct) * lvT,
+      dur = SLP.maxDur - (SLP.maxDur - SLP.minDur) * lvT,
+      pool = p * pct;
+    if (!e.h._slRegen) e.h._slRegen = [];
+    e.h._slRegen.push({ rate: pool / dur, left: dur });
+    Wn(n, e, "slime_regen", {
+      duration: dur,
+      sourceId: e.id,
+      key: "slime_regen",
+      merge: "replace",
+    });
+    // 吸附期间免疫击退；大招不可选取或弹球冲撞中也不触发被动击退
+    if (Ba(e, "slime_cling") || Ba(e, "slime_puddle") || Ba(e, "slime_ball_dash") || !t || t.id === e.id) return;
+    const hpPct = pool / Math.max(1, e.stats.maxHp);
+    if (t.kind !== "hero" && t.kind !== "tower" && hpPct < 0.012) return;
+    let dx = e.pos.x - t.pos.x,
+      dy = e.pos.y - t.pos.y,
+      dl = Math.hypot(dx, dy);
+    if (dl < 1e-4) {
+      dx = -Math.cos(e.facing);
+      dy = -Math.sin(e.facing);
+      dl = 1;
+    }
+    const nx = dx / dl,
+      ny = dy / dl,
+      dist = Math.max(t.kind === "hero" || t.kind === "tower" ? SLP.minKnock : 0.45, Math.min(SLP.maxKnock, hpPct * SLP.knockScale));
+    // 挨物理伤害若正在蓄力弹球会被弹性顶飞打断
+    if (Ba(e, "slime_ball_charge")) {
+      e.h._slBallReleased = !0;
+      Va(n, e, "slime_ball_charge");
+      e.skills.s2.cd = Math.min(e.h._slBallCd || e.skills.s2.cdMax, 2.2);
+    }
+    const pushed = dW(n, e, nx, ny, dist, SLP.knockSpeed, (reason) => {
+      if (reason === "wall" && e.alive) slimeGrantWallBounce(n, e);
+    });
+    if (pushed) {
+      ds(n, "slime_bounce", e.pos, e.team, { unitId: e.id });
+    }
+  },
+  onTick(n, t, dt) {
+    if (!t.alive) {
+      if (t.h._slRegen) t.h._slRegen.length = 0;
+      t.h._slHealAcc = 0;
+      t.h._slClingId = -1;
+      slimeReleaseAbsorbed(n, t);
+      slimeClearPuddleZone(n, t);
+      return;
+    }
+    // 1. 被动弹性缓回生命池
+    const reg = t.h._slRegen;
+    if (reg && reg.length > 0) {
+      let stepHeal = 0,
+        maxLeft = 0;
+      for (let i = reg.length - 1; i >= 0; i--) {
+        const r = reg[i],
+          step = Math.min(dt, r.left);
+        stepHeal += r.rate * step;
+        r.left -= step;
+        if (r.left <= 1e-4) reg.splice(i, 1);
+        else if (r.left > maxLeft) maxLeft = r.left;
+      }
+      t.h._slHealAcc = (t.h._slHealAcc || 0) + stepHeal;
+      t.h._slHealTimer = (t.h._slHealTimer || 0) + dt;
+      if (t.h._slHealTimer >= 0.45 || reg.length === 0) {
+        if (t.h._slHealAcc > 0.5) xS(n, t, t, t.h._slHealAcc);
+        t.h._slHealAcc = 0;
+        t.h._slHealTimer = 0;
+      }
+      const rb = Dh(t, "slime_regen");
+      if (reg.length === 0) {
+        rb && Va(n, t, "slime_regen");
+      } else if (rb) {
+        rb.timeLeft = maxLeft;
+      }
+    }
+    // 2. 1技能【吸附】跟随目标重叠移动
+    if (Ba(t, "slime_cling")) {
+      const tgt = n.byId.get(t.h._slClingId);
+      if (!tgt || !tgt.alive || tgt.rt.untargetable) {
+        t.h._slClingId = -1;
+        Va(n, t, "slime_cling");
+      } else {
+        Hl(t);
+        t.pos.x = tgt.pos.x;
+        t.pos.y = tgt.pos.y;
+        t.facing = tgt.facing;
+        n.grid.move(t);
+      }
+    } else if (t.h._slClingId >= 0) {
+      t.h._slClingId = -1;
+    }
+    // 3. 大招【化整为零】期间反吸的敌人强制跟随自身移动
+    const abs = t.h._slAbsorbed;
+    if (abs && abs.length > 0) {
+      if (!Ba(t, "slime_puddle")) {
+        slimeReleaseAbsorbed(n, t);
+      } else {
+        for (let i = abs.length - 1; i >= 0; i--) {
+          const item = abs[i],
+            v = n.byId.get(item.id);
+          if (!v || !v.alive || v.rt.untargetable || !Ba(v, "slime_absorbed")) {
+            abs.splice(i, 1);
+            continue;
+          }
+          v.rt.dash && iu(n, v, "interrupted");
+          Hl(v);
+          const ox = item.ox,
+            oy = item.oy,
+            od = Math.hypot(ox, oy);
+          v.pos.x = t.pos.x;
+          v.pos.y = t.pos.y;
+          if (od > 0.02) {
+            n.nav.moveStraight(v.pos, ox / od, oy / od, od, v.rt.navR);
+          }
+          n.grid.move(v);
+        }
+      }
+    }
+  },
+});
+
+Oi("slime", "s1", {
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dur = n.val("duration"),
+      tick = n.val("tick"),
+      baseTick = n.val("tickDmg"),
+      apR = n.val("apRatio"),
+      hpR = n.val("hpRatio");
+
+    // 大招【化整为零】期间释放：把大滩体积上覆盖到的所有敌人反吸进果冻，强制拖着走
+    if (Ba(e, "slime_puddle")) {
+      const pb = Dh(e, "slime_puddle"),
+        remDur = Math.max(0.35, Math.min(dur, pb ? pb.timeLeft : dur)),
+        rad = n.val("absorbRadius"),
+        list = [];
+      n.sim.grid.query(e.pos.x, e.pos.y, rad + 1.5, list);
+      if (!e.h._slAbsorbed) e.h._slAbsorbed = [];
+      let count = 0;
+      for (let i = 0; i < list.length; i++) {
+        const u = list[i];
+        if (!Ui(e, u) || Ss(u)) continue;
+        const d = Math.hypot(u.pos.x - e.pos.x, u.pos.y - e.pos.y);
+        if (d > rad + u.radius) continue;
+        // 把敌人往果冻中心拉拢并锁死位移
+        const pullD = Math.min(1.15, d * 0.45),
+          ang = d > 0.02 ? Math.atan2(u.pos.y - e.pos.y, u.pos.x - e.pos.x) : count * 2.1,
+          ox = Math.cos(ang) * pullD,
+          oy = Math.sin(ang) * pullD;
+        const ex = e.h._slAbsorbed.find((a) => a.id === u.id);
+        if (ex) {
+          ex.ox = ox;
+          ex.oy = oy;
+        } else {
+          e.h._slAbsorbed.push({ id: u.id, ox, oy });
+        }
+        u.rt.dash && iu(t, u, "interrupted");
+        Hl(u);
+        u.pos.x = e.pos.x;
+        u.pos.y = e.pos.y;
+        if (pullD > 0.02) t.nav.moveStraight(u.pos, Math.cos(ang), Math.sin(ang), pullD, u.rt.navR);
+        t.grid.move(u);
+        const tickDmg = baseTick + e.stats.ap * apR + e.stats.maxHp * hpR;
+        Bo(t, e, u, tickDmg, "magic", "skill", "s1");
+        Wn(t, u, "slime_absorbed", {
+          duration: remDur,
+          sourceId: e.id,
+          key: `slime_absorbed_${e.id}`,
+          merge: "replace",
+          tickInterval: tick,
+          onTick(sim, victim) {
+            if (!e.alive || !Ba(e, "slime_puddle") || !victim.alive) {
+              Va(sim, victim, "slime_absorbed");
+              return;
+            }
+            const d2 = baseTick + e.stats.ap * apR + e.stats.maxHp * hpR;
+            Bo(sim, e, victim, d2, "magic", "skill", "s1");
+          },
+        });
+        count++;
+      }
+      ds(t, "slime_absorb_burst", e.pos, e.team, { unitId: e.id, radius: rad, count });
+      return;
+    }
+
+    // 普通释放：贴住一名敌人 3 秒（模型重叠、随对方位移同步移动、期间免疫击退）
+    const tgt = n.target;
+    if (!tgt || !tgt.alive) return;
+    e.rt.dash && iu(t, e, "interrupted");
+    Hl(e);
+    e.h._slClingId = tgt.id;
+    e.pos.x = tgt.pos.x;
+    e.pos.y = tgt.pos.y;
+    t.grid.move(e);
+    const firstDmg = baseTick + e.stats.ap * apR + e.stats.maxHp * hpR;
+    Bo(t, e, tgt, firstDmg, "magic", "skill", "s1");
+    ds(t, "slime_cling_start", tgt.pos, e.team, { unitId: e.id, targetId: tgt.id });
+    Wn(t, e, "slime_cling", {
+      duration: dur,
+      sourceId: e.id,
+      key: "slime_cling",
+      merge: "replace",
+      tickInterval: tick,
+      onTick(sim, unit) {
+        const cur = sim.byId.get(unit.h._slClingId);
+        if (!unit.alive || !cur || !cur.alive || cur.rt.untargetable) {
+          unit.h._slClingId = -1;
+          Va(sim, unit, "slime_cling");
+          return;
+        }
+        const dmg = baseTick + unit.stats.ap * apR + unit.stats.maxHp * hpR;
+        Bo(sim, unit, cur, dmg, "magic", "skill", "s1");
+        ds(sim, "slime_cling_tick", cur.pos, unit.team, { unitId: unit.id, targetId: cur.id });
+      },
+      onRemove(sim, unit) {
+        unit.h._slClingId = -1;
+      },
+      onExpire(sim, unit) {
+        unit.h._slClingId = -1;
+      },
+    });
+  },
+});
+
+Oi("slime", "s2", {
+  movement: !0,
+  lockTime: 0,
+  noAnim: !0,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      fullCharge = n.val("fullCharge"),
+      maxCharge = n.val("maxCharge"),
+      dl = Math.hypot(n.dir.x, n.dir.y) || 1,
+      nx = n.dir.x / dl,
+      ny = n.dir.y / dl;
+
+    // 若在大招或吸附状态下释放弹球，先解除贴身状态
+    if (Ba(e, "slime_cling")) {
+      e.h._slClingId = -1;
+      Va(t, e, "slime_cling");
+    }
+
+    // 被动撞墙触发的 0.5 秒窗口：立刻瞬发无需蓄力的满额弹球
+    if (Ba(e, "slime_wall_bounce")) {
+      Va(t, e, "slime_wall_bounce");
+      if (Ba(e, "slime_ball_charge")) {
+        e.h._slBallReleased = !0;
+        Va(t, e, "slime_ball_charge");
+      }
+      slimeLaunchBall(t, e, { x: nx, y: ny }, n.level, 1.0);
+      return;
+    }
+
+    // 再次按下或松手：按当前蓄力比例弹出
+    if (n.isRecast) {
+      const elapsed = Math.max(0, t.state.time - (e.h._slBallStart ?? t.state.time)),
+        p = Math.max(0, Math.min(1, elapsed / Math.max(0.1, fullCharge))),
+        cdMax = e.h._slBallCd || e.skills.s2.cdMax;
+      e.h._slBallReleased = !0;
+      Va(t, e, "slime_ball_charge");
+      slimeLaunchBall(t, e, { x: nx, y: ny }, n.level, p);
+      e.skills.s2.cd = cdMax;
+      return;
+    }
+
+    // 初次按下：原地蓄力最多 3 秒
+    const cdMax = e.skills.s2.cdMax;
+    e.skills.s2.cd = 0;
+    e.h._slBallStart = t.state.time;
+    e.h._slBallDir = { x: nx, y: ny };
+    e.h._slBallCd = cdMax;
+    e.h._slBallLvl = n.level;
+    e.h._slBallReleased = !1;
+    e.h.atkOrder = !1;
+    e.targetId = -1;
+    e.rt.windupLeft = 0;
+    e.rt.windupTarget = -1;
+    e.rt.act === "attack" && (e.rt.act = null);
+    e.facing = Math.atan2(ny, nx);
+
+    Wn(t, e, "slime_ball_charge", {
+      duration: maxCharge,
+      sourceId: e.id,
+      key: "slime_ball_charge",
+      merge: "replace",
+      tickInterval: 0.08,
+      onTick(sim, unit) {
+        if (!unit.alive || unit.rt.stunned || unit.rt.silenced) {
+          unit.h._slBallReleased = !0;
+          Va(sim, unit, "slime_ball_charge");
+          unit.skills.s2.cd = Math.min(cdMax, 2.2);
+          return;
+        }
+        if (unit.h._slBallDir) {
+          unit.facing = Math.atan2(unit.h._slBallDir.y, unit.h._slBallDir.x);
+        }
+      },
+      onExpire(sim, unit) {
+        if (unit.h._slBallReleased || !unit.alive) return;
+        unit.h._slBallReleased = !0;
+        const fDir = unit.h._slBallDir || { x: Math.cos(unit.facing), y: Math.sin(unit.facing) };
+        slimeLaunchBall(sim, unit, fDir, unit.h._slBallLvl || 1, 1.0);
+        unit.skills.s2.cd = unit.h._slBallCd || cdMax;
+      },
+      onRemove(sim, unit) {
+        if (!unit.h._slBallReleased) {
+          unit.skills.s2.cd = Math.min(unit.h._slBallCd || cdMax, 2.2);
+        }
+      },
+    });
+  },
+});
+
+Oi("slime", "ult", {
+  lockTime: 0.08,
+  cast(n) {
+    const { sim: t, caster: e } = n,
+      dur = n.val("duration"),
+      rad = n.val("radius"),
+      tick = n.val("tick"),
+      totalHeal = n.val("healBase") + e.stats.maxHp * n.val("healHp"),
+      healPerTick = totalHeal / Math.max(1, dur / tick),
+      baseTick = n.val("tickDmg"),
+      apR = n.val("apRatio"),
+      hpR = n.val("hpRatio");
+
+    if (Ba(e, "slime_cling")) {
+      e.h._slClingId = -1;
+      Va(t, e, "slime_cling");
+    }
+    if (Ba(e, "slime_ball_charge")) {
+      e.h._slBallReleased = !0;
+      Va(t, e, "slime_ball_charge");
+    }
+    slimeClearPuddleZone(t, e);
+    e.h._slPuddleZone = Zo(t, {
+      visual: "slime_puddle_zone",
+      owner: e,
+      followUnitId: e.id,
+      pos: Cs(e.pos),
+      radius: rad,
+      duration: dur,
+    });
+    ds(t, "slime_puddle_start", e.pos, e.team, { unitId: e.id, radius: rad });
+    const hitsBuf = [];
+    Wn(t, e, "slime_puddle", {
+      duration: dur,
+      sourceId: e.id,
+      key: "slime_puddle",
+      merge: "replace",
+      tickInterval: tick,
+      onTick(sim, unit) {
+        if (!unit.alive) return;
+        xS(sim, unit, unit, healPerTick);
+        const cnt = sim.grid.query(unit.pos.x, unit.pos.y, rad + 1.4, hitsBuf),
+          dmg = baseTick + unit.stats.ap * apR + unit.stats.maxHp * hpR;
+        for (let i = 0; i < cnt; i++) {
+          const u = hitsBuf[i];
+          if (!Ui(unit, u) || Ss(u)) continue;
+          if (Math.hypot(u.pos.x - unit.pos.x, u.pos.y - unit.pos.y) <= rad + u.radius) {
+            Bo(sim, unit, u, dmg, "magic", "skill", "ult");
+          }
+        }
+      },
+      onExpire(sim, unit) {
+        slimeReleaseAbsorbed(sim, unit);
+        slimeClearPuddleZone(sim, unit);
+      },
+      onRemove(sim, unit) {
+        slimeReleaseAbsorbed(sim, unit);
+        slimeClearPuddleZone(sim, unit);
+      },
+    });
   },
 });
 
@@ -1132,13 +4568,25 @@ function lineupOf(seed, playerHero) {
     fill = shuffle(pool.filter((h) => !red.includes(h)));
   while (red.length < 5 && fill.length) red.push(fill.shift());
   while (red.length < 5) red.push(me);
-  const laneTpl = shuffle(LINEUP_LANES);
+  const laneTpl = shuffle(LINEUP_LANES),
+    blueLanes = blue.map((h, i) => (i > 0 && h === "monkey" ? (rnd() < 0.5 ? "mid" : "bot") : Se[h].lane)),
+    redLanes = red.map((h, i) => laneTpl[i % laneTpl.length]),
+    redMk = red.indexOf("monkey");
+  if (redMk >= 0 && redLanes[redMk] !== "mid" && redLanes[redMk] !== "bot") {
+    const pref = rnd() < 0.5 ? "mid" : "bot",
+      alt = pref === "mid" ? "bot" : "mid",
+      swapIdx = redLanes.indexOf(pref) >= 0 ? redLanes.indexOf(pref) : redLanes.indexOf(alt);
+    if (swapIdx >= 0) {
+      const tmp = redLanes[redMk];
+      ((redLanes[redMk] = redLanes[swapIdx]), (redLanes[swapIdx] = tmp));
+    } else redLanes[redMk] = pref;
+  }
   return {
     me,
     blue,
     red,
-    blueLanes: blue.map((h) => Se[h].lane),
-    redLanes: red.map((h, i) => laneTpl[i % laneTpl.length]),
+    blueLanes,
+    redLanes,
   };
 }
 
@@ -1760,11 +5208,17 @@ async function Uq(n, t, e, s) {
     };
   const p = () => (s.cancelled ? (x(), !0) : !1);
   try {
-    if (t.skin) {
+    const needKarts = new Set();
+    if (t.skin) needKarts.add(t.skin);
+    for (const hid of [...(lu?.blue || []), ...(lu?.red || []), t.heroId]) {
+      const kid = heroKartId(hid);
+      if (kid) needKarts.add(kid);
+    }
+    for (const kid of needKarts) {
       // 原版角色模型是运行时拉的（dist/kart/<id>.bin），进对局前先等它到齐，
       // 否则第一帧会拿一个还没登记的模型 key 去取定义。
-      r.setProgress(dl.world, `加载 ${kartSpec(t.skin)?.name ?? '角色'}…`);
-      await preloadKart(t.skin);
+      r.setProgress(dl.world, `加载 ${kartSpec(kid)?.name ?? '角色'}…`);
+      await preloadKart(kid);
       if (p()) return null;
     }
     if ((r.setProgress(dl.world, "集结双方英雄…"), await zc(), p())) return null;
@@ -2358,10 +5812,18 @@ function Xq() {
           buttons: q,
         })));
     };
+  const isExtErr = (file, err) => {
+    const text = `${file || ""}\n${(err && err.stack) || ""}`;
+    return /(?:chrome|moz|safari|safari-web|edge)-extension:\/\//i.test(text);
+  };
   (window.addEventListener("error", (L) => {
+    if (isExtErr(L.filename, L.error)) return;
     (!L.error && !L.message) || g(L.error ?? L.message, !1);
   }),
-    window.addEventListener("unhandledrejection", (L) => g(L.reason, !1)));
+    window.addEventListener("unhandledrejection", (L) => {
+      if (isExtErr("", L.reason)) return;
+      g(L.reason, !1);
+    }));
   let y, v;
   try {
     Hf();

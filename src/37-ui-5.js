@@ -29,7 +29,14 @@ function p$(n) {
         (g === "recall" || g === "heal" || g === "flash") &&
           (p.style.setProperty("--xp", F4[g].x.toFixed(3)), p.style.setProperty("--yp", F4[g].y.toFixed(3))));
     },
-    r = e.attackType === "melee" ? Vt("kill") : e.role === "mage" ? Ar("mage") : Ar("marksman"),
+    r =
+      e.attackType === "melee"
+        ? Vt("kill")
+        : e.role === "mage"
+          ? Ar("mage")
+          : e.role === "support"
+            ? Ar("support")
+            : Ar("marksman"),
     l = z(
       "button",
       "sf-hud__sk is-atk",
@@ -158,21 +165,30 @@ function p$(n) {
       let y = !1,
         v = !1,
         _ = !1,
-        k = !1;
+        k = !1,
+        onPole = !1,
+        noAtk = !1;
       for (const M of g.buffs)
-        M.id === "stun" || M.id === "airborne"
+        M.id === "stun" || M.id === "airborne" || M.id === "xuesong_lifted"
           ? (y = !0)
           : M.id === "silence"
             ? (v = !0)
             : M.id === "recall"
               ? (_ = !0)
-              : M.id === "restore" && (k = !0);
-      (d(g.alive && y), h(_), u(k));
+              : M.id === "restore"
+                ? (k = !0)
+                : M.id === "xuesong_pole"
+                  ? (onPole = !0)
+                  : (M.id === "horseman_kick_charge" || M.id === "niumo_march" || M.id === "slime_ball_charge") && (noAtk = !0);
+      (d(g.alive && (y || onPole || noAtk)), h(_), u(k));
       for (const M of A3) {
         const S = i[M],
           b = g.skills[M],
-          w = b.cd > 0.03,
-          T = b.level <= 0;
+          hasWallBounce = g.heroId === "slime" && M === "s2" && g.buffs.some((bf) => bf.id === "slime_wall_bounce"),
+          w = b.cd > 0.03 && !hasWallBounce,
+          T = b.level <= 0,
+          skDef = M === "s1" || M === "s2" || M === "ult" ? e.skills[M] : null,
+          isRecast = !!(skDef?.recastBuff && g.buffs.some((bf) => bf.id === skDef.recastBuff));
         if (
           (S.setOnCd(w),
           w
@@ -181,7 +197,7 @@ function p$(n) {
             : (S.setSec(""), S.wasCd && g.alive && uo(S.el, "is-ready")),
           (S.wasCd = w),
           S.setLocked(T),
-          S.setNoMana(!T && b.cost > 0 && g.mana < b.cost),
+          S.setNoMana(!T && !isRecast && !hasWallBounce && b.cost > 0 && g.mana < b.cost),
           S.setForbid(g.alive && !T && (y || v)),
           b.level !== S.level)
         ) {
@@ -194,7 +210,36 @@ function p$(n) {
 }
 
 function Cd(n, t) {
-  return t === "s1" || t === "s2" || t === "ult" ? Se[n.heroId].skills[t].cast : J8[t];
+  if (t === "s1" || t === "s2" || t === "ult") {
+    const s = Se[n.heroId].skills[t];
+    if (n.heroId === "slime" && t === "s1" && n.buffs && n.buffs.some((b) => b.id === "slime_puddle")) {
+      return { type: "self", radius: s.values.absorbRadius };
+    }
+    if (n.heroId === "slime" && t === "s2" && n.buffs && n.buffs.some((b) => b.id === "slime_wall_bounce")) {
+      return { type: "direction", range: s.values.maxRange, width: s.cast.width };
+    }
+    if (s.recastBuff && s.recastCast && n.buffs) {
+      const bf = n.buffs.find((b) => b.id === s.recastBuff);
+      if (bf) {
+        if (s.values && typeof s.values.minRange === "number" && typeof s.values.maxRange === "number") {
+          const fc = s.values.fullCharge || 0.9,
+            p = Math.max(0, Math.min(1, (bf.duration - bf.timeLeft) / Math.max(0.1, fc)));
+          return { ...s.recastCast, range: s.values.minRange + (s.values.maxRange - s.values.minRange) * p };
+        }
+        return s.recastCast;
+      }
+    }
+    if (s.holdCharge && s.values && typeof s.values.minRange === "number") {
+      return { ...s.cast, range: s.values.minRange };
+    }
+    if (n.heroId === "cow" && t === "s2" && n.stats) {
+      const ms = n.stats.moveSpeed || 5.5,
+        r = Math.max(4.0, Math.min(13.0, 5.5 + (ms - 4.5) * 0.95));
+      return { ...s.cast, range: r };
+    }
+    return s.cast;
+  }
+  return J8[t];
 }
 
 function m$(n) {
@@ -213,18 +258,24 @@ function U4(n) {
 
 const yk = 1;
 
-function C3(n, t, e, s, i, a, o = 0) {
-  const r = n.me;
+function C3(n, t, e, s, i, a, o = 0, anyUnit = !1, ally = !1) {
+  const r = n.me,
+    pool = anyUnit && !ally ? n.state.units : n.state.heroes;
   let l = -1,
     c = 1 / 0;
-  for (const f of n.state.heroes) {
-    if (f.team === n.team || !f.alive || !f.visible[n.team]) continue;
+  for (const f of pool) {
+    if (ally) {
+      if (f.team !== n.team || f.id === r.id || !f.alive) continue;
+    } else {
+      if (f.team === n.team || !f.alive || (f.visible && !f.visible[n.team])) continue;
+      if (anyUnit && (f.kind === "tower" || f.kind === "core")) continue;
+    }
     const d = f.pos.x - r.pos.x,
       h = f.pos.y - r.pos.y,
       u = Math.hypot(d, h);
     if (u > s + f.radius + yk) continue;
     let m = !1;
-    for (const p of f.buffs) p.id === "untargetable" && (m = !0);
+    for (const p of f.buffs) (p.id === "untargetable" || p.id === "xuesong_pole" || p.id === "stasis") && (m = !0);
     if (m) continue;
     let x;
     if (a) {
@@ -237,6 +288,7 @@ function C3(n, t, e, s, i, a, o = 0) {
       if (g > i) continue;
       x = g * 12 + u;
     }
+    anyUnit && !ally && f.kind !== "hero" && (x += 6);
     x < c && ((c = x), (l = f.id));
   }
   return l;
@@ -258,7 +310,7 @@ function bk(n, t, e, s, i) {
       return { indicator: { kind: "position", pos: l, range: t.range, radius: t.radius }, pos: l };
     }
     case "target": {
-      const r = C3(n, e, s, t.range, 50 * vk);
+      const r = C3(n, e, s, t.range, 50 * vk, void 0, 0, !!t.anyUnit, !!t.ally);
       return r >= 0
         ? { indicator: { kind: "target", targetId: r, range: t.range }, targetId: r }
         : { indicator: { kind: "target", targetId: -1, range: t.range } };
@@ -283,15 +335,19 @@ function g$(n, t, e, s) {
   }
   if (t.type === "target") {
     let l = -1;
-    const c = s >= 0 ? n.hero(s) : void 0;
+    const any = !!t.anyUnit,
+      ally = !!t.ally,
+      c = s >= 0 ? (any && !ally ? n.unit(s) : n.hero(s)) : void 0;
     return (
       c &&
-        c.team !== n.team &&
+        (ally
+          ? c.team === n.team && c.id !== i.id
+          : (!any || (c.kind !== "tower" && c.kind !== "core")) && c.team !== n.team) &&
         c.alive &&
         Math.hypot(c.pos.x - i.pos.x, c.pos.y - i.pos.y) <= t.range + c.radius + yk &&
         (l = c.id),
-      l < 0 && (l = C3(n, a, o, t.range, 0, e, 3.5)),
-      l < 0 && (l = C3(n, a, o, t.range, 22 * vk)),
+      l < 0 && (l = C3(n, a, o, t.range, 0, e, 3.5, any, ally)),
+      l < 0 && (l = C3(n, a, o, t.range, 22 * vk, void 0, 0, any, ally)),
       l >= 0
         ? { indicator: { kind: "target", targetId: l, range: t.range }, targetId: l }
         : { indicator: { kind: "target", targetId: -1, range: t.range } }
@@ -500,6 +556,24 @@ function A$(n, t) {
       Y.targetId !== void 0 && (gt.targetId = Y.targetId)),
       f(gt));
   }
+  function activeChargeSlot() {
+    const sks = Se[n.me.heroId]?.skills;
+    if (!sks || !n.me.buffs || n.me.buffs.length === 0) return null;
+    for (const slot of ["s1", "s2", "ult"]) {
+      const def = sks[slot];
+      if (def?.holdCharge && def.recastBuff && n.me.buffs.some((b) => b.id === def.recastBuff)) return slot;
+    }
+    return null;
+  }
+  function canHoldStart(O) {
+    if (O !== "s1" && O !== "s2" && O !== "ult") return !1;
+    if (n.me.heroId === "slime" && O === "s2" && n.me.buffs && n.me.buffs.some((b) => b.id === "slime_wall_bounce")) return !1;
+    const def = Se[n.me.heroId]?.skills?.[O];
+    if (!def || !def.holdCharge) return !1;
+    const sk = n.me.skills[O];
+    if (!sk || sk.level <= 0 || sk.cd > 0 || n.me.mana < sk.cost) return !1;
+    return !(def.recastBuff && n.me.buffs && n.me.buffs.some((b) => b.id === def.recastBuff));
+  }
   // 装备主动：数字键 1~6 对应装备栏的六格。
   // 传送要落点，所以把鼠标在场景里的地面投影一起带过去（拿不到就由引擎退化成朝正前方）。
   function itemActive(ix) {
@@ -510,7 +584,7 @@ function A$(n, t) {
   const B = new Set();
   let G = -1;
   function q() {
-    n.inputBlocked() || ((G = o()), f({ type: "attack" }));
+    n.inputBlocked() || activeChargeSlot() || ((G = o()), f({ type: "attack" }));
   }
   const et = new Map();
   let ct = null;
@@ -534,10 +608,21 @@ function A$(n, t) {
       Math.max(Y * 0.45, Math.min(Y * 1.15, ft))
     );
   }
+  let lastAimAt = -1;
+  function sendChargeAim(slot, dir) {
+    if (!dir) return;
+    const def = Se[n.me.heroId]?.skills?.[slot];
+    if (!def?.holdCharge || !def.recastBuff) return;
+    if (!n.me.buffs || !n.me.buffs.some((b) => b.id === def.recastBuff)) return;
+    const now = o();
+    if (now - lastAimAt < 0.04) return;
+    lastAimAt = now;
+    f({ type: "aim", dir });
+  }
   function nt(O) {
     if (O.btn === "attack" || O.state !== "aim") return;
     const Y = bk(n, Cd(n.me, O.btn), O.nx, O.ny, O.mag);
-    (O.cancel && (Y.indicator.cancel = !0), (O.sol = Y), P(Y.indicator));
+    (O.cancel && (Y.indicator.cancel = !0), (O.sol = Y), P(Y.indicator), sendChargeAim(O.btn, Y.dir));
   }
   function H(O, Y, gt = Number.NaN) {
     if ((window.clearTimeout(O.timer), et.delete(O.id), a.setDown(O.btn, !1), O.btn === "attack")) {
@@ -587,6 +672,28 @@ function A$(n, t) {
         };
       if ((et.set(ft.pointerId, Dt), a.setDown(O, !0), O === "attack")) {
         (B.add(ft.pointerId), q());
+        return;
+      }
+      if (!n.inputBlocked() && canHoldStart(O)) {
+        if (!_t) {
+          const sol = solveAimForSlot(O);
+          L(O, sol);
+          Dt.state = "void";
+          return;
+        }
+        L(O, null);
+        if (R === null || R === Dt.id) {
+          Dt.state = "aim";
+          R = Dt.id;
+          a.setAiming(O, !0);
+          ct = a.cancelZone.getBoundingClientRect();
+          nt(Dt);
+        }
+        return;
+      }
+      if (!n.inputBlocked() && !_t && activeChargeSlot() === O) {
+        L(O, solveAimForSlot(O));
+        Dt.state = "void";
         return;
       }
       _t &&
@@ -658,21 +765,36 @@ function A$(n, t) {
   }
   st("attack");
   for (const O of A3) st(O);
-  let tt = null;
+  let tt = null,
+    chargeAimOn = !1;
   const it = { x: 0, y: 0, known: !1 };
+  function solveAimForSlot(slot) {
+    const O = Cd(n.me, slot),
+      Y = it.known ? e.screenToGround(it.x, it.y) : null;
+    if (Y) {
+      const gt = O.type === "target" ? e.pickUnit(it.x, it.y) : -1;
+      return g$(n, O, Y, gt);
+    }
+    if (O.type === "direction" || O.type === "cone") {
+      const rev = n.me.heroId === "horseman" && activeChargeSlot() === slot ? -1 : 1;
+      return bk(n, O, Math.cos(n.me.facing) * rev, Math.sin(n.me.facing) * rev, 1);
+    }
+    return null;
+  }
   function D() {
     if (!tt) return null;
-    const O = Cd(n.me, tt.slot),
-      Y = it.known ? e.screenToGround(it.x, it.y) : null;
-    if (!Y) return null;
-    const gt = O.type === "target" ? e.pickUnit(it.x, it.y) : -1;
-    return g$(n, O, Y, gt);
+    return solveAimForSlot(tt.slot);
+  }
+  function updateLiveChargeAim(slot) {
+    const O = solveAimForSlot(slot),
+      Y = O ? O.indicator : U4(Cd(n.me, slot));
+    (Y && (Y.pointer = !0), P(Y), O && sendChargeAim(slot, O.dir), (chargeAimOn = !0));
   }
   function Q() {
     if (!tt) return;
     const O = D(),
       Y = O ? O.indicator : U4(Cd(n.me, tt.slot));
-    (Y && (Y.pointer = !0), P(Y));
+    (Y && (Y.pointer = !0), P(Y), O && sendChargeAim(tt.slot, O.dir));
   }
   function $() {
     tt && (a.setDown(tt.slot, !1), (tt = null), F("key"));
@@ -683,16 +805,22 @@ function A$(n, t) {
         (n.toast("技能尚未学会", "warn"), e.audio.ui("error"));
         return;
       }
+      if (activeChargeSlot() === O && !tt) {
+        L(O, solveAimForSlot(O));
+        return;
+      }
       (R !== null && R !== "key") ||
         (tt && a.setDown(tt.slot, !1),
         (tt = { slot: O, code: Y }),
         (R = "key"),
         a.setDown(O, !0),
         a.setAiming(O, !1),
-        Q());
+        Q(),
+        canHoldStart(O) && L(O, D()));
     }
   }
   function N() {
+    if (activeChargeSlot()) return;
     $();
     for (const O of et.values())
       O.btn === "attack" ||
@@ -724,6 +852,7 @@ function A$(n, t) {
           return;
         }
         if ((O.preventDefault(), O.button === 2)) {
+          if (activeChargeSlot()) return;
           if (R !== null) {
             N();
             return;
@@ -741,7 +870,7 @@ function A$(n, t) {
             i.setPointerCapture(O.pointerId);
           } catch {}
         } else if (O.button === 0) {
-          if (n.inputBlocked()) return;
+          if (n.inputBlocked() || activeChargeSlot()) return;
           const Y = e.pickUnit(O.clientX, O.clientY);
           j(Y) && (f({ type: "attack", targetId: Y }), z2(s, O.clientX, O.clientY, !0));
         }
@@ -767,7 +896,14 @@ function A$(n, t) {
     l(i, "pointercancel", at),
     l(i, "lostpointercapture", at),
     c("pointermove", (O) => {
-      O.pointerType === "mouse" && ((it.x = O.clientX), (it.y = O.clientY), (it.known = !0), tt && Q());
+      if (O.pointerType === "mouse") {
+        ((it.x = O.clientX), (it.y = O.clientY), (it.known = !0));
+        if (tt) Q();
+        else if (typeof R != "number") {
+          const cs = activeChargeSlot();
+          cs && updateLiveChargeAim(cs);
+        }
+      }
     }));
   function Rt(O, Y) {
     switch (O) {
@@ -914,11 +1050,20 @@ function A$(n, t) {
     update(O) {
       const Y = O.inputBlocked();
       if ((Y !== lt && ((lt = Y), Y && (N(), (v = _ = 0))), !Y)) {
+        const cs = activeChargeSlot();
         if ((b(), B.size > 0 && o() - G >= _$ && q(), tt)) Q();
         else if (typeof R == "number") {
           const gt = et.get(R);
           gt && nt(gt);
+        } else if (cs) {
+          updateLiveChargeAim(cs);
+        } else if (chargeAimOn) {
+          chargeAimOn = !1;
+          R === null && P(null);
         }
+      } else if (chargeAimOn) {
+        chargeAimOn = !1;
+        R === null && P(null);
       }
     },
     onMode() {

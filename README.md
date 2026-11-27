@@ -42,9 +42,14 @@ olo/
 │  ├─ split.mjs                依赖排序 + 切分为模块（可重复执行）
 │  ├─ scc.mjs                  依赖图强连通分量统计
 │  ├─ herocheck.mjs            一键验证某个英雄：起服务器+无头浏览器、选将、放技能、查异常
+│  ├─ design-editor.mjs        设计表编辑服务器：点「保存」原地写回 docs/hero-design.html
+│  ├─ design-doc.mjs           生成设计表（读 .kart/art.json 里的图标、.kart/portraits 里的风格化头像）
+│  ├─ heroart.mjs              烘英雄立绘 + 抓技能/Buff 图标 → dist/images/hero/、.kart/art.json
+│  ├─ _portraits.mjs           从卡丁车编辑器导出风格化头像（波普撞色 + 网点 + 描边）→ .kart/portraits/
 │  └─ build.mjs                用 esbuild 把 src/ 重新打包成 dist/index.html
 ├─ docs/
 │  ├─ ADD-HERO.md              新增英雄手册（接入点清单 + 五个坑）
+│  ├─ hero-design.html         英雄设计表（28 名英雄的定位矩阵 / 技能预设 / Buff / 属性公式，可直接编辑）
 │  ├─ SYMBOLS.md               符号索引：每个顶层绑定 → 所在模块 + 行号 + 用途线索
 │  └─ preview-*.png            运行截图
 ├─ images/beian-gongan.png     页脚备案图标（原页面唯一外部资源）

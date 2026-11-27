@@ -5,6 +5,7 @@ desktop.ini
 *.log
 tools/report.json
 tools/plan.json
+.kart/art.json
 tools/.build.bundle.js
 .herocheck/
 
@@ -15,3 +16,9 @@ tools/.build.bundle.js
 .kart/glb/
 .kart/bundle.js
 .kart/src/
+
+# 风格化头像的中间产物：.kart/portraits* 可由 tools/_portraits.mjs 从卡丁车编辑器重新导出，
+# .kart/glb-raw 是导出 GLB 的临时目录，都能再生，不进仓库。
+.kart/glb-raw/
+.kart/portraits/
+.kart/portraits-rect/

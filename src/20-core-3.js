@@ -18,7 +18,7 @@ import { An, No, Sn } from './07-three-3.js';
 import { Cf, Gl, rx } from './08-three-4.js';
 import { Bh, DI, Ft, ih, ji } from './16-render-5.js';
 import { Fa, Lt, OI, W, XM, Xt, aP, bb, oe, qe, sn, ws } from './17-three-8.js';
-import { $n, B1, H0, JM, KM, L0, Lr, Mm, Mt, Ni, QM, Sh, Th, U0, bn, bx, dP, jo, le, rP, vs, wm, xo } from './18-core.js';
+import { $n, B1, H0, JM, KM, L0, Lr, Mm, Mt, Ni, QM, Sh, Th, U0, bn, bx, dP, jo, le, mkBananaGeo, rP, vs, wm, xo, xsPoleMat } from './18-core.js';
 import { $0, ED, Ex, Nr, Pn, UP, YP, _x, bo, eD, ld, xD } from './19-core-2.js';
 
 const AD = (n, t, e) => {
@@ -432,6 +432,1285 @@ const AD = (n, t, e) => {
     mushroom_ult_land: mZD,
     mushroom_ult_charge: mXD,
   },
+  Xs = ws.xuesong,
+  xBC = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = t.dir?.x ?? 1,
+      a = t.dir?.y ?? 0,
+      o = Math.atan2(a, i),
+      r = t.radius ?? 5.8,
+      l = t.angle ?? 1.18,
+      h = l / 2,
+      f = n.rnd;
+    (n.decals.add(Xt.cone, e, s, r, 0.42).rot(o).params(h, 0.16).color(Xs.accent, 2.0, 0.92).under(W.shadow, 0.36),
+      n.decals.add(Xt.cone, e, s, r * 0.72, 0.34).rot(o).params(h * 0.9, 0.08).color(Xs.hot, 1.6, 0.85).under(W.shadow, 0.2));
+    const c = n.particles.use(Mt.dust).tint(W.sand, Xs.accent);
+    for (let d = 0; d < 14; d++) {
+      const m = f.next(),
+        x = o + h - l * m,
+        p = r * f.range(0.25, 0.95);
+      c.spawn(
+        e + Math.cos(x) * p,
+        f.range(0.25, 1.1),
+        s + Math.sin(x) * p,
+        Math.cos(x) * f.range(2.2, 5.2),
+        f.range(0.8, 2.2),
+        Math.sin(x) * f.range(2.2, 5.2),
+        0.48,
+        0.55,
+        1.3,
+      );
+    }
+    (n.light(e + i * r * 0.45, s + a * r * 0.45, 1.2, Xs.accent, 5, r * 1.4, 0.28), n.shake(0.14, e, s));
+  },
+  xDG = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      r = t.radius ?? 2.2,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, r, 1.9).params(1, 0.1).color(Xs.accent, 1.5, 0.8).under(W.shadow, 0.3),
+      n.decals.add(Xt.zone, e, s, r * 0.85, 1.9).params(10, 0.12).color(W.sand, 1.1, 0.55).under(Xs.dark, 0.28));
+    const a = n.particles.use(Mt.dust).tint(W.sand, W.dustDark);
+    for (let o = 0; o < 16; o++) {
+      const l = i.next() * Math.PI * 2,
+        c = i.range(0.2, r * 0.8);
+      a.spawn(
+        e + Math.cos(l) * c,
+        0.2,
+        s + Math.sin(l) * c,
+        Math.cos(l) * i.range(1.0, 2.6),
+        i.range(1.6, 3.2),
+        Math.sin(l) * i.range(1.0, 2.6),
+        0.75,
+        0.55,
+        1.4,
+      );
+    }
+  },
+  xPO = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      r = t.radius ?? 2.2,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, r * 1.2, 0.45).params(1, 0.14).color(Xs.hot, 2.0).under(W.shadow, 0.4),
+      n.light(e, s, 1, Xs.accent, 5, r * 2.2, 0.35),
+      n.shake(0.18, e, s));
+    const a = n.particles.use(Mt.dust).tint(W.sand, Xs.accent);
+    for (let o = 0; o < 20; o++) {
+      const l = i.next() * Math.PI * 2,
+        c = i.range(0.3, r);
+      a.spawn(
+        e + Math.cos(l) * c,
+        0.25,
+        s + Math.sin(l) * c,
+        Math.cos(l) * i.range(1.8, 4.4),
+        i.range(1.4, 3.6),
+        Math.sin(l) * i.range(1.8, 4.4),
+        0.65,
+        0.65,
+        1.5,
+      );
+    }
+  },
+  xST = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      to = t.to ?? t.targetPos ?? t.pos,
+      r = n.rnd,
+      a = n.particles.use(Mt.dust).tint(W.sand, Xs.hot),
+      m = n.particles.use(Mt.mote).tint(Xs.hot, Xs.accent);
+    // 抛沙弧线光带与飞溅沙团
+    (n.ribbons.trace($n.energy, s, 1.15, i, to.x, 0.9, to.y, 0.34, Xs.hot, W.sand),
+      n.ribbons.trace($n.thin, s, 1.35, i, to.x, 1.05, to.y, 0.3, Xs.accent, W.sand),
+      n.decals.add(Xt.ring, s, i, 1.6, 0.32).params(1, 0.16).color(W.sand, 1.8).under(Xs.dark, 0.3),
+      n.light(s, i, 1.2, Xs.accent, 5, 6, 0.28));
+    for (let o = 0; o < 28; o++) {
+      const f = o / 27,
+        px = s + (to.x - s) * f,
+        pz = i + (to.y - i) * f,
+        py = 0.75 + 4 * 1.9 * f * (1 - f);
+      a.spawn(
+        px + r.signed() * 0.36,
+        py + r.signed() * 0.18,
+        pz + r.signed() * 0.36,
+        (to.x - s) * 0.85 + r.signed() * 1.2,
+        r.range(0.6, 2.1),
+        (to.y - i) * 0.85 + r.signed() * 1.2,
+        0.58,
+        r.range(0.45, 0.78),
+        1.45,
+      );
+      if (o % 2 === 0)
+        m.spawn(
+          px + r.signed() * 0.3,
+          py,
+          pz + r.signed() * 0.3,
+          (to.x - s) * 0.9 + r.signed() * 1.5,
+          r.range(0.8, 2.6),
+          (to.y - i) * 0.9 + r.signed() * 1.5,
+          0.42,
+          0.26,
+          0.12,
+        );
+    }
+    bo(t, e) && n.shake(0.14, s, i);
+  },
+  xSB = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 3.0,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r * 1.15, 0.62).params(1, 0.18).color(Xs.hot, 2.6, 0.95).under(W.shadow, 0.45),
+      n.decals.add(Xt.swirl, s, i, r * 1.05, 1.35).params(3, 3.8).color(Xs.accent, 2.0, 0.88).under(Xs.dark, 0.38),
+      n.decals.add(Xt.zone, s, i, r * 0.98, 1.65).params(14, 0.12).color(W.sand, 1.85, 0.88).under(W.shadow, 0.36));
+    const a = n.particles.use(Mt.dust).tint(W.sand, Xs.hot),
+      m = n.particles.use(Mt.mote).tint(Xs.hot, Xs.accent);
+    for (let l = 0; l < 36; l++) {
+      const c = o.next() * Math.PI * 2,
+        d = o.range(0.15, r * 0.95);
+      a.spawn(
+        s + Math.cos(c) * d,
+        o.range(0.25, 1.9),
+        i + Math.sin(c) * d,
+        Math.cos(c) * o.range(1.8, 5.2),
+        o.range(0.9, 3.4),
+        Math.sin(c) * o.range(1.8, 5.2),
+        1.15,
+        o.range(0.65, 1.05),
+        2.1,
+      );
+    }
+    for (let l = 0; l < 18; l++) {
+      const c = o.next() * Math.PI * 2,
+        d = o.range(0.2, r * 0.85);
+      m.spawn(
+        s + Math.cos(c) * d,
+        o.range(0.3, 1.6),
+        i + Math.sin(c) * d,
+        Math.cos(c) * o.range(2.2, 5.8),
+        o.range(1.2, 3.6),
+        Math.sin(c) * o.range(2.2, 5.8),
+        0.55,
+        0.32,
+        0.14,
+      );
+    }
+    (n.light(s, i, 1.4, Xs.hot, le.lightMax, r * 2.4, 0.45), n.shake(bo(t, e) ? 0.34 : 0.18, s, i));
+  },
+  xBM = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd,
+      a = n.particles.use(Mt.dust).tint(W.sand, W.white);
+    for (let o = 0; o < 6; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e + Math.cos(l) * 0.35, 1.4, s + Math.sin(l) * 0.35, Math.cos(l) * 1.4, i.range(0.6, 1.2), Math.sin(l) * 1.4, 0.35, 0.32, 0.8);
+    }
+  },
+  xPU = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 2.2, 0.45).params(1, 0.1).color(Xs.glow, 2.0).under(Xs.deep, 0.35),
+      n.light(e, s, 2.6, Xs.glow, 6, 7, 0.4));
+    const a = n.particles.use(Mt.wisp).tint(Xs.glow, Xs.hot);
+    for (let o = 0; o < 14; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e + Math.cos(l) * 0.7, 0.3, s + Math.sin(l) * 0.7, Math.cos(l) * 0.8, i.range(2.6, 4.8), Math.sin(l) * 0.8, 0.55, 0.45, 0.8);
+    }
+  },
+  xSL = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 3.8,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.52).params(1, 0.14).color(Xs.glow, 2.2).under(Xs.deep, 0.4),
+      n.decals.add(Xt.zone, s, i, r * 0.92, 0.6).params(16, 0.1).color(Xs.hot, 1.5, 0.75).under(Xs.deep, 0.3));
+    const a = n.particles.use(Mt.wisp).tint(Xs.glow, W.white);
+    for (let l = 0; l < 22; l++) {
+      const c = o.next() * Math.PI * 2,
+        f = o.range(0.4, r);
+      a.spawn(s + Math.cos(c) * f, o.range(0.2, 1.2), i + Math.sin(c) * f, Math.cos(c) * 1.4, o.range(1.2, 2.8), Math.sin(c) * 1.4, 0.65, 0.55, 1.0);
+    }
+    (n.light(s, i, 1.3, Xs.glow, 7, r * 2.4, 0.42), n.shake(bo(t, e) ? 0.28 : 0.15, s, i));
+  },
+  xUS = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 2.4, 0.42).params(1, 0.14).color(Xs.accent, 2.2).under(W.shadow, 0.38),
+      n.light(e, s, 1.8, Xs.accent, 6, 6, 0.36));
+    const a = n.particles.use(Mt.spark).tint(Xs.hot, Xs.accent);
+    for (let o = 0; o < 14; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e + Math.cos(l) * 0.8, 0.4, s + Math.sin(l) * 0.8, Math.cos(l) * 1.5, i.range(2.4, 4.6), Math.sin(l) * 1.5, 0.4, 0.16, 0.06);
+    }
+  },
+  xUT = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      to = t.to ?? t.pos,
+      i = n.rnd,
+      a = n.particles.use(Mt.streak).tint(Xs.hot, Xs.glow);
+    for (let o = 0; o < 12; o++) {
+      const f = o / 11;
+      a.spawn(
+        e + (to.x - e) * f,
+        1.1 + 4 * 2.2 * f * (1 - f),
+        s + (to.y - s) * f,
+        (to.x - e) * 0.7,
+        i.range(0.4, 1.4),
+        (to.y - s) * 0.7,
+        0.35,
+        0.12,
+        0.05,
+      );
+    }
+  },
+  xUL = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 2.6,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.48).params(1, 0.16).color(Xs.hot, 2.4).under(W.shadow, 0.48),
+      n.decals.add(Xt.zone, s, i, r * 0.9, 0.55).params(14, 0.08).color(Xs.accent, 1.8, 0.85).under(W.shadow, 0.36));
+    const a = n.particles.use(Mt.dust).tint(W.sand, Xs.accent);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2,
+        f = o.range(0.3, r);
+      a.spawn(s + Math.cos(c) * f, o.range(0.2, 1.1), i + Math.sin(c) * f, Math.cos(c) * o.range(2, 5.2), o.range(1.0, 3.2), Math.sin(c) * o.range(2, 5.2), 0.65, 0.75, 1.7);
+    }
+    (n.light(s, i, 1.2, Xs.hot, le.lightMax, r * 2.6, 0.44), n.shake(bo(t, e) ? 0.46 : 0.26, s, i));
+  },
+  xMD = {
+    xuesong_basic_cone: xBC,
+    xuesong_dig_start: xDG,
+    xuesong_pit_open: xPO,
+    xuesong_sand_throw: xST,
+    xuesong_sand_burst: xSB,
+    xuesong_blind_miss: xBM,
+    xuesong_pole_up: xPU,
+    xuesong_s2_land: xSL,
+    xuesong_ult_scoop: xUS,
+    xuesong_ult_throw: xUT,
+    xuesong_ult_land: xUL,
+  },
+  St = ws.stone,
+  sPH = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 2.0, 0.36).params(1, 0.16).color(St.hot, 2.2).under(W.shadow, 0.35),
+      n.light(e, s, 1.2, St.accent, 6, 5.5, 0.28),
+      n.shake(0.22, e, s));
+    const a = n.particles.use(Mt.spark).tint(St.hot, St.accent);
+    for (let o = 0; o < 14; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e, 1.0, s, Math.cos(l) * i.range(2.2, 5.5), i.range(1.0, 3.2), Math.sin(l) * i.range(2.2, 5.5), 0.38, 0.18, 0.06);
+    }
+  },
+  sTD = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 2.8, 0.55).params(1, 0.14).color(St.glow, 2.3).under(St.dark, 0.4),
+      n.light(e, s, 1.8, St.glow, 7, 7, 0.42));
+    const a = n.particles.use(Mt.wisp).tint(St.hot, St.accent);
+    for (let o = 0; o < 18; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e + Math.cos(l) * 0.9, 0.3, s + Math.sin(l) * 0.9, Math.cos(l) * 1.1, i.range(2.2, 4.6), Math.sin(l) * 1.1, 0.6, 0.52, 0.8);
+    }
+  },
+  sTE = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 1.9, 0.42).params(1, 0.15).color(St.accent, 2.0).under(W.shadow, 0.35),
+      n.light(e, s, 1.2, St.accent, 5, 5, 0.3));
+    const a = n.particles.use(Mt.spark).tint(St.hot, W.rock);
+    for (let o = 0; o < 12; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e + Math.cos(l) * 0.6, 0.9, s + Math.sin(l) * 0.6, Math.cos(l) * 2.2, i.range(0.8, 2.4), Math.sin(l) * 2.2, 0.35, 0.14, 0.05);
+    }
+  },
+  sCR = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      i = n.rnd;
+    (n.decals.add(Xt.ring, e, s, 2.4, 0.48).params(1, 0.14).color(St.hot, 2.2).under(W.shadow, 0.4),
+      n.light(e, s, 1.5, St.hot, 6, 6, 0.35));
+    const a = n.particles.use(Mt.dust).tint(St.accent, W.rock);
+    for (let o = 0; o < 14; o++) {
+      const l = i.next() * Math.PI * 2;
+      a.spawn(e + Math.cos(l) * 0.7, 0.5, s + Math.sin(l) * 0.7, Math.cos(l) * 1.6, i.range(1.8, 3.6), Math.sin(l) * 1.6, 0.55, 0.48, 0.9);
+    }
+  },
+  sTH = (n, t) => {
+    const e = t.pos.x,
+      s = t.pos.y,
+      to = t.to ?? t.pos,
+      i = n.rnd,
+      a = n.particles.use(Mt.dust).tint(W.rock, St.accent);
+    for (let o = 0; o < 14; o++) {
+      const f = o / 13;
+      a.spawn(
+        e + (to.x - e) * f,
+        0.9 + 4 * 2.1 * f * (1 - f),
+        s + (to.y - s) * f,
+        (to.x - e) * 0.6,
+        i.range(0.4, 1.4),
+        (to.y - s) * 0.6,
+        0.42,
+        0.52,
+        1.1,
+      );
+    }
+  },
+  sTL = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 2.6,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.5).params(1, 0.18).color(St.hot, 2.4).under(W.shadow, 0.46),
+      n.decals.add(Xt.scorch, s, i, r * 0.88, 1.2).params(0, 0).color(W.rock, 0.9, 0.72).under(St.dark, 0.55));
+    const a = n.particles.use(Mt.dust).tint(W.rock, St.accent);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2,
+        f = o.range(0.3, r);
+      a.spawn(s + Math.cos(c) * f, o.range(0.2, 1.0), i + Math.sin(c) * f, Math.cos(c) * o.range(2.2, 5.6), o.range(1.2, 3.6), Math.sin(c) * o.range(2.2, 5.6), 0.68, 0.76, 1.6);
+    }
+    (n.light(s, i, 1.2, St.hot, le.lightMax, r * 2.5, 0.42), n.shake(bo(t, e) ? 0.45 : 0.24, s, i));
+  },
+  sUL = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 3.4,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r * 1.08, 0.6).params(1, 0.2).color(St.hot, 2.6).under(W.shadow, 0.55),
+      n.decals.add(Xt.zone, s, i, r * 0.95, 0.9).params(14, 0.1).color(St.accent, 1.9, 0.85).under(St.dark, 0.45),
+      n.decals.add(Xt.scorch, s, i, r * 0.85, 2.2).params(0, 0).color(W.rock, 0.95, 0.8).under(St.dark, 0.65));
+    const a = n.particles.use(Mt.dust).tint(W.rock, St.accent);
+    for (let l = 0; l < 32; l++) {
+      const c = o.next() * Math.PI * 2,
+        f = o.range(0.4, r);
+      a.spawn(s + Math.cos(c) * f, o.range(0.2, 1.2), i + Math.sin(c) * f, Math.cos(c) * o.range(2.8, 6.8), o.range(1.6, 4.4), Math.sin(c) * o.range(2.8, 6.8), 0.78, 0.9, 1.9);
+    }
+    (n.light(s, i, 1.5, St.hot, le.lightMax, r * 3, 0.52), n.shake(bo(t, e) ? 0.65 : 0.35, s, i));
+  },
+  sMD = {
+    stone_passive_hit: sPH,
+    stone_train_done: sTD,
+    stone_tether: sTE,
+    stone_corpse_ready: sCR,
+    stone_throw: sTH,
+    stone_throw_land: sTL,
+    stone_ult_land: sUL,
+  },
+  Sc = ws.scallion,
+  scS1 = (n, t, e) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      w = t.width ?? 2.3,
+      p = t.passive ? 0.72 : 1,
+      o = n.rnd;
+    let dx = i.x - s.x,
+      dz = i.y - s.y;
+    const len = Math.hypot(dx, dz) || 1;
+    ((dx /= len), (dz /= len));
+    const px = -dz,
+      pz = dx;
+    (n.ribbons.trace($n.energy, s.x, 0.92, s.y, i.x, 0.92, i.y, 0.24, Sc.hot, Sc.glow),
+      n.ribbons.trace($n.thin, s.x + px * 0.45, 0.85, s.y + pz * 0.45, i.x + px * 0.55, 0.85, i.y + pz * 0.55, 0.22, Sc.accent, Sc.deep),
+      n.ribbons.trace($n.thin, s.x - px * 0.45, 0.85, s.y - pz * 0.45, i.x - px * 0.55, 0.85, i.y - pz * 0.55, 0.22, Sc.accent, Sc.deep),
+      JM(n, s.x, s.y, i.x, i.y, w * 0.55 * p, 0.45, 0.28, Sc.glow, 1.9 * p, 0.82),
+      n.decals.add(Xt.ring, i.x, i.y, 1.2 * p, 0.32).params(1, 0.14).color(Sc.hot, 1.8 * p).under(Sc.dark, 0.35));
+    const a = n.particles.use(Mt.mote).tint(Sc.hot, Sc.glow);
+    for (let l = 0; l < (t.passive ? 10 : 18); l++) {
+      const f = o.next(),
+        lat = o.signed() * w * 0.42;
+      a.spawn(
+        s.x + dx * len * f + px * lat,
+        o.range(0.35, 1.25),
+        s.y + dz * len * f + pz * lat,
+        dx * o.range(2.5, 6.2) + px * o.signed() * 1.6,
+        o.range(0.5, 2.2),
+        dz * o.range(2.5, 6.2) + pz * o.signed() * 1.6,
+        0.34,
+        o.range(0.18, 0.36),
+        0.1,
+      );
+    }
+    (n.light((s.x + i.x) * 0.5, (s.y + i.y) * 0.5, 1.1, Sc.glow, le.lightMax * p, 7, 0.24),
+      !t.passive && n.shake(bo(t, e) ? 0.22 : 0.1, i.x, i.y));
+  },
+  scS2 = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 2.5, 0.55).params(1, 0.16).color(Sc.hot, 2.4).under(Sc.dark, 0.4),
+      n.decals.add(Xt.swirl, s, i, 2.2, 0.65).params(3, 4.2).color(Sc.glow, 1.9, 0.82).under(Sc.deep, 0.3));
+    const a = n.particles.use(Mt.mote).tint(Sc.hot, Sc.accent);
+    for (let l = 0; l < 22; l++) {
+      const c = o.next() * Math.PI * 2,
+        r = o.range(0.3, 1.5);
+      a.spawn(s + Math.cos(c) * r, o.range(0.2, 1.4), i + Math.sin(c) * r, Math.cos(c) * o.range(2.2, 4.8), o.range(1.6, 3.8), Math.sin(c) * o.range(2.2, 4.8), 0.52, 0.3, 0.08);
+    }
+    (n.light(s, i, 1.3, Sc.hot, le.lightMax, 8, 0.36), n.shake(bo(t, e) ? 0.2 : 0.08, s, i));
+  },
+  scUB = (n, t, e) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      o = n.rnd;
+    (n.ribbons.trace($n.energy, s.x, 1.0, s.y, i.x, 1.0, i.y, 0.3, Sc.hot, Sc.glow),
+      n.decals.add(Xt.ring, s.x, s.y, 1.6, 0.4).params(1, 0.14).color(Sc.accent, 2.0).under(Sc.dark, 0.35),
+      n.decals.add(Xt.ring, i.x, i.y, 2.4, 0.55).params(1, 0.18).color(Sc.hot, 2.6).under(Sc.dark, 0.45));
+    const a = n.particles.use(Mt.mote).tint(Sc.hot, Sc.glow);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(i.x + Math.cos(c) * 0.5, o.range(0.3, 1.6), i.y + Math.sin(c) * 0.5, Math.cos(c) * o.range(2.5, 5.8), o.range(0.8, 3.2), Math.sin(c) * o.range(2.5, 5.8), 0.46, 0.32, 0.1);
+    }
+    (n.light(i.x, i.y, 1.4, Sc.hot, le.lightMax, 9, 0.36), n.shake(bo(t, e) ? 0.32 : 0.15, i.x, i.y));
+  },
+  scBT = (n, t, e) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      w = t.width ?? 2.3,
+      o = n.rnd;
+    let dx = i.x - s.x,
+      dz = i.y - s.y;
+    const len = Math.hypot(dx, dz) || 1;
+    ((dx /= len), (dz /= len));
+    const px = -dz,
+      pz = dx;
+    // 主绿色气功波激光束（外层绿光 + 内层高亮白绿芯 + 地面焦痕光路）
+    (n.ribbons.trace($n.energy, s.x + dx * 0.4, 1.05, s.y + dz * 0.4, i.x, 1.05, i.y, 0.16, Sc.glow, Sc.deep),
+      n.ribbons.trace($n.white, s.x + dx * 0.4, 1.08, s.y + dz * 0.4, i.x, 1.08, i.y, 0.14, W.white, Sc.hot),
+      n.ribbons.trace($n.thin, s.x + dx * 0.5 + px * 0.55, 1.02, s.y + dz * 0.5 + pz * 0.55, i.x + px * 0.65, 1.02, i.y + pz * 0.65, 0.15, Sc.accent, Sc.glow),
+      n.ribbons.trace($n.thin, s.x + dx * 0.5 - px * 0.55, 1.02, s.y + dz * 0.5 - pz * 0.55, i.x - px * 0.65, 1.02, i.y - pz * 0.65, 0.15, Sc.accent, Sc.glow),
+      JM(n, s.x + dx * 0.4, s.y + dz * 0.4, i.x, i.y, w * 0.54, 0.24, 0.14, Sc.glow, 2.3, 0.88),
+      n.decals.add(Xt.ring, s.x + dx * 0.7, s.y + dz * 0.7, 1.15, 0.18).params(1, 0.2).color(Sc.hot, 2.4).under(Sc.dark, 0.25),
+      n.decals.add(Xt.ring, i.x, i.y, 1.5, 0.22).params(1, 0.22).color(Sc.glow, 2.1).under(Sc.dark, 0.35));
+    const a = n.particles.use(Mt.mote).tint(Sc.hot, Sc.glow);
+    for (let l = 0; l < 12; l++) {
+      const f = o.next(),
+        lat = o.signed() * w * 0.46;
+      a.spawn(
+        s.x + dx * len * f + px * lat,
+        o.range(0.45, 1.55),
+        s.y + dz * len * f + pz * lat,
+        dx * o.range(6, 12) + px * o.signed() * 2.2,
+        o.range(-0.6, 2.0),
+        dz * o.range(6, 12) + pz * o.signed() * 2.2,
+        0.24,
+        o.range(0.18, 0.36),
+        0.08,
+      );
+    }
+    (n.light(s.x + dx * len * 0.45, s.y + dz * len * 0.45, 1.2, Sc.glow, le.lightMax, 11, 0.16),
+      bo(t, e) && n.shake(0.12, s.x, s.y));
+  },
+  scBW = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      o = n.rnd;
+    let dx = i.x - s.x,
+      dz = i.y - s.y;
+    const len = Math.hypot(dx, dz) || 1;
+    ((dx /= len), (dz /= len));
+    const px = -dz,
+      pz = dx,
+      midX = (s.x + i.x) * 0.5 + px * (o.signed() * 0.42),
+      midZ = (s.y + i.y) * 0.5 + pz * (o.signed() * 0.42);
+    // 绿葱抽打鞭影：长度完全贴合普攻实际抽打距离，不再出现绿色小箭矢
+    (n.ribbons.trace($n.energy, s.x + dx * 0.35, 0.95, s.y + dz * 0.35, midX, 0.98, midZ, 0.15, Sc.hot, Sc.glow),
+      n.ribbons.trace($n.energy, midX, 0.98, midZ, i.x, 0.9, i.y, 0.15, Sc.hot, Sc.glow),
+      n.ribbons.trace($n.thin, s.x + dx * 0.3, 0.9, s.y + dz * 0.3, i.x, 0.88, i.y, 0.14, W.white, Sc.accent),
+      JM(n, s.x + dx * 0.3, s.y + dz * 0.3, i.x, i.y, 0.65, 0.22, 0.14, Sc.glow, 1.45, 0.65));
+    const a = n.particles.use(Mt.mote).tint(Sc.hot, Sc.accent);
+    for (let l = 0; l < 7; l++) {
+      const f = o.range(0.3, 1.0);
+      a.spawn(
+        s.x + dx * len * f + px * o.signed() * 0.32,
+        o.range(0.55, 1.25),
+        s.y + dz * len * f + pz * o.signed() * 0.32,
+        dx * o.range(1.6, 3.8) + px * o.signed() * 1.8,
+        o.range(0.4, 1.6),
+        dz * o.range(1.6, 3.8) + pz * o.signed() * 1.8,
+        0.24,
+        o.range(0.14, 0.26),
+        0.08,
+      );
+    }
+  },
+  scMD = {
+    scallion_basic_whip: scBW,
+    scallion_s1_slash: scS1,
+    scallion_s2_burst: scS2,
+    scallion_ult_blink: scUB,
+    scallion_beam_tick: scBT,
+  },
+  PbC = ws.paperboy,
+  pbSP = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 8.5,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.55).params(1, 0.1).color(PbC.accent, 2.2).under(PbC.dark, 0.35),
+      n.decals.add(Xt.ring, s, i, r * 0.55, 0.4).params(1, 0.14).color(PbC.hot, 2.1).under(PbC.deep, 0.25));
+    const a = n.particles.use(Mt.mote).tint(PbC.hot, PbC.accent);
+    for (let l = 0; l < 18; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s + Math.cos(c) * 0.9, o.range(0.8, 1.7), i + Math.sin(c) * 0.9, Math.cos(c) * o.range(5, 9.5), o.range(0.4, 1.6), Math.sin(c) * o.range(5, 9.5), 0.5, 0.28, 0.08);
+    }
+    (n.light(s, i, 1.4, PbC.accent, le.lightMax * 0.85, 9, 0.3), bo(t, e) && n.shake(0.14, s, i));
+  },
+  pbCH = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 2.2, 0.5).params(1, 0.16).color(PbC.hot, 2.5).under(PbC.glow, 0.45),
+      n.decals.add(Xt.swirl, s, i, 1.9, 0.55).params(3, 3.8).color(PbC.glow, 2.0, 0.8).under(PbC.deep, 0.25));
+    const a = n.particles.use(Mt.mote).tint(PbC.hot, PbC.glow);
+    for (let l = 0; l < 20; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s + Math.cos(c) * 0.5, o.range(0.4, 1.6), i + Math.sin(c) * 0.5, Math.cos(c) * o.range(2.2, 5.2), o.range(1.2, 3.2), Math.sin(c) * o.range(2.2, 5.2), 0.5, 0.3, 0.1);
+    }
+    n.light(s, i, 1.3, PbC.hot, le.lightMax, 8, 0.35);
+  },
+  pbBT = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      d = Math.hypot(i.x - s.x, i.y - s.y);
+    if (d > 0.2) {
+      (n.ribbons.trace($n.thin, s.x, 1.05, s.y, i.x, 1.05, i.y, 0.28, PbC.accent, PbC.hot),
+        n.decals.add(Xt.ring, i.x, i.y, 1.15, 0.26).params(1, 0.14).color(PbC.accent, 1.65).under(PbC.dark, 0.2));
+    } else {
+      (n.decals.add(Xt.ring, s.x, s.y, 1.45, 0.28).params(1, 0.16).color(PbC.accent, 1.9).under(PbC.dark, 0.25),
+        n.decals.add(Xt.swirl, s.x, s.y, 1.25, 0.28).params(2, -3.2).color(PbC.hot, 1.4, 0.7).under(PbC.dark, 0.18));
+    }
+  },
+  pbCL = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos;
+    (n.ribbons.trace($n.thin, s.x, 1.1, s.y, i.x, 1.1, i.y, 0.24, PbC.hot, PbC.accent),
+      n.decals.add(Xt.ring, i.x, i.y, 1.1, 0.32).params(1, 0.16).color(PbC.hot, 2.0).under(PbC.dark, 0.35));
+  },
+  pbES = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      to = t.to ?? t.pos,
+      r = t.radius ?? 8.5,
+      o = n.rnd;
+    (n.ribbons.trace($n.energy, s, 1.1, i, to.x, 1.1, to.y, 0.55, PbC.hot, PbC.glow),
+      n.decals.add(Xt.ring, s, i, r, 0.78).params(1, 0.14).color(PbC.hot, 2.8).under(PbC.accent, 0.55),
+      n.decals.add(Xt.zone, s, i, r * 0.92, 0.7).params(14, 0.08).color(PbC.glow, 1.9, 0.8).under(PbC.dark, 0.45),
+      n.decals.add(Xt.ring, to.x, to.y, 2.6, 0.65).params(1, 0.18).color(PbC.hot, 2.6).under(PbC.glow, 0.45));
+    const a = n.particles.use(Mt.mote).tint(PbC.hot, PbC.accent);
+    for (let l = 0; l < 36; l++) {
+      const c = o.next() * Math.PI * 2,
+        d = o.range(0.5, r * 0.85);
+      a.spawn(s + Math.cos(c) * d, o.range(0.3, 1.8), i + Math.sin(c) * d, Math.cos(c) * o.range(2.5, 7.5), o.range(1.4, 4.4), Math.sin(c) * o.range(2.5, 7.5), 0.68, 0.36, 0.14);
+    }
+    (n.light(s, i, 1.6, PbC.hot, le.lightMax * 1.2, r * 2.2, 0.55),
+      n.light(to.x, to.y, 1.4, PbC.glow, le.lightMax, 9, 0.42),
+      n.shake(bo(t, e) ? 0.62 : 0.34, s, i));
+  },
+  pbGB = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 2.4, 0.52).params(1, 0.18).color(PbC.hot, 2.8).under(PbC.accent, 0.55),
+      n.decals.add(Xt.scorch, s, i, 1.8, 1.1).params(0, 0).color(PbC.hot, 0.9, 0.72).under(PbC.dark, 0.55));
+    const a = n.particles.use(Mt.mote).tint(PbC.hot, PbC.accent);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.4, 1.5), i, Math.cos(c) * o.range(2.4, 6.2), o.range(1.6, 4.4), Math.sin(c) * o.range(2.4, 6.2), 0.56, 0.34, 0.12);
+    }
+    (n.light(s, i, 1.4, PbC.hot, le.lightMax, 9, 0.38), n.shake(bo(t, e) ? 0.42 : 0.22, s, i));
+  },
+  pbMD = {
+    paperboy_suona_pulse: pbSP,
+    paperboy_crane_hit: pbCH,
+    paperboy_bind_tick: pbBT,
+    paperboy_curse_link: pbCL,
+    paperboy_effigy_shatter: pbES,
+    paperboy_gloom_burst: pbGB,
+  },
+  MgC = ws.maggot,
+  mgFT = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 2.1, 0.55).params(1, 0.16).color(MgC.glow, 1.9).under(MgC.dark, 0.45);
+    const a = n.particles.use(Mt.puff).tint(MgC.glow, MgC.deep);
+    for (let l = 0; l < 18; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s + Math.cos(c) * 0.35, o.range(0.4, 1.1), i + Math.sin(c) * 0.35, Math.cos(c) * o.range(1.6, 4.4), o.range(0.8, 2.4), Math.sin(c) * o.range(1.6, 4.4), 0.62, 0.38, 0.14);
+    }
+    (n.light(s, i, 1.1, MgC.glow, le.lightMax * 0.7, 7, 0.32), bo(t, e) && n.shake(0.12, s, i));
+  },
+  mgST = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      dx = t.dir?.x ?? 1,
+      dz = t.dir?.y ?? 0,
+      len = t.range ?? 8.5,
+      o = n.rnd;
+    const px = -dz,
+      pz = dx,
+      a = n.particles.use(Mt.debris).tint(MgBrownC.hot, MgBrownC.deep);
+    for (let l = 0; l < 16; l++) {
+      const spread = o.signed() * 0.32,
+        vx = (dx + px * spread) * o.range(10, 19),
+        vz = (dz + pz * spread) * o.range(10, 19);
+      a.spawn(s + dx * 0.65, o.range(0.55, 1.05), i + dz * 0.65, vx, o.range(0.5, 2.2), vz, 0.34, o.range(0.14, 0.24), 0.08);
+    }
+    n.decals
+      .add(Xt.cone, s, i, len, 0.22)
+      .rot(Math.atan2(dz, dx), 0.28)
+      .params(0.12, 0)
+      .color(MgBrownC.deep, 0.95, 0.44)
+      .under(MgC.dark, 0.22);
+  },
+  mgPM = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      tier = t.tier ?? 2,
+      o = n.rnd,
+      isGold = tier >= 3;
+    (n.decals.add(Xt.ring, s, i, isGold ? 3.4 : 2.2, 0.56).params(1, 0.16).color(isGold ? MgC.hot : MgBrownC.hot, isGold ? 2.5 : 1.5).under(MgC.dark, 0.4),
+      n.light(s, i, 1.4, isGold ? MgC.hot : MgC.glow, le.lightMax * (isGold ? 1.15 : 0.65), isGold ? 11 : 6, 0.38));
+    const a = n.particles.use(isGold ? Mt.star : Mt.debris).tint(isGold ? MgC.hot : MgBrownC.hot, isGold ? MgC.accent : MgBrownC.deep);
+    for (let l = 0; l < (isGold ? 28 : 16); l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.45, 1.5), i, Math.cos(c) * o.range(2.2, 6.2), o.range(1.6, 4.5), Math.sin(c) * o.range(2.2, 6.2), 0.58, isGold ? 0.32 : 0.22, 0.1);
+    }
+    isGold && n.shake(bo(t, e) ? 0.34 : 0.16, s, i);
+  },
+  mgVC = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 13,
+      o = n.rnd,
+      sources = t.sources ?? [];
+    (n.decals.add(Xt.ring, s, i, r, 0.62).params(1, 0.08).color(MgC.accent, 1.85).under(MgC.dark, 0.3),
+      n.decals.add(Xt.swirl, s, i, 3.6, 0.68).params(4, -5.2).color(MgC.hot, 2.0, 0.78).under(MgC.deep, 0.35));
+    for (let k = 0; k < sources.length; k++) {
+      const src = sources[k];
+      n.ribbons.trace($n.thin, src.x, 0.65, src.y, s, 0.8, i, 0.42, MgC.hot, MgBrownC.hot);
+    }
+    const a = n.particles.use(Mt.mote).tint(MgC.hot, MgBrownC.hot);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2,
+        d = o.range(2.5, Math.min(r, 9));
+      a.spawn(s + Math.cos(c) * d, o.range(0.4, 1.5), i + Math.sin(c) * d, -Math.cos(c) * o.range(6, 12), o.range(0.2, 1.4), -Math.sin(c) * o.range(6, 12), 0.44, 0.24, 0.08);
+    }
+    (n.light(s, i, 1.3, MgC.hot, le.lightMax * 0.85, 9, 0.38), bo(t, e) && n.shake(0.22, s, i));
+  },
+  mgUL = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      dur = 0.62,
+      p = n.particles.use(Mt.debris).tint(MgBrownC.hot, MgBrownC.deep);
+    n.decals.add(Xt.ring, s.x, s.y, 1.4, 0.32).params(1, 0.16).color(MgBrownC.hot, 1.4).under(MgC.dark, 0.28);
+    for (let k = 0; k <= 12; k++) {
+      const u = k / 12,
+        px = s.x + (i.x - s.x) * u,
+        pz = s.y + (i.y - s.y) * u,
+        py = 0.7 + 4 * 5.2 * u * (1 - u);
+      p.spawn(px, py, pz, (i.x - s.x) * 0.15, 0.4, (i.y - s.y) * 0.15, 0.18, k === 12 ? 0.36 : 0.28, 0.14, u * dur);
+    }
+  },
+  mgUS = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 2.6,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.54).params(1, 0.16).color(MgBrownC.hot, 1.9).under(MgC.dark, 0.48),
+      n.decals.add(Xt.scorch, s, i, r * 0.9, 0.9).params(0, 0).color(MgBrownC.deep, 1.15, 0.85).under(MgC.dark, 0.6));
+    const a = n.particles.use(Mt.debris).tint(MgBrownC.hot, MgBrownC.deep);
+    for (let l = 0; l < 26; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.3, 1.1), i, Math.cos(c) * o.range(2.2, 6.8), o.range(1.6, 4.8), Math.sin(c) * o.range(2.2, 6.8), 0.52, 0.24, 0.1);
+    }
+    (n.light(s, i, 1.2, MgC.accent, le.lightMax * 0.8, 7, 0.32), n.shake(bo(t, e) ? 0.34 : 0.18, s, i));
+  },
+  mgOH = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd,
+      a = n.particles.use(Mt.debris).tint(MgBrownC.hot, MgBrownC.deep);
+    for (let l = 0; l < 6; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.45, 1.1), i, Math.cos(c) * o.range(1.4, 3.4), o.range(0.8, 2.2), Math.sin(c) * o.range(1.4, 3.4), 0.3, 0.16, 0.06);
+    }
+  },
+  mgOHG = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 1.15, 0.28).params(1, 0.18).color(MgGoldC.hot, 2.2).under(MgGoldC.deep, 0.35);
+    const a = n.particles.use(Mt.star).tint(MgGoldC.hot, MgGoldC.glow);
+    for (let l = 0; l < 10; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.5, 1.3), i, Math.cos(c) * o.range(1.8, 4.4), o.range(1.0, 2.8), Math.sin(c) * o.range(1.8, 4.4), 0.38, 0.24, 0.08);
+    }
+  },
+  MgBrownC = {
+    glow: Lt(0x6b3e1b),
+    hot: Lt(0x8e5628),
+    deep: Lt(0x361c09),
+    accent: Lt(0x9a6434),
+    tail: Lt(0x5d3516),
+    tail2: Lt(0x2b1607),
+  },
+  MgGoldC = {
+    glow: Lt(0xf6c93b),
+    hot: Lt(0xfff4a8),
+    deep: Lt(0x9e6608),
+    accent: Lt(0xffdc5c),
+    tail: Lt(0xf6c93b),
+    tail2: Lt(0xb8780c),
+  },
+  mgMD = {
+    maggot_fart: mgFT,
+    maggot_spray_tick: mgST,
+    maggot_poop_merge: mgPM,
+    maggot_vacuum: mgVC,
+    maggot_ult_launch: mgUL,
+    maggot_ult_splat: mgUS,
+    maggot_onhit: mgOH,
+    maggot_onhit_gold: mgOHG,
+  },
+  HmC = ws.horseman,
+  hmCR = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 2.2, 0.4).params(1, 0.16).color(HmC.hot, 2.2).under(HmC.deep, 0.4);
+    const a = n.particles.use(Mt.spark).tint(HmC.hot, HmC.accent);
+    for (let l = 0; l < 16; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s + Math.cos(c) * 0.6, o.range(0.3, 1.1), i + Math.sin(c) * 0.6, Math.cos(c) * o.range(1.8, 4.2), o.range(1.4, 3.4), Math.sin(c) * o.range(1.8, 4.2), 0.42, 0.18, 0.06);
+    }
+    n.light(s, i, 1.2, HmC.glow, le.lightMax * 0.6, 5.5, 0.28);
+  },
+  hmCD = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      o = n.rnd;
+    const dx = i.x - s.x,
+      dy = i.y - s.y,
+      dist = Math.hypot(dx, dy) || 1,
+      nx = dx / dist,
+      ny = dy / dist,
+      px = -ny,
+      py = nx;
+    (n.ribbons.trace($n.energy, s.x, 0.92, s.y, i.x, 0.92, i.y, 0.42, HmC.hot, HmC.accent),
+      n.ribbons.trace($n.thin, s.x + px * 0.55, 0.72, s.y + py * 0.55, i.x + px * 0.55, 0.72, i.y + py * 0.55, 0.36, W.goldHot, HmC.glow),
+      n.ribbons.trace($n.thin, s.x - px * 0.55, 0.72, s.y - py * 0.55, i.x - px * 0.55, 0.72, i.y - py * 0.55, 0.36, W.goldHot, HmC.glow),
+      n.decals.add(Xt.ring, s.x, s.y, 1.9, 0.36).params(1, 0.2).color(HmC.hot, 2.4).under(HmC.deep, 0.4));
+    const d = n.particles.use(Mt.dust).tint(W.sand, HmC.accent),
+      sp = n.particles.use(Mt.spark).tint(W.goldHot, HmC.hot);
+    for (let l = 0; l < 18; l++) {
+      const u = o.next();
+      d.spawn(s.x + dx * u + o.signed() * 0.45, o.range(0.15, 0.75), s.y + dy * u + o.signed() * 0.45, -nx * o.range(1.6, 4.2), o.range(0.8, 2.2), -ny * o.range(1.6, 4.2), 0.46, 0.32, 0.65);
+      sp.spawn(s.x + dx * u + o.signed() * 0.55, o.range(0.45, 1.5), s.y + dy * u + o.signed() * 0.55, -nx * o.range(2.2, 5.5), o.range(0.5, 1.8), -ny * o.range(2.2, 5.5), 0.38, 0.2, 0.06);
+    }
+    n.light(s.x + dx * 0.5, s.y + dy * 0.5, 1.3, HmC.hot, le.lightMax * 0.75, 7.5, 0.32);
+  },
+  hmCH = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 2.8, 0.42).params(1, 0.2).color(HmC.hot, 2.6).under(HmC.deep, 0.48),
+      n.decals.add(Xt.scorch, s, i, 1.9, 0.75).params(0, 0).color(HmC.dark, 1.2, 0.8).under(W.dustDark, 0.5));
+    const a = n.particles.use(Mt.star).tint(HmC.hot, HmC.accent),
+      b = n.particles.use(Mt.dust).tint(W.sand, HmC.deep);
+    for (let l = 0; l < 22; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.4, 1.3), i, Math.cos(c) * o.range(2.6, 7.2), o.range(1.6, 4.6), Math.sin(c) * o.range(2.6, 7.2), 0.44, 0.26, 0.08);
+      b.spawn(s, 0.2, i, Math.cos(c) * o.range(2.0, 5.4), o.range(0.9, 2.6), Math.sin(c) * o.range(2.0, 5.4), 0.52, 0.34, 0.72);
+    }
+    (n.light(s, i, 1.2, HmC.hot, le.lightMax * 0.85, 7, 0.3), n.shake(bo(t, e) ? 0.36 : 0.2, s, i));
+  },
+  hmKB = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      dir = t.dir ?? { x: 1, y: 0 },
+      dl = Math.hypot(dir.x, dir.y) || 1,
+      nx = dir.x / dl,
+      ny = dir.y / dl,
+      px = -ny,
+      py = nx,
+      rad = t.range ?? 4.8,
+      wid = t.width ?? 2.3,
+      pow = t.power ?? 1,
+      yaw = Math.atan2(ny, nx),
+      halfL = rad * 0.5,
+      o = n.rnd;
+    (n.decals
+      .add(Xt.rect, s + nx * halfL, i + ny * halfL, halfL, 0.48)
+      .rot(yaw, Math.max(0.28, (wid * 0.5) / Math.max(0.5, halfL)))
+      .color(pow >= 0.98 ? W.goldHot : HmC.hot, 2.3 + pow * 0.9, 0.92)
+      .under(HmC.deep, 0.55),
+      n.decals
+        .add(Xt.ring, s + nx * rad * 0.85, i + ny * rad * 0.85, 1.5 + pow * 1.1, 0.44)
+        .params(1, 0.2)
+        .color(pow >= 0.98 ? W.goldHot : HmC.accent, 2.5)
+        .under(HmC.dark, 0.45),
+      n.ribbons.trace($n.energy, s, 0.72, i, s + nx * rad, 0.72, i + ny * rad, 0.3, pow >= 0.98 ? W.goldHot : HmC.hot, HmC.accent),
+      n.ribbons.trace($n.thin, s + px * 0.55, 0.65, i + py * 0.55, s + nx * rad + px * 0.55, 0.65, i + ny * rad + py * 0.55, 0.26, HmC.accent, W.sand),
+      n.ribbons.trace($n.thin, s - px * 0.55, 0.65, i - py * 0.55, s + nx * rad - px * 0.55, 0.65, i + ny * rad - py * 0.55, 0.26, HmC.accent, W.sand));
+    const sp = n.particles.use(Mt.star).tint(pow >= 0.98 ? W.goldHot : HmC.hot, HmC.accent),
+      du = n.particles.use(Mt.dust).tint(W.sand, W.dustDark);
+    const cnt = Math.round(22 + pow * 24);
+    for (let l = 0; l < cnt; l++) {
+      const dist = o.range(0.4, rad),
+        lat = o.signed() * (wid * 0.48),
+        spd = o.range(4.5, 11.5 + pow * 5.0),
+        bx = s + nx * dist + px * lat,
+        bz = i + ny * dist + py * lat;
+      sp.spawn(bx, o.range(0.35, 1.15), bz, nx * spd + o.signed() * 1.4, o.range(1.2, 3.8), ny * spd + o.signed() * 1.4, 0.42, 0.22 + pow * 0.12, 0.08);
+      du.spawn(bx, 0.2, bz, nx * spd * 0.65 + px * o.signed() * 2.2, o.range(0.8, 2.8), ny * spd * 0.65 + py * o.signed() * 2.2, 0.55, 0.36, 0.75);
+    }
+    (n.light(s + nx * halfL, i + ny * halfL, 1.2, pow >= 0.98 ? W.goldHot : HmC.hot, le.lightMax * (0.7 + pow * 0.4), 7.5 + rad * 0.4, 0.34),
+      n.shake(bo(t, e) ? 0.32 + pow * 0.28 : 0.18, s, i));
+  },
+  hmNG = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 5.4,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.55).params(1, 0.14).color(HmC.glow, 2.3).under(HmC.deep, 0.45),
+      n.decals.add(Xt.swirl, s, i, r * 0.92, 0.65).params(3, 2.2).color(HmC.accent, 1.6, 0.72).under(HmC.dark, 0.35));
+    const a = n.particles.use(Mt.mote).tint(HmC.hot, HmC.accent);
+    for (let l = 0; l < 28; l++) {
+      const c = o.next() * Math.PI * 2,
+        spd = o.range(3.5, 8.2);
+      a.spawn(s + Math.cos(c) * 0.5, o.range(0.7, 1.8), i + Math.sin(c) * 0.5, Math.cos(c) * spd, o.range(0.5, 2.2), Math.sin(c) * spd, 0.54, 0.22, 0.08);
+    }
+    (n.light(s, i, 1.5, HmC.glow, le.lightMax * 0.75, 8, 0.34), n.shake(bo(t, e) ? 0.24 : 0.12, s, i));
+  },
+  hmTS = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 3.2,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.48).params(1, 0.18).color(HmC.hot, 2.6).under(HmC.accent, 0.5),
+      n.decals.add(Xt.swirl, s, i, r * 0.85, 0.52).params(4, -3).color(HmC.glow, 1.8, 0.75).under(HmC.deep, 0.35));
+    const a = n.particles.use(Mt.spark).tint(HmC.hot, HmC.accent);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s + Math.cos(c) * 0.7, o.range(0.2, 1.2), i + Math.sin(c) * 0.7, Math.cos(c) * o.range(2.2, 6.2), o.range(2.2, 5.2), Math.sin(c) * o.range(2.2, 6.2), 0.5, 0.24, 0.07);
+    }
+    (n.light(s, i, 1.2, HmC.hot, le.lightMax * 0.85, 7, 0.34), n.shake(bo(t, e) ? 0.28 : 0.14, s, i));
+  },
+  hmTP = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      big = !!t.big,
+      o = n.rnd,
+      d = n.particles.use(Mt.dust).tint(big ? HmC.accent : W.sand, W.dustDark);
+    for (let l = 0; l < (big ? 7 : 4); l++) {
+      const c = o.next() * Math.PI * 2;
+      d.spawn(s + Math.cos(c) * 0.35, 0.14, i + Math.sin(c) * 0.35, Math.cos(c) * o.range(0.9, 2.5), o.range(0.6, 1.9), Math.sin(c) * o.range(0.9, 2.5), 0.38, big ? 0.28 : 0.2, 0.65);
+    }
+    big && n.particles.use(Mt.spark).tint(HmC.hot, HmC.accent).spawn(s, 0.25, i, o.signed() * 1.4, o.range(1.2, 2.6), o.signed() * 1.4, 0.34, 0.18, 0.06);
+  },
+  hmTR = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 3.0, 0.55).params(1, 0.16).color(W.goldHot, 2.8).under(HmC.accent, 0.45),
+      n.decals.add(Xt.ring, s, i, 1.8, 0.42).params(1, 0.2).color(HmC.hot, 2.4).under(HmC.deep, 0.35));
+    const a = n.particles.use(Mt.star).tint(W.goldHot, HmC.hot);
+    for (let l = 0; l < 22; l++) {
+      const c = o.next() * Math.PI * 2;
+      a.spawn(s, o.range(0.5, 1.8), i, Math.cos(c) * o.range(2.2, 5.8), o.range(1.8, 4.4), Math.sin(c) * o.range(2.2, 5.8), 0.55, 0.26, 0.08);
+    }
+    n.light(s, i, 1.5, W.goldHot, le.lightMax * 0.85, 7, 0.38);
+  },
+  hmMD = {
+    horseman_charge_ready: hmCR,
+    horseman_charge_dash: hmCD,
+    horseman_charge_hit: hmCH,
+    horseman_kick_blast: hmKB,
+    horseman_neigh: hmNG,
+    horseman_trample_start: hmTS,
+    horseman_trample_step: hmTP,
+    horseman_trample_reset: hmTR,
+  },
+  CwC = ws.cow,
+  cwST = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      o = n.rnd;
+    (n.ribbons.trace($n.thin, s.x, 0.85, s.y, i.x, 0.85, i.y, 0.28, CwC.hot, CwC.accent),
+      n.decals.add(Xt.ring, s.x, s.y, 1.5, 0.36).params(1, 0.16).color(CwC.glow, 1.9).under(CwC.dark, 0.35),
+      n.decals.add(Xt.ring, i.x, i.y, 1.7, 0.4).params(1, 0.16).color(CwC.hot, 2.1).under(CwC.deep, 0.4));
+    const d = n.particles.use(Mt.dust).tint(W.sand, CwC.accent);
+    for (let l = 0; l < 12; l++) {
+      const c = o.next() * Math.PI * 2;
+      d.spawn(i.x + Math.cos(c) * 0.3, 0.16, i.y + Math.sin(c) * 0.3, Math.cos(c) * o.range(1.2, 3.4), o.range(0.7, 2.0), Math.sin(c) * o.range(1.2, 3.4), 0.42, 0.26, 0.68);
+    }
+  },
+  cwSD = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 2.4, 0.48).params(1, 0.18).color(W.goldHot, 2.4).under(CwC.accent, 0.45),
+      n.decals.add(Xt.scorch, s, i, 1.5, 0.6).params(0, 0).color(CwC.dark, 1.0, 0.65).under(W.dustDark, 0.4));
+    const sp = n.particles.use(Mt.spark).tint(W.goldHot, CwC.hot);
+    for (let l = 0; l < 18; l++) {
+      const c = o.next() * Math.PI * 2;
+      sp.spawn(s + Math.cos(c) * 0.5, o.range(0.3, 1.4), i + Math.sin(c) * 0.5, Math.cos(c) * o.range(1.5, 4.2), o.range(1.8, 4.4), Math.sin(c) * o.range(1.5, 4.2), 0.48, 0.22, 0.06);
+    }
+    n.light(s, i, 1.4, CwC.hot, le.lightMax * 0.65, 6, 0.3);
+  },
+  cwFD = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      dx = i.x - s.x,
+      dy = i.y - s.y,
+      dist = Math.hypot(dx, dy) || 1,
+      nx = dx / dist,
+      ny = dy / dist,
+      o = n.rnd;
+    (n.ribbons.trace($n.energy, s.x, 1.05, s.y, i.x, 1.05, i.y, 0.4, CwC.hot, CwC.accent),
+      n.decals.add(Xt.ring, s.x, s.y, 1.8, 0.36).params(1, 0.2).color(CwC.hot, 2.3).under(CwC.deep, 0.42));
+    const d = n.particles.use(Mt.dust).tint(W.sand, CwC.accent),
+      sp = n.particles.use(Mt.spark).tint(W.goldHot, CwC.hot);
+    for (let l = 0; l < 16; l++) {
+      const u = o.next();
+      d.spawn(s.x + dx * u + o.signed() * 0.35, o.range(0.2, 0.9), s.y + dy * u + o.signed() * 0.35, -nx * o.range(1.8, 4.5), o.range(0.7, 2.0), -ny * o.range(1.8, 4.5), 0.42, 0.28, 0.68);
+      sp.spawn(s.x + dx * u + o.signed() * 0.45, o.range(0.5, 1.6), s.y + dy * u + o.signed() * 0.45, -nx * o.range(2.2, 5.2), o.range(0.6, 1.8), -ny * o.range(2.2, 5.2), 0.36, 0.2, 0.06);
+    }
+    n.light(s.x + dx * 0.5, s.y + dy * 0.5, 1.4, CwC.hot, le.lightMax * 0.72, 7, 0.3);
+  },
+  cwFH = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, 3.0, 0.46).params(1, 0.22).color(W.goldHot, 2.8).under(CwC.deep, 0.5),
+      n.decals.add(Xt.cracks, s, i, 2.5, 1.2).params(0, 0).color(CwC.hot, 1.8, 0.9).under(CwC.dark, 0.6));
+    const st = n.particles.use(Mt.star).tint(W.goldHot, CwC.hot),
+      du = n.particles.use(Mt.dust).tint(W.sand, W.rock);
+    for (let l = 0; l < 24; l++) {
+      const c = o.next() * Math.PI * 2;
+      st.spawn(s, o.range(0.4, 1.4), i, Math.cos(c) * o.range(3.2, 8.2), o.range(1.6, 4.8), Math.sin(c) * o.range(3.2, 8.2), 0.46, 0.28, 0.08);
+      du.spawn(s, 0.2, i, Math.cos(c) * o.range(2.2, 5.8), o.range(1.0, 3.0), Math.sin(c) * o.range(2.2, 5.8), 0.54, 0.34, 0.76);
+    }
+    (n.light(s, i, 1.4, W.goldHot, le.lightMax * 0.92, 8, 0.34), n.shake(bo(t, e) ? 0.42 : 0.22, s, i));
+  },
+  cwUG = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 4.8,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.58).params(1, 0.18).color(CwC.hot, 2.8).under(CwC.deep, 0.52),
+      n.decals.add(Xt.cracks, s, i, r * 0.78, 1.4).params(0, 0).color(CwC.accent, 1.6, 0.85).under(CwC.dark, 0.55));
+    const em = n.particles.use(Mt.ember).tint(W.goldHot, CwC.hot);
+    for (let l = 0; l < 30; l++) {
+      const c = o.next() * Math.PI * 2;
+      em.spawn(s + Math.cos(c) * o.range(0.4, 1.8), o.range(0.2, 1.6), i + Math.sin(c) * o.range(0.4, 1.8), Math.cos(c) * o.range(1.8, 5.2), o.range(2.5, 6.2), Math.sin(c) * o.range(1.8, 5.2), 0.62, 0.26, 0.06);
+    }
+    (n.light(s, i, 1.8, CwC.hot, le.lightMax * 0.95, 9, 0.42), n.shake(bo(t, e) ? 0.38 : 0.2, s, i));
+  },
+  cwUS = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 4.8,
+      o = n.rnd;
+    (n.decals.add(Xt.ring, s, i, r, 0.52).params(1, 0.22).color(W.goldHot, 3.0).under(CwC.deep, 0.58),
+      n.decals.add(Xt.cracks, s, i, r * 0.96, 1.9).params(0, 0).color(CwC.hot, 2.2, 0.95).under(CwC.dark, 0.72),
+      n.decals.add(Xt.scorch, s, i, r * 0.72, 1.5).params(0, 0).color(CwC.dark, 1.3, 0.82).under(W.dustDark, 0.55));
+    const du = n.particles.use(Mt.dust).tint(W.rock, W.dustDark),
+      st = n.particles.use(Mt.star).tint(W.goldHot, CwC.accent);
+    for (let l = 0; l < 34; l++) {
+      const c = o.next() * Math.PI * 2,
+        rad = o.range(0.4, r * 0.82);
+      du.spawn(s + Math.cos(c) * rad, 0.2, i + Math.sin(c) * rad, Math.cos(c) * o.range(2.6, 7.2), o.range(1.4, 4.4), Math.sin(c) * o.range(2.6, 7.2), 0.62, 0.42, 0.85);
+      st.spawn(s + Math.cos(c) * rad * 0.7, o.range(0.3, 1.1), i + Math.sin(c) * rad * 0.7, Math.cos(c) * o.range(3.0, 8.0), o.range(2.0, 5.2), Math.sin(c) * o.range(3.0, 8.0), 0.48, 0.28, 0.08);
+    }
+    (n.light(s, i, 1.6, CwC.hot, le.lightMax, 10, 0.42), n.shake(bo(t, e) ? 0.55 : 0.3, s, i));
+  },
+  cwMD = {
+    cow_stride: cwST,
+    cow_squat_done: cwSD,
+    cow_flykick_dash: cwFD,
+    cow_flykick_hit: cwFH,
+    cow_ult_grow: cwUG,
+    cow_ult_stomp: cwUS,
+  },
+  MkC = ws.monkey,
+  mkBE = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      full = !!t.fullHp,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, full ? 2.4 : 2.0, 0.42).params(1, 0.16).color(full ? MkC.hot : W.heal, 2.2).under(MkC.dark, 0.35);
+    const pt = n.particles.use(full ? Mt.spark : Mt.mote).tint(full ? MkC.hot : W.heal, MkC.accent);
+    for (let l = 0; l < 16; l++) {
+      const c = o.next() * Math.PI * 2;
+      pt.spawn(s + Math.cos(c) * 0.4, o.range(0.3, 1.3), i + Math.sin(c) * 0.4, Math.cos(c) * o.range(1.2, 3.6), o.range(1.4, 3.4), Math.sin(c) * o.range(1.2, 3.6), 0.48, 0.24, 0.08);
+    }
+    n.light(s, i, 1.3, full ? MkC.hot : W.heal, le.lightMax * 0.65, 6, 0.28);
+  },
+  mkPT = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      o = n.rnd;
+    n.ribbons.trace($n.thin, s.x, 1.1, s.y, i.x, 0.25, i.y, Math.max(0.24, t.dur || 0.3), MkC.hot, MkC.accent);
+    const sp = n.particles.use(Mt.mote).tint(MkC.hot, MkC.accent);
+    for (let l = 0; l < 10; l++) {
+      const u = o.next();
+      sp.spawn(s.x + (i.x - s.x) * u, 0.35 + Math.sin(u * Math.PI) * 1.4, s.y + (i.y - s.y) * u, o.signed() * 0.8, o.range(0.4, 1.2), o.signed() * 0.8, 0.35, 0.22, 0.1);
+    }
+  },
+  mkPS = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 2.2, 0.42).params(1, 0.18).color(MkC.hot, 2.6).under(MkC.deep, 0.42);
+    const st = n.particles.use(Mt.star).tint(MkC.hot, MkC.accent);
+    for (let l = 0; l < 20; l++) {
+      const c = o.next() * Math.PI * 2;
+      st.spawn(s, o.range(0.4, 1.5), i, Math.cos(c) * o.range(2.0, 5.4), o.range(2.0, 5.2), Math.sin(c) * o.range(2.0, 5.4), 0.52, 0.26, 0.08);
+    }
+    n.light(s, i, 1.3, MkC.hot, le.lightMax * 0.72, 6, 0.3);
+  },
+  mkPM = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 1.35, 0.28).params(1, 0.12).color(MkC.dark, 1.1).under(W.dustDark, 0.4);
+    const du = n.particles.use(Mt.dust).tint(MkC.accent, W.sand);
+    for (let l = 0; l < 10; l++) {
+      const c = o.next() * Math.PI * 2;
+      du.spawn(s, 0.14, i, Math.cos(c) * o.range(1.0, 2.6), o.range(0.5, 1.5), Math.sin(c) * o.range(1.0, 2.6), 0.36, 0.22, 0.45);
+    }
+  },
+  mkST = (n, t) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      dx = i.x - s.x,
+      dy = i.y - s.y,
+      o = n.rnd;
+    n.ribbons.trace($n.energy, s.x, 1.15, s.y, i.x, 1.05, i.y, Math.max(0.32, (t.dur || 0.3) + 0.14), MkC.hot, MkC.deep);
+    const sp = n.particles.use(Mt.spark).tint(W.goldHot, MkC.deep),
+      du = n.particles.use(Mt.dust).tint(W.sand, MkC.accent);
+    for (let l = 0; l < 18; l++) {
+      const u = o.next();
+      sp.spawn(s.x + dx * u + o.signed() * 0.35, o.range(0.5, 1.4), s.y + dy * u + o.signed() * 0.35, o.signed() * 2.2, o.range(0.8, 2.6), o.signed() * 2.2, 0.4, 0.22, 0.06);
+      du.spawn(s.x + dx * u, 0.16, s.y + dy * u, o.signed() * 1.6, o.range(0.6, 1.8), o.signed() * 1.6, 0.44, 0.28, 0.68);
+    }
+    n.light(s.x + dx * 0.5, s.y + dy * 0.5, 1.4, MkC.hot, le.lightMax * 0.75, 7, 0.3);
+  },
+  mkPL = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 1.45,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, r * 2.1, 0.52).params(1, 0.22).color(W.goldHot, 2.9).under(MkC.deep, 0.55);
+    n.decals.add(Xt.cracks, s, i, r * 1.6, 1.6).params(0, 0).color(MkC.hot, 2.0, 0.92).under(MkC.dark, 0.65);
+    const du = n.particles.use(Mt.dust).tint(W.rock, W.sand),
+      st = n.particles.use(Mt.star).tint(W.goldHot, MkC.hot);
+    for (let l = 0; l < 28; l++) {
+      const c = o.next() * Math.PI * 2;
+      du.spawn(s + Math.cos(c) * r * 0.5, 0.2, i + Math.sin(c) * r * 0.5, Math.cos(c) * o.range(2.2, 6.2), o.range(1.4, 4.2), Math.sin(c) * o.range(2.2, 6.2), 0.58, 0.38, 0.8);
+      st.spawn(s + Math.cos(c) * r * 0.4, o.range(0.4, 2.2), i + Math.sin(c) * r * 0.4, Math.cos(c) * o.range(2.4, 6.8), o.range(2.0, 5.2), Math.sin(c) * o.range(2.4, 6.8), 0.48, 0.26, 0.08);
+    }
+    (n.light(s, i, 2.0, W.goldHot, le.lightMax, 9, 0.4), n.shake(bo(t, e) ? 0.46 : 0.24, s, i));
+  },
+  mkUS = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 4.2,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, r, 0.55).params(1, 0.16).color(W.goldHot, 2.8).under(MkC.deep, 0.5);
+    const em = n.particles.use(Mt.ember).tint(W.goldHot, MkC.deep);
+    for (let l = 0; l < 28; l++) {
+      const c = o.next() * Math.PI * 2;
+      em.spawn(s + Math.cos(c) * o.range(0.3, 1.5), o.range(0.2, 1.5), i + Math.sin(c) * o.range(0.3, 1.5), Math.cos(c) * o.range(1.8, 5.0), o.range(2.4, 5.8), Math.sin(c) * o.range(1.8, 5.0), 0.6, 0.26, 0.06);
+    }
+    (n.light(s, i, 1.8, W.goldHot, le.lightMax * 0.95, 9, 0.4), n.shake(bo(t, e) ? 0.32 : 0.16, s, i));
+  },
+  mkSW = (n, t, e) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      dx = i.x - s.x,
+      dy = i.y - s.y,
+      dist = Math.hypot(dx, dy) || 1,
+      nx = dx / dist,
+      ny = dy / dist,
+      px = -ny,
+      py = nx,
+      o = n.rnd;
+    n.ribbons.trace($n.energy, s.x, 1.15, s.y, i.x, 1.15, i.y, 0.36, W.goldHot, MkC.deep);
+    n.ribbons.trace($n.thin, s.x + px * 0.45, 1.15, s.y + py * 0.45, i.x + px * 0.45, 1.15, i.y + py * 0.45, 0.3, MkC.hot, MkC.accent);
+    n.ribbons.trace($n.thin, s.x - px * 0.45, 1.15, s.y - py * 0.45, i.x - px * 0.45, 1.15, i.y - py * 0.45, 0.3, MkC.hot, MkC.accent);
+    const sp = n.particles.use(Mt.star).tint(W.goldHot, MkC.deep),
+      du = n.particles.use(Mt.dust).tint(W.sand, MkC.accent);
+    for (let l = 0; l < 24; l++) {
+      const u = o.next(),
+        lat = o.signed() * 0.75;
+      sp.spawn(s.x + dx * u + px * lat, o.range(0.5, 1.5), s.y + dy * u + py * lat, nx * o.range(2.5, 6.5) + px * o.signed() * 1.5, o.range(0.8, 2.6), ny * o.range(2.5, 6.5) + py * o.signed() * 1.5, 0.42, 0.24, 0.06);
+      du.spawn(s.x + dx * u + px * lat, 0.16, s.y + dy * u + py * lat, nx * o.range(1.6, 4.2), o.range(0.6, 1.8), ny * o.range(1.6, 4.2), 0.46, 0.3, 0.7);
+    }
+    (n.light(s.x + dx * 0.5, s.y + dy * 0.5, 1.4, W.goldHot, le.lightMax * 0.85, 8, 0.32), n.shake(bo(t, e) ? 0.34 : 0.18, s.x, s.y));
+  },
+  mkGR = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      big = (t.gain ?? 6) >= 6,
+      o = n.rnd;
+    n.decals
+      .add(Xt.ring, s, i, big ? 3.6 : 2.1, big ? 0.65 : 0.42)
+      .params(1, big ? 0.22 : 0.14)
+      .color(W.goldHot, big ? 3.2 : 2.2)
+      .under(MkC.deep, big ? 0.55 : 0.35);
+    const st = n.particles.use(Mt.star).tint(W.goldHot, MkC.hot),
+      cnt = big ? 32 : 10;
+    for (let l = 0; l < cnt; l++) {
+      const c = o.next() * Math.PI * 2;
+      st.spawn(
+        s + Math.cos(c) * 0.45,
+        o.range(0.3, big ? 2.2 : 1.5),
+        i + Math.sin(c) * 0.45,
+        Math.cos(c) * o.range(big ? 2.4 : 1.2, big ? 7.2 : 3.6),
+        o.range(big ? 2.6 : 1.6, big ? 6.5 : 3.6),
+        Math.sin(c) * o.range(big ? 2.4 : 1.2, big ? 7.2 : 3.6),
+        big ? 0.62 : 0.42,
+        big ? 0.3 : 0.2,
+        0.06,
+      );
+    }
+    (n.light(s, i, big ? 2.0 : 1.4, W.goldHot, le.lightMax * (big ? 1 : 0.55), big ? 10 : 6, big ? 0.45 : 0.24),
+      big && n.shake(bo(t, e) ? 0.4 : 0.2, s, i));
+  },
+  mkMD = {
+    monkey_banana_eat: mkBE,
+    monkey_peel_throw: mkPT,
+    monkey_peel_slip: mkPS,
+    monkey_peel_stomp: mkPM,
+    monkey_stick_throw: mkST,
+    monkey_pillar_slam: mkPL,
+    monkey_ult_start: mkUS,
+    monkey_ult_sweep: mkSW,
+    monkey_stick_grow: mkGR,
+  },
+  SlC = ws.slime,
+  slBN = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 1.85, 0.34).params(1, 0.18).color(SlC.hot, 2.2).under(SlC.deep, 0.35);
+    const p = n.particles.use(Mt.mote).tint(SlC.hot, SlC.accent);
+    for (let l = 0; l < 12; l++) {
+      const a = o.next() * Math.PI * 2;
+      p.spawn(s + Math.cos(a) * 0.4, o.range(0.2, 1.0), i + Math.sin(a) * 0.4, Math.cos(a) * o.range(1.6, 4.4), o.range(0.8, 2.4), Math.sin(a) * o.range(1.6, 4.4), 0.38, 0.22, 0.05);
+    }
+    n.light(s, i, 1.0, SlC.hot, le.lightMax * 0.55, 5.5, 0.22);
+  },
+  slWL = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 3.1, 0.5).params(1, 0.22).color(W.goldHot, 3.0).under(SlC.deep, 0.55);
+    const st = n.particles.use(Mt.star).tint(W.goldHot, SlC.hot);
+    for (let l = 0; l < 24; l++) {
+      const a = o.next() * Math.PI * 2;
+      st.spawn(s + Math.cos(a) * 0.45, o.range(0.3, 1.4), i + Math.sin(a) * 0.45, Math.cos(a) * o.range(2.2, 6.4), o.range(1.4, 4.2), Math.sin(a) * o.range(2.2, 6.4), 0.46, 0.26, 0.06);
+    }
+    (n.light(s, i, 1.5, W.goldHot, le.lightMax * 0.95, 8.5, 0.36), n.shake(bo(t, e) ? 0.36 : 0.18, s, i));
+  },
+  slCL = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 1.9, 0.36).params(1, 0.16).color(SlC.hot, 2.4).under(SlC.deep, 0.4);
+    const p = n.particles.use(Mt.mote).tint(SlC.hot, SlC.glow);
+    for (let l = 0; l < 14; l++) {
+      const a = o.next() * Math.PI * 2;
+      p.spawn(s + Math.cos(a) * 0.85, o.range(0.25, 1.1), i + Math.sin(a) * 0.85, -Math.cos(a) * o.range(1.4, 3.2), o.range(0.6, 1.8), -Math.sin(a) * o.range(1.4, 3.2), 0.34, 0.2, 0.05);
+    }
+    n.light(s, i, 1.1, SlC.hot, le.lightMax * 0.65, 6, 0.25);
+  },
+  slCT = (n, t) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    const p = n.particles.use(Mt.mote).tint(SlC.hot, SlC.accent);
+    for (let l = 0; l < 6; l++) {
+      const a = o.next() * Math.PI * 2;
+      p.spawn(s + Math.cos(a) * 0.55, o.range(0.3, 1.1), i + Math.sin(a) * 0.55, Math.cos(a) * o.range(0.8, 2.2), o.range(0.8, 2.0), Math.sin(a) * o.range(0.8, 2.2), 0.26, 0.18, 0.04);
+    }
+  },
+  slBL = (n, t, e) => {
+    const s = t.from ?? t.pos,
+      i = t.to ?? t.pos,
+      full = (t.charge ?? 0) >= 0.85,
+      o = n.rnd;
+    n.ribbons.trace($n.energy, s.x, 0.75, s.y, i.x, 0.75, i.y, 0.34, full ? W.goldHot : SlC.hot, SlC.deep);
+    n.decals.add(Xt.ring, s.x, s.y, full ? 2.8 : 2.0, 0.4).params(1, 0.18).color(full ? W.goldHot : SlC.hot, 2.5).under(SlC.deep, 0.45);
+    const p = n.particles.use(full ? Mt.star : Mt.mote).tint(W.goldHot, SlC.accent);
+    for (let l = 0; l < (full ? 20 : 12); l++) {
+      const a = o.next() * Math.PI * 2;
+      p.spawn(s.x + Math.cos(a) * 0.5, o.range(0.2, 1.1), s.y + Math.sin(a) * 0.5, Math.cos(a) * o.range(2.0, 5.2), o.range(0.8, 2.8), Math.sin(a) * o.range(2.0, 5.2), 0.4, 0.24, 0.05);
+    }
+    (n.light(s.x, s.y, 1.3, SlC.hot, le.lightMax * (full ? 0.9 : 0.6), 7.5, 0.3), full && n.shake(bo(t, e) ? 0.3 : 0.15, s.x, s.y));
+  },
+  slBH = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, 2.4, 0.42).params(1, 0.2).color(W.goldHot, 2.8).under(SlC.deep, 0.5);
+    const st = n.particles.use(Mt.star).tint(W.goldHot, SlC.hot);
+    for (let l = 0; l < 18; l++) {
+      const a = o.next() * Math.PI * 2;
+      st.spawn(s + Math.cos(a) * 0.35, o.range(0.3, 1.3), i + Math.sin(a) * 0.35, Math.cos(a) * o.range(2.0, 5.8), o.range(1.6, 4.6), Math.sin(a) * o.range(2.0, 5.8), 0.44, 0.26, 0.06);
+    }
+    (n.light(s, i, 1.4, W.goldHot, le.lightMax * 0.85, 7.5, 0.32), n.shake(bo(t, e) ? 0.34 : 0.16, s, i));
+  },
+  slPD = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 2.95,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, r * 1.15, 0.56).params(1, 0.2).color(SlC.hot, 2.6).under(SlC.deep, 0.48);
+    const p = n.particles.use(Mt.mote).tint(SlC.hot, W.heal);
+    for (let l = 0; l < 28; l++) {
+      const a = o.next() * Math.PI * 2,
+        d = o.range(0.3, r * 0.9);
+      p.spawn(s + Math.cos(a) * d, o.range(0.15, 0.9), i + Math.sin(a) * d, Math.cos(a) * o.range(1.0, 3.2), o.range(1.4, 3.8), Math.sin(a) * o.range(1.0, 3.2), 0.55, 0.26, 0.06);
+    }
+    (n.light(s, i, 1.5, SlC.hot, le.lightMax * 0.9, 9.5, 0.42), n.shake(bo(t, e) ? 0.28 : 0.14, s, i));
+  },
+  slAB = (n, t, e) => {
+    const s = t.pos.x,
+      i = t.pos.y,
+      r = t.radius ?? 2.95,
+      o = n.rnd;
+    n.decals.add(Xt.ring, s, i, r * 1.1, 0.48).params(1, 0.22).color(W.goldHot, 2.9).under(SlC.deep, 0.55);
+    const p = n.particles.use(Mt.star).tint(W.goldHot, SlC.hot);
+    for (let l = 0; l < 26; l++) {
+      const a = o.next() * Math.PI * 2;
+      p.spawn(s + Math.cos(a) * r, o.range(0.2, 1.1), i + Math.sin(a) * r, -Math.cos(a) * o.range(4.0, 7.5), o.range(0.6, 2.2), -Math.sin(a) * o.range(4.0, 7.5), 0.42, 0.24, 0.06);
+    }
+    (n.light(s, i, 1.4, W.goldHot, le.lightMax * 0.9, 9, 0.36), n.shake(bo(t, e) ? 0.36 : 0.18, s, i));
+  },
+  slMD = {
+    slime_bounce: slBN,
+    slime_wall_hit: slWL,
+    slime_cling_start: slCL,
+    slime_cling_tick: slCT,
+    slime_ball_launch: slBL,
+    slime_ball_hit: slBH,
+    slime_puddle_start: slPD,
+    slime_absorb_burst: slAB,
+  },
   Ci = ws.yeque,
   Nb = Se.yeque.skills.s1,
   DD = Se.yeque.skills.s2,
@@ -634,7 +1913,7 @@ const AD = (n, t, e) => {
       n.shake(bo(t, e) ? 0.4 : 0.25, s, i));
   },
   HD = { yeque_s1_dash: FD, yeque_s2_cast: UD, yeque_ult_vanish: OD, yeque_ult_strike: BD },
-  $D = { ...xD, ...UP, ...ED, ...YP, ...PD, ...mMD, ...eD, ...HD };
+  $D = { ...xD, ...UP, ...ED, ...YP, ...PD, ...mMD, ...xMD, ...sMD, ...scMD, ...pbMD, ...mgMD, ...hmMD, ...cwMD, ...mkMD, ...slMD, ...eD, ...HD };
 
 function GD() {
   return { x: 0, y: 0, z: 0, height: 2, radius: 0.6, visible: !1, opacity: 1, unit: null };
@@ -1128,6 +2407,100 @@ const Bb = {
         n.particles
           .use(Mt.plume)
           .spawn(e, s, i, n.rnd.signed() * 2 - o, 2, n.rnd.signed() * 2 - r, 0.7, 0.34, 0.28));
+    },
+  }),
+  scallion_basic: To({
+    shape: qe.arrow,
+    mode: sn.solid,
+    scale: [1.15, 1.15, 1.2],
+    colors: () => Sc,
+    intensity: 1.45,
+    add: 0.25,
+    ribbon: $n.thin,
+    ribbonWidth: 0.95,
+    halo: 0.55,
+    hit(n, t, e, s, i, a, o, r) {
+      (vs(n, e, s, i, 0.8, Sc.hot, Sc.glow, o, r, 3, le.flashBasic, 6),
+        n.particles
+          .use(Mt.mote)
+          .tint(Sc.hot, Sc.accent)
+          .spawn(e, s, i, n.rnd.signed() * 2.4 - o, 1.8, n.rnd.signed() * 2.4 - r, 0.36, 0.26, 0.14));
+    },
+  }),
+  paperboy_basic: To({
+    shape: qe.arrow,
+    mode: sn.solid,
+    scale: [1.05, 1.05, 1.1],
+    colors: () => PbC,
+    intensity: 1.5,
+    add: 0.28,
+    ribbon: $n.thin,
+    ribbonWidth: 0.85,
+    halo: 0.52,
+    hit(n, t, e, s, i, a, o, r) {
+      (vs(n, e, s, i, 0.75, PbC.hot, PbC.glow, o, r, 3, le.flashBasic, 6),
+        n.particles
+          .use(Mt.mote)
+          .tint(PbC.hot, PbC.accent)
+          .spawn(e, s, i, n.rnd.signed() * 2.2 - o, 1.7, n.rnd.signed() * 2.2 - r, 0.38, 0.26, 0.12));
+    },
+  }),
+  paperboy_crane: To({
+    shape: qe.arrow,
+    mode: sn.solid,
+    scale: [1.65, 1.35, 1.85],
+    colors: () => PbC,
+    intensity: 1.9,
+    add: 0.38,
+    ribbon: $n.energy,
+    ribbonWidth: 1.25,
+    halo: 0.95,
+    rate: 18,
+    emit(n, t, e, s, i) {
+      const r = n.rnd;
+      n.particles
+        .use(Mt.mote)
+        .tint(PbC.hot, PbC.glow)
+        .spawn(e + r.signed() * 0.25, s + r.signed() * 0.2, i + r.signed() * 0.25, r.signed() * 0.8, r.range(0.4, 1.4), r.signed() * 0.8, 0.38, 0.22, 0.08);
+    },
+    hit(n, t, e, s, i) {
+      pbCH(n, { pos: { x: e, y: i } }, -1);
+    },
+  }),
+  maggot_basic: To({
+    shape: qe.diamond,
+    mode: sn.solid,
+    scale: [0.24, 0.19, 0.28],
+    colors: () => MgBrownC,
+    intensity: 0.88,
+    add: 0,
+    roll: 6,
+    ribbon: $n.thin,
+    ribbonWidth: 0.22,
+    halo: 0,
+    hit(n, t, e, s, i, a, o, r) {
+      const rnd = n.rnd,
+        p = n.particles.use(Mt.debris).tint(MgBrownC.hot, MgBrownC.deep);
+      for (let k = 0; k < 5; k++)
+        p.spawn(e, s, i, rnd.signed() * 2.4 - o * 0.5, rnd.range(0.8, 2.2), rnd.signed() * 2.4 - r * 0.5, 0.28, 0.14, 0.05);
+    },
+  }),
+  maggot_basic_gold: To({
+    shape: qe.diamond,
+    mode: sn.solid,
+    scale: [0.3, 0.24, 0.34],
+    colors: () => MgGoldC,
+    intensity: 1.55,
+    add: 0.2,
+    roll: 8,
+    ribbon: $n.thin,
+    ribbonWidth: 0.34,
+    halo: 0.22,
+    hit(n, t, e, s, i, a, o, r) {
+      const rnd = n.rnd,
+        p = n.particles.use(Mt.star).tint(MgGoldC.hot, MgGoldC.glow);
+      for (let k = 0; k < 8; k++)
+        p.spawn(e, s, i, rnd.signed() * 2.8 - o * 0.5, rnd.range(1.0, 2.6), rnd.signed() * 2.8 - r * 0.5, 0.34, 0.2, 0.06);
     },
   }),
   fengling_s1: To({
@@ -2444,6 +3817,171 @@ const d8 = {
               c * 1.3,
             );
         }
+      },
+    },
+    monkey_eating: {
+      create(n, t) {
+        const mesh = new Sn(mkBananaGeo(), xsPoleMat());
+        mesh.castShadow = !0;
+        n.ctx.layers.fx.add(mesh);
+        t._mkBanMesh = mesh;
+      },
+      update(n, t, e, s, i) {
+        const mesh = t._mkBanMesh;
+        if (!mesh) return;
+        const u = Math.max(0, Math.min(1, 1 - s.timeLeft / Math.max(0.1, s.duration))),
+          f = e.unit ? e.unit.facing : 0,
+          cf = Math.cos(f),
+          sf = Math.sin(f),
+          lx = -sf,
+          lz = cf;
+        if (u < 0.72) {
+          // 吃香蕉阶段：香蕉举在嘴边一晃一晃地被咬短，并冒出金黄色碎屑
+          const chew = Math.sin(u * Math.PI * 10),
+            bx = e.x + cf * 0.44 + lx * 0.16,
+            by = e.y + e.height * 0.67 + chew * 0.08,
+            bz = e.z + sf * 0.44 + lz * 0.16,
+            bite = 1.25 * (1 - 0.34 * (u / 0.72));
+          mesh.position.set(bx, by, bz);
+          mesh.rotation.set(0.25 + chew * 0.22, -f + 0.6, -0.45 + chew * 0.15);
+          mesh.scale.set(1.22, bite, 1.22);
+          for (let k = oi(n, t, i, 12); k > 0; k--) {
+            const o = n.rnd;
+            n.particles
+              .use(Mt.mote)
+              .tint(MkC.hot, MkC.accent)
+              .spawn(
+                bx + o.signed() * 0.14,
+                by + o.signed() * 0.1,
+                bz + o.signed() * 0.14,
+                o.signed() * 1.4,
+                o.range(0.4, 1.6),
+                o.signed() * 1.4,
+                0.32,
+                0.15,
+                0.04,
+              );
+          }
+        } else {
+          // 丢香蕉皮阶段：从手边划一道小弧线翻转着砸到轮椅底下的地面
+          const tu = (u - 0.72) / 0.28,
+            arc = Math.sin(tu * Math.PI),
+            bx = e.x + cf * (0.44 * (1 - tu)) + lx * (0.16 + 0.42 * arc),
+            by = e.y + e.height * 0.67 * (1 - tu) + arc * 0.52 + 0.08 * tu,
+            bz = e.z + sf * (0.44 * (1 - tu)) + lz * (0.16 + 0.42 * arc);
+          mesh.position.set(bx, by, bz);
+          mesh.rotation.set(tu * Math.PI * 2.6, -f + tu * 2.2, tu * Math.PI * 1.8);
+          mesh.scale.set(1.15, 0.85, 1.15);
+        }
+      },
+      end(n, t) {
+        if (t._mkBanMesh) {
+          n.ctx.layers.fx.remove(t._mkBanMesh);
+          t._mkBanMesh = null;
+        }
+      },
+    },
+    monkey_ult: {
+      create(n, t) {
+        const ring = Ks(n, t, Xt.range, 0.16);
+        n.decals.at(ring).y(0.08).params(0.028, 0).color(W.goldHot, 1.9, 0.92).under(MkC.deep, 0.38);
+        const fill = Ks(n, t, Xt.zone, 0.16);
+        n.decals.at(fill).y(0.06).params(0, 0).color(MkC.accent, 0.9, 0.2).under(MkC.dark, 0.08);
+      },
+      update(n, t, e) {
+        const rng = e.unit?.stats?.attackRange ?? 3.6;
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(rng);
+        n.decals.at(t.slots[1]).at(e.x, e.z).radius(rng);
+      },
+    },
+    slime_regen: {
+      create(n, t) {
+        const ring = Ks(n, t, Xt.ring, 0.14);
+        n.decals.at(ring).y(0.05).params(1, 0.14).color(W.heal, 1.5, 0.65).under(SlC.deep, 0.25);
+      },
+      update(n, t, e, s) {
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(e.radius * (1.35 + 0.1 * Math.sin(t.age * 6)));
+        for (let i = xc(n, t, s, 6); i > 0; i--) {
+          const o = n.rnd,
+            a = o.next() * oe;
+          n.particles
+            .use(Mt.mote)
+            .tint(W.heal, SlC.hot)
+            .spawn(e.x + Math.cos(a) * e.radius * 0.9, 0.25, e.z + Math.sin(a) * e.radius * 0.9, 0, o.range(0.9, 1.9), 0, 0.45, 0.18, 0.05);
+        }
+      },
+    },
+    slime_wall_bounce: {
+      create(n, t) {
+        const ring = Ks(n, t, Xt.ring, 0.08);
+        n.decals.at(ring).y(0.08).params(1, 0.22).color(W.goldHot, 3.0, 0.95).under(SlC.deep, 0.5);
+      },
+      update(n, t, e) {
+        const pulse = 1.45 + 0.28 * Math.sin(t.age * 28);
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(e.radius * pulse);
+      },
+    },
+    slime_ball_charge: {
+      create(n, t) {
+        const ring = Ks(n, t, Xt.ring, 0.12);
+        n.decals.at(ring).y(0.07).params(1, 0.2).color(SlC.hot, 2.2, 0.88).under(SlC.deep, 0.4);
+      },
+      update(n, t, e, s, bf) {
+        const p = bf ? Math.max(0, Math.min(1, (bf.duration - bf.timeLeft) / Math.max(0.1, bf.duration))) : 0.5;
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(e.radius * (1.2 + 0.75 * p));
+        for (let i = xc(n, t, s, 8 + 12 * p); i > 0; i--) {
+          const o = n.rnd,
+            a = o.next() * oe,
+            d = e.radius * (1.3 + 0.6 * p);
+          n.particles
+            .use(Mt.mote)
+            .tint(W.goldHot, SlC.hot)
+            .spawn(e.x + Math.cos(a) * d, o.range(0.2, 0.9), e.z + Math.sin(a) * d, -Math.cos(a) * 2.2, o.range(0.3, 1.0), -Math.sin(a) * 2.2, 0.28, 0.18, 0.04);
+        }
+      },
+    },
+    slime_cling: {
+      create(n, t) {
+        const ring = Ks(n, t, Xt.ring, 0.1);
+        n.decals.at(ring).y(0.07).params(1, 0.16).color(SlC.hot, 2.1, 0.85).under(SlC.deep, 0.4);
+      },
+      update(n, t, e) {
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(e.radius * (1.42 + 0.14 * Math.sin(t.age * 24)));
+      },
+    },
+    slime_puddle: {
+      create(n, t) {
+        const outer = Ks(n, t, Xt.range, 0.16);
+        n.decals.at(outer).y(0.07).params(0.04, 0).color(SlC.hot, 2.2, 0.92).under(SlC.deep, 0.45);
+        const fill = Ks(n, t, Xt.zone, 0.16);
+        n.decals.at(fill).y(0.05).params(0, 0).color(SlC.glow, 1.45, 0.52).under(SlC.deep, 0.3);
+        const sw = Ks(n, t, Xt.swirl, 0.16);
+        n.decals.at(sw).y(0.06).params(3, 1.5).color(SlC.hot, 1.6, 0.46).under(SlC.dark, 0.2);
+      },
+      update(n, t, e, s) {
+        const r = 2.95,
+          pulse = 0.97 + 0.04 * Math.sin(t.age * 7.5);
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(r * pulse);
+        n.decals.at(t.slots[1]).at(e.x, e.z).radius(r * 0.98);
+        n.decals.at(t.slots[2]).at(e.x, e.z).radius(r * 0.88).rot(t.age * 1.1, 1);
+        for (let i = xc(n, t, s, 14); i > 0; i--) {
+          const o = n.rnd,
+            a = o.next() * oe,
+            d = o.range(0.3, r * 0.88);
+          n.particles
+            .use(Mt.mote)
+            .tint(i % 2 === 0 ? SlC.hot : W.heal, SlC.accent)
+            .spawn(e.x + Math.cos(a) * d, 0.14, e.z + Math.sin(a) * d, o.signed() * 0.4, o.range(1.0, 2.3), o.signed() * 0.4, 0.48, 0.22, 0.06);
+        }
+      },
+    },
+    slime_absorbed: {
+      create(n, t) {
+        const ring = Ks(n, t, Xt.ring, 0.12);
+        n.decals.at(ring).y(0.08).params(1, 0.2).color(W.goldHot, 2.5, 0.92).under(SlC.deep, 0.5);
+      },
+      update(n, t, e) {
+        n.decals.at(t.slots[0]).at(e.x, e.z).radius(e.radius * (1.5 + 0.16 * Math.sin(t.age * 18)));
       },
     },
   },

@@ -171,8 +171,8 @@ function XH(n, t, e, lu) {
           "sf-loading__cards",
           ...roster(y).map((v, _) => {
             const isMe = y === 0 && v === me;
-            // 玩家选了角色皮：这张卡连头像带名字都换成皮的
-            return qH(e, isMe ? lookId(v, !0) : v, y, isMe, _, (y === 0 ? lu?.blueLanes : lu?.redLanes)?.[_]);
+            // 玩家选了角色皮或英雄原生用原版模型：头像与名字按 lookId 解析
+            return qH(e, lookId(v, isMe), y, isMe, _, (y === 0 ? lu?.blueLanes : lu?.redLanes)?.[_]);
           }),
         ),
       ),
@@ -1277,7 +1277,18 @@ function h$(n, t) {
   return ks(n.desc).replace(/\{(\w+)(%?)\}/g, (s, i, a) => {
     if (n.values[i] === void 0) return "";
     const o = Nh(n, i, e);
-    return `<span class="sf-hud-v sf-num">${a === "%" ? `${Math.round(o * 100)}%` : Number.isInteger(o) ? String(o) : String(Math.round(o * 100) / 100)}</span>`;
+    let txt;
+    if (a === "%") {
+      const p = o * 100;
+      txt = `${Math.abs(p) < 1 && p !== 0 ? Math.round(p * 100) / 100 : Math.round(p)}%`;
+    } else {
+      txt = Number.isInteger(o)
+        ? String(o)
+        : Math.abs(o) < 0.1
+          ? String(Math.round(o * 10000) / 10000)
+          : String(Math.round(o * 100) / 100);
+    }
+    return `<span class="sf-hud-v sf-num">${txt}</span>`;
   });
 }
 

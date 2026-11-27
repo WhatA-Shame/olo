@@ -185,10 +185,12 @@ const main = async () => {
   };
   const meshFiles = fs.readdirSync(path.join(root, 'src')).filter((f) => /^45-.+-mesh\.js$/.test(f));
   const srcOf = (f) => fs.readFileSync(path.join(root, 'src', f), 'utf8');
-  const noWarm = meshFiles.filter((f) => !srcOf(f).includes('setTimeout(() => heroMap(), 0)'));
-  ok('外部网格模块都预热贴图解码', noWarm.length === 0, noWarm.length ? `漏了 ${noWarm.join(', ')}` : `${meshFiles.length} 个模块`);
+  // 程序化 mesh（如 45-slime-mesh.js）不带烘焙贴图，只查真正用贴图的那几个
+  const texMeshFiles = meshFiles.filter((f) => srcOf(f).includes('TEX_W'));
+  const noWarm = texMeshFiles.filter((f) => !srcOf(f).includes('setTimeout(() => heroMap(), 0)'));
+  ok('外部网格模块都预热贴图解码', noWarm.length === 0, noWarm.length ? `漏了 ${noWarm.join(', ')}` : `${texMeshFiles.length} 个模块`);
   const badSize = [];
-  for (const f of meshFiles) {
+  for (const f of texMeshFiles) {
     const s = srcOf(f);
     const w = /const TEX_W = (\d+)/.exec(s);
     const h = /TEX_H = (\d+)/.exec(s);
@@ -200,7 +202,7 @@ const main = async () => {
     const [iw, ih] = texSize(Buffer.from(m[2], 'base64'), m[1]);
     if (+w[1] !== iw || +h[1] !== ih) badSize.push(`${f}(占位 ${w[1]}×${h[1]} ≠ 贴图 ${iw}×${ih})`);
   }
-  ok('占位图尺寸和真实贴图一致', badSize.length === 0, badSize.length ? badSize.join('; ') : `${meshFiles.length} 个模块`);
+  ok('占位图尺寸和真实贴图一致', badSize.length === 0, badSize.length ? badSize.join('; ') : `${texMeshFiles.length} 个模块`);
 
   await ensureServer();
   await ensureChrome();

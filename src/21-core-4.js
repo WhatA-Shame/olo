@@ -92,7 +92,7 @@ function cz(n) {
           if (
             !_ ||
             _.kind !== "hero" ||
-            Se[_.heroId].attackType !== "melee" ||
+            Se[_.heroId].attackType === "ranged" ||
             t.focusDist(t.a.x, t.a.z) > Jr
           )
             return;
@@ -654,6 +654,15 @@ class yz {
         (g.top = 58 * r),
         (g.bottom = 98 * r));
     }
+    this._vp = !1;
+    this._vt = e.playerTeam;
+    for (let _i = 0; _i < f.heroes.length; _i++) {
+      const _h = f.heroes[_i];
+      if (_h.id === f.playerId) {
+        this._vp = _h.heroId === "paperboy";
+        break;
+      }
+    }
     for (const p of d) {
       if (!p.alive) continue;
       const g = this.stateOf(p);
@@ -788,6 +797,14 @@ class yz {
       const m = h > 9e3 ? 2e3 : 1e3;
       for (let x = m; x < h; x += m) t.fillRect(f + Math.round((o * x) / h), d, 1, r * 0.6);
     }
+    if (this._vp && e.team !== this._vt && e.buffs && e.buffs.length > 0) {
+      let gs = 0;
+      for (let _i = 0; _i < e.buffs.length; _i++) if (e.buffs[_i].id === "paperboy_gloom") { gs = e.buffs[_i].stacks; break; }
+      if (gs > 0 && u > 0) {
+        const gw = Math.min(u, (o * h * gs * 0.01) / h);
+        ((t.fillStyle = "#ffffff"), t.fillRect(f + u - gw, d, gw, r));
+      }
+    }
     s.flash > 0 &&
       ((t.fillStyle = `rgba(255,255,255,${Math.min(0.75, s.flash * 6)})`), t.fillRect(f, d, u, r));
   }
@@ -798,12 +815,15 @@ class yz {
       d = Math.round(92 * o * f),
       h = Math.round(9 * o * f),
       u = Math.max(2, Math.round(3 * o)),
+      cb = e.chargeBar,
+      cH = cb ? Math.max(2, Math.round(3 * o)) : 0,
+      barH = h + u + 1 + (cH > 0 ? cH + 1 : 0),
       m = 8.5 * o * f,
       x = Math.round(i - d / 2 + m * 0.5),
-      p = Math.round(a - h - u - 1),
+      p = Math.round(a - barH),
       g = e.stats.maxHp,
       y = Math.max(g, e.hp + e.shield);
-    ((t.fillStyle = s2), t.fillRect(x - 2, p - 2, d + 4, h + u + 5));
+    ((t.fillStyle = s2), t.fillRect(x - 2, p - 2, d + 4, barH + 4));
     const v = (d * Math.max(0, e.hp)) / y,
       _ = (d * e.shield) / y;
     (s.trail > e.hp &&
@@ -812,8 +832,27 @@ class yz {
       t.fillRect(x, p, v, h),
       _ > 0 && ((t.fillStyle = pz), t.fillRect(x + v, p, _, h)),
       (t.fillStyle = "rgba(255,255,255,0.26)"),
-      t.fillRect(x, p, v + _, h * 0.42),
-      (t.fillStyle = Kb));
+      t.fillRect(x, p, v + _, h * 0.42));
+    // 纸札人晦气白条：纸札人可看到所有敌人的白色血条，敌人自己也能看到自己的白色血条
+    if ((l || (this._vp && e.team !== r.playerTeam)) && e.buffs && e.buffs.length > 0 && v > 0) {
+      let gs = 0;
+      for (let _i = 0; _i < e.buffs.length; _i++) {
+        if (e.buffs[_i].id === "paperboy_gloom") {
+          gs = e.buffs[_i].stacks;
+          break;
+        }
+      }
+      if (gs > 0) {
+        const gw = Math.min(v, (d * (g * gs * 0.01)) / y);
+        if (gw > 0.5) {
+          ((t.fillStyle = "#ffffff"),
+            t.fillRect(x + v - gw, p, gw, h),
+            (t.fillStyle = "rgba(18,24,42,0.55)"),
+            t.fillRect(Math.round(x + v - gw), p, 1, h));
+        }
+      }
+    }
+    t.fillStyle = Kb;
     for (let R = 1e3; R < y; R += 1e3) {
       const I = R % 5e3 === 0;
       t.fillRect(x + Math.round((d * R) / y) - (I ? 1 : 0), p, I ? 2 : 1, I ? h : h * 0.8);
@@ -825,8 +864,22 @@ class yz {
         t.fillRect(x, p + h + 1, d, u),
         (t.fillStyle = mz),
         t.fillRect(x, p + h + 1, (d * Math.max(0, e.mana)) / e.stats.maxMana, u)));
+    // 第三条蓄力条（蓝条下方）：平时黄色显示蓄力进度，蓄满变红提示强化就绪
+    if (cH > 0) {
+      const cy = p + h + u + 2,
+        cr = Math.max(0, Math.min(1, cb.ratio || 0)),
+        cw = d * cr;
+      t.fillStyle = "rgba(28,22,12,0.92)";
+      t.fillRect(x, cy, d, cH);
+      if (cw > 0.5) {
+        t.fillStyle = cb.full ? "#ff382e" : "#f5c838";
+        t.fillRect(x, cy, cw, cH);
+        t.fillStyle = cb.full ? "rgba(255,210,190,0.55)" : "rgba(255,248,195,0.45)";
+        t.fillRect(x, cy, cw, Math.max(1, cH * 0.42));
+      }
+    }
     const k = x - m * 0.9,
-      M = p + (h + u) / 2;
+      M = p + barH / 2;
     (t.beginPath(),
       t.arc(k, M, m, 0, Math.PI * 2),
       (t.fillStyle = "#0c1428"),

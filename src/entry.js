@@ -49,7 +49,9 @@ import './44-data-4.js';
 // 未捕获异常留一份完整栈，出问题时可在控制台执行 __lastErr 直接取到
 if (typeof window !== 'undefined') {
   window.__lastErr = null;
+  const isExtErr = (file, err) => /(?:chrome|moz|safari|safari-web|edge)-extension:\/\//i.test(`${file || ''}\n${(err && err.stack) || ''}`);
   window.addEventListener('error', (e) => {
+    if (isExtErr(e.filename, e.error)) return;
     window.__lastErr = {
       msg: e.message,
       stack: (e.error && e.error.stack) || '',
@@ -59,6 +61,7 @@ if (typeof window !== 'undefined') {
   });
   window.addEventListener('unhandledrejection', (e) => {
     const r = e.reason;
+    if (isExtErr('', r)) return;
     window.__lastErr = { msg: String((r && r.message) || r), stack: (r && r.stack) || '', where: 'promise', at: Date.now() };
   });
 }

@@ -98,4 +98,214 @@ export function chantPose(R, J, time, p, o = {}) {
   return R;
 }
 
+// ── 牛魔专属程序化动作库（Tripo 41 骨标准人形骨架） ──────────────────
+// 实测本地轴（世界 +Y=上、+Z=前、+X=角色左）：
+// - 躯干 (Pelvis/Waist/Spine01/Spine02/Head)：+X=右（正=后仰挺胸，负=前倾）、+Y=上（正=左转，负=右转）、+Z=后（正=右倾）
+// - 下放双臂后 (armsDown)：+X=右（上臂正=前抬，前臂负=自然屈肘）、+Z=前（右上臂负=外展，左上臂正=外展）
+// - 大腿/小腿：+X=右（大腿负=前抬，小腿正=后屈膝）、+Z=前（左腿负/右腿正=外展站稳）
+
+export function niumoIdlePose(R, J, time) {
+  const b = Math.sin(time * 1.85),
+    b2 = Math.sin(time * 0.78);
+  // 宽大稳重的魔王架势：重心略沉、双膝微曲外展、微微侧身立定
+  R.move(J.root, 0, -0.05 + b * 0.012, 0);
+  R.add(J.pelvis, 2, 6, -1.5);
+  R.add(J.thighL, -10, 8, -7);
+  R.add(J.calfL, 15, 0, 0);
+  R.add(J.thighR, -12, -9, 8);
+  R.add(J.calfR, 17, 0, 0);
+  // 挺胸呼吸：腰脊舒展、胸膛随深呼吸起伏、双肩微向前拢方便双臂环抱
+  R.add(J.waist, 2 + b * 0.9, 2, 0.5);
+  R.add(J.spine1, 3 + b * 1.2, -3, 0);
+  R.add(J.chest, 3 + b * 1.6, -4, 0);
+  R.add(J.clavR, 22, 0, -3 - b * 1.2);
+  R.add(J.clavL, 22, 0, 3 + b * 1.2);
+  // 微微昂首缓扫战场，显威严而非木讷
+  R.add(J.head, 4.5 - b * 1.1, -2 + b2 * 5.0, b2 * 1.4);
+  // 待机大剑背在身后：双手环抱胸前（右小臂叠在上前方、左小臂压在下侧，双拳收拢）
+  R.add(J.upperR, 62 + b * 1.4, 0, -2);
+  R.add(J.foreR, 8 - b * 1.0, 0, 72);
+  R.add(J.handR, -84, 0, 48);
+  R.add(J.upperL, 54 + b * 1.4, 0, 2);
+  R.add(J.foreL, -16 - b * 1.0, 0, -70);
+  R.add(J.handL, 0, 0, -48);
+  return R;
+}
+
+// ── 牛魔大幅度两段普攻：大幅蓄力拧腰跨步 + 全身大开大合重劈/反撩 ──
+export function niumoAttackPose(R, J, p, variant = 0) {
+  const rev = (variant & 1) === 1;
+  if (!rev) {
+    // 第一刀：大开大合斜劈（深拧腰高举巨剑 → 猛跨步全躯干砸砍拉满跟随）
+    const up = smooth(p / 0.42),
+      hit = smooth((p - 0.42) / 0.24),
+      rec = smooth((p - 0.76) / 0.24),
+      w = up * (1 - hit),
+      s = hit * (1 - rec * 0.55);
+    const upperX = 12 + 158 * w + 4 * s,
+      upperZ = -10 - 20 * w + 24 * s,
+      foreX = -22 - 44 * w + 12 * s,
+      tiltWant = lerp(lerp(18, -34, w), 124, s),
+      handX = 3 - tiltWant - (upperX + foreX);
+    R.move(J.root, 0, -0.05 - 0.04 * w - 0.1 * s, -0.09 * w + 0.2 * s);
+    R.add(J.pelvis, 4 * w - 6 * s, -12 * w + 16 * s, 3 * w - 5 * s);
+    R.add(J.thighL, -10 - 6 * w - 18 * s, 8, -8);
+    R.add(J.calfL, 15 + 10 * w + 20 * s, 0, 0);
+    R.add(J.thighR, -12 + 8 * w + 14 * s, -8, 9);
+    R.add(J.calfR, 17 + 8 * w + 8 * s, 0, 0);
+    R.add(J.waist, 7 * w - 10 * s, -12 * w + 14 * s, 4 * w - 5 * s);
+    R.add(J.spine1, 8 * w - 12 * s, -10 * w + 12 * s, 0);
+    R.add(J.chest, 9 * w - 14 * s, -12 * w + 14 * s, 4 * w - 6 * s);
+    R.add(J.clavR, 0, -8 * w + 12 * s, -14 * w + 8 * s);
+    R.add(J.head, -2 * w + 14 * s, 14 * w - 14 * s, 0);
+    R.add(J.upperR, upperX, -14 * w + 10 * s, upperZ);
+    R.add(J.foreR, foreX, 0, 0);
+    R.add(J.handR, handX, -16 - 58 * s, 6);
+    R.add(J.upperL, 14 + 40 * w - 42 * s, 8, 12 + 12 * w + 14 * s);
+    R.add(J.foreL, -26 - 20 * w + 12 * s, 0, 0);
+    return R;
+  }
+  // 第二刀：反手大跨步横扫重斩（低身左蓄力 → 凶猛向右上方甩开一整圆）
+  const up = smooth(p / 0.4),
+    hit = smooth((p - 0.4) / 0.26),
+    rec = smooth((p - 0.76) / 0.24),
+    w = up * (1 - hit),
+    s = hit * (1 - rec * 0.52);
+  R.move(J.root, 0, -0.05 - 0.08 * w - 0.05 * s, -0.06 * w + 0.18 * s);
+  R.add(J.pelvis, -6 * w + 4 * s, 16 * w - 18 * s, -5 * w + 5 * s);
+  R.add(J.thighL, -10 - 14 * w + 6 * s, 8, -8);
+  R.add(J.calfL, 16 + 18 * w + 6 * s, 0, 0);
+  R.add(J.thighR, -12 + 4 * w - 16 * s, -8, 9);
+  R.add(J.calfR, 18 + 8 * w + 20 * s, 0, 0);
+  R.add(J.waist, -8 * w + 6 * s, 14 * w - 16 * s, -5 * w + 6 * s);
+  R.add(J.spine1, -6 * w + 8 * s, 12 * w - 16 * s, 0);
+  R.add(J.chest, -6 * w + 10 * s, 14 * w - 18 * s, -5 * w + 6 * s);
+  R.add(J.clavR, 0, 12 * w - 14 * s, 8 * w - 16 * s);
+  R.add(J.head, 4 * w - 4 * s, -18 * w + 16 * s, 0);
+  R.add(J.upperR, 12 + 48 * w + 108 * s, 26 * w - 28 * s, -10 + 44 * w - 40 * s);
+  R.add(J.foreR, -24 - 28 * w + 14 * s, 0, 0);
+  R.add(J.handR, 14 - 32 * w - 44 * s, -18 - 44 * w + 56 * s, 6 - 18 * w + 20 * s);
+  R.add(J.upperL, 14 - 22 * w + 46 * s, 8, 12 - 6 * w + 24 * s);
+  R.add(J.foreL, -28 - 10 * w + 14 * s, 0, 0);
+  return R;
+}
+
+// ── 开大消耗火焰层数的致命一击：腾跃双手高举过顶 → 裂地断岳重砸 ──
+export function niumoExecPose(R, J, p) {
+  const up = smooth(p / 0.44),
+    hit = smooth((p - 0.44) / 0.2),
+    rec = smooth((p - 0.78) / 0.22),
+    w = up * (1 - hit),
+    s = hit * (1 - rec * 0.45),
+    leap = Math.sin(clamp01(p / 0.52) * Math.PI);
+  const upperX = 12 + 168 * w - 2 * s,
+    foreX = -22 - 28 * w + 12 * s,
+    tiltWant = lerp(lerp(16, -42, w), 136, s),
+    handX = 3 - tiltWant - (upperX + foreX);
+  // 蓄力时纵身微跃、下砸时深蹲猛扑狠压地面
+  R.move(J.root, 0, -0.05 + 0.26 * leap * (1 - hit * 0.85) - 0.16 * s, -0.1 * w + 0.26 * s);
+  R.add(J.pelvis, 10 * w - 12 * s, -6 * w + 10 * s, 0);
+  R.add(J.thighL, -10 - 18 * w - 24 * s, 8, -9);
+  R.add(J.calfL, 15 + 24 * w + 32 * s, 0, 0);
+  R.add(J.thighR, -12 - 14 * w + 18 * s, -8, 9);
+  R.add(J.calfR, 17 + 22 * w + 14 * s, 0, 0);
+  // 蓄力极度后仰蓄势咆哮，落剑整个人压下去砸裂地面
+  R.add(J.waist, 10 * w - 14 * s, -6 * w + 8 * s, 0);
+  R.add(J.spine1, 12 * w - 16 * s, -4 * w + 6 * s, 0);
+  R.add(J.chest, 15 * w - 20 * s, -6 * w + 10 * s, 0);
+  R.add(J.clavR, 0, 0, -18 * w + 10 * s);
+  R.add(J.clavL, 0, 0, 18 * w - 10 * s);
+  R.add(J.head, 16 * w + 10 * s, 0, 0);
+  // 蓄力阶段双臂齐举过头顶作双手巨剑处决势，劈下时右手砸穿地面、左手猛甩稳身
+  R.add(J.upperR, upperX, -8 * w + 8 * s, -10 - 6 * w + 18 * s);
+  R.add(J.foreR, foreX, 0, 0);
+  R.add(J.handR, handX, -14 - 52 * s, 6);
+  R.add(J.upperL, 16 + 152 * w - 46 * s, 10 * w, 12 + 12 * w + 24 * s);
+  R.add(J.foreL, -28 - 22 * w + 16 * s, 0, 0);
+  return R;
+}
+
+// ── 烈焰斩（0.3 秒蓄力前摇 → 直线垂直裂地重劈） ──
+export function niumoSlashPose(R, J, p) {
+  // cast_s1 总长 0.56s，前摇 0.30s 正好对应 p = 0.535 砸地瞬间
+  const up = smooth(p / 0.48),
+    hit = smooth((p - 0.48) / 0.14),
+    rec = smooth((p - 0.76) / 0.24),
+    w = up * (1 - hit),
+    s = hit * (1 - rec * 0.48);
+  const upperX = 12 + 162 * w + 2 * s,
+    foreX = -22 - 38 * w + 10 * s,
+    tiltWant = lerp(lerp(16, -36, w), 126, s),
+    handX = 3 - tiltWant - (upperX + foreX);
+  R.move(J.root, 0, -0.05 - 0.06 * w - 0.14 * s, -0.08 * w + 0.2 * s);
+  R.add(J.pelvis, 6 * w - 9 * s, -8 * w + 10 * s, 0);
+  R.add(J.thighL, -10 - 6 * w - 22 * s, 8, -8);
+  R.add(J.calfL, 15 + 12 * w + 28 * s, 0, 0);
+  R.add(J.thighR, -12 + 4 * w + 16 * s, -8, 9);
+  R.add(J.calfR, 17 + 10 * w + 12 * s, 0, 0);
+  R.add(J.waist, 8 * w - 12 * s, -8 * w + 8 * s, 0);
+  R.add(J.spine1, 9 * w - 13 * s, -6 * w + 6 * s, 0);
+  R.add(J.chest, 10 * w - 15 * s, -8 * w + 10 * s, 0);
+  R.add(J.clavR, 0, 0, -16 * w + 8 * s);
+  R.add(J.head, 6 * w + 12 * s, 6 * w - 6 * s, 0);
+  R.add(J.upperR, upperX, -6 * w + 6 * s, -10 - 10 * w + 16 * s);
+  R.add(J.foreR, foreX, 0, 0);
+  R.add(J.handR, handX, -14 - 46 * s, 6);
+  R.add(J.upperL, 16 + 52 * w - 36 * s, 8, 12 + 14 * w + 16 * s);
+  R.add(J.foreL, -28 - 18 * w + 10 * s, 0, 0);
+  return R;
+}
+
+// ── 烈焰行军（大剑立于胸前、双拳紧护剑身、无畏重步顶进喷火） ──
+export function niumoMarchPose(R, J, time, p) {
+  const k = smooth(p / 0.14),
+    stride = Math.sin(time * 5.8),
+    bob = Math.abs(Math.cos(time * 5.8)),
+    trem = Math.sin(time * 16) * 1.2;
+  R.move(J.root, 0, (-0.06 - 0.03 * (1 - bob)) * k, 0.08 * k);
+  R.add(J.pelvis, -5 * k, stride * 6 * k, -stride * 2.5 * k);
+  R.add(J.thighL, (-10 + stride * 26) * k, 6 * k, -7 * k);
+  R.add(J.calfL, (16 + Math.max(0, -stride) * 26) * k, 0, 0);
+  R.add(J.thighR, (-10 - stride * 26) * k, -6 * k, 7 * k);
+  R.add(J.calfR, (16 + Math.max(0, stride) * 26) * k, 0, 0);
+  R.add(J.waist, -4 * k, -stride * 3.5 * k, 0);
+  R.add(J.spine1, -3 * k, 0, 0);
+  R.add(J.chest, (-4 + trem * 0.6) * k, -stride * 2.5 * k, 0);
+  R.add(J.clavR, 0, 10 * k, 6 * k);
+  R.add(J.clavL, 0, -10 * k, -6 * k);
+  R.add(J.head, (6 + trem * 0.8) * k, 0, 0);
+  // 双臂向胸前合拢屈肘，双拳上下紧握并抵住胸前竖立的火红大剑，无畏前推喷火
+  R.add(J.upperR, (52 + trem * 0.6) * k, 24 * k, 32 * k);
+  R.add(J.foreR, -62 * k, 18 * k, 0);
+  R.add(J.handR, -10 * k, -12 * k, 6 * k);
+  R.add(J.upperL, (58 + trem * 0.6) * k, -24 * k, -32 * k);
+  R.add(J.foreL, -64 * k, -18 * k, 0);
+  R.add(J.handL, 8 * k, 14 * k, -8 * k);
+  return R;
+}
+
+// ── 烈焰牛魔变身咆哮：沉腰蓄势后昂首扩胸举剑怒吼 ──
+export function niumoUltPose(R, J, time, p) {
+  const k = smooth(p / 0.28),
+    b = Math.sin(time * 12) * 1.8;
+  R.move(J.root, 0, -0.09 * k, 0);
+  R.add(J.pelvis, 4 * k, 0, 0);
+  R.add(J.thighL, -16 * k, 10 * k, -10 * k);
+  R.add(J.calfL, 24 * k, 0, 0);
+  R.add(J.thighR, -16 * k, -10 * k, 10 * k);
+  R.add(J.calfR, 24 * k, 0, 0);
+  R.add(J.waist, 8 * k, 0, 0);
+  R.add(J.spine1, 10 * k + b * 0.5, 0, 0);
+  R.add(J.chest, 14 * k + b, 0, 0);
+  R.add(J.clavR, 0, 0, -14 * k);
+  R.add(J.clavL, 0, 0, 14 * k);
+  R.add(J.head, 18 * k + b, 0, 0);
+  R.add(J.upperR, 38 * k, -18 * k, -52 * k);
+  R.add(J.foreR, -26 * k, 0, 0);
+  R.add(J.handR, -16 * k, -12 * k, 0);
+  R.add(J.upperL, 28 * k, 18 * k, 52 * k);
+  R.add(J.foreL, -34 * k, 0, 0);
+  return R;
+}
+
 export { clamp01, smooth, lerp };

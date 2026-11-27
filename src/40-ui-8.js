@@ -766,7 +766,13 @@ const RG = Jn(`
 .is-hp.is-mid > .sf-hud__bar-fill { background: linear-gradient(180deg, #ffe7a6 0%, #f3bb48 38%, #c07e16 100%); }
 .is-hp.is-low > .sf-hud__bar-fill { background: linear-gradient(180deg, #ffb8a8 0%, #f0584f 38%, #a8222d 100%); }
 .is-mp > .sf-hud__bar-fill { background: linear-gradient(180deg, #a9d6ff 0%, #4da3ff 40%, #1e5fc4 100%); }
+.sf-hud__bar.is-charge { height: max(5px, 6u); display: none; }
+.sf-hud__bar.is-charge.is-show { display: block; }
+.is-charge > .sf-hud__bar-fill { background: linear-gradient(180deg, #fff1a8 0%, #f5c838 45%, #c78b0c 100%); transition: transform 0.08s linear; }
+.is-charge.is-full { box-shadow: inset 0 0 0 1px rgba(255, 165, 140, 0.7), 0 0 8u rgba(255, 58, 46, 0.72); }
+.is-charge.is-full > .sf-hud__bar-fill { background: linear-gradient(180deg, #ffb49e 0%, #ff3d30 45%, #b81212 100%); }
 .sf-hud__bar-shield { transform: translateX(calc(var(--p) * 100%)) scaleX(var(--s)); background: linear-gradient(180deg, #ffffff, #cfe2ff); transition: transform 0.12s linear; }
+.sf-hud__bar-gloom { transform: translateX(calc(var(--gl, 0) * 100%)) scaleX(var(--gw, 0)); background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 70%, #dce6f2 100%); box-shadow: inset 1px 0 0 rgba(12, 18, 34, 0.55); transition: transform 0.12s linear; }
 /* 每 1000 生命一道刻度：血厚的英雄一眼能看出来 */
 .sf-hud__bar-ticks { background: repeating-linear-gradient(90deg, rgba(3, 6, 16, 0) 0, rgba(3, 6, 16, 0) calc(var(--seg) - 1px), rgba(3, 6, 16, 0.6) calc(var(--seg) - 1px), rgba(3, 6, 16, 0.6) var(--seg)); }
 .sf-hud__bar-gloss { background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 48%, rgba(0, 0, 0, 0.16)); }
@@ -876,6 +882,7 @@ function IG(n) {
       "sf-hud__bar is-hp",
       z("i", "sf-hud__bar-trail"),
       z("i", "sf-hud__bar-fill"),
+      z("i", "sf-hud__bar-gloom"),
       z("i", "sf-hud__bar-shield"),
       z("i", "sf-hud__bar-ticks"),
       z("i", "sf-hud__bar-gloss"),
@@ -883,6 +890,7 @@ function IG(n) {
     ),
     m = z("span", "sf-hud__bar-text sf-num"),
     x = z("div", "sf-hud__bar is-mp", z("i", "sf-hud__bar-fill"), z("i", "sf-hud__bar-gloss"), m),
+    cbEl = z("div", "sf-hud__bar is-charge", z("i", "sf-hud__bar-fill"), z("i", "sf-hud__bar-gloss")),
     p = z("div", "sf-hud__xp", z("i"));
   (p.setAttribute("data-hud-hit", ""),
     i.push(
@@ -932,7 +940,7 @@ function IG(n) {
       return `<div class="sf-tip__title"><span>${ks(z0(s))}</span><span class="sf-tip__meta">属性</span></div><div style="display:grid;grid-template-columns:auto auto auto auto;gap:1px 10px;margin-top:4px">${Z.map(([ot, j]) => `<span style="color:var(--sf-c-text-3)">${ot}</span><b class="sf-num" style="color:var(--sf-c-text);text-align:right">${j}</b>`).join("")}</div><div style="margin-top:5px;font-size:var(--sf-fs-xs);color:var(--sf-c-text-3)">冷却缩减上限 ${J(CG)}；吸血只对普攻生效。</div>`;
     }),
   );
-  const k = z("div", "sf-hud__st-bars", v, u, x, p),
+  const k = z("div", "sf-hud__st-bars", v, u, x, cbEl, p),
     M = z("div", "sf-hud__st-items"),
     S = [];
   for (let N = 0; N < n.me.items.length; N++) {
@@ -965,6 +973,9 @@ function IG(n) {
   const I = br(u, "--p"),
     P = br(u, "--s"),
     F = br(x, "--p"),
+    Fcb = br(cbEl, "--p", 0.004),
+    cbShow = is(cbEl, "is-show"),
+    cbFull = is(cbEl, "is-full"),
     L = br(p, "--p", 0.005),
     B = Vn(f),
     G = Vn(h, (N) => `/ ${N}`),
@@ -1036,6 +1047,7 @@ function IG(n) {
   function ut(N) {
     C.length = 0;
     for (const J of N.buffs) {
+      if (!T3[J.id]) continue;
       let Z = !1;
       for (let ot = 0; ot < C.length; ot++)
         if (C[ot].id === J.id) {
@@ -1086,6 +1098,16 @@ function IG(n) {
         j = Math.max(1, Z.maxHp, J.hp + ot),
         at = J.alive ? Math.max(0, J.hp) : 0;
       (I(at / j), P(ot / j), B(Math.ceil(at)), G(Math.round(Z.maxHp)), q(Math.round(ot)));
+      let gs = 0;
+      for (let gi = 0; gi < J.buffs.length; gi++) {
+        if (J.buffs[gi].id === "paperboy_gloom") {
+          gs = J.buffs[gi].stacks;
+          break;
+        }
+      }
+      const gDmg = gs > 0 ? Math.min(at, Z.maxHp * gs * 0.01) : 0;
+      (u.style.setProperty("--gl", ((at - gDmg) / j).toFixed(4)),
+        u.style.setProperty("--gw", (gDmg / j).toFixed(4)));
       const Rt = at / Math.max(1, Z.maxHp);
       (H(Rt < 0.25), nt(Rt >= 0.25 && Rt < 0.5));
       const kt = Math.round(j);
@@ -1094,6 +1116,9 @@ function IG(n) {
         U = Math.floor(Math.max(0, J.mana));
       (F(V > 0 ? U / V : 0),
         (U !== tt || V !== it) && ((tt = U), (it = V), et(`${U} / ${V}`)),
+        J.chargeBar
+          ? (cbShow(!0), Fcb(Math.max(0, Math.min(1, J.chargeBar.ratio || 0))), cbFull(!!J.chargeBar.full))
+          : cbShow(!1),
         L(J.xpToNext > 0 ? Ef(J.xp / J.xpToNext) : 1),
         ct(J.level),
         T(Math.floor(J.gold)),
@@ -1993,14 +2018,16 @@ const ze = $a,
     },
     niumo: {
       s1: bi("niumo", "s1", {
-        roles: ["waveclear", "poke"],
+        roles: ["waveclear", "poke", "burst"],
         damage: Gi("physical", { ad: "adRatio" }),
+        lineWidth: 2.4,
+        delay: 0.3,
         duration: ze("niumo", "s1", "trailDur"),
       }),
       s2: bi("niumo", "s2", {
-        // 站定喷火：没有位移了，别让 AI 当突进用（会站着被白打）
-        roles: ["waveclear", "poke"],
-        damage: Gi("magic", { base: "sprayDmg", ad: "sprayAd" }),
+        // 直线前进喷火并叠满火焰层数：按多段喷火+灼烧折算真实威胁，不当位移突进用
+        roles: ["waveclear", "poke", "burst"],
+        damage: Gi("magic", { base: "sprayDmg", ad: "sprayAd", hits: 6 }),
         duration: ze("niumo", "s2", "duration"),
         delay: E0("niumo", "s2"),
         lock: 0,
@@ -2008,10 +2035,212 @@ const ze = $a,
         dodgeable: !0,
       }),
       ult: bi("niumo", "ult", {
-        roles: ["buff", "zone"],
-        damage: Gi("magic", { base: "perStack", ad: "adRatio" }),
+        roles: ["buff", "zone", "burst"],
+        damage: Gi("magic", { base: "perStack", ad: "adRatio", hits: 4 }),
         duration: ze("niumo", "ult", "duration"),
         immunity: "unstoppable",
+      }),
+    },
+    xuesong: {
+      s1: bi("xuesong", "s1", {
+        roles: ["zone", "poke"],
+        damage: Gi("magic", { ap: "apRatio" }),
+        delay: ze("xuesong", "s1", "digTime"),
+        duration: ze("xuesong", "s1", "pitDur"),
+        reach: Se.xuesong.skills.s1.recastCast.range,
+        aoeRadius: Se.xuesong.skills.s1.recastCast.radius,
+        dodgeable: !0,
+      }),
+      s2: bi("xuesong", "s2", {
+        roles: ["defense", "escape", "engage"],
+        mobility: {
+          kind: "leap",
+          distance: ze("xuesong", "s2", "leapRange"),
+          duration: ze("xuesong", "s2", "leapTime"),
+          wallBlocked: !1,
+          stopsAtHero: !1,
+          destination: "aim",
+        },
+        duration: ze("xuesong", "s2", "maxDur"),
+        selfBuffs: ["xuesong_pole", "shield"],
+        immunity: "untargetable",
+      }),
+      ult: bi("xuesong", "ult", {
+        roles: ["engage", "burst"],
+        damage: Gi("magic", { ap: "apRatio" }),
+        cc: [{ kind: "stun", duration: ze("xuesong", "ult", "stunDur"), value: 0 }],
+        duration: ze("xuesong", "ult", "holdDur"),
+        hitsNonHeroes: !1,
+      }),
+    },
+    stone: {
+      s1: bi("stone", "s1", {
+        roles: ["buff"],
+        duration: ze("stone", "s1", "maxDur"),
+        selfBuffs: ["stone_train"],
+      }),
+      s2: bi("stone", "s2", {
+        roles: ["control", "burst"],
+        damage: Gi("physical", { base: "throwDmg", ad: "adRatio" }),
+        cc: [
+          { kind: "slow", duration: ze("stone", "s2", "lockDur"), value: ze("stone", "s2", "slow") },
+          { kind: "knockup", duration: ze("stone", "s2", "knockup"), value: 0 },
+        ],
+        duration: ze("stone", "s2", "lockDur"),
+        aoeRadius: ze("stone", "s2", "landRadius"),
+      }),
+      ult: bi("stone", "ult", {
+        roles: ["engage", "defense", "burst"],
+        damage: Gi("physical", { ad: "adRatio" }),
+        cc: [{ kind: "slow", duration: ze("stone", "ult", "slowDur"), value: ze("stone", "ult", "slow") }],
+        mobility: {
+          kind: "leap",
+          distance: k1("stone", "ult"),
+          duration: ze("stone", "ult", "leapTime"),
+          wallBlocked: !1,
+          stopsAtHero: !1,
+          destination: "aim",
+        },
+        delay: ze("stone", "ult", "leapTime"),
+        lock: ze("stone", "ult", "leapTime"),
+        selfBuffs: ["dmg_reduction"],
+        immunity: "unstoppable",
+      }),
+    },
+    scallion: {
+      s1: bi("scallion", "s1", {
+        roles: ["poke", "burst"],
+        damage: Gi("physical", { ad: "adRatio" }),
+        lineWidth: 2.3,
+      }),
+      s2: bi("scallion", "s2", {
+        roles: ["buff"],
+        duration: ze("scallion", "s2", "duration"),
+        selfBuffs: ["scallion_boost"],
+      }),
+      ult: bi("scallion", "ult", {
+        roles: ["burst", "slow", "dash"],
+        damage: Gi("physical", { base: "tickDamage", ad: "adRatio" }),
+        cc: [{ kind: "slow", duration: ze("scallion", "ult", "slowDur"), value: ze("scallion", "ult", "slow") }],
+        mobility: {
+          kind: "blink",
+          distance: k1("scallion", "ult"),
+          duration: 0,
+          wallBlocked: !1,
+          stopsAtHero: !1,
+          destination: "aim",
+        },
+        duration: ze("scallion", "ult", "duration"),
+        selfBuffs: ["scallion_beam"],
+      }),
+    },
+    paperboy: {
+      s1: bi("paperboy", "s1", {
+        roles: ["defense", "burst"],
+        duration: ze("paperboy", "s1", "duration"),
+        selfBuffs: ["shield", "paperboy_suona"],
+      }),
+      s2: bi("paperboy", "s2", {
+        roles: ["buff", "defense"],
+        duration: ze("paperboy", "s2", "hasteDur"),
+        selfBuffs: ["haste"],
+      }),
+      ult: bi("paperboy", "ult", {
+        roles: ["defense", "buff"],
+        duration: ze("paperboy", "ult", "duration"),
+        selfBuffs: ["paperboy_bind"],
+      }),
+    },
+    maggot: {
+      s1: bi("maggot", "s1", {
+        roles: ["burst", "control"],
+        duration: ze("maggot", "s1", "duration"),
+        selfBuffs: ["maggot_spray"],
+      }),
+      s2: bi("maggot", "s2", {
+        roles: ["buff", "control"],
+        selfBuffs: ["maggot_vacuum"],
+      }),
+      ult: bi("maggot", "ult", {
+        roles: ["burst", "control"],
+        damage: "magic",
+        delay: ze("maggot", "ult", "delay"),
+        slow: ze("maggot", "ult", "slow"),
+        slowDur: ze("maggot", "ult", "slowDur"),
+      }),
+    },
+    horseman: {
+      s1: bi("horseman", "s1", {
+        roles: ["burst", "control"],
+        damage: "physical",
+        stun: ze("horseman", "s1", "stunDur"),
+      }),
+      s2: bi("horseman", "s2", {
+        roles: ["control", "defense", "buff"],
+        damage: "magic",
+        selfBuffs: ["horseman_neigh_guard"],
+      }),
+      ult: bi("horseman", "ult", {
+        roles: ["buff", "dash"],
+        duration: ze("horseman", "ult", "duration"),
+        selfBuffs: ["horseman_trample", "haste"],
+      }),
+    },
+    cow: {
+      s1: bi("cow", "s1", {
+        roles: ["buff", "defense"],
+        duration: ze("cow", "s1", "maxDur"),
+        selfBuffs: ["cow_squat", "cow_gains"],
+      }),
+      s2: bi("cow", "s2", {
+        roles: ["dash", "burst"],
+        damage: "physical",
+      }),
+      ult: bi("cow", "ult", {
+        roles: ["buff", "control", "burst"],
+        damage: "physical",
+        duration: ze("cow", "ult", "giantDur"),
+        stun: ze("cow", "ult", "stompStun"),
+        selfBuffs: ["cow_giant", "cow_stomp_ready"],
+      }),
+    },
+    monkey: {
+      s1: bi("monkey", "s1", {
+        roles: ["control", "poke"],
+        damage: Gi("magic", { base: "peelDmg", ad: "adRatio" }),
+        aoeRadius: 1.1,
+      }),
+      s2: bi("monkey", "s2", {
+        roles: ["control", "burst"],
+        damage: Gi("physical", { base: "damage", ad: "adRatio" }),
+        lineWidth: 1.55,
+        aoeRadius: 1.55,
+      }),
+      ult: bi("monkey", "ult", {
+        roles: ["buff", "burst", "control"],
+        damage: Gi("physical", { base: "bonusDmg", ad: "adRatio", hits: 3 }),
+        duration: ze("monkey", "ult", "duration"),
+        selfBuffs: ["monkey_ult"],
+      }),
+    },
+    slime: {
+      s1: bi("slime", "s1", {
+        roles: ["control", "damage"],
+        damage: Gi("magic", { base: "tickDmg", ap: "apRatio", hits: 8 }),
+        duration: ze("slime", "s1", "duration"),
+      }),
+      s2: bi("slime", "s2", {
+        roles: ["dash", "control", "burst"],
+        damage: Gi("magic", { base: "damage", ap: "apRatio" }),
+        lineWidth: 2.2,
+        dashSpeed: 24,
+      }),
+      ult: bi("slime", "ult", {
+        roles: ["defense", "control", "zone"],
+        damage: Gi("magic", { base: "tickDmg", ap: "apRatio", hits: 10 }),
+        aoeRadius: 2.95,
+        duration: ze("slime", "ult", "duration"),
+        selfBuffs: ["slime_puddle"],
       }),
     },
   };
@@ -2026,6 +2255,15 @@ const OG = {
     yeque: ["s2", "s1", "ult"],
     mushroom: ["ult", "s1", "s2"],
     niumo: ["ult", "s1", "s2"],
+    xuesong: ["ult", "s1", "s2"],
+    stone: ["ult", "s2", "s1"],
+    scallion: ["s2", "s1", "ult"],
+    paperboy: ["s1", "s2", "ult"],
+    maggot: ["ult", "s1", "s2"],
+    horseman: ["ult", "s1", "s2"],
+    cow: ["ult", "s2", "s1"],
+    monkey: ["ult", "s2", "s1"],
+    slime: ["ult", "s2", "s1"],
   },
   BG = {
     telegraph: "incoming",
@@ -2036,6 +2274,22 @@ const OG = {
     fengling_ult_rain: "damage",
     panyue_ult_fissure: "slow",
     panyue_s2_aura: "none",
+    xuesong_pit: "zone",
+    xuesong_dig_mound: "none",
+    xuesong_pole_ring: "none",
+    stone_train_ring: "none",
+    scallion_ult_beam: "none",
+    paperboy_effigy: "none",
+    paperboy_suona_ring: "damage",
+    maggot_poop_s: "none",
+    maggot_poop_m: "none",
+    maggot_poop_l: "none",
+    horseman_kick_zone: "none",
+    cow_squat_ring: "none",
+    cow_giant_aura: "none",
+    monkey_peel: "none",
+    monkey_pillar: "zone",
+    slime_puddle_zone: "damage",
     fountain_zone: "none",
   };
 
@@ -2086,8 +2340,20 @@ function S1(n, t) {
   const e = n.stats,
     s = n.kind === "hero" ? Se[n.heroId].basicAttack.damageType : "physical",
     i = t.kind === "tower" || t.kind === "core" ? 0 : e.critChance;
-  let a = e.ad * (1 + i * (e.critDamage - 1)) * Lk(t);
-  return (n.kind === "hero" && (a *= Dk(n, t)), Ik(a, s, n, t));
+  let a = e.ad * (1 + i * (e.critDamage - 1)) * Lk(t),
+    extra = 0;
+  if (n.kind === "hero") {
+    a *= Dk(n, t);
+    if (n.heroId === "niumo") {
+      const pv = Se.niumo.passive.values;
+      a *= pv.dmgMin + Math.min(1, Math.max(0, (e.maxHp - pv.hpBase) / pv.hpSpan)) * (pv.dmgMax - pv.dmgMin);
+      if (t.kind !== "tower" && t.kind !== "core" && n.skills.ult.level > 0 && n.buffs.some((b) => b.id === "niumo_ult")) {
+        const fb = t.buffs.find((b) => b.id === "niumo_flame");
+        if (fb && fb.stacks > 0) extra = Nm(n, "ult", t, fb.stacks);
+      }
+    }
+  }
+  return Ik(a, s, n, t) + extra;
 }
 
 function t6(n, t, e = OG[n.heroId]) {

@@ -5,7 +5,7 @@
 // dist/kart/<id>.bin —— 一个量化过的自描述数据块，由 47-kart-decode.js 解回来。
 //
 // 为什么是运行时 fetch 而不是打进 bundle：
-//   21 个角色加起来 60MB，全打进来会让首页从 6.5MB 涨到 66MB。只有玩家选的那个
+//   28 个角色加起来 97MB，全打进来会让首页从 7MB 涨到 100MB 以上。只有玩家选的那个
 //   角色需要加载，所以进对局前按需拉一次（0.7~6.5MB），加载完再登记进模型表。
 //
 // 骨架约定：原版模型的"零件 = three 的 node"，节点层级直接当骨架用，
@@ -13,8 +13,9 @@
 import { Ls } from './26-core-5.js';
 import { Vs } from './05-three.js';
 import { K } from './25-render-9.js';
-import { registerModel } from './31-render-10.js';
+import { registerModel, registerHeroAlias } from './31-render-10.js';
 import { kartDecode } from './47-kart-decode.js';
+import { getSpecialPose } from './47-kart-poses.js';
 
 // id 就是 .bin 文件名；name 用项目里的原名（"原版"就该原样）
 // kit = 借哪个英雄的技能包（技能逻辑按 heroId 注册，这里只换外观）
@@ -22,30 +23,47 @@ export const KART_SPECS = [
   { id: 'frog', name: '丑黄蛤蟆', kit: 'yeque' },
   { id: 'mannequin', name: '跑步假人', kit: 'chijin' },
   { id: 'boxman', name: '多脚纸箱', kit: 'panyue' },
-  { id: 'scallion', name: '葱仔仔', kit: 'fengling' },
-  { id: 'maggot', name: '白色大肥蛆', kit: 'mushroom' },
-  { id: 'slime', name: '黄色史莱姆', kit: 'mushroom' },
-  { id: 'monkey', name: '轮椅大圣', kit: 'chijin' },
+  { id: 'scallion', name: '葱仔仔', kit: 'scallion', native: true },
+  { id: 'maggot', name: '活蛆', kit: 'maggot', native: true },
+  { id: 'monkey', name: '轮椅大圣', kit: 'monkey', native: true },
   { id: 'mushroom', name: '杯杯菇', kit: 'mushroom' },
-  { id: 'cow', name: '大脚牛', kit: 'niumo' },
-  { id: 'stone', name: '小肥石', kit: 'panyue' },
+  { id: 'cow', name: '大脚牛', kit: 'cow', native: true },
+  { id: 'stone', name: '小肥石', kit: 'stone', native: true },
   { id: 'kangaroo', name: '袋鼠单王', kit: 'yeque' },
   { id: 'magnet', name: '智慧磁铁', kit: 'xingli' },
-  { id: 'boxtree', name: '雪松老师', kit: 'xingli' },
+  { id: 'boxtree', name: '雪松老师', kit: 'xuesong', native: true },
   { id: 'bighead', name: '漂浮大脑袋', kit: 'fengling' },
   { id: 'girlhead', name: '漂浮女脑袋', kit: 'fengling' },
-  { id: 'horseman', name: '半马人', kit: 'chijin' },
+  { id: 'horseman', name: '半马人', kit: 'horseman', native: true },
   { id: 'skeleton', name: '暴走骷髅', kit: 'yeque' },
   { id: 'coconut', name: '椰子保龄球', kit: 'panyue' },
-  { id: 'paperboy', name: '纸札弟', kit: 'xingli' },
+  { id: 'paperboy', name: '纸札人', kit: 'paperboy', native: true },
   { id: 'panda', name: '熊猫警察', kit: 'niumo' },
   { id: 'bear', name: '狗熊警官', kit: 'niumo' },
+  // 编辑器第二批新增（模型/头像由同一个 glbExporter + kartportrait 流程产出）
+  { id: 'doll', name: '娃娃组装员', kit: 'chijin' },
+  { id: 'blackcat', name: '心狠手辣喵', kit: 'yeque' },
+  { id: 'stagbeetle', name: '巨锹神', kit: 'panyue' },
+  { id: 'dungbeetle', name: '史太郎', kit: 'stone' },
+  { id: 'tiandongbao', name: '天冬宝', kit: 'xuesong' },
+  { id: 'wooddoll', name: '木娃娃', kit: 'paperboy' },
+  { id: 'thunderdragon', name: '电光独龙', kit: 'mushroom' },
 ];
 
 export const KART_IDS = KART_SPECS.map((s) => s.id);
 const BY_ID = new Map(KART_SPECS.map((s) => [s.id, s]));
+const NATIVE_KART = new Map();
+for (const s of KART_SPECS) {
+  if (s.native) {
+    NATIVE_KART.set(s.kit, s.id);
+    registerHeroAlias(s.kit, s.id);
+  }
+}
 export function kartSpec(id) {
   return (id && BY_ID.get(id)) || null;
+}
+export function heroKartId(heroId) {
+  return (heroId && NATIVE_KART.get(heroId)) || null;
 }
 
 const DATA = new Map();
@@ -199,6 +217,37 @@ function kartDef(id) {
       }
     }
 
+  // 大脚牛原版 85 号胸腔零件是一个上宽下窄、顶面平切的倒扣圆桶，会盖住胸肌并切穿肩膀；
+  // 在骨骼局部空间把桶口柔和收窄压圆，顺滑衔接 84 号腰部和 86 号圆肩胸廓，让胸肌与双臂露出来。
+  if (id === 'cow') {
+    for (let v = 0; v < mesh.pos.length / 3; v++) {
+      if (mesh.skin[v * 3] !== 85) continue;
+      let x = mesh.pos[v * 3],
+        y = mesh.pos[v * 3 + 1],
+        z = mesh.pos[v * 3 + 2];
+      const u = Math.max(0, Math.min(1, (y + 0.165) / 0.33)),
+        arc = Math.sin(u * Math.PI),
+        sx = 0.9 * (1 - u) + 0.66 * u + 0.08 * arc,
+        sz = 0.88 * (1 - u) + 0.64 * u + 0.07 * arc;
+      x *= sx;
+      z *= sz;
+      if (u > 0.82) {
+        const rad = Math.min(1, Math.hypot(x, z) / 0.34);
+        y -= 0.028 * ((u - 0.82) / 0.18) * rad * rad;
+      }
+      mesh.pos[v * 3] = x;
+      mesh.pos[v * 3 + 1] = y;
+      mesh.pos[v * 3 + 2] = z;
+      const nx = x * 2.3,
+        ny = y * 1.5,
+        nz = z * 2.6,
+        nl = Math.hypot(nx, ny, nz) || 1;
+      mesh.nor[v * 3] = nx / nl;
+      mesh.nor[v * 3 + 1] = ny / nl;
+      mesh.nor[v * 3 + 2] = nz / nl;
+    }
+  }
+
   const t = new Ls();
   t.crease = 42;
   t.bone(rootJ);
@@ -264,6 +313,21 @@ function kartDef(id) {
     // 用 p 的话会被状态的时长拉伸，动作就不是原速了。超过片长就停在末帧。
     hold = (R, clip, t) => clip && playClip(R, clip, Math.min(clip.dur || 1, Math.max(0, t)), false, N);
 
+  const specialPose = getSpecialPose(id),
+    resetPose = (R, t) => {
+      if (A.idle) playClip(R, A.idle, t ?? 0, t != null, N);
+      else {
+        R.t.fill(0);
+        R.s.fill(1);
+        for (let j = 0; j < N; j++) {
+          R.q[j * 4] = 0;
+          R.q[j * 4 + 1] = 0;
+          R.q[j * 4 + 2] = 0;
+          R.q[j * 4 + 3] = 1;
+        }
+      }
+    };
+
   const animate = (R, I, out) => {
     const st = I.anim;
     out.glow = 1;
@@ -274,6 +338,7 @@ function kartDef(id) {
       if (c) playClip(R, c, Math.min(c.dur || 1, I.t), false, N);
       I.clip = 'die';
       out.glow = Math.max(0.15, 1 - I.t * 1.2);
+      specialPose?.always?.(R, I, out, rig);
       return;
     }
     // 滞空：被打飞腾空那段，循环着放
@@ -281,12 +346,14 @@ function kartDef(id) {
       loop(R, pick('air', 'spin', 'stun'), I.time);
       I.clip = 'air';
       out.glow = 1.2;
+      specialPose?.always?.(R, I, out, rig);
       return;
     }
     // 眩晕 / 受击
     if (st === 'stunned' || st === 'hit' || st === 'hurt') {
       loop(R, pick('stun', 'spin'), I.time);
       I.clip = 'stun';
+      specialPose?.always?.(R, I, out, rig);
       return;
     }
     // 滚动 / 失控
@@ -294,36 +361,65 @@ function kartDef(id) {
       loop(R, pick('spin', 'accelL', 'walk'), I.time);
       I.clip = 'spin';
       out.glow = 2.2;
+      specialPose?.always?.(R, I, out, rig);
       return;
     }
+    // 角色专属全身动作覆盖（如小肥石做俯卧撑练功）
+    if (specialPose?.override?.(R, I, out, rig, resetPose)) {
+      specialPose.post?.(R, I, out, rig);
+      return;
+    }
+    const finish = () => {
+      specialPose?.post?.(R, I, out, rig);
+    };
     if (st === 'attack') {
-      once(R, pick('attack', 'attackL', 'attackR'), I.p);
+      const c = specialPose?.pickAttackClip?.(I, pick) || pick('attack', 'attackL', 'attackR');
+      once(R, c, I.p);
       out.glow = 1 + 1.2 * Math.sin(Math.min(1, I.p) * Math.PI);
+      finish();
       return;
     }
     if (st === 'attack2') {
-      once(R, pick('attackR', 'attack', 'attackL'), I.p);
+      const c = specialPose?.pickAttackClip?.(I, pick) || pick('attackR', 'attack', 'attackL');
+      once(R, c, I.p);
       out.glow = 1 + 1.2 * Math.sin(Math.min(1, I.p) * Math.PI);
+      finish();
       return;
     }
     if (st === 'cast_s1') {
       once(R, pick('attackL', 'attack', 'attackR'), I.p);
       out.glow = 1 + 1.6 * Math.sin(Math.min(1, I.p) * Math.PI);
+      finish();
       return;
     }
     if (st === 'cast_s2') {
       once(R, pick('attackR', 'attack', 'attackL'), I.p);
       out.glow = 1 + 1.6 * Math.sin(Math.min(1, I.p) * Math.PI);
+      finish();
+      return;
+    }
+    if (I.mode & 4) {
+      loop(R, pick('cheer', 'idle'), I.time);
+      out.glow = 1.65 + 0.35 * Math.sin(I.time * 4);
+      finish();
+      return;
+    }
+    if (st === 'leap') {
+      once(R, pick('air', 'attackR', 'attack'), I.p);
+      out.glow = 1.6 + 0.8 * Math.min(1, I.p);
+      finish();
       return;
     }
     if (st === 'cast_ult') {
       once(R, pick('chant', 'attack'), I.p);
       out.glow = 1 + 2 * Math.sin(Math.min(1, I.p) * Math.PI);
+      finish();
       return;
     }
     if (st === 'channel') {
       loop(R, pick('chant', 'attack'), I.time);
       out.glow = 1.5 + 0.4 * Math.sin(I.time * 6);
+      finish();
       return;
     }
     // 表情：嘲讽 / 笑话 / 跳舞 / 庆祝。引擎给的是真实秒数，按原速放完停在末帧
@@ -331,6 +427,7 @@ function kartDef(id) {
       hold(R, pick(st.slice(6), 'taunt', 'joke'), I.t);
       I.clip = st;
       out.glow = 1.3;
+      finish();
       return;
     }
     // 胜利庆祝：循环跳到对局结束
@@ -338,22 +435,26 @@ function kartDef(id) {
       loop(R, pick('cheer', 'dance'), I.time);
       I.clip = 'cheer';
       out.glow = 1.6;
+      finish();
       return;
     }
     // 复活：复活那一下的起身动作，放完接待机
     if (st === 'revive') {
       once(R, pick('revive', 'cheer'), I.p);
       I.clip = 'revive';
+      finish();
       return;
     }
     if (st === 'stop') {
       once(R, pick('stop', 'stun'), I.p);
       I.clip = 'stop';
+      finish();
       return;
     }
     if (st === 'turnL' || st === 'turnR') {
       once(R, pick(st, 'stop', 'walk'), I.p);
       I.clip = st;
+      finish();
       return;
     }
     if (st === 'move' || st === 'run') {
@@ -364,6 +465,7 @@ function kartDef(id) {
           c = pick(k, 'stop', 'walk');
         if (c && I.turnT < Math.min(c.dur || 1, 0.45)) {
           (hold(R, c, I.turnT), (I.clip = k));
+          finish();
           return;
         }
       }
@@ -377,6 +479,7 @@ function kartDef(id) {
               : 'accelS',
         c = pick(k, 'accelS', 'walk');
       (loop(R, c, I.time), (I.clip = k));
+      finish();
       return;
     }
     // 急停：从走到停的那一下播一次，播完（或超过片长）就回待机。
@@ -385,13 +488,21 @@ function kartDef(id) {
       const c = pick('stop', 'stun');
       if (c && I.stopT < Math.min(c.dur || 1, 0.6)) {
         (hold(R, c, I.stopT), (I.clip = 'stop'));
+        finish();
         return;
       }
+    }
+    if (I.mode & 16) {
+      loop(R, pick('chant', 'taunt', 'idle'), I.time);
+      out.glow = 1.45 + 0.35 * Math.sin(I.time * 6);
+      finish();
+      return;
     }
     // 待机：新包已经带上真正的待机片段（3.6 秒环视），直接循环。
     // 万一老包没有 idle，这里就停在绑定姿势。
     if (A.idle) loop(R, A.idle, I.time + (I.seed ?? 0) * 3);
     out.glow = 1 + 0.1 * Math.sin(I.time * 2);
+    finish();
   };
 
   // 挂点：attach 的偏移在关节局部空间（会被关节世界缩放放大），根骨局部空间 = 模型空间，
@@ -485,9 +596,9 @@ export function setPlayerSkin(id) {
 export function getPlayerSkin() {
   return playerSkin;
 }
-// heroId + 是不是玩家 → 展示用的外观 id（有皮就是皮 id）
+// heroId + 是不是玩家 → 展示用的外观 id（玩家手选皮优先，其次原生原版模型）
 export function lookId(heroId, isPlayer) {
-  return (isPlayer && playerSkin) || heroId;
+  return (isPlayer && playerSkin) || heroKartId(heroId) || heroId;
 }
 
 const PAL = new Map();

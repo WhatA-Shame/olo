@@ -55,6 +55,13 @@ const IDS = [
   'paperboy',
   'panda',
   'bear',
+  'doll',
+  'blackcat',
+  'stagbeetle',
+  'dungbeetle',
+  'tiandongbao',
+  'wooddoll',
+  'thunderdragon',
 ];
 
 const up = async (url) => {

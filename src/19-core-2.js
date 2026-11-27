@@ -869,6 +869,7 @@ const VP = (n, t, e) => {
     chijin_s2_dash: jP,
     chijin_ult_start: qP,
     chijin_ult_tick: XP,
+    niumo_s1_warn: NQWarn,
     niumo_s1_slash: NQ,
     niumo_s2_spray: NS,
     niumo_ult_start: NU,
@@ -879,7 +880,53 @@ const VP = (n, t, e) => {
 
 const nc = ws.niumo,
   nWarm = Lt(0xffe6b0); // 火焰芯的暖白：贴花颜色必须是 Lt() 对象，写裸十六进制会变成 NaN → 整块面片渲染成黑方块
-// 牛魔·烈焰斩：一条窄长的火焰斩击（刀光 + 地面焦痕 + 火舌 + 火星）
+// 牛魔·烈焰斩 0.3 秒前摇预警：清晰的直线矩形蓄力带 + 剑刃聚火
+function NQWarn(n, t) {
+  const s = t.pos.x,
+    i = t.pos.y,
+    a = t.dir?.x ?? 1,
+    o = t.dir?.y ?? 0,
+    r = Math.atan2(o, a),
+    l = t.radius ?? 7,
+    w = t.width ?? 2.4,
+    halfL = l * 0.5,
+    hw = w * 0.5,
+    aspect = Math.max(0.14, hw / Math.max(0.5, halfL)),
+    dur = Math.max(0.18, (t.duration ?? 0.3) + 0.03),
+    cx = s + a * halfL,
+    cz = i + o * halfL,
+    px = -o,
+    py = a,
+    d = n.rnd;
+  (n.decals
+    .add(Xt.rect, cx, cz, halfL, dur)
+    .rot(r, aspect)
+    .color(nc.glow, 1.45, 0.72)
+    .under(nc.dark, 0.42),
+    n.decals
+      .add(Xt.rect, cx, cz, halfL * 0.96, dur)
+      .rot(r, aspect * 0.32)
+      .color(nc.hot, 1.9, 0.8),
+    n.light(s + a * 1.1, i + o * 1.1, 1.5, nc.hot, 5.5, 4.2, dur));
+  const sp = n.particles.use(Mt.ember).tint(nWarm, nc.hot);
+  for (let u = 0; u < 10; u++) {
+    const dist = d.range(0.4, l),
+      lat = d.signed() * hw * 0.85;
+    sp.spawn(
+      s + a * dist + px * lat,
+      0.16,
+      i + o * dist + py * lat,
+      0,
+      d.range(1.0, 2.2),
+      0,
+      dur * 0.95,
+      0.14,
+      0.04,
+    );
+  }
+}
+
+// 牛魔·烈焰斩：真·直线矩形火焰重劈（矩形烈焰裂痕 + 居中刀光气带 + 沿直线腾起的火舌火星）
 function NQ(n, t, e) {
   const s = t.pos.x,
     i = t.pos.y,
@@ -887,69 +934,70 @@ function NQ(n, t, e) {
     o = t.dir?.y ?? 0,
     r = Math.atan2(o, a),
     l = t.radius ?? 7,
-    c = Math.min(1.1, Math.max(0.5, t.angle ?? 0.55)),
-    f = c * 0.5,
+    w = t.width ?? 2.4,
+    halfL = l * 0.5,
+    hw = w * 0.5,
+    aspect = Math.max(0.14, hw / Math.max(0.5, halfL)),
+    cx = s + a * halfL,
+    cz = i + o * halfL,
+    px = -o,
+    py = a,
     d = n.rnd;
   (n.decals
-    .add(Xt.cone, s, i, l, 0.6)
-    .rot(r)
-    .params(f, 0.28)
-    .color(nc.glow, 2.8)
-    .under(nc.dark, 0.6),
+    .add(Xt.rect, cx, cz, halfL, 0.65)
+    .rot(r, aspect)
+    .color(nc.glow, 2.8, 0.94)
+    .under(nc.dark, 0.62),
     n.decals
-      .add(Xt.cone, s, i, l * 0.96, 0.5)
-      .rot(r)
-      .params(f * 0.72, 0.12)
-      .color(nc.hot, 2.4),
+      .add(Xt.rect, cx, cz, halfL * 0.96, 0.52)
+      .rot(r, aspect * 0.62)
+      .color(nc.hot, 2.5, 0.9),
     n.decals
-      .add(Xt.cone, s, i, l * 0.8, 0.34)
-      .rot(r)
-      .params(f * 0.4, 0.06)
-      .color(nWarm, 2.2));
-  // 刀光：沿直线甩出去的一道弧
-  wx(n, s, 1, i, r, l, 0.34, c, 0.06, !0);
+      .add(Xt.rect, cx, cz, halfL * 0.9, 0.36)
+      .rot(r, aspect * 0.24)
+      .color(nWarm, 2.4, 0.95),
+    n.ribbons.trace($n.energy, s, 0.72, i, s + a * l, 0.72, i + o * l, 0.34, nWarm, nc.hot),
+    n.ribbons.trace($n.thin, s + px * hw * 0.72, 0.42, i + py * hw * 0.72, s + a * l + px * hw * 0.72, 0.42, i + o * l + py * hw * 0.72, 0.28, nc.hot, nc.glow),
+    n.ribbons.trace($n.thin, s - px * hw * 0.72, 0.42, i - py * hw * 0.72, s + a * l - px * hw * 0.72, 0.42, i + o * l - py * hw * 0.72, 0.28, nc.hot, nc.glow));
   const h = n.particles.use(Mt.streak).tint(W.white, nc.hot);
-  for (let u = 0; u < 18; u++) {
-    const m = d.next(),
-      x = r + (d.next() - 0.5) * c,
-      p = l * (0.15 + 0.85 * m);
+  for (let u = 0; u < 20; u++) {
+    const dist = l * (0.08 + 0.9 * d.next()),
+      lat = d.signed() * hw * 0.9;
     h.spawn(
-      s + Math.cos(x) * p,
-      d.range(0.4, 1.5),
-      i + Math.sin(x) * p,
-      Math.cos(r) * 7,
-      d.signed() * 0.5,
-      Math.sin(r) * 7,
-      0.16,
-      0.1,
+      s + a * dist + px * lat,
+      d.range(0.35, 1.35),
+      i + o * dist + py * lat,
+      a * 7.5,
+      d.range(0.2, 1.4),
+      o * 7.5,
+      0.18,
+      0.11,
       0.03,
-      m * 0.1,
+      d.next() * 0.08,
     );
   }
-  // 火舌：沿斩击线升起，让这一下不只是贴地一块饼
   const g = n.particles.use(Mt.plume).tint(nc.hot, nc.deep);
-  for (let u = 0; u < 7; u++) {
-    const m = d.next(),
-      x = r + (d.next() - 0.5) * c * 0.7,
-      p = l * (0.2 + 0.7 * m);
+  for (let u = 0; u < 10; u++) {
+    const dist = l * (0.12 + 0.82 * d.next()),
+      lat = d.signed() * hw * 0.75;
     g.spawn(
-      s + Math.cos(x) * p,
+      s + a * dist + px * lat,
       0.3,
-      i + Math.sin(x) * p,
+      i + o * dist + py * lat,
       d.signed() * 0.4,
-      d.range(1.6, 2.8),
+      d.range(1.8, 3.2),
       d.signed() * 0.4,
-      d.range(0.9, 1.5),
-      0.42,
-      0.3,
+      d.range(0.95, 1.55),
+      0.44,
+      0.32,
     );
   }
   (n.particles
     .use(Mt.hitFlash)
     .tint(W.white, nc.glow)
-    .spawn(s + a * 1.4, 1.1, i + o * 1.4, 0, 0, 0, le.flashSkill, 1, 1.8),
-    n.light(s + a * l * 0.5, i + o * l * 0.5, 1.6, nc.glow, 8, l * 1.5, 0.32),
-    n.shake(bo(t, e) ? le.shakeSkill : 0.06, s, i));
+    .spawn(s + a * 1.4, 1.1, i + o * 1.4, 0, 0, 0, le.flashSkill, 1, 1.9),
+    n.light(cx, cz, 1.6, nc.glow, 8.5, l * 1.5, 0.34),
+    n.shake(bo(t, e) ? le.shakeSkill : 0.08, s, i));
 }
 
 // 牛魔·烈焰行军：2 秒 24 段。第一段铺一条长火柱本体，后面每段只往上添火星和火舌
@@ -1005,39 +1053,53 @@ function NS(n, t, e) {
   n.light(s + a * 2.4, i + o * 2.4, 1.2, nc.glow, 4.5, 3.4, 0.12);
 }
 
-// 牛魔·引爆火焰层数：小范围爆燃
+// 牛魔·引爆火焰层数：开大后消耗层数的致命爆燃冲击
 function NB(n, t, e) {
   const s = t.pos.x,
     i = t.pos.y,
+    st = Math.min(7, Math.max(1, t.stacks ?? 1)),
+    sc = 1 + (st - 1) * 0.12,
     a = n.rnd;
-  (n.decals.add(Xt.zone, s, i, 1.5, 0.4).params(0, 0).color(nc.hot, 2).under(nc.dark, 0.3),
-    n.light(s, i, 1.2, nc.glow, 6, 2.5, 0.25));
-  const o = n.particles.use(Mt.ember).tint(nc.hot, nc.deep);
-  for (let r = 0; r < 10; r++) {
+  (n.decals.add(Xt.zone, s, i, 1.65 * sc, 0.46).params(0, 0).color(nc.hot, 2.3).under(nc.dark, 0.35),
+    n.decals.add(Xt.ring, s, i, 2.1 * sc, 0.44).params(1, 0.16).color(nWarm, 2.6).under(nc.glow, 0.4),
+    n.particles.use(Mt.hitFlash).tint(W.white, nc.hot).spawn(s, 1.0, i, 0, 0, 0, le.flashSkill * 1.05, 1, 1.9 * sc),
+    n.light(s, i, 1.4, nc.glow, 8.5 * sc, 3.6 * sc, 0.3),
+    n.shake(bo(t, e) ? Math.min(0.42, 0.16 + st * 0.035) : 0.09, s, i));
+  const o = n.particles.use(Mt.ember).tint(nWarm, nc.deep),
+    pl = n.particles.use(Mt.plume).tint(nc.hot, nc.deep),
+    cnt = Math.round(12 + st * 3);
+  for (let r = 0; r < cnt; r++) {
     const l = a.next() * oe,
-      c = a.range(0.1, 1);
+      c = a.range(0.12, 1.15 * sc);
     o.spawn(
       s + Math.cos(l) * c,
-      a.range(0.2, 1.2),
+      a.range(0.2, 1.3),
       i + Math.sin(l) * c,
-      Math.cos(l) * 2,
-      a.range(1.5, 3.5),
-      Math.sin(l) * 2,
-      a.range(0.3, 0.6),
-      0.25,
+      Math.cos(l) * a.range(2.2, 4.8),
+      a.range(2.0, 4.6),
+      Math.sin(l) * a.range(2.2, 4.8),
+      a.range(0.32, 0.62),
+      0.26,
       0.08,
     );
   }
+  for (let r = 0; r < 6; r++) {
+    const l = a.next() * oe,
+      c = a.range(0.1, 0.8 * sc);
+    pl.spawn(s + Math.cos(l) * c, 0.3, i + Math.sin(l) * c, Math.cos(l) * 1.4, a.range(2.2, 4.2), Math.sin(l) * 1.4, a.range(0.7, 1.2), 0.46, 0.25);
+  }
 }
 
-// 牛魔·烈焰牛魔：变身爆发 + 10 秒常驻火环 + 身上一直冒火
+const _nmUltAura = new WeakMap();
+
+// 牛魔·烈焰牛魔：变身爆发 + 常驻火环 + 身上一直冒火（击杀刷新时自动顶替旧光环，不叠重复特效）
 function NU(n, t, e) {
   const s = t.pos.x,
     i = t.pos.y,
     a = n.rnd,
     uid = t.unitId,
     dur = t.duration ?? 10;
-  // 起手：三圈不同速度的地面光环 + 八芒符文阵，读起来是「变身了」
+  // 起手：三圈不同速度的地面光环 + 八芒符文阵，读起来是「变身了/续上了」
   (n.decals.add(Xt.zone, s, i, 3.7, 0.8).params(0, 0).color(nc.glow, 2.4).under(nc.dark, 0.5),
     n.decals.add(Xt.swirl, s, i, 3.2, 0.95).params(2, -3).color(nc.hot, 1.9).under(nc.dark, 0.25),
     n.decals.add(Xt.rune, s, i, 3.1, 0.75).params(8, -1.6).color(nc.hot, 1.6).under(nc.dark, 0.2),
@@ -1066,28 +1128,37 @@ function NU(n, t, e) {
   (n.light(s, i, 2.2, nc.glow, 13, 6, 0.6), n.shake(bo(t, e) ? le.shakeSkill : 0.16, s, i));
 
   if (!(uid >= 0) || !n.anchor(uid)) return;
-  // 10 秒常驻：贴地跟随的火池 + 火环 + 缓慢反卷的旋涡，变身期间一直亮着
+  let byUid = _nmUltAura.get(n);
+  if (!byUid) ((byUid = new Map()), _nmUltAura.set(n, byUid));
+  const prev = byUid.get(uid);
+  prev && prev.stop();
+
   const pool = n.decals.hold(Xt.glow, 0.2);
   n.decals.at(pool).follow(uid).radius(2.6).params(1.1, 0).color(nc.glow, 1.6, 0.5).under(nc.deep, 0.12);
   const ring = n.decals.hold(Xt.zone, 0.18);
-  // 环用暖白而不是纯橙红：橙红的大圆圈在俯视下像敌方的技能预警圈
   n.decals.at(ring).follow(uid).radius(2.05).params(0, 0).color(nc.hot, 2.4).under(nc.dark, 0.45);
   const sw = n.decals.hold(Xt.swirl, 0.18);
   n.decals.at(sw).follow(uid).radius(1.85).params(3, -1.5).color(nc.hot, 1.9).under(nc.dark, 0.2);
-  n.after(dur, () => {
-    (n.decals.release(pool, 0.5), n.decals.release(ring, 0.5), n.decals.release(sw, 0.5));
-  });
+
+  let active = !0;
+  const stop = () => {
+    if (!active) return;
+    active = !1;
+    byUid.get(uid)?.stop === stop && byUid.delete(uid);
+    (n.decals.release(pool, 0.4), n.decals.release(ring, 0.4), n.decals.release(sw, 0.4));
+  };
+  byUid.set(uid, { stop });
+  n.after(dur, stop);
+
   // 身上持续冒火：每 0.15 秒一簇，跟着英雄走——「变身」期间整个人是烧着的
   const spark = n.particles.use(Mt.ember).tint(nc.hot, nc.deep);
   let left = dur,
     n2 = 0;
   const burn = () => {
-    if (!n.anchor(uid)) return;
-    // n.a 是所有锚点查询共用的临时对象，先抄成本地值再用：中间任何一次 n.light / anchor 都可能把它改掉
+    if (!active || !n.anchor(uid)) return;
     const cx = n.a.x,
       cy = n.a.y,
       cz = n.a.z;
-    // 每 0.3 秒补一盏跟随的火光：地面被照亮，才会读成「他身上在烧」
     n2++ % 2 === 0 && n.light(cx, cz, 1.3, nc.glow, 4.5, 3.4, 0.4);
     for (let k = 0; k < 4; k++) {
       const l = a.next() * oe,
@@ -1115,7 +1186,7 @@ function NU(n, t, e) {
         0.05,
       );
     }
-    ((left -= 0.15), left > 1e-6 && n.after(0.15, burn));
+    ((left -= 0.15), left > 1e-6 && active && n.after(0.15, burn));
   };
   burn();
 }

@@ -18,8 +18,8 @@ import { Qc, sh, ux } from './15-render-4.js';
 import { II, PI } from './16-render-5.js';
 import { Nz, cz } from './21-core-4.js';
 import { mU } from './25-render-9.js';
-import { Ac, D8, I8, P8, Vx, a4, cB, fB, hB, lB, mB, of, pB, qc, uB, v3 } from './31-render-10.js';
-import { ART_H, ART_W, KART_IDS, kartSpec, kartReady, kartPalette, preloadKart } from './47-kart.js';
+import { Ac, D8, I8, P8, Vx, Zw, a4, cB, fB, hB, lB, mB, of, pB, qc, uB, v3 } from './31-render-10.js';
+import { ART_H, ART_W, KART_IDS, heroKartId, kartSpec, kartReady, kartPalette, preloadKart } from './47-kart.js';
 import { KART_ART } from './47-kart-art.js';
 
 function gB(n, t) {
@@ -91,26 +91,31 @@ function gB(n, t) {
     y = 0,
     v = performance.now();
   const _ = (b, sk) => {
-      // 原版角色模型是运行时拉的，还没到就先用它借的那个英雄顶上；
-      // 拉完再进来一次（不然 qc() 会对着没登记的 key 抛"未知模型"）。
-      if (sk && !kartReady(sk)) {
-        preloadKart(sk).then((ok) => {
-          ok && f === b && curSkin === sk && _(b, sk);
+      // 原版角色模型是运行时拉的，还没到就先异步拉取，拉完再进来一次
+      const req = sk || heroKartId(b);
+      if (req && !kartReady(req)) {
+        preloadKart(req).then((ok) => {
+          ok && f === b && curSkin === (sk || null) && _(b, sk);
         });
       }
-      const us = sk && kartReady(sk) ? sk : null;
-      ((f = b),
-        (o = qc(Vx(us || b))),
-        (r = new of(o, 0.37)),
-        l && (l.removeFrom(s.scene), l.dispose()),
-        (l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map, mapSRGB: o.mapSRGB, specular: o.specular }, `preview:${us || b}`)),
-        l.addTo(s.scene));
+      const us = req && kartReady(req) ? req : null,
+        mid = us || b;
+      f = b;
       const w = new Ut(Se[b].palette.glow);
       (s.rim.color.copy(w).lerp(new Ut(1, 1, 1), 0.35),
         a && (s.scene.remove(a), a.geometry.dispose()),
         (a = new Sn(pB(w, b === "panyue" ? 1.5 : 1.12), i)),
         (a.receiveShadow = !0),
-        s.scene.add(a),
+        s.scene.add(a));
+      if (!Zw(Vx(mid))) {
+        (l && (l.removeFrom(s.scene), l.dispose(), (l = null)), (o = null), (r = null));
+        return;
+      }
+      ((o = qc(Vx(mid))),
+        (r = new of(o, 0.37)),
+        l && (l.removeFrom(s.scene), l.dispose()),
+        (l = new ux(o.geometry, o.rig.count, 1, { outline: 1.6, map: o.map, mapSRGB: o.mapSRGB, specular: o.specular }, `preview:${mid}`)),
+        l.addTo(s.scene),
         (d = qAnim),
         (h = 0),
         // 一次性动作必须给个时长：原来 u 一直是 0，?anim=attack 第一帧就被判成"播完了"退回 idle
@@ -119,6 +124,7 @@ function gB(n, t) {
         k());
     },
     k = () => {
+      if (!o) return;
       const b = e.domElement.width / Math.max(1, e.domElement.height),
         w = uB(f, o),
         T = s.camera,
@@ -256,7 +262,7 @@ let dh = null,
 const MAP_HEROES = ["chijin", "niumo", "mushroom"];
 // 立绘要预热的全部 id：正式英雄 + 还没烘成图片的占位皮角色
 // （烘好的那批走 KART_ART 直接给图片路径，不用 3D 渲染，也别排进队列）
-const ALL_PORTRAITS = kr.concat(KART_IDS).filter((e) => !KART_ART[e]);
+const ALL_PORTRAITS = kr.concat(KART_IDS).filter((e) => !KART_ART[heroKartId(e) || e]);
 // dist/index.html 下是 images/…；modular/index.html 开发入口要往上一级
 const ART_BASE = /\/modular\//.test(location.pathname) ? "../" : "";
 let mapFixTries = 0;
@@ -314,6 +320,7 @@ function fitPortrait(canvas, aimX, aimY, dist) {
 }
 
 function N8(n, w0, h0) {
+  n = heroKartId(n) || n;
   // 占位皮：n 可能是角色皮 id（frog/boxman…），配色/取景/底板要退回它借的那个英雄
   const sp = kartSpec(n),
     base = sp?.kit ?? n,
@@ -437,7 +444,7 @@ function F8() {
 
 function xB(n) {
   // 离线烘好的立绘（卡丁车那批角色）：直接给图片路径，不用在运行时拉模型再渲染
-  const art = KART_ART[n];
+  const art = KART_ART[heroKartId(n) || n];
   if (art) return ART_BASE + art;
   const t = j1.get(n);
   if (t !== void 0) return t;

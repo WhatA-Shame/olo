@@ -25,6 +25,7 @@ import { PU, UU } from './27-core-6.js';
 import { $U, KU, ZU, jU } from './28-core-7.js';
 import { JU, QU, fO, lO } from './29-core-8.js';
 import { $x, CO, L8, LO, MO, W1, ao, jc, pO, qi, qw, rs, xa, yO } from './30-core-9.js';
+import { bSlime } from './45-slime-mesh.js';
 
 // 调试用：?dbg=1 时记下每个单位这一帧喂给动画的输入（见下面 ANIM_DBG.set）。
 // 不开就不建这张表，正常对局零开销。herocheck 靠它验"动作档位"这类只在渲染侧成立的逻辑。
@@ -814,6 +815,7 @@ const Gx = {
     "hero:mushroom": bBg,
     "hero:niumo": bNm,
     "hero:niumo2": bNm2,
+    "hero:slime": bSlime,
     "minion:melee": KU,
     "minion:ranged": ZU,
     "minion:siege": QU,
@@ -851,6 +853,11 @@ const Vx = (n) => `hero:${n}`,
 
 function Qw() {
   return Object.keys(Gx);
+}
+
+const HERO_ALIAS = Object.create(null);
+function registerHeroAlias(heroId, modelId) {
+  HERO_ALIAS[heroId] = modelId;
 }
 
 // 外部原版模型（.kart 那批）是运行时按需 fetch 的，加载完再登记进来。
@@ -1250,7 +1257,7 @@ function nB(n) {
         ? `hero:${n.skin}`
         : n.heroId === "niumo" && n.buffs && n.buffs.some((b) => b.id === "niumo_ult")
           ? "hero:niumo2"
-          : Vx(n.heroId);
+          : Vx(HERO_ALIAS[n.heroId] || n.heroId);
       // 场上可能同时有多个牛魔（玩家 + AI），钩子按单位 id 分开记，
       // 否则后渲染的那个会把前一个的值覆盖掉，测试读到的永远是 AI 的普通形态。
       n.heroId === "niumo" && ((globalThis.__niumoKey ??= {})[n.id] = k);
@@ -1301,8 +1308,10 @@ function aB(n) {
 }
 
 function oB(n) {
-  return n.startsWith("hero:")
-    ? 2
+  return n === "hero:horseman"
+    ? 12
+    : n.startsWith("hero:")
+      ? 2
     : n === "minion:melee"
       ? 24
       : n.startsWith("minion:")
@@ -1335,6 +1344,7 @@ function lB(n) {
     a = new Map(),
     o = [],
     r = [],
+    ghosts = [],
     l = new GO(320),
     c = new jO(16),
     f = Math.hypot(as.x, as.z) || 1,
@@ -1516,7 +1526,7 @@ function lB(n) {
     };
   ct(n.frame.state);
   const rt = () => {
-      (e.clear(), (i.length = 0), (r.length = 0), (k = !1), (M = !0));
+      (e.clear(), (i.length = 0), (r.length = 0), (ghosts.length = 0), (k = !1), (M = !0));
     },
     mt = () => {
       const D = n.camera;
@@ -1653,8 +1663,7 @@ function lB(n) {
         const ft = D.def.spawnDur ?? 0;
         (D.spawnT >= ft || U < D.spawnT || !Q.alive) && (D.spawnT = -1);
       }
-      if (
-        ((O.spawnT = D.spawnT),
+      ((O.spawnT = D.spawnT),
         Q.kind === "monster"
           ? (Y && (D.special = D.variant % 3 === 0),
             D.special && Q.anim === "attack" && (O.mode |= 1),
@@ -1666,26 +1675,113 @@ function lB(n) {
               ? ((D.shield = Math.min(1, D.shield + $.dt * 2.5)), (D.shieldBreak = -1))
               : D.shield > 0 &&
                 ((D.shieldBreak = Math.max(0, D.shieldBreak) + $.dt / tB),
-                D.shieldBreak >= 1 && ((D.shield = 0), (D.shieldBreak = -1)))),
-        Q.kind === "hero")
-      ) {
-        for (let ft = 0; ft < Q.buffs.length; ft++) {
-          const _t = Q.buffs[ft];
+                D.shieldBreak >= 1 && ((D.shield = 0), (D.shieldBreak = -1)))));
+      let xsPole = !1,
+        xsLifted = !1,
+        xsDigP = 0;
+      D.grabId = -1;
+      let cowGiant = !1,
+        mkEatP = 0,
+        slPuddle = !1,
+        slChargeP = 0;
+      for (let ft = 0; ft < Q.buffs.length; ft++) {
+        const _t = Q.buffs[ft];
+        _t.id === "xuesong_lifted" && (xsLifted = !0);
+        if (Q.kind === "hero") {
           Y &&
           ((_t.id === "panyue_passive" && _t.stacks >= 2) ||
             _t.id === "fengling_crit" ||
-            _t.id === "chijin_ember")
+            _t.id === "chijin_ember" ||
+            _t.id === "stone_passive" ||
+            _t.id === "scallion_boost" ||
+            _t.id === "paperboy_effigy_ready" ||
+            _t.id === "maggot_aura" ||
+            _t.id === "horseman_charge" ||
+            (_t.id === "niumo_ult" &&
+              (((Q.h?._nmExecUntil ?? 0) > V) ||
+                !!e.get(Q.targetId)?.buffs?.some((bf) => bf.id === "niumo_flame" && bf.stacks > 0))))
             ? (D.special = !0)
-            : _t.id === "panyue_bulwark" && (O.mode |= 2);
+            : _t.id === "panyue_bulwark"
+              ? (O.mode |= 2)
+              : _t.id === "xuesong_pole"
+                ? ((O.mode |= 4), (xsPole = !0))
+                : _t.id === "xuesong_scoop"
+                  ? (O.mode |= 8)
+                  : _t.id === "xuesong_dig"
+                    ? ((O.mode |= 4096),
+                      (xsDigP = Math.max(0, Math.min(1, 1 - _t.timeLeft / Math.max(0.1, _t.duration)))))
+                    : _t.id === "xuesong_sand"
+                      ? (O.mode |= 8192)
+                      : _t.id === "stone_train"
+                        ? (O.mode |= 16)
+                        : _t.id === "stone_tether"
+                          ? ((O.mode |= 32), (D.grabId = _t.value ?? -1))
+                          : _t.id === "stone_corpse"
+                            ? (O.mode |= 64)
+                            : _t.id === "scallion_beam"
+                              ? (O.mode |= 128)
+                              : _t.id === "scallion_glide" && _t.stacks >= 40
+                                ? (O.mode |= 256)
+                                : _t.id === "paperboy_suona"
+                                  ? (O.mode |= 512)
+                                  : _t.id === "maggot_spray"
+                                    ? (O.mode |= 1024)
+                                    : _t.id === "maggot_vacuum"
+                                      ? (O.mode |= 2048)
+                                      : _t.id === "horseman_kick_charge"
+                                        ? (O.mode |= 16384)
+                                        : _t.id === "horseman_trample"
+                                          ? (O.mode |= 32768)
+                                          : _t.id === "horseman_neigh_guard"
+                                            ? (O.mode |= 65536)
+                                            : _t.id === "horseman_dashing"
+                                              ? (O.mode |= 131072)
+                                              : _t.id === "cow_giant"
+                                                ? ((O.mode |= 262144), (cowGiant = !0))
+                                                : _t.id === "cow_squat"
+                                                  ? (O.mode |= 524288)
+                                                  : _t.id === "cow_flykick"
+                                                    ? (O.mode |= 1048576)
+                                                    : _t.id === "cow_stride"
+                                                      ? (O.mode |= 2097152)
+                                                      : _t.id === "cow_exhaust"
+                                                        ? (O.mode |= 4194304)
+                                                        : _t.id === "niumo_march" && (O.mode |= 8388608);
+          _t.id === "monkey_ult" && ((O.mode |= 16777216), Y && (D.special = !0));
+          _t.id === "monkey_stick_out" && (O.mode |= 33554432);
+          _t.id === "monkey_eating" &&
+            ((O.mode |= 67108864), (mkEatP = Math.max(0, Math.min(1, 1 - _t.timeLeft / Math.max(0.1, _t.duration)))));
+          _t.id === "slime_puddle" && ((O.mode |= 134217728), (slPuddle = !0));
+          _t.id === "slime_ball_charge" &&
+            ((O.mode |= 268435456), (slChargeP = Math.max(0, Math.min(1, (_t.duration - _t.timeLeft) / Math.max(0.1, _t.duration)))));
+          _t.id === "slime_ball_dash" && (O.mode |= 268435456);
+          _t.id === "slime_wall_bounce" && (O.mode |= 536870912);
+          _t.id === "slime_cling" && (O.mode |= 1073741824);
         }
-        D.special && Q.anim === "attack" && (O.mode |= 1);
       }
-      ((D.mode = O.mode),
-        Q.anim === "leap"
-          ? (D.lift = 4 * 3.4 * O.p * (1 - O.p))
-          : Q.anim === "airborne"
-            ? (D.lift = 4 * Math.min(2.2, Math.max(0.8, Q.animDur * 1.7)) * O.p * (1 - O.p))
-            : (D.lift = 0));
+      Q.kind === "hero" && D.special && Q.anim === "attack" && (O.mode |= 1);
+      xsLifted && (O.anim = "airborne");
+      const dtPole = Math.min(0.1, Math.max(0.001, $.dt || 0.016));
+      D.poleT = xsPole ? Math.min(1, (D.poleT ?? 0) + dtPole / 0.38) : Math.max(0, (D.poleT ?? 0) - dtPole / 0.22);
+      D.giantT = cowGiant ? Math.min(1, (D.giantT ?? 0) + dtPole / 0.35) : Math.max(0, (D.giantT ?? 0) - dtPole / 0.35);
+      D.slPuddleT = slPuddle ? Math.min(1, (D.slPuddleT ?? 0) + dtPole / 0.24) : Math.max(0, (D.slPuddleT ?? 0) - dtPole / 0.28);
+      const poleEase = 1 - Math.pow(1 - D.poleT, 3);
+      ((O.digP = xsDigP),
+        (O.poleP = poleEase),
+        (O.stickBonus = Q.heroId === "monkey" ? (Q.h?.monkeyStickBonus ?? 0) : 0),
+        (O.eatP = mkEatP),
+        (O.slimePuddleT = D.slPuddleT),
+        (O.slimeChargeP = slChargeP),
+        (D.mode = O.mode),
+        D.poleT > 0.001
+          ? (D.lift = 2.65 * poleEase)
+          : xsLifted
+            ? (D.lift = 2.45)
+            : Q.anim === "leap"
+              ? (D.lift = 4 * 3.4 * O.p * (1 - O.p))
+              : Q.anim === "airborne"
+                ? (D.lift = 4 * Math.min(2.2, Math.max(0.8, Q.animDur * 1.7)) * O.p * (1 - O.p))
+                : (D.lift = 0));
     },
     st = (D) => {
       ((D.dying = 0), (D.alive = !1), D.kind === "tower" && D.team !== 2 && et(D.x, D.z, D.team, 0));
@@ -1716,6 +1812,21 @@ function lB(n) {
       // ?dbg=1 时把 puppet 的输入对象本身挂到表上。动作档位（走/小加速/中加速/行走）是纯渲染逻辑，
       // 从 state 里看不出来，herocheck 就靠这张表验。存的是活对象，读的时候拿到的就是当前帧的值。
       if (ANIM_DBG) ((ot.modelKey = D.def && D.def.key), ANIM_DBG.set(D.unitId, ot));
+      if (D.grabId >= 0) {
+        const gtgt = e.get(D.grabId);
+        if (gtgt && gtgt.alive) {
+          const sc = Math.max(0.01, D.scale),
+            cy = Math.cos(D.yaw),
+            sy = Math.sin(D.yaw),
+            dx = gtgt.x - D.x,
+            dy = gtgt.y + gtgt.lift + Math.min(1.5, Math.max(0.85, gtgt.height * 0.45)) - (D.y + D.lift),
+            dz = gtgt.z - D.z;
+          ((ot.grabOn = !0),
+            (ot.grabX = (cy * dx - sy * dz) / sc),
+            (ot.grabY = dy / sc),
+            (ot.grabZ = (sy * dx + cy * dz) / sc));
+        } else ot.grabOn = !1;
+      } else ot.grabOn = !1;
       ((ot.time = g),
         (ot.stride = D.stride),
         (ot.speed = D.speed),
@@ -1737,7 +1848,7 @@ function lB(n) {
           D.y + D.lift,
           D.z,
           D.yaw,
-          D.scale,
+          D.scale * (1 + 0.42 * (D.giantT ?? 0)),
         ));
       const j = D.look,
         at = D.puppet.output;
@@ -1771,7 +1882,38 @@ function lB(n) {
         const lt = D.deathDur - D.dying;
         lt < 0.4 && (j.opacity = Math.max(0, D.opacity * (lt / 0.4)));
       }
-      if ((D.batch.push(D.puppet.skeleton, j), y++, D.shield > 0 && D.team !== 2 && D.dying < 0)) {
+      if ((D.batch.push(D.puppet.skeleton, j), y++, (D.mode & 131072) && D.alive && D.dying < 0)) {
+        D.ghostAcc = (D.ghostAcc ?? 0.04) + $;
+        if (D.ghostAcc >= 0.032) {
+          D.ghostAcc = 0;
+          const packed = new Float32Array(D.batch.bones * 16);
+          D.puppet.skeleton.pack(packed, 0);
+          const gl = sh();
+          gl.body.copy(j.body);
+          gl.team.copy(j.team);
+          gl.tint.setHex(0xff381c);
+          gl.tintAmount = 0.86;
+          gl.xrayAmount = 0;
+          ghosts.push({
+            batch: D.batch,
+            skel: {
+              pack(out, off) {
+                out.set(packed, off);
+              },
+            },
+            look: gl,
+            age: 0,
+            dur: 0.34,
+            x: D.x,
+            z: D.z,
+            radius: D.radius,
+            height: D.height,
+          });
+        }
+      } else {
+        D.ghostAcc = 0.04;
+      }
+      if (D.shield > 0 && D.team !== 2 && D.dying < 0) {
         const lt = Math.max(0, D.shieldBreak);
         D.kind === "core"
           ? c.push(D.x, 0.95, D.z, 3.05, 5.4, 16, R.shield[D.team], D.shield * D.opacity, lt)
@@ -1885,6 +2027,25 @@ function lB(n) {
             (N.look.glow = N.puppet.output.glow),
             N.batch.push(N.puppet.skeleton, N.look),
             y++);
+        }
+        for (let ut = ghosts.length - 1; ut >= 0; ut--) {
+          const G = ghosts[ut];
+          G.age += D.dt;
+          if (G.age >= G.dur) {
+            ghosts.splice(ut, 1);
+            continue;
+          }
+          if (!nt(G.x, G.z, G.radius, G.height)) continue;
+          const f = G.age / G.dur,
+            rem = 1 - f;
+          G.look.opacity = 0.68 * rem * Math.sqrt(rem);
+          G.look.glow = 2.6 * (0.55 + 0.45 * rem);
+          G.look.rim = 0.9 * rem;
+          G.look.tint.setRGB(1.0, 0.22 + 0.42 * f, 0.1 + 0.08 * f);
+          G.look.tintAmount = 0.88;
+          G.look.xrayAmount = 0;
+          G.batch.push(G.skel, G.look);
+          y++;
         }
         if (S) {
           n.rig.getFocus(w);
@@ -2023,6 +2184,15 @@ const cB = {
     yeque: { cast_s1: ["dash", 0.45], cast_s2: ["cast_s2", 0.8], cast_ult: ["cast_ult", 1] },
     mushroom: { cast_s1: ["spin", 1.6], cast_s2: ["cast_s2", 0.9], cast_ult: ["cast_ult", 1.2] },
     niumo: { cast_s1: ["cast_s1", 0.9], cast_s2: ["dash", 2], cast_ult: ["cast_ult", 1.2] },
+    xuesong: { cast_s1: ["channel", 1.1], cast_s2: ["leap", 0.7], cast_ult: ["cast_ult", 0.9] },
+    stone: { cast_s1: ["channel", 1.2], cast_s2: ["cast_s2", 0.9], cast_ult: ["leap", 0.95] },
+    scallion: { cast_s1: ["cast_s1", 0.75], cast_s2: ["cast_s2", 0.75], cast_ult: ["channel", 1.4] },
+    paperboy: { cast_s1: ["cast_s1", 0.9], cast_s2: ["cast_s2", 0.8], cast_ult: ["cast_ult", 0.9] },
+    maggot: { cast_s1: ["cast_s1", 0.85], cast_s2: ["cast_s2", 0.75], cast_ult: ["cast_ult", 0.85] },
+    horseman: { cast_s1: ["cast_s1", 0.5], cast_s2: ["cast_s2", 0.75], cast_ult: ["cast_ult", 0.65] },
+    cow: { cast_s1: ["channel", 1.1], cast_s2: ["leap", 0.65], cast_ult: ["cast_ult", 0.75] },
+    monkey: { cast_s1: ["cast_s1", 0.45], cast_s2: ["cast_s2", 0.55], cast_ult: ["cast_ult", 0.6] },
+    slime: { cast_s1: ["cast_s1", 0.4], cast_s2: ["dash", 0.6], cast_ult: ["cast_ult", 0.65] },
   },
   Ac = { side: 0.07, top: 0.06, bottom: 0.12 },
   a4 = { top: 3.2, halfW: 1.2 },
@@ -2034,6 +2204,15 @@ const cB = {
     yeque: { drop: 0.24, dist: 2.7, yaw: -22, x: 0, anim: "attack", p: 0.17, variant: 0 },
     mushroom: { drop: 0.12, dist: 3.2, yaw: 0, x: 0 },
     niumo: { drop: 0.24, dist: 3, yaw: -12, x: -0.06 },
+    xuesong: { drop: 0.25, dist: 3.15, yaw: -16, x: 0.04 },
+    stone: { drop: 0.2, dist: 3.1, yaw: -16, x: 0 },
+    scallion: { drop: 0.22, dist: 3.05, yaw: -18, x: 0 },
+    paperboy: { drop: 0.24, dist: 3.05, yaw: -14, x: 0 },
+    maggot: { drop: 0.18, dist: 3.0, yaw: -14, x: 0 },
+    horseman: { drop: 0.24, dist: 3.35, yaw: -16, x: 0 },
+    cow: { drop: 0.22, dist: 3.3, yaw: -14, x: 0 },
+    monkey: { drop: 0.22, dist: 3.35, yaw: -16, x: 0 },
+    slime: { drop: 0.14, dist: 2.75, yaw: -12, x: 0 },
   },
   o4 = new Map(),
   r4 = new Float32Array(512);
@@ -2089,11 +2268,21 @@ const v3 = {
     fengling: [0.25, 0.8],
     yeque: [0.25, 0.8],
     mushroom: [0, 0],
+    xuesong: [-0.32, 0.52],
+    stone: [-0.28, 0.45],
+    scallion: [0.15, 0.65],
+    paperboy: [0.2, 0.72],
+    maggot: [0.1, 0.45],
+    horseman: [-0.36, 0.48],
+    cow: [-0.34, 0.46],
+    monkey: [-0.36, 0.48],
+    slime: [0, 0.25],
   },
   hB = 48;
 
 function uB(n, t) {
-  const e = o4.get(n);
+  const ck = `${n}|${t.key}`,
+    e = o4.get(ck);
   if (e) return e;
   const s = { minX: 1 / 0, maxX: -1 / 0, minY: 0, maxY: -1 / 0, maxZ: -1 / 0 },
     i = { minX: 1 / 0, maxX: -1 / 0, minY: 0, maxY: -1 / 0, maxZ: -1 / 0 },
@@ -2123,7 +2312,7 @@ function uB(n, t) {
       maxY: Math.max(s.maxY, Math.min(i.maxY, s.maxY * 1.12)),
       maxZ: s.maxZ,
     };
-  return (o4.set(n, d), d);
+  return (o4.set(ck, d), d);
 }
 
 function I8(n) {
@@ -2236,4 +2425,4 @@ function mB(n, t) {
     }
   );
 }
-export { of, qc, Vx, lB, cB, Ac, a4, fB, v3, hB, uB, I8, P8, pB, D8, mB, registerModel };
+export { of, qc, Zw, Vx, lB, cB, Ac, a4, fB, v3, hB, uB, I8, P8, pB, D8, mB, registerModel, registerHeroAlias };

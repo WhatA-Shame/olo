@@ -1035,11 +1035,25 @@ const ET = {
     fengling: "atk_fengling_draw",
     yeque: "atk_yeque_swing",
     mushroom: "atk_mushroom_swing",
+    xuesong: "atk_xuesong_swing",
+    stone: "atk_stone_swing",
+    scallion: "atk_scallion_launch",
+    paperboy: "atk_paperboy_launch",
+    maggot: "atk_maggot_launch",
+    horseman: "atk_horseman_swing",
+    cow: "atk_cow_swing",
+    monkey: "atk_panyue_swing",
+    slime: "atk_slime_swing",
   },
-  AT = { panyue: "atk_panyue_hit", chijin: "atk_chijin_hit", yeque: "atk_yeque_hit", mushroom: "atk_mushroom_hit" },
+  AT = { panyue: "atk_panyue_hit", chijin: "atk_chijin_hit", yeque: "atk_yeque_hit", mushroom: "atk_mushroom_hit", xuesong: "atk_xuesong_hit", stone: "atk_stone_hit", scallion: "atk_scallion_hit", paperboy: "atk_paperboy_hit", maggot: "atk_maggot_hit", horseman: "atk_horseman_hit", cow: "atk_cow_hit", monkey: "atk_chijin_hit", slime: "atk_slime_hit" },
   RT = {
     xingli_basic: "atk_xingli_launch",
     fengling_basic: "atk_fengling_launch",
+    scallion_basic: "atk_scallion_launch",
+    paperboy_basic: "atk_paperboy_launch",
+    paperboy_crane: "cast_paperboy_s2",
+    maggot_basic: "atk_maggot_launch",
+    maggot_basic_gold: "atk_maggot_launch",
     xingli_s1: "xingli_s1_fly",
     fengling_s1: "fengling_s1_fly",
     yeque_s2: "yeque_s2_fly",
@@ -1052,6 +1066,11 @@ const ET = {
   CT = {
     xingli_basic: "atk_xingli_hit",
     fengling_basic: "atk_fengling_hit",
+    scallion_basic: "atk_scallion_hit",
+    paperboy_basic: "atk_paperboy_hit",
+    paperboy_crane: "fx_paperboy_crane_hit",
+    maggot_basic: "atk_maggot_hit",
+    maggot_basic_gold: "atk_maggot_hit",
     xingli_s1: "xingli_s1_hit",
     fengling_s1: "fengling_s1_hit",
     yeque_s2: "yeque_s2_hit",
@@ -1334,7 +1353,9 @@ class DT {
         if (i.team !== 0 || !i.alive) continue;
         const a =
           i.kind === "hero"
-            ? ui.hero
+            ? i.buffs && i.buffs.some((b) => b.id === "xuesong_pole")
+              ? 26
+              : ui.hero
             : i.kind === "minion"
               ? ui.minion
               : i.kind === "tower"

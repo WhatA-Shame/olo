@@ -802,6 +802,771 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
       },
       { loud: -12, len: 0.9, gap: 0.1, prio: 2, rev: 0.2 },
     ),
+    atk_xuesong_swing: At(
+      "英雄普攻",
+      "雪松老师·挥铁锹",
+      (n) => {
+        (Ti(n, 0, 0.26, 0.42, 180, 920, 340, 1.2, "brown"),
+          n.osc({ w: "triangle", f: 160, f1: 72, a: 0.01, d: 0.2, g: 0.26 }),
+          n.ring(1420, [1, 1.48, 2.1], { t: 0.04, a: 0.002, d: 0.16, g: 0.08 }));
+      },
+      { loud: -22, len: 0.46, gap: 0.12, rev: 0.1 },
+    ),
+    atk_xuesong_hit: At(
+      "英雄普攻",
+      "雪松老师·铁锹敲人",
+      (n) => {
+        const t = n.drive(2.2);
+        (n.osc({ w: "sine", f: 150, f1: 58, a: 0.002, d: 0.22, g: 0.55, to: t }),
+          n.ring(1180, [1, 1.62, 2.38], { a: 0.001, d: 0.26, g: 0.24 }),
+          n.noise({ flt: "bandpass", fc: 1400, q: 1.2, a: 0.001, d: 0.09, g: 0.45, to: t }));
+      },
+      { loud: -16, len: 0.45, gap: 0.08, rev: 0.16 },
+    ),
+    cast_xuesong_s1: At(
+      "技能施放",
+      "雪松老师·挖土",
+      (n) => {
+        (n.noise({ k: "brown", flt: "bandpass", fc: 620, fc1: 300, q: 0.9, a: 0.02, d: 0.36, g: 0.45 }),
+          n.ring(980, [1, 1.5], { t: 0.02, a: 0.002, d: 0.14, g: 0.12 }));
+      },
+      { loud: -22, len: 0.5, gap: 0.1, poly: 2, rev: 0.1 },
+    ),
+    cast_xuesong_s2: At(
+      "技能施放",
+      "雪松老师·立定撑篙",
+      (n) => {
+        (n.osc({ w: "triangle", f: 180, f1: 420, ft: 0.25, a: 0.01, d: 0.32, g: 0.3 }),
+          n.ring(1680, [1, 1.5, 2], { t: 0.02, a: 0.003, d: 0.24, g: 0.14 }));
+      },
+      { loud: -20, len: 0.5, gap: 0.1, poly: 2, rev: 0.16 },
+    ),
+    cast_xuesong_ult: At(
+      "技能施放",
+      "雪松老师·颠勺铁锹",
+      (n) => {
+        const t = n.drive(2.4);
+        (n.osc({ w: "sawtooth", f: 130, f1: 310, ft: 0.22, a: 0.01, d: 0.32, g: 0.28, to: t }),
+          n.ring(1320, [1, 1.44, 2.2], { a: 0.002, d: 0.3, g: 0.22 }));
+      },
+      { loud: -16, len: 0.55, gap: 0.1, prio: 2, rev: 0.18 },
+    ),
+    fx_xuesong_basic_cone: At(
+      "技能施放",
+      "雪松老师·警告铁锹震荡",
+      (n) => {
+        const t = n.drive(2.5);
+        (n.osc({ f: 135, f1: 46, ft: 0.14, a: 0.002, d: 0.3, g: 0.58, to: t }),
+          n.ring(1260, [1, 1.54, 2.3], { a: 0.001, d: 0.28, g: 0.2 }),
+          n.noise({ k: "pink", flt: "lowpass", fc: 1100, a: 0.002, d: 0.2, g: 0.35 }));
+      },
+      { loud: -16, len: 0.45, gap: 0.1, rev: 0.16 },
+    ),
+    fx_xuesong_dig_start: At(
+      "技能施放",
+      "雪松老师·下锹挖土",
+      (n) => {
+        (n.noise({ k: "brown", flt: "bandpass", fc: 540, q: 0.8, a: 0.02, d: 0.45, g: 0.48 }),
+          n.scatter(5, 0.08, 0.35, (t) =>
+            n.noise({ k: "pink", flt: "bandpass", fc: n.rr(700, 1400), t, a: 0.01, d: 0.12, g: 0.18 }),
+          ));
+      },
+      { loud: -22, len: 0.65, gap: 0.12, rev: 0.1 },
+    ),
+    fx_xuesong_pit_open: At(
+      "技能施放",
+      "雪松老师·沙坑成型",
+      (n) => {
+        const t = n.drive(2.2);
+        (n.osc({ f: 105, f1: 42, ft: 0.18, a: 0.003, d: 0.36, g: 0.55, to: t }),
+          n.noise({ k: "brown", flt: "lowpass", fc: 750, a: 0.004, d: 0.35, g: 0.5 }));
+      },
+      { loud: -18, len: 0.6, gap: 0.1, rev: 0.16 },
+    ),
+    fx_xuesong_sand_throw: At(
+      "技能施放",
+      "雪松老师·抛沙",
+      (n) => {
+        (Ti(n, 0, 0.3, 0.35, 1600, 520, 420, 1.0, "pink"),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1900, fc1: 800, q: 0.9, a: 0.01, d: 0.28, g: 0.35 }));
+      },
+      { loud: -22, len: 0.45, gap: 0.1, rev: 0.1 },
+    ),
+    fx_xuesong_sand_burst: At(
+      "技能施放",
+      "雪松老师·沙尘致盲",
+      (n) => {
+        (n.noise({ k: "pink", flt: "bandpass", fc: 1500, fc1: 420, q: 0.7, a: 0.005, d: 0.42, g: 0.52 }),
+          n.osc({ w: "sine", f: 420, f1: 190, ft: 0.2, a: 0.005, d: 0.24, g: 0.22 }));
+      },
+      { loud: -18, len: 0.55, gap: 0.1, rev: 0.14 },
+    ),
+    fx_xuesong_blind_miss: At(
+      "技能施放",
+      "致盲落空",
+      (n) => {
+        n.noise({ k: "pink", flt: "highpass", fc: 2200, a: 0.005, d: 0.12, g: 0.25 });
+      },
+      { loud: -28, len: 0.22, gap: 0.1, poly: 3, rev: 0.06 },
+    ),
+    fx_xuesong_pole_up: At(
+      "技能施放",
+      "雪松老师·撑篙升空",
+      (n) => {
+        (n.osc({ w: "triangle", f: 170, f1: 520, ft: 0.3, a: 0.01, d: 0.38, g: 0.32 }),
+          n.ring(1540, [1, 1.5, 2.25], { t: 0.04, a: 0.002, d: 0.34, g: 0.16 }));
+      },
+      { loud: -19, len: 0.55, gap: 0.1, rev: 0.18 },
+    ),
+    fx_xuesong_s2_land: At(
+      "技能施放",
+      "雪松老师·撑篙落地护盾",
+      (n) => {
+        const t = n.drive(2.2);
+        (n.osc({ f: 120, f1: 48, ft: 0.16, a: 0.002, d: 0.34, g: 0.55, to: t }),
+          n.ring(660, [1, 1.25, 1.5, 2], { t: 0.01, a: 0.004, d: 0.48, g: 0.28 }));
+      },
+      { loud: -16, len: 0.65, gap: 0.1, rev: 0.22 },
+    ),
+    fx_xuesong_ult_scoop: At(
+      "技能施放",
+      "雪松老师·铁锹铲人",
+      (n) => {
+        const t = n.drive(2.6);
+        (n.osc({ w: "sawtooth", f: 110, f1: 360, ft: 0.22, a: 0.005, d: 0.34, g: 0.42, to: t }),
+          n.ring(1480, [1, 1.4, 2.1], { a: 0.001, d: 0.32, g: 0.26 }));
+      },
+      { loud: -15, len: 0.55, gap: 0.1, prio: 2, rev: 0.18 },
+    ),
+    fx_xuesong_ult_throw: At(
+      "技能施放",
+      "雪松老师·颠勺甩出",
+      (n) => {
+        (Ti(n, 0, 0.28, 0.42, 260, 1400, 500, 1.3, "brown"),
+          n.osc({ w: "triangle", f: 240, f1: 580, ft: 0.2, a: 0.01, d: 0.26, g: 0.28 }));
+      },
+      { loud: -17, len: 0.48, gap: 0.1, prio: 2, rev: 0.14 },
+    ),
+    fx_xuesong_ult_land: At(
+      "技能施放",
+      "雪松老师·砸地眩晕",
+      (n) => {
+        const t = n.drive(3);
+        (n.osc({ f: 96, f1: 32, ft: 0.22, a: 0.002, d: 0.48, g: 0.72, to: t }),
+          n.noise({ flt: "lowpass", fc: 920, a: 0.001, d: 0.36, g: 0.58, to: t }),
+          n.ring(540, [1, 1.5, 2.2], { a: 0.002, d: 0.42, g: 0.24 }));
+      },
+      { loud: -13, len: 0.85, gap: 0.1, prio: 2, rev: 0.22 },
+    ),
+    atk_stone_swing: At(
+      "普通攻击",
+      "小肥石·重锤挥动",
+      (n) => {
+        (Ti(n, 0, 0.22, 0.34, 210, 620, 260, 1.3, "brown"),
+          n.osc({ f: 110, f1: 58, ft: 0.14, a: 0.008, d: 0.16, g: 0.24 }));
+      },
+      { loud: -26, len: 0.34, gap: 0.08, poly: 3, rev: 0.1 },
+    ),
+    atk_stone_hit: At(
+      "普通攻击",
+      "小肥石·石头砸中",
+      (n) => {
+        const t = n.drive(2.4);
+        (n.osc({ f: 135, f1: 42, ft: 0.12, a: 0.002, d: 0.22, g: 0.56, to: t }),
+          n.noise({ k: "brown", flt: "lowpass", fc: 980, a: 0.002, d: 0.16, g: 0.44 }));
+      },
+      { loud: -21, len: 0.32, gap: 0.07, poly: 3, rev: 0.12 },
+    ),
+    cast_stone_s1: At(
+      "技能施放",
+      "小肥石·开始练功",
+      (n) => {
+        (n.osc({ w: "triangle", f: 120, f1: 210, ft: 0.28, a: 0.01, d: 0.34, g: 0.36 }),
+          n.noise({ k: "brown", flt: "lowpass", fc: 620, a: 0.01, d: 0.26, g: 0.28 }));
+      },
+      { loud: -19, len: 0.5, gap: 0.1, rev: 0.14 },
+    ),
+    cast_stone_s2: At(
+      "技能施放",
+      "小肥石·抓起来锤",
+      (n) => {
+        const t = n.drive(2.2);
+        (n.osc({ f: 170, f1: 72, ft: 0.12, a: 0.002, d: 0.24, g: 0.5, to: t }),
+          n.ring(680, [1, 1.5], { a: 0.002, d: 0.18, g: 0.18 }));
+      },
+      { loud: -17, len: 0.38, gap: 0.1, rev: 0.12 },
+    ),
+    cast_stone_ult: At(
+      "技能施放",
+      "小肥石·自重跳起跳",
+      (n) => {
+        (Ti(n, 0, 0.32, 0.46, 180, 960, 420, 1.4, "brown"),
+          n.osc({ f: 92, f1: 220, ft: 0.28, a: 0.005, d: 0.34, g: 0.42 }));
+      },
+      { loud: -15, len: 0.55, gap: 0.1, prio: 2, rev: 0.16 },
+    ),
+    fx_stone_passive_hit: At(
+      "技能施放",
+      "小肥石·安全帽重锤",
+      (n) => {
+        const t = n.drive(2.8);
+        (n.osc({ f: 155, f1: 38, ft: 0.16, a: 0.002, d: 0.3, g: 0.68, to: t }),
+          n.ring(1120, [1, 1.45, 2.1], { a: 0.001, d: 0.24, g: 0.24 }));
+      },
+      { loud: -16, len: 0.45, gap: 0.08, rev: 0.14 },
+    ),
+    fx_stone_train_done: At(
+      "技能施放",
+      "小肥石·练功涨属性",
+      (n) => {
+        (n.ring(520, [1, 1.25, 1.5, 2], { t: 0.01, a: 0.004, d: 0.46, g: 0.3 }),
+          n.osc({ f: 110, f1: 165, ft: 0.22, a: 0.005, d: 0.3, g: 0.34 }));
+      },
+      { loud: -17, len: 0.62, gap: 0.1, rev: 0.2 },
+    ),
+    fx_stone_tether: At(
+      "技能施放",
+      "小肥石·锁住敌人",
+      (n) => {
+        (n.ring(840, [1, 1.33, 1.9], { a: 0.002, d: 0.26, g: 0.24 }),
+          n.osc({ f: 140, f1: 88, ft: 0.14, a: 0.003, d: 0.22, g: 0.4 }));
+      },
+      { loud: -18, len: 0.38, gap: 0.1, rev: 0.12 },
+    ),
+    fx_stone_corpse_ready: At(
+      "技能施放",
+      "小肥石·抓起尸体",
+      (n) => {
+        (n.osc({ w: "sawtooth", f: 120, f1: 280, ft: 0.2, a: 0.004, d: 0.28, g: 0.32 }),
+          n.ring(740, [1, 1.5], { a: 0.002, d: 0.25, g: 0.22 }));
+      },
+      { loud: -17, len: 0.42, gap: 0.1, rev: 0.14 },
+    ),
+    fx_stone_throw: At(
+      "技能施放",
+      "小肥石·扔出去",
+      (n) => {
+        (Ti(n, 0, 0.26, 0.4, 220, 1280, 480, 1.3, "brown"),
+          n.osc({ w: "triangle", f: 220, f1: 480, ft: 0.18, a: 0.008, d: 0.22, g: 0.28 }));
+      },
+      { loud: -17, len: 0.44, gap: 0.1, rev: 0.14 },
+    ),
+    fx_stone_throw_land: At(
+      "技能施放",
+      "小肥石·砸地击飞",
+      (n) => {
+        const t = n.drive(3);
+        (n.osc({ f: 100, f1: 30, ft: 0.2, a: 0.002, d: 0.46, g: 0.72, to: t }),
+          n.noise({ k: "brown", flt: "lowpass", fc: 920, a: 0.001, d: 0.38, g: 0.58, to: t }));
+      },
+      { loud: -14, len: 0.75, gap: 0.1, prio: 2, rev: 0.2 },
+    ),
+    fx_stone_ult_land: At(
+      "技能施放",
+      "小肥石·自重跳砸地",
+      (n) => {
+        const t = n.drive(3.4);
+        (n.osc({ f: 84, f1: 26, ft: 0.26, a: 0.002, d: 0.62, g: 0.82, to: t }),
+          n.noise({ k: "brown", flt: "lowpass", fc: 1100, a: 0.001, d: 0.48, g: 0.68, to: t }),
+          n.ring(420, [1, 1.4, 2.0], { a: 0.002, d: 0.44, g: 0.22 }));
+      },
+      { loud: -12, len: 0.95, gap: 0.1, prio: 2, rev: 0.26 },
+    ),
+    atk_scallion_launch: At(
+      "技能施放",
+      "葱仔仔·葱镖出手",
+      (n) => {
+        (n.osc({ f: 780, f1: 420, ft: 0.08, a: 0.002, d: 0.12, g: 0.32 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 2200, q: 2.2, a: 0.002, d: 0.09, g: 0.42 }));
+      },
+      { loud: -20, len: 0.16, gap: 0.05, prio: 1, rev: 0.08 },
+    ),
+    atk_scallion_hit: At(
+      "技能命中",
+      "葱仔仔·葱叶抽中",
+      (n) => {
+        (n.osc({ f: 340, f1: 120, ft: 0.07, a: 0.002, d: 0.12, g: 0.44 }),
+          n.noise({ k: "white", flt: "bandpass", fc: 1900, q: 1.6, a: 0.001, d: 0.08, g: 0.48 }));
+      },
+      { loud: -18, len: 0.16, gap: 0.05, prio: 1, rev: 0.08 },
+    ),
+    cast_scallion_s1: At(
+      "技能施放",
+      "葱仔仔·葱锋拍击",
+      (n) => {
+        const t = n.drive(2.1);
+        (n.osc({ f: 520, f1: 160, ft: 0.14, a: 0.002, d: 0.24, g: 0.62, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1650, q: 1.2, a: 0.002, d: 0.2, g: 0.56, to: t }));
+      },
+      { loud: -15, len: 0.34, gap: 0.08, prio: 2, rev: 0.14 },
+    ),
+    cast_scallion_s2: At(
+      "技能施放",
+      "葱仔仔·葱能爆发",
+      (n) => {
+        (n.osc({ f: 360, f1: 880, ft: 0.22, a: 0.004, d: 0.34, g: 0.54 }),
+          n.ring(740, [1, 1.5, 2], { a: 0.004, d: 0.28, g: 0.26 }),
+          n.noise({ k: "white", flt: "highpass", fc: 2100, a: 0.005, d: 0.24, g: 0.32 }));
+      },
+      { loud: -15, len: 0.44, gap: 0.1, prio: 2, rev: 0.18 },
+    ),
+    cast_scallion_ult: At(
+      "技能施放",
+      "葱仔仔·葱击波闪现起手",
+      (n) => {
+        const t = n.drive(2.4);
+        (n.osc({ f: 960, f1: 280, ft: 0.16, a: 0.002, d: 0.32, g: 0.62, to: t }),
+          n.osc({ f: 220, f1: 580, ft: 0.28, a: 0.02, d: 0.45, g: 0.48, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1400, q: 1.1, a: 0.002, d: 0.36, g: 0.5, to: t }));
+      },
+      { loud: -13, len: 0.56, gap: 0.1, prio: 2, rev: 0.22 },
+    ),
+    fx_scallion_s1_slash: At(
+      "技能施放",
+      "葱仔仔·葱锋气浪",
+      (n) => {
+        (n.osc({ f: 420, f1: 145, ft: 0.12, a: 0.002, d: 0.22, g: 0.52 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1850, q: 1.4, a: 0.002, d: 0.18, g: 0.48 }));
+      },
+      { loud: -16, len: 0.28, gap: 0.06, prio: 1, rev: 0.12 },
+    ),
+    fx_scallion_s2_burst: At(
+      "技能施放",
+      "葱仔仔·绿光爆气",
+      (n) => {
+        (n.osc({ f: 440, f1: 920, ft: 0.2, a: 0.004, d: 0.3, g: 0.44 }),
+          n.ring(860, [1, 1.33, 2], { a: 0.004, d: 0.24, g: 0.22 }));
+      },
+      { loud: -16, len: 0.38, gap: 0.1, prio: 1, rev: 0.16 },
+    ),
+    fx_scallion_ult_blink: At(
+      "技能施放",
+      "葱仔仔·闪现",
+      (n) => {
+        (n.osc({ f: 1120, f1: 420, ft: 0.09, a: 0.001, d: 0.16, g: 0.48 }),
+          n.noise({ k: "white", flt: "highpass", fc: 2600, a: 0.001, d: 0.12, g: 0.36 }));
+      },
+      { loud: -16, len: 0.22, gap: 0.08, prio: 1, rev: 0.12 },
+    ),
+    fx_scallion_beam_tick: At(
+      "技能施放",
+      "葱仔仔·葱击波持续喷射",
+      (n) => {
+        const t = n.drive(2.0);
+        (n.osc({ f: 290, f1: 360, ft: 0.12, a: 0.004, d: 0.22, g: 0.46, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1550, q: 1.5, a: 0.003, d: 0.2, g: 0.44, to: t }));
+      },
+      { loud: -17, len: 0.26, gap: 0.12, prio: 1, rev: 0.14 },
+    ),
+    atk_paperboy_launch: At(
+      "技能施放",
+      "纸札人·纸符飞出",
+      (n) => {
+        (n.osc({ f: 680, f1: 390, ft: 0.08, a: 0.002, d: 0.11, g: 0.28 }),
+          n.noise({ k: "white", flt: "bandpass", fc: 2600, q: 2.0, a: 0.001, d: 0.08, g: 0.36 }));
+      },
+      { loud: -20, len: 0.15, gap: 0.05, prio: 1, rev: 0.1 },
+    ),
+    atk_paperboy_hit: At(
+      "技能命中",
+      "纸札人·纸符贴中",
+      (n) => {
+        (n.osc({ f: 310, f1: 140, ft: 0.07, a: 0.002, d: 0.11, g: 0.38 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1800, q: 1.5, a: 0.001, d: 0.08, g: 0.42 }));
+      },
+      { loud: -18, len: 0.15, gap: 0.05, prio: 1, rev: 0.1 },
+    ),
+    cast_paperboy_s1: At(
+      "技能施放",
+      "纸札人·唢呐起调",
+      (n) => {
+        const t = n.drive(2.6);
+        (n.osc({ type: "sawtooth", f: 587, f1: 880, ft: 0.14, a: 0.008, d: 0.42, g: 0.48, to: t }),
+          n.osc({ type: "sawtooth", f: 880, f1: 932, ft: 0.22, a: 0.06, d: 0.38, g: 0.36, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 2200, q: 3.0, a: 0.01, d: 0.34, g: 0.22 }));
+      },
+      { loud: -14, len: 0.56, gap: 0.1, prio: 2, rev: 0.24 },
+    ),
+    cast_paperboy_s2: At(
+      "技能施放",
+      "纸札人·纸鹤飞出",
+      (n) => {
+        (n.osc({ f: 640, f1: 1180, ft: 0.18, a: 0.004, d: 0.26, g: 0.42 }),
+          n.ring(1120, [1, 1.25, 1.5], { a: 0.004, d: 0.26, g: 0.22 }),
+          n.noise({ k: "white", flt: "highpass", fc: 2400, a: 0.003, d: 0.18, g: 0.3 }));
+      },
+      { loud: -16, len: 0.36, gap: 0.08, prio: 2, rev: 0.18 },
+    ),
+    cast_paperboy_ult: At(
+      "技能施放",
+      "纸札人·扎筋点睛",
+      (n) => {
+        const t = n.drive(2.0);
+        (n.osc({ f: 240, f1: 620, ft: 0.22, a: 0.005, d: 0.46, g: 0.52, to: t }),
+          n.ring(520, [1, 1.41, 2], { a: 0.006, d: 0.44, g: 0.28 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1450, q: 1.8, a: 0.005, d: 0.32, g: 0.36 }));
+      },
+      { loud: -14, len: 0.58, gap: 0.1, prio: 2, rev: 0.24 },
+    ),
+    fx_paperboy_suona_pulse: At(
+      "技能施放",
+      "纸札人·唢呐声波",
+      (n) => {
+        const t = n.drive(2.2);
+        (n.osc({ type: "sawtooth", f: 784, f1: 880, ft: 0.12, a: 0.006, d: 0.28, g: 0.38, to: t }),
+          n.osc({ type: "triangle", f: 392, f1: 440, ft: 0.12, a: 0.006, d: 0.26, g: 0.28 }));
+      },
+      { loud: -18, len: 0.36, gap: 0.15, prio: 1, rev: 0.2 },
+    ),
+    fx_paperboy_crane_hit: At(
+      "技能命中",
+      "纸札人·纸鹤解控提速",
+      (n) => {
+        (n.ring(980, [1, 1.5, 2], { a: 0.002, d: 0.32, g: 0.3 }),
+          n.osc({ f: 520, f1: 1040, ft: 0.16, a: 0.002, d: 0.26, g: 0.38 }));
+      },
+      { loud: -15, len: 0.38, gap: 0.08, prio: 2, rev: 0.2 },
+    ),
+    fx_paperboy_effigy_shatter: At(
+      "技能施放",
+      "纸札人·替身碎裂人殉",
+      (n) => {
+        const t = n.drive(3.0);
+        (n.osc({ f: 140, f1: 42, ft: 0.32, a: 0.002, d: 0.72, g: 0.8, to: t }),
+          n.noise({ k: "white", flt: "bandpass", fc: 2800, q: 1.2, a: 0.001, d: 0.38, g: 0.65, to: t }),
+          n.ring(740, [1, 1.18, 1.62, 2.3], { a: 0.002, d: 0.62, g: 0.34 }));
+      },
+      { loud: -11, len: 0.88, gap: 0.1, prio: 2, rev: 0.32 },
+    ),
+    fx_paperboy_gloom_burst: At(
+      "技能命中",
+      "纸札人·晦气爆发",
+      (n) => {
+        const t = n.drive(2.5);
+        (n.osc({ f: 460, f1: 95, ft: 0.22, a: 0.002, d: 0.44, g: 0.68, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1900, q: 1.4, a: 0.001, d: 0.3, g: 0.58, to: t }));
+      },
+      { loud: -13, len: 0.52, gap: 0.08, prio: 2, rev: 0.24 },
+    ),
+    atk_maggot_launch: At(
+      "普攻",
+      "活蛆·吐泥弹",
+      (n) => {
+        (n.osc({ f: 420, f1: 190, ft: 0.07, a: 0.002, d: 0.09, g: 0.5 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1400, q: 1.5, a: 0.002, d: 0.07, g: 0.42 }));
+      },
+      { loud: -22, len: 0.14, gap: 0.04, poly: 4, prio: 0, rev: 0.05 },
+    ),
+    atk_maggot_hit: At(
+      "普攻命中",
+      "活蛆·烂泥拍脸",
+      (n) => {
+        (n.osc({ f: 220, f1: 75, ft: 0.09, a: 0.001, d: 0.11, g: 0.56 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 980, q: 1.3, a: 0.001, d: 0.09, g: 0.48 }));
+      },
+      { loud: -20, len: 0.16, gap: 0.04, poly: 4, prio: 0, rev: 0.07 },
+    ),
+    cast_maggot_s1: At(
+      "技能施放",
+      "活蛆·喷吐",
+      (n) => {
+        const t = n.drive(2.1);
+        (n.osc({ type: "sawtooth", f: 165, f1: 95, ft: 0.26, a: 0.004, d: 0.34, g: 0.52, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 920, q: 1.4, a: 0.004, d: 0.32, g: 0.58, to: t }));
+      },
+      { loud: -16, len: 0.42, gap: 0.06, prio: 1, rev: 0.12 },
+    ),
+    cast_maggot_s2: At(
+      "技能施放",
+      "活蛆·吸粪机",
+      (n) => {
+        const t = n.drive(2.0);
+        (n.osc({ f: 120, f1: 520, ft: 0.34, a: 0.008, d: 0.45, g: 0.62, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1300, q: 1.8, a: 0.01, d: 0.4, g: 0.54, to: t }));
+      },
+      { loud: -14, len: 0.54, gap: 0.08, prio: 2, rev: 0.18 },
+    ),
+    cast_maggot_ult: At(
+      "技能施放",
+      "活蛆·噗叽啪发射",
+      (n) => {
+        const t = n.drive(2.3);
+        (n.osc({ f: 160, f1: 580, ft: 0.18, a: 0.003, d: 0.28, g: 0.64, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1100, q: 1.6, a: 0.002, d: 0.22, g: 0.5, to: t }));
+      },
+      { loud: -14, len: 0.38, gap: 0.07, prio: 2, rev: 0.16 },
+    ),
+    fx_maggot_fart: At(
+      "技能命中",
+      "活蛆·噗屁声",
+      (n) => {
+        const t = n.drive(3.2);
+        (n.osc({ type: "sawtooth", f: 118, f1: 56, ft: 0.38, a: 0.004, d: 0.44, g: 0.72, to: t }),
+          n.osc({ type: "square", f: 88, f1: 44, ft: 0.36, a: 0.01, d: 0.4, g: 0.42, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 520, q: 2.2, a: 0.005, d: 0.36, g: 0.56, to: t }));
+      },
+      { loud: -12, len: 0.52, gap: 0.08, prio: 2, rev: 0.12 },
+    ),
+    fx_maggot_poop_merge: At(
+      "技能命中",
+      "活蛆·粪污合体",
+      (n) => {
+        const t = n.drive(2.1);
+        (n.osc({ f: 240, f1: 680, ft: 0.24, a: 0.004, d: 0.38, g: 0.58, to: t }),
+          n.ring(620, [1, 1.25, 1.5], { a: 0.003, d: 0.42, g: 0.32 }));
+      },
+      { loud: -14, len: 0.52, gap: 0.08, prio: 2, rev: 0.22 },
+    ),
+    fx_maggot_ult_splat: At(
+      "技能命中",
+      "活蛆·噗叽啪落地",
+      (n) => {
+        const t = n.drive(2.8);
+        (n.osc({ f: 210, f1: 52, ft: 0.18, a: 0.001, d: 0.34, g: 0.76, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 840, q: 1.1, a: 0.001, d: 0.28, g: 0.68, to: t }));
+      },
+      { loud: -12, len: 0.44, gap: 0.06, prio: 2, rev: 0.16 },
+    ),
+    atk_horseman_swing: At(
+      "普攻",
+      "半马人·蹄挥",
+      (n) => {
+        (n.noise({ k: "pink", flt: "bandpass", fc: 720, q: 1.2, a: 0.004, d: 0.12, g: 0.52 }),
+          n.osc({ f: 185, f1: 88, ft: 0.1, a: 0.003, d: 0.12, g: 0.48 }));
+      },
+      { loud: -20, len: 0.16, gap: 0.04, poly: 4, prio: 0, rev: 0.06 },
+    ),
+    atk_horseman_hit: At(
+      "普攻命中",
+      "半马人·闷蹄撞",
+      (n) => {
+        const t = n.drive(2.0);
+        (n.osc({ f: 150, f1: 48, ft: 0.11, a: 0.001, d: 0.15, g: 0.68, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 620, q: 1.1, a: 0.001, d: 0.1, g: 0.5, to: t }));
+      },
+      { loud: -18, len: 0.18, gap: 0.04, poly: 4, prio: 0, rev: 0.08 },
+    ),
+    cast_horseman_s1: At(
+      "技能施放",
+      "半马人·蓄力刨蹄",
+      (n) => {
+        const t = n.drive(1.8);
+        (n.osc({ f: 135, f1: 80, ft: 0.2, a: 0.005, d: 0.24, g: 0.56, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 540, q: 1.6, a: 0.004, d: 0.22, g: 0.52, to: t }));
+      },
+      { loud: -16, len: 0.3, gap: 0.06, prio: 1, rev: 0.12 },
+    ),
+    cast_horseman_s2: At(
+      "技能施放",
+      "半马人·嘶鸣哀嚎",
+      (n) => {
+        const t = n.drive(2.6);
+        (n.osc({ type: "sawtooth", f: 680, f1: 290, ft: 0.46, a: 0.012, d: 0.58, g: 0.62, to: t }),
+          n.osc({ type: "triangle", f: 980, f1: 420, ft: 0.42, a: 0.015, d: 0.52, g: 0.44, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1650, q: 2.2, a: 0.01, d: 0.44, g: 0.42, to: t }));
+      },
+      { loud: -12, len: 0.66, gap: 0.08, prio: 2, rev: 0.28 },
+    ),
+    cast_horseman_ult: At(
+      "技能施放",
+      "半马人·践踏狂奔",
+      (n) => {
+        const t = n.drive(2.8);
+        (n.osc({ f: 110, f1: 310, ft: 0.28, a: 0.004, d: 0.48, g: 0.72, to: t }),
+          n.osc({ f: 220, f1: 520, ft: 0.32, a: 0.01, d: 0.44, g: 0.45, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 980, q: 1.3, a: 0.004, d: 0.38, g: 0.58, to: t }));
+      },
+      { loud: -11, len: 0.58, gap: 0.08, prio: 2, rev: 0.22 },
+    ),
+    fx_horseman_charge_hit: At(
+      "技能命中",
+      "半马人·冲锋撞飞",
+      (n) => {
+        const t = n.drive(3.0);
+        (n.osc({ f: 185, f1: 42, ft: 0.16, a: 0.001, d: 0.32, g: 0.82, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 820, q: 1.0, a: 0.001, d: 0.24, g: 0.68, to: t }));
+      },
+      { loud: -11, len: 0.4, gap: 0.06, prio: 2, rev: 0.16 },
+    ),
+    fx_horseman_kick_blast: At(
+      "技能命中",
+      "半马人·后腿重蹬",
+      (n) => {
+        const t = n.drive(3.2);
+        (n.osc({ f: 210, f1: 38, ft: 0.18, a: 0.001, d: 0.36, g: 0.86, to: t }),
+          n.osc({ type: "square", f: 120, f1: 48, ft: 0.14, a: 0.002, d: 0.24, g: 0.46, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1120, q: 1.1, a: 0.001, d: 0.28, g: 0.72, to: t }));
+      },
+      { loud: -10, len: 0.44, gap: 0.06, prio: 2, rev: 0.18 },
+    ),
+    fx_horseman_trample_reset: At(
+      "技能命中",
+      "半马人·践踏刷新",
+      (n) => {
+        (n.ring(520, [1, 1.25, 1.5, 2], { a: 0.004, d: 0.46, g: 0.44 }),
+          n.osc({ f: 260, f1: 620, ft: 0.22, a: 0.004, d: 0.34, g: 0.56 }));
+      },
+      { loud: -13, len: 0.52, gap: 0.08, prio: 2, rev: 0.24 },
+    ),
+    atk_cow_swing: At(
+      "普攻",
+      "大脚牛·大脚挥",
+      (n) => {
+        (n.noise({ k: "pink", flt: "bandpass", fc: 520, q: 1.1, a: 0.005, d: 0.14, g: 0.56 }),
+          n.osc({ f: 145, f1: 68, ft: 0.12, a: 0.004, d: 0.14, g: 0.54 }));
+      },
+      { loud: -19, len: 0.18, gap: 0.04, poly: 4, prio: 0, rev: 0.07 },
+    ),
+    atk_cow_hit: At(
+      "普攻命中",
+      "大脚牛·厚脚闷砸",
+      (n) => {
+        const t = n.drive(2.2);
+        (n.osc({ f: 132, f1: 42, ft: 0.12, a: 0.001, d: 0.17, g: 0.72, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 480, q: 1.0, a: 0.001, d: 0.12, g: 0.52, to: t }));
+      },
+      { loud: -17, len: 0.2, gap: 0.04, poly: 4, prio: 0, rev: 0.08 },
+    ),
+    cast_cow_s1: At(
+      "技能施放",
+      "大脚牛·深蹲哼哧",
+      (n) => {
+        const t = n.drive(2.0);
+        (n.osc({ f: 115, f1: 72, ft: 0.22, a: 0.008, d: 0.28, g: 0.62, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 420, q: 1.5, a: 0.006, d: 0.22, g: 0.45, to: t }));
+      },
+      { loud: -15, len: 0.34, gap: 0.06, prio: 1, rev: 0.12 },
+    ),
+    cast_cow_s2: At(
+      "技能施放",
+      "大脚牛·飞踢破风",
+      (n) => {
+        const t = n.drive(2.4);
+        (n.osc({ f: 240, f1: 95, ft: 0.18, a: 0.003, d: 0.24, g: 0.66, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1280, q: 1.2, a: 0.003, d: 0.22, g: 0.58, to: t }));
+      },
+      { loud: -14, len: 0.3, gap: 0.06, prio: 1, rev: 0.14 },
+    ),
+    cast_cow_ult: At(
+      "技能施放",
+      "大脚牛·牛气冲天",
+      (n) => {
+        const t = n.drive(3.0);
+        (n.osc({ type: "sawtooth", f: 130, f1: 72, ft: 0.45, a: 0.01, d: 0.56, g: 0.72, to: t }),
+          n.osc({ f: 88, f1: 38, ft: 0.36, a: 0.004, d: 0.48, g: 0.82, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 680, q: 1.1, a: 0.006, d: 0.42, g: 0.56, to: t }));
+      },
+      { loud: -10, len: 0.64, gap: 0.08, prio: 2, rev: 0.24 },
+    ),
+    fx_cow_stride: At(
+      "技能命中",
+      "大脚牛·大长腿跨步",
+      (n) => {
+        (n.noise({ k: "pink", flt: "bandpass", fc: 920, q: 1.3, a: 0.004, d: 0.16, g: 0.5 }),
+          n.osc({ f: 160, f1: 240, ft: 0.12, a: 0.004, d: 0.15, g: 0.44 }));
+      },
+      { loud: -18, len: 0.2, gap: 0.06, prio: 1, rev: 0.08 },
+    ),
+    fx_cow_flykick_hit: At(
+      "技能命中",
+      "大脚牛·飞踢暴踹",
+      (n) => {
+        const t = n.drive(3.2);
+        (n.osc({ f: 220, f1: 42, ft: 0.16, a: 0.001, d: 0.32, g: 0.86, to: t }),
+          n.osc({ type: "square", f: 145, f1: 52, ft: 0.12, a: 0.002, d: 0.22, g: 0.45, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1180, q: 1.0, a: 0.001, d: 0.24, g: 0.7, to: t }));
+      },
+      { loud: -10, len: 0.38, gap: 0.06, prio: 2, rev: 0.18 },
+    ),
+    fx_cow_ult_stomp: At(
+      "技能命中",
+      "大脚牛·一脚裂地",
+      (n) => {
+        const t = n.drive(3.5);
+        (n.osc({ f: 155, f1: 30, ft: 0.24, a: 0.001, d: 0.44, g: 0.92, to: t }),
+          n.osc({ type: "triangle", f: 92, f1: 28, ft: 0.26, a: 0.002, d: 0.4, g: 0.78, to: t }),
+          n.noise({ k: "pink", flt: "lowpass", fc: 960, q: 0.9, a: 0.001, d: 0.36, g: 0.76, to: t }));
+      },
+      { loud: -9, len: 0.5, gap: 0.06, prio: 2, rev: 0.22 },
+    ),
+    atk_slime_swing: At(
+      "普攻",
+      "黄色史莱姆·果冻甩砸",
+      (n) => {
+        (n.osc({ f: 185, f1: 310, ft: 0.11, a: 0.004, d: 0.14, g: 0.54 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 680, q: 1.8, a: 0.004, d: 0.11, g: 0.36 }));
+      },
+      { loud: -19, len: 0.17, gap: 0.04, poly: 4, prio: 0, rev: 0.08 },
+    ),
+    atk_slime_hit: At(
+      "普攻命中",
+      "黄色史莱姆·果冻闷弹",
+      (n) => {
+        (n.osc({ f: 240, f1: 115, ft: 0.12, a: 0.002, d: 0.16, g: 0.66 }),
+          n.osc({ type: "triangle", f: 390, f1: 210, ft: 0.09, a: 0.002, d: 0.12, g: 0.38 }));
+      },
+      { loud: -17, len: 0.19, gap: 0.04, poly: 4, prio: 0, rev: 0.08 },
+    ),
+    cast_slime_s1: At(
+      "技能施放",
+      "黄色史莱姆·啵唧吸附",
+      (n) => {
+        (n.osc({ f: 190, f1: 480, ft: 0.14, a: 0.004, d: 0.22, g: 0.62 }),
+          n.osc({ type: "triangle", f: 320, f1: 590, ft: 0.16, a: 0.008, d: 0.2, g: 0.42 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 980, q: 2.2, a: 0.004, d: 0.15, g: 0.32 }));
+      },
+      { loud: -14, len: 0.28, gap: 0.05, prio: 1, rev: 0.12 },
+    ),
+    cast_slime_s2: At(
+      "技能施放",
+      "黄色史莱姆·弹性弹射",
+      (n) => {
+        const t = n.drive(1.8);
+        (n.osc({ f: 150, f1: 540, ft: 0.2, a: 0.002, d: 0.28, g: 0.72, to: t }),
+          n.osc({ type: "triangle", f: 280, f1: 140, ft: 0.22, a: 0.006, d: 0.26, g: 0.48, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 1120, q: 1.5, a: 0.003, d: 0.18, g: 0.42, to: t }));
+      },
+      { loud: -12, len: 0.34, gap: 0.05, prio: 2, rev: 0.16 },
+    ),
+    cast_slime_ult: At(
+      "技能施放",
+      "黄色史莱姆·化整为零",
+      (n) => {
+        (n.osc({ f: 260, f1: 92, ft: 0.38, a: 0.008, d: 0.52, g: 0.72 }),
+          n.osc({ type: "triangle", f: 420, f1: 180, ft: 0.32, a: 0.01, d: 0.46, g: 0.48 }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 760, q: 1.6, a: 0.008, d: 0.42, g: 0.48 }));
+      },
+      { loud: -11, len: 0.58, gap: 0.08, prio: 2, rev: 0.22 },
+    ),
+    fx_slime_bounce: At(
+      "技能命中",
+      "黄色史莱姆·弹性击退",
+      (n) => {
+        (n.osc({ f: 210, f1: 420, ft: 0.12, a: 0.002, d: 0.18, g: 0.56 }),
+          n.osc({ type: "triangle", f: 340, f1: 190, ft: 0.1, a: 0.003, d: 0.14, g: 0.34 }));
+      },
+      { loud: -16, len: 0.22, gap: 0.06, poly: 3, prio: 1, rev: 0.1 },
+    ),
+    fx_slime_wall_hit: At(
+      "技能命中",
+      "黄色史莱姆·撞墙储能",
+      (n) => {
+        (n.osc({ f: 290, f1: 660, ft: 0.16, a: 0.002, d: 0.24, g: 0.68 }),
+          n.ring(540, [1, 1.25, 1.5], { a: 0.004, d: 0.26, g: 0.36 }));
+      },
+      { loud: -12, len: 0.3, gap: 0.05, prio: 2, rev: 0.16 },
+    ),
+    fx_slime_ball_hit: At(
+      "技能命中",
+      "黄色史莱姆·弹球撞飞",
+      (n) => {
+        const t = n.drive(2.4);
+        (n.osc({ f: 260, f1: 68, ft: 0.14, a: 0.001, d: 0.26, g: 0.82, to: t }),
+          n.osc({ type: "triangle", f: 420, f1: 170, ft: 0.12, a: 0.002, d: 0.2, g: 0.46, to: t }),
+          n.noise({ k: "pink", flt: "bandpass", fc: 980, q: 1.2, a: 0.001, d: 0.18, g: 0.54, to: t }));
+      },
+      { loud: -11, len: 0.32, gap: 0.05, prio: 2, rev: 0.16 },
+    ),
     proj_fizzle: At(
       "技能弹道",
       "弹道落空",
@@ -830,7 +1595,7 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
     ),
   },
   Ry = Math.PI / 180,
-  kr = ["panyue", "chijin", "xingli", "fengling", "yeque", "mushroom", "niumo"],
+  kr = ["panyue", "chijin", "xingli", "fengling", "yeque", "mushroom", "niumo", "xuesong", "stone", "scallion", "paperboy", "maggot", "horseman", "cow", "monkey", "slime"],
   Se = {
     panyue: {
       id: "panyue",
@@ -1067,9 +1832,9 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
         s1: {
           slot: "s1",
           name: "烈焰斩",
-          brief: "直线斩击：物理伤害 + 留下灼烧地面 5 秒",
+          brief: "0.3 秒前摇直线范围重劈：物理伤害 + 留下灼烧地面 5 秒",
           tags: ["burst", "dot"],
-          desc: "牛魔抡起十字巨剑向前斩出一条直线，造成 {damage}(+{adRatio%}物攻) 点物理伤害，并在地面留下火焰轨迹，持续 {trailDur} 秒：每 {tick} 秒对轨迹上的敌人造成 {burnDps} 点魔法伤害，并施加 1 层「磨砂火焰」。",
+          desc: "经过 0.3 秒前摇蓄力后，牛魔抡起十字巨剑向前劈出一条直线范围，造成 {damage}(+{adRatio%}物攻) 点物理伤害，并在地面留下火焰轨迹，持续 {trailDur} 秒：每 {tick} 秒对轨迹上的敌人造成 {burnDps} 点魔法伤害，并施加 1 层「磨砂火焰」。",
           maxLevel: 6,
           cooldown: [7, 6.5, 6, 5.5, 5, 4.5],
           manaCost: [45, 50, 55, 60, 65, 70],
@@ -1086,21 +1851,21 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
         s2: {
           slot: "s2",
           name: "烈焰行军",
-          brief: "被动：命中叠火焰层数（上限 7）；主动：定身喷火 2 秒、免疫控制",
+          brief: "被动：命中叠火焰层数（上限 7）；主动：免控直线前进喷火 2 秒，期间不能转向与攻击",
           tags: ["dot", "buff", "channel"],
-          desc: "被动「磨砂火焰」：敌人身上的每一层火焰每秒受到 {flameDps} 点魔法伤害，最多叠 {maxStacks} 层。主动「烈焰行军」：选定一个方向，{duration} 秒内免疫控制、期间无法自己转向，一边朝该方向前进一边持续喷射烈焰，对前方敌人造成 {sprayDmg}(+{sprayAd%}物攻) 点魔法伤害并施加火焰层数，期间不会被打断。",
+          desc: "被动「磨砂火焰」：敌人身上的每一层火焰每秒受到 {flameDps} 点魔法伤害，最多叠 {maxStacks} 层。主动「烈焰行军」：选定一个方向，{duration} 秒内免疫控制、期间无法转向也无法攻击，一边朝该方向前进一边持续喷射烈焰，对前方敌人造成 {sprayDmg}(+{sprayAd%}物攻) 点魔法伤害并施加火焰层数，期间不会被打断。",
           maxLevel: 6,
           cooldown: [12, 11.5, 11, 10.5, 10, 9.5],
           manaCost: [55, 60, 65, 70, 75, 80],
           cast: { type: "direction", range: 6, width: 2.6 },
           values: {
-            flameDps: [12, 18, 24, 30, 36, 42],
+            flameDps: [24, 36, 48, 60, 72, 84],
             maxStacks: 7,
             flameDur: 4,
             sprayDmg: [40, 55, 70, 85, 100, 115],
             sprayAd: 0.35,
             duration: 2,
-            // 2 秒 24 段（每段 1/3 伤害），站着喷、期间定身免控
+            // 2 秒 24 段（每段 1/3 伤害），直线前进喷火、期间免控禁转向禁攻
             segments: 24,
           },
           castTime: 0.15,
@@ -1108,9 +1873,9 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
         ult: {
           slot: "ult",
           name: "烈焰牛魔",
-          brief: "变身 10 秒：免疫控制 + 身下火路；普攻引爆全部火焰层数",
+          brief: "变身 10 秒：免疫控制 + 身下火路；普攻引爆层数，击杀敌方英雄刷新持续时间",
           tags: ["buff", "dot", "heal"],
-          desc: "牛魔化身烈焰牛魔，持续 {duration} 秒：免疫控制，移动时在身后留下火焰轨迹。期间每次普通攻击会消耗目标身上所有「磨砂火焰」层数，每层额外造成 {perStack}(+{adRatio%}物攻) 点魔法伤害，并回复自身 {healPerStack%} 最大生命。",
+          desc: "牛魔化身烈焰牛魔，持续 {duration} 秒：免疫控制，移动时在身后留下火焰轨迹。期间每次普通攻击会消耗目标身上所有「磨砂火焰」层数，每层额外造成 {perStack}(+{adRatio%}物攻) 点魔法伤害，并回复自身 {healPerStack%} 最大生命；变身期间击杀敌方英雄可立刻刷新持续时间。",
           maxLevel: 3,
           cooldown: [80, 70, 60],
           manaCost: [100, 110, 120],
@@ -1556,6 +2321,1099 @@ const Ey = [76, 79, 81, 83, 86, 83, 81, 79].map(It),
       palette: { primary: "#7c3aed", secondary: "#f3e7d0", accent: "#a78bfa", glow: "#c4a2ff" },
       look: "一朵成了精的紫色大蘑菇：粗壮圆胖的奶白菌柄就是身子，菌颈处透出淡淡紫色；头顶倒扣着一只巨大的紫红伞盖，盖面是带绒光的紫，点缀着几块奶白色圆斑，盖底是放射状的浅色菌褶。菌柄中段有一张憨厚的脸：两只圆眼睛、粉腮红、小小的嘴。四肢短粗，拳头圆滚滚。",
     },
+    xuesong: {
+      id: "xuesong",
+      name: "雪松老师",
+      title: "上课了",
+      role: "support",
+      roleName: "辅助",
+      lane: "bot",
+      difficulty: 2,
+      lore: "扛着一把大铁锹走上讲台也走上战场的老师。嘴上总挂着「上课了」，辅助不靠奶量，靠改地形、开视野和控制替队友把场子控得死死的。",
+      tips: "辅助不靠奶量，靠改地形和控制：被动让普攻攻速减少 70%，但每次普攻都会横扫锥形范围造成伤害并眩晕；一技能「挖土」原地花 2 秒挖出 60 秒无法通行的沙坑封路，随后 10 秒内可将沙子抛出造成少量伤害和致盲；二技能「立定撑篙」把自己高高撑起变为不可选中状态并给队友大幅开视野，最多持续 8 秒，二次释放选落点跳下给周围友军加护盾；大招「颠勺铁锹」伸长手臂铲起一名敌人高举压制 2.5 秒，随后可将其投掷到身边任意位置并造成伤害和眩晕。",
+      attackType: "ranged",
+      radius: 0.72,
+      base: {
+        hp: 3050,
+        mana: 520,
+        ad: 168,
+        armor: 112,
+        mr: 68,
+        attackSpeed: 0.9,
+        moveSpeed: 5.5,
+        attackRange: 5.6,
+        hpRegen: 10,
+        manaRegen: 4,
+      },
+      growth: { hp: 270, mana: 105, ad: 10, armor: 18, mr: 8.5, attackSpeedPct: 0.015 },
+      basicAttack: { windup: 0.42, damageType: "physical" },
+      passive: {
+        name: "警告铁锹",
+        brief: "攻速减少 70%，但普攻变为锥形范围伤害并造成眩晕",
+        tags: ["control"],
+        desc: "攻速减少 {asPenalty%}，但是普攻变成范围伤害，能够对前方锥形范围内的所有敌人造成伤害与 {stunDur} 秒眩晕。",
+        values: { asPenalty: 0.7, coneAngle: 68, stunDur: 0.55, aoeRatio: 0.9 },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "挖土",
+          brief: "原地 2 秒挖出 60 秒阻挡通行的沙坑；10 秒内抛沙造成伤害与致盲",
+          tags: ["control"],
+          desc: "原地花 {digTime} 秒铲起一铁锹沙子，在面前挖出半径 {pitRadius} 的沙坑，沙坑在 {pitDur} 秒内无法行走经过；随后 {holdDur} 秒内再次施放可将沙子抛出，对落点敌人造成 {damage}(+{apRatio%}法强) 点法术伤害并致盲 {blindDur} 秒（普攻全部落空）。",
+          maxLevel: 6,
+          cooldown: [16, 15, 14, 13, 12, 11],
+          manaCost: [55, 60, 65, 70, 75, 80],
+          cast: { type: "self", radius: 2.2 },
+          recastBuff: "xuesong_sand",
+          recastCast: { type: "position", range: 8.5, radius: 3.0 },
+          values: {
+            digTime: 2,
+            pitRadius: 2.2,
+            pitDur: 60,
+            holdDur: 10,
+            damage: [220, 285, 350, 415, 480, 545],
+            apRatio: 0.75,
+            blindDur: [2.8, 3.1, 3.4, 3.7, 4.0, 4.4],
+          },
+          castTime: 0.15,
+        },
+        s2: {
+          slot: "s2",
+          name: "立定撑篙",
+          brief: "原地撑起变不可选中并给全队开大视野最多 8 秒；二段选落点跳下给友军套盾",
+          tags: ["shield", "dash", "buff"],
+          desc: "原地用铁锹把自己高高撑起来，变为不可选中状态并无法移动，最多持续 {maxDur} 秒，期间大幅扩大自身视野并为队友提供高空视野（可看穿草丛）；二次施放可选择一个落点跳下来，使落点周围的友军获得 {shield}(+{hpRatio%}最大生命) 点护盾，持续 {shieldDur} 秒。",
+          maxLevel: 6,
+          cooldown: [18, 17, 16, 15, 14, 13],
+          manaCost: [65, 70, 75, 80, 85, 90],
+          cast: { type: "self", radius: 0 },
+          recastBuff: "xuesong_pole",
+          recastCast: { type: "position", range: 7.5, radius: 3.8 },
+          values: {
+            maxDur: 8,
+            sightRange: 26,
+            leapRange: 7.5,
+            leapTime: 0.45,
+            shieldRadius: 3.8,
+            shield: [260, 340, 420, 500, 580, 660],
+            hpRatio: 0.08,
+            shieldDur: 4,
+          },
+          castTime: 0.14,
+        },
+        ult: {
+          slot: "ult",
+          name: "颠勺铁锹",
+          brief: "伸手铲起一名敌人高举压制 2.5 秒；二段将其投掷到身边任意位置造成伤害与眩晕",
+          tags: ["control", "burst"],
+          desc: "伸长手臂用铁锹铲起一名敌方英雄并高高举起压制 {holdDur} 秒，随后可再次施放将敌人投掷到身边的任意位置，落地对范围内敌人造成 {damage}(+{apRatio%}法强) 点法术伤害并眩晕 {stunDur} 秒。",
+          maxLevel: 3,
+          cooldown: [58, 50, 42],
+          manaCost: [100, 110, 120],
+          cast: { type: "target", range: 6.5 },
+          recastBuff: "xuesong_scoop",
+          recastCast: { type: "position", range: 7, radius: 2.6 },
+          values: {
+            holdDur: 2.5,
+            throwRange: 7,
+            landRadius: 2.6,
+            damage: [320, 460, 600],
+            apRatio: 0.65,
+            stunDur: [1.2, 1.4, 1.6],
+          },
+          castTime: 0.18,
+        },
+      },
+      build: [
+        "slippers",
+        "fire_hydrant",
+        "liberation_shoes",
+        "big_pot",
+        "steel_basin",
+        "fire_blanket",
+        "air_cooler",
+      ],
+      palette: { primary: "#2e6b58", secondary: "#ece6d6", accent: "#d9a24b", glow: "#7ee8c0" },
+      look: "身着松绿大衣、浅色衬衫和暖金领带的老师，戴着黑框方眼镜，右手扛着一把长杆宽头大铁锹。挖土、撑篙、颠勺全凭手中铁锹，沉稳中带着一股讲台威严。",
+    },
+    stone: {
+      id: "stone",
+      name: "小肥石",
+      title: "一块会滚的石头",
+      role: "fighter",
+      roleName: "战士",
+      lane: "top",
+      difficulty: 2,
+      lore: "顶着一顶祖传黄安全帽、圆滚滚会翻跟头的大石块。腿短跑不快，但越练越肉、越练越狠，粘上人就赖着不走。",
+      tips: "用机动性换成长性的重装战士：被动减少 15% 受到的暴击伤害，每 7 秒强化一次普攻；一技能「练功」原地锻炼最多 10 秒，期间不能走但能普攻和放技能，虽然挨打更疼，但能永久加血量、护甲和攻击力，撑得越久涨得越多；二技能「抓起来锤」锁住敌方英雄减速 50% 并被他带着跑 3 秒，期间一直敲他，打死还能抓起尸体扔出去砸飞一片，对小兵野怪则可以直接扔；大招「自重跳」远远跳进人群砸地减速，落地自带 40% 免伤。",
+      attackType: "melee",
+      radius: 0.78,
+      base: {
+        hp: 4100,
+        mana: 440,
+        ad: 160,
+        armor: 128,
+        mr: 68,
+        attackSpeed: 0.82,
+        moveSpeed: 5.25,
+        attackRange: 2.35,
+        hpRegen: 12,
+        manaRegen: 3.2,
+      },
+      growth: { hp: 350, mana: 85, ad: 10.5, armor: 24, mr: 9.5, attackSpeedPct: 0.015 },
+      basicAttack: { windup: 0.36, damageType: "physical" },
+      passive: {
+        name: "祖传安全帽",
+        brief: "受到暴击伤害 -15%；每 7 秒强化一次普攻附带额外伤害",
+        tags: ["defense", "burst"],
+        desc: "受到的暴击伤害减少 {critRed%}；每 {cd} 秒强化一次普攻，下次普攻额外造成 {bonusDmg}(+{adRatio%}物攻) 点物理伤害。",
+        values: { critRed: 0.15, cd: 7, bonusDmg: 75, adRatio: 0.45 },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "练功",
+          brief: "原地锻炼 7 秒每秒叠 1 层，期间击杀小兵野怪 +1 层、杀英雄 +4 层，永久加血甲攻且死亡不清空",
+          tags: ["buff"],
+          desc: "原地锻炼 {maxDur} 秒：期间无法移动，但可以穿插技能与普攻，受到伤害提高 {vuln%}。每秒叠加 1 层练功底子（完整 7 秒得 7 层），锻炼期间击杀小兵或野怪额外得 {killBonusUnit} 层、击杀敌方英雄额外得 {killBonusHero} 层。每层永久提升 +{hpPerStack} 最大生命、+{armorPerStack} 护甲与 +{adPerStack} 攻击力，死亡后层数与属性永久保留不清空。",
+          maxLevel: 6,
+          cooldown: [16, 15, 14, 13, 12, 11],
+          manaCost: [45, 50, 55, 60, 65, 70],
+          cast: { type: "self", radius: 0 },
+          recastBuff: "stone_train",
+          recastCast: { type: "self", radius: 0 },
+          values: {
+            maxDur: 7,
+            vuln: 0.3,
+            hpPerStack: [12, 14.5, 17, 19.5, 22, 25],
+            armorPerStack: [1.5, 1.8, 2.1, 2.4, 2.7, 3.0],
+            adPerStack: [1.5, 1.8, 2.1, 2.4, 2.7, 3.0],
+            killBonusUnit: 1,
+            killBonusHero: 4,
+          },
+          castTime: 0.1,
+        },
+        s2: {
+          slot: "s2",
+          name: "抓起来锤",
+          brief: "获得 50%-80% 攻速，锁住英雄减速 50% 被带着走 3 秒，击杀后可扔尸体击飞；对小兵野怪直接扔",
+          tags: ["control", "slow", "buff"],
+          desc: "自身在 {asDur} 秒内获得 {asBonus%} 攻速提升，并锁住范围内一名敌人：对英雄减速 {slow%}，{lockDur} 秒内被其移动或传送带着走，期间可持续普攻；目标阵亡后 {corpseDur} 秒内可再次施放，抓起尸体投掷到指定位置，造成 {throwDmg}(+{adRatio%}物攻) 点物理伤害并击飞 {knockup} 秒。对非英雄单位可直接抓起投掷。",
+          maxLevel: 6,
+          cooldown: [13, 12.2, 11.4, 10.6, 9.8, 9],
+          manaCost: [55, 60, 65, 70, 75, 80],
+          cast: { type: "target", range: 5.5, anyUnit: !0 },
+          recastBuff: "stone_corpse",
+          recastCast: { type: "position", range: 7.5, radius: 2.6 },
+          values: {
+            slow: 0.5,
+            lockDur: 3,
+            asBonus: [0.5, 0.56, 0.62, 0.68, 0.74, 0.8],
+            asDur: 3,
+            corpseDur: 5,
+            throwRange: 7.5,
+            landRadius: 2.6,
+            throwDmg: [240, 300, 360, 420, 480, 540],
+            adRatio: 0.75,
+            knockup: 0.9,
+          },
+          castTime: 0.14,
+        },
+        ult: {
+          slot: "ult",
+          name: "自重跳",
+          brief: "跃向远处落点砸地造成伤害和减速，落地获得 40% 免伤",
+          tags: ["dash", "slow", "defense"],
+          desc: "跃向远处落点，砸地对范围内敌人造成 {damage}(+{adRatio%}物攻+{hpRatio%}最大生命) 点物理伤害并减速 {slow%}，持续 {slowDur} 秒；落地后获得 {reduction%} 免伤，持续 {drDur} 秒。",
+          maxLevel: 3,
+          cooldown: [48, 42, 36],
+          manaCost: [95, 105, 115],
+          cast: { type: "position", range: 11.5, radius: 3.4 },
+          values: {
+            leapTime: 0.62,
+            damage: [340, 490, 640],
+            adRatio: 0.85,
+            hpRatio: 0.08,
+            slow: 0.45,
+            slowDur: 2.5,
+            reduction: 0.4,
+            drDur: 4.5,
+          },
+          castTime: 0.14,
+        },
+      },
+      build: [
+        "slippers",
+        "red_bull_case",
+        "liberation_shoes",
+        "riot_armor",
+        "fire_blanket",
+        "sledgehammer",
+        "big_quilt",
+      ],
+      palette: { primary: "#7c776e", secondary: "#46423d", accent: "#e8b93c", glow: "#ffcf66" },
+      look: "一块戴着祖传黄安全帽的敦实石头，平时滚着走路，打起架来稳如泰山。",
+    },
+    scallion: {
+      id: "scallion",
+      name: "葱仔仔",
+      title: "一根会刺人的葱小孩",
+      role: "marksman",
+      roleName: "射手",
+      lane: "bot",
+      difficulty: 2,
+      lore: "一根脾气不太好、顶着炸毛绿葱叶到处乱窜的葱小孩。别人说他太扎眼，他就越滑越来劲，近身能拍人，远处能丢葱叶，急眼了直接憋出一管绿光气功波。",
+      tips: "不打架的时候一直跑会越滑越快，支援转线很快。对拼开二技能加攻速加射程，每四下普攻白送一次无前摇葱锋还能叠破甲；大招先闪现找好角度再喷葱击波，期间靠方向键慢慢甩头扫人。",
+      attackType: "both",
+      radius: 0.56,
+      base: {
+        hp: 2900,
+        mana: 450,
+        ad: 172,
+        armor: 76,
+        mr: 50,
+        attackSpeed: 0.96,
+        moveSpeed: 5.55,
+        attackRange: 4.2,
+        hpRegen: 7,
+        manaRegen: 3.2,
+      },
+      growth: { hp: 200, mana: 100, ad: 10.8, armor: 13.5, mr: 6, attackSpeedPct: 0.032 },
+      basicAttack: {
+        windup: 0.24,
+        damageType: "physical",
+      },
+      passive: {
+        name: "飘逸刺头",
+        brief: "脱战持续移动 8 秒内移速最高加 15% 到 60%（随等级提升）；同时属于远程和近战",
+        tags: ["buff"],
+        desc: "他的绿头发很扎眼，越滑越兴奋。非战斗状态持续移动时移速不断提升，8 秒后达到上限，最多提高 15% 到 60%（随等级提升）。他同时属于远程和近战。",
+        values: { rampSec: 8, minHaste: 0.15, maxHaste: 0.6, combatDelay: 3.5 },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "葱锋",
+          brief: "主动直线拍击造成伤害和可叠加破甲；被动每四下普攻自动白送一次 25% 伤害的葱锋",
+          tags: ["burst", "buff"],
+          desc: "主动：用葱绿朝前方拍击，对直线范围内敌人造成 {damage}(+{adRatio%}物攻) 点物理伤害，并施加一层护甲破损，降低 {shred%} 护甲（最多叠 {maxStacks} 层，持续 {shredDur} 秒）。被动：每 4 次普通攻击自动触发一次没有前摇后摇的葱锋，造成 {passiveRatio%} 伤害。",
+          maxLevel: 6,
+          cooldown: [6.5, 6.1, 5.7, 5.3, 4.9, 4.5],
+          manaCost: [40, 44, 48, 52, 56, 60],
+          cast: { type: "direction", range: 8.8, width: 2.3 },
+          values: {
+            damage: [210, 265, 320, 375, 430, 485],
+            adRatio: 0.85,
+            shred: [0.08, 0.09, 0.1, 0.11, 0.12, 0.13],
+            maxStacks: 4,
+            shredDur: 5,
+            passiveRatio: 0.25,
+            hitsToProc: 4,
+          },
+          castTime: 0.16,
+        },
+        s2: {
+          slot: "s2",
+          name: "葱能爆发",
+          brief: "8 秒内大幅提高攻速和射程",
+          tags: ["buff"],
+          desc: "鼓起全身葱劲，在 {duration} 秒内获得 {asBonus%} 攻速提升，并使普攻抽打射程额外提升 {rangeBonus} 米。",
+          maxLevel: 6,
+          cooldown: [14, 13.2, 12.4, 11.6, 10.8, 10],
+          manaCost: [55, 58, 61, 64, 67, 70],
+          cast: { type: "self" },
+          values: {
+            duration: 8,
+            asBonus: [0.35, 0.43, 0.51, 0.59, 0.67, 0.75],
+            rangeBonus: [1.5, 1.7, 1.9, 2.1, 2.3, 2.5],
+          },
+          castTime: 0.06,
+        },
+        ult: {
+          slot: "ult",
+          name: "葱击波",
+          brief: "闪现到目标点，原地喷出 3 秒可缓慢转向的绿色葱能激光，造成物理与敌人当前生命比例伤害；再次按大招可提前中断",
+          tags: ["dash", "burst", "slow"],
+          desc: "先闪现到范围内指定位置，随后在 {duration} 秒内向前喷射持续的绿色葱能激光。喷射期间自身无法移动，但可通过移动方向缓慢转动激光扫射，每跳造成 {tickDamage}(+{adRatio%}物攻) 外加目标当前生命值 {curHpPct%} 的物理伤害并减速 {slow%}，持续 {slowDur} 秒。期间再次按大招可主动提前中断。",
+          maxLevel: 3,
+          cooldown: [46, 40, 34],
+          manaCost: [95, 105, 115],
+          cast: { type: "position", range: 7.5, radius: 1.5 },
+          recastBuff: "scallion_beam",
+          recastCast: { type: "self" },
+          values: {
+            duration: 3,
+            beamLength: 13.5,
+            beamWidth: 2.3,
+            tickInterval: 0.25,
+            tickDamage: [115, 162, 210],
+            adRatio: 0.34,
+            curHpPct: [0.025, 0.032, 0.04],
+            slow: 0.4,
+            slowDur: 0.8,
+            turnRate: 1.15,
+          },
+          castTime: 0.08,
+        },
+      },
+      build: [
+        "slippers",
+        "nail_gun",
+        "running_shoes",
+        "brick",
+        "red_bull_case",
+        "pry_bar",
+        "sledgehammer",
+      ],
+      palette: { primary: "#2ea843", secondary: "#eef7e6", accent: "#a6f052", glow: "#6bff78" },
+      look: "一根顶着蓬松刺头绿葱叶、踩着小滑板乱窜的葱小孩，浑身散发刺鼻又精神的葱味。",
+    },
+    paperboy: {
+      id: "paperboy",
+      name: "纸札人",
+      title: "替身先碎",
+      role: "support",
+      roleName: "辅助",
+      lane: "bot",
+      difficulty: 1,
+      lore: "一个脸涂大红嘴、身上贴满白纸条的纸扎小人。总把一个替身放在自家塔下晃悠，平时拿着大唢呐围着人吹，真被打死时替身一碎，自己跑回塔下，顺手把对面身上攒了一堆的晦气全点爆。",
+      tips: "你是高仇恨反手自爆辅助：进团先开大招绑住己方主力分摊伤害并给打人的敌人狂叠晦气，再吹一技能唢呐在人堆里顶着盾叠晦气。队友吃控就丢二技能纸鹤解控提速。身上有替身时不怕死，被打死替身先碎，不仅回血换位逃回塔下，还会直接引爆周围敌人身上所有晦气。",
+      attackType: "ranged",
+      radius: 0.56,
+      base: {
+        hp: 2400,
+        mana: 480,
+        ad: 132,
+        armor: 84,
+        mr: 58,
+        attackSpeed: 0.85,
+        moveSpeed: 5.5,
+        attackRange: 6.4,
+        hpRegen: 8,
+        manaRegen: 4.5,
+      },
+      growth: { hp: 176, mana: 110, ad: 8.5, armor: 14, mr: 7, attackSpeedPct: 0.02 },
+      basicAttack: {
+        windup: 0.28,
+        damageType: "magic",
+        projectile: "paperboy_basic",
+        projectileSpeed: 24,
+      },
+      passive: {
+        name: "纸替身/人殉",
+        brief: "每 22 到 14 秒在最近去过的己方塔下生一个替身；致命伤替身碎裂回血 30%-70% 并换位，引爆防御塔射程内所有敌人晦气",
+        tags: ["defense", "burst"],
+        desc: "每 22 到 14 秒（随等级缩短）生成一个替身灵体，在自己最近去过的己方存活防御塔下游荡。受到致命伤害时替身碎裂，回复 30% 到 70% 最大生命值（随等级提高）并将自己替换到替身位置，同时引爆大范围（防御塔攻击半径）内所有敌人的晦气层数。晦气永久存在，仅在爆发后清零或回到泉水慢慢消解，每层爆发造成目标 1% 最大生命值真实伤害，能扣除的血量以白色血条显示。",
+        values: {
+          effigyCd: 22,
+          effigyCdMin: 14,
+          minHeal: 0.3,
+          maxHeal: 0.7,
+          radius: 8.5,
+          pctPerStack: 0.01,
+          fountainDecayPerSec: 2.5,
+        },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "唢呐齐响",
+          brief: "吹响唢呐得 5 秒护盾，大范围内敌人每秒叠加晦气（随技能与英雄等级越来越快），护盾碎了就停",
+          tags: ["defense", "burst"],
+          desc: "原地吹响唢呐，获得持续 {duration} 秒的 {shield}(+{hpRatio%}最大生命) 点护盾；护盾存在期间，大范围（防御塔攻击半径）内的敌人每秒叠加 {stacksPerSec} 层晦气（英雄每升 4 级额外多叠 1 层）。护盾被打破则吹唢呐立刻中断。",
+          maxLevel: 6,
+          cooldown: [10.5, 9.9, 9.3, 8.7, 8.1, 7.5],
+          manaCost: [55, 60, 65, 70, 75, 80],
+          cast: { type: "self", radius: 8.5 },
+          values: {
+            duration: 5,
+            shield: [280, 360, 440, 520, 600, 680],
+            hpRatio: 0.1,
+            radius: 8.5,
+            stacksPerSec: [2, 3, 5, 7, 9, 11],
+          },
+          castTime: 0.12,
+        },
+        s2: {
+          slot: "s2",
+          name: "纸鹤传书",
+          brief: "纸鹤飞向友军解除并免疫控制 1 秒，自己和该队友都得 40%-80% 爆发移速",
+          tags: ["buff", "defense"],
+          desc: "放出一只纸鹤飞向范围内一名友军：立刻解除其身上的控制效果，并在 {immuneDur} 秒内免疫控制；同时纸札人与该队友都获得 {haste%} 爆发移速，持续 {hasteDur} 秒。",
+          maxLevel: 6,
+          cooldown: [13, 12.2, 11.4, 10.6, 9.8, 9],
+          manaCost: [50, 55, 60, 65, 70, 75],
+          cast: { type: "target", range: 11, ally: !0, selfFallback: !0 },
+          values: {
+            immuneDur: 1,
+            haste: [0.4, 0.48, 0.56, 0.64, 0.72, 0.8],
+            hasteDur: 2.5,
+            speed: 32,
+          },
+          castTime: 0.1,
+        },
+        ult: {
+          slot: "ult",
+          name: "扎筋点睛",
+          brief: "绑定友军替其扛 30% 伤害并给打人者叠晦气；也可对自己用，不免伤但挨打就给敌人叠晦气",
+          tags: ["defense", "buff"],
+          desc: "用红线绑定范围内一名友军或自己，持续 {duration} 秒：绑定友军时替其承受 {share%} 伤害并按伤害给攻击者叠晦气；对自己施放时无法减伤，但所有攻击自己的敌人都会按伤害量自动叠加晦气层数。",
+          maxLevel: 3,
+          cooldown: [42, 36, 30],
+          manaCost: [80, 90, 100],
+          cast: { type: "target", range: 11.5, ally: !0, selfFallback: !0 },
+          values: {
+            duration: [8, 10, 12],
+            share: 0.3,
+            dmgPerStack: 95,
+            maxStacksPerHit: 6,
+            breakRange: 18,
+          },
+          castTime: 0.14,
+        },
+      },
+      build: [
+        "slippers",
+        "lunchbox",
+        "liberation_shoes",
+        "riot_armor",
+        "fire_blanket",
+        "big_quilt",
+        "air_cooler",
+      ],
+      palette: { primary: "#d9e6f0", secondary: "#2a3140", accent: "#e84a5f", glow: "#c9f7ff" },
+      look: "贴着白纸黑冠、涂着大红嘴唇的纸扎小人，怀里揣着纸鹤与唢呐，站在人堆里阴森又扎眼。",
+    },
+    maggot: {
+      id: "maggot",
+      name: "活蛆",
+      title: "分解者",
+      role: "marksman",
+      roleName: "射手",
+      lane: "bot",
+      difficulty: 2,
+      lore: "一条白白胖胖、一节一节扭着走的分解者肥蛆。最喜欢吃东西拉粪污、把小坨合成金光闪闪的大粪污，靠在粪堆边上普攻专治皮糙肉厚的大肉盾。",
+      tips: "你是百分比魔法伤害专治坦克的阵地射手：吃消耗品五秒后会伴随屁声原地生一坨小粪污，一技能喷吐沾满三秒也会生小粪污，大招噗叽啪冷却很短可以远距离不停砸小粪污。两坨小粪污合成中粪污，两坨中粪污合成金光大粪污，二技能能把大范围所有粪污一口气吸到身边合成大粪污。自己能随便穿粪污走位，靠在粪污旁边站撸攻速和百分比魔法伤害高得吓人。",
+      attackType: "ranged",
+      radius: 0.58,
+      base: {
+        hp: 2950,
+        mana: 460,
+        ad: 156,
+        armor: 76,
+        mr: 54,
+        attackSpeed: 0.92,
+        moveSpeed: 5.45,
+        attackRange: 6.5,
+        hpRegen: 7.5,
+        manaRegen: 4.5,
+      },
+      growth: { hp: 205, mana: 105, ad: 9.2, armor: 12, mr: 6.5, attackSpeedPct: 0.032 },
+      basicAttack: {
+        windup: 0.24,
+        damageType: "physical",
+        projectile: "maggot_basic",
+        projectileSpeed: 28,
+      },
+      passive: {
+        name: "分解者",
+        brief: "吃消耗品 5 秒后放屁生小粪污；能穿粪污；身边有粪污时普攻多吐粑粑碎片并附带最大生命值魔法伤害",
+        tags: ["buff", "burst"],
+        desc: "每次食用消耗品装备，会在 5 秒后伴随屁声在原地生成一坨小粪污。活蛆可以自由穿越粪污地形而不受阻挡。身边 5.7 米内有粪污时叠便便层数提升攻速，且普攻会额外吐出粑粑碎片附带目标最大生命值百分比魔法伤害：附近有小粪污额外吐 1 块小粑粑，中粪污额外吐 2 块小粑粑，金色大粪污额外吐 1 块金色粑粑碎片。",
+        values: {
+          digestDelay: 5,
+          auraRadius: 5.67,
+          asPerPower: 0.12,
+          hpPctPerPower: 0.015,
+          maxPower: 10,
+          monsterCapPerPower: 120,
+          smallDur: 8,
+          medDur: 24,
+          largeDur: 64,
+        },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "喷吐",
+          brief: "跟着头朝向持续喷吐 5 秒散碎粪便，命中敌人满 3 秒生小粪污；两小合中，两中合金色大粪污",
+          tags: ["burst", "control"],
+          desc: "顺着活蛆当前朝向持续喷吐 {duration} 秒散碎粪便（喷吐方向会随头朝向实时转动），每秒造成多次 {tickDamage}(+{apRatio%}) 点魔法伤害；敌人被喷中累计满 {coatSec} 秒时脚下形成一坨小粪污。小粪污持续 8 秒并阻挡行走，两坨小粪污滑到一起融合为持续 24 秒的中粪污，两坨中粪污融合为持续 64 秒的金色大粪污，大粪污吸收小粪污可刷新持续时间。",
+          maxLevel: 6,
+          cooldown: [11, 10.4, 9.8, 9.2, 8.6, 8],
+          manaCost: [55, 60, 65, 70, 75, 80],
+          cast: { type: "direction", range: 8.5, width: 2.4 },
+          values: {
+            duration: 5,
+            tickDamage: [24, 30, 36, 42, 48, 54],
+            apRatio: 0.15,
+            coatSec: 3,
+          },
+          castTime: 0.1,
+        },
+        s2: {
+          slot: "s2",
+          name: "吸粪机",
+          brief: "把大范围内所有粪污平滑吸到身边聚拢融合",
+          tags: ["buff", "control"],
+          desc: "猛吸一口气，将 {radius} 米大范围内所有粪污平滑吸回自己身边聚拢，满足两小合中、两中合金的粪污会自动依次融合成更大的粪污或刷新金色大粪污。",
+          maxLevel: 6,
+          cooldown: [14, 13, 12, 11, 10, 9],
+          manaCost: [50, 55, 60, 65, 70, 75],
+          cast: { type: "self", radius: 13 },
+          values: {
+            radius: 13,
+            poseDur: 0.65,
+          },
+          castTime: 0.12,
+        },
+        ult: {
+          slot: "ult",
+          name: "噗叽啪",
+          brief: "远距离高射一坨小粪污导弹，便便层数每高 1 层伤害按 150% 累乘、蓝耗按 180% 累乘",
+          tags: ["burst", "control"],
+          desc: "向远处目标圆圈高抛射出一坨小粪污导弹，{delay} 秒后噗叽啪砸下，造成 {damage}(+{adRatio%}物攻+{apRatio%}法强) 点魔法伤害与 {slow%} 减速，并在落点生成一坨小粪污。身边每有 1 层便便加成，本次大招伤害按 150% 累乘，同时法力消耗按 180% 累乘。",
+          maxLevel: 3,
+          cooldown: [12, 9.5, 7],
+          manaCost: [45, 50, 55],
+          cast: { type: "position", range: 13.5, radius: 2.6 },
+          values: {
+            delay: 0.65,
+            damage: [240, 340, 440],
+            adRatio: 0.75,
+            apRatio: 0.65,
+            slow: 0.3,
+            slowDur: 1.2,
+            ultDmgMult: 1.5,
+            ultManaMult: 1.8,
+          },
+          castTime: 0.12,
+        },
+      },
+      build: [
+        "slippers",
+        "nail_gun",
+        "running_shoes",
+        "brick",
+        "red_bull_case",
+        "pry_bar",
+        "sledgehammer",
+      ],
+      palette: { primary: "#ebe6cf", secondary: "#6b4a24", accent: "#f5c842", glow: "#b8e04b" },
+      look: "一条白白胖胖、扭来扭去的肥蛆，周围堆满大小粪污和金灿灿的大便便，靠在粪堆旁边专咬肉盾。",
+    },
+    horseman: {
+      id: "horseman",
+      name: "半马人",
+      title: "四条腿的怪人",
+      role: "fighter",
+      roleName: "战士",
+      lane: "top",
+      difficulty: 1,
+      lore: "上半身是人、下半身是四条马腿的怪人。站着跟人对砍笨手笨脚就是个废物，可一旦甩开四条蹄子跑起来，那就是见谁撞谁的怪物。",
+      tips: "站着打是废物，跑起来是怪物：不停跑满 5 秒且不平砍就能攒出长距离冲锋普攻，移速越快伤害越高而且没有上限，冲刺过程会把沿途所有敌人都撞开；接着按住一技能转身拿屁股对准方向蓄力，蓄越久长方形射程越长、击退越远，蓄满还能暴击；被围攻按二技能嘶鸣免控兼削弱对面伤害，拿人头刷新大招继续狂奔。",
+      attackType: "melee",
+      radius: 0.64,
+      base: {
+        hp: 3420,
+        mana: 440,
+        ad: 162,
+        armor: 102,
+        mr: 56,
+        attackSpeed: 0.82,
+        moveSpeed: 5.95,
+        attackRange: 2.3,
+        hpRegen: 9.5,
+        manaRegen: 3.4,
+      },
+      growth: { hp: 315, mana: 90, ad: 12.2, armor: 20, mr: 8.5, attackSpeedPct: 0.018 },
+      basicAttack: { windup: 0.3, damageType: "physical" },
+      passive: {
+        name: "人马一体",
+        brief: "持续跑 5 秒不普攻后普攻变长距离冲锋：沿途撞开所有敌人，移速越快伤害越高且无上限",
+        tags: ["dash", "burst", "control"],
+        desc: "持续移动 5 秒且不普攻后，下一次普攻变为长距离冲锋：猛冲一段远距离，沿途撞开并击飞所有碰到的敌人；冲锋伤害随当前移动速度持续拔高，增幅没有上限，跑得越快撞得越痛。",
+        values: {
+          runTime: 5,
+          bonusRange: 4.5,
+          minDash: 5.0,
+          maxDash: 7.4,
+          dashSpeed: 26,
+          hitRadius: 1.15,
+          minBonus: 0.3,
+          msFloor: 4.5,
+          msScale: 0.25,
+          knockDist: 3.4,
+          sideKnock: 2.6,
+          knockAir: 0.34,
+        },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "后腿蹬",
+          brief: "长方形蓄力猛蹬：蓄越久射程越长、击退越远，蓄满可暴击",
+          tags: ["burst", "control"],
+          desc: "冷却较短。按住蓄力期间不可移动并立刻把屁股对准目标方向，长方形射程随蓄力从 {minRange} 米拉长到 {maxRange} 米（最长蓄力 {maxCharge} 秒）；松手后用后腿猛蹬，造成 {minDamage}～{damage}(+{adRatio%}物攻) 点物理伤害、击退 {minKnock}～{knockDist} 米并眩晕 {minStun}～{stunDur} 秒。蓄力满时该次伤害可以暴击。",
+          maxLevel: 6,
+          cooldown: [5.5, 5.0, 4.6, 4.2, 3.8, 3.5],
+          manaCost: [35, 37, 39, 41, 43, 45],
+          holdCharge: !0,
+          cast: { type: "direction", range: 3.0, width: 2.3 },
+          recastBuff: "horseman_kick_charge",
+          recastCast: { type: "direction", range: 6.8, width: 2.3 },
+          values: {
+            fullCharge: 0.9,
+            maxCharge: 1.65,
+            minRange: 3.0,
+            maxRange: 6.8,
+            width: 2.3,
+            minRatio: 0.43,
+            minDamage: [100, 128, 156, 184, 212, 240],
+            damage: [235, 300, 365, 430, 495, 560],
+            adRatio: 1.25,
+            minStun: 0.55,
+            stunDur: [1.15, 1.25, 1.35, 1.45, 1.55, 1.65],
+            minKnock: 1.2,
+            knockDist: 4.6,
+          },
+          castTime: 0.14,
+        },
+        s2: {
+          slot: "s2",
+          name: "嘶鸣",
+          brief: "发出哀嚎：周围魔法伤害 + 削弱敌人伤害，自己免疫控制",
+          tags: ["control", "defense", "buff"],
+          desc: "扬起脖子发出凄厉嘶鸣，对周围 {radius} 米内所有敌人造成 {damage}(+{apRatio%}法强+{adRatio%}物攻) 点魔法伤害，并削弱他们造成的伤害 {weaken%}，持续 {weakDur} 秒；同时自身立刻解除减速与定身并在 {immuneDur} 秒内免疫所有控制。",
+          maxLevel: 6,
+          cooldown: [11, 10.4, 9.8, 9.2, 8.6, 8.0],
+          manaCost: [55, 58, 61, 64, 67, 70],
+          cast: { type: "self", radius: 5.4 },
+          values: {
+            radius: 5.4,
+            damage: [160, 210, 260, 310, 360, 410],
+            apRatio: 0.75,
+            adRatio: 0.45,
+            weaken: [0.22, 0.25, 0.28, 0.31, 0.34, 0.38],
+            weakDur: 3.5,
+            immuneDur: [1.8, 2.0, 2.2, 2.4, 2.6, 2.8],
+          },
+          castTime: 0.12,
+        },
+        ult: {
+          slot: "ult",
+          name: "践踏",
+          brief: "主动爆发移速并持续衰减、击杀刷新冷却；被动放任意技能都加移速",
+          tags: ["buff", "dash"],
+          desc: "主动：四蹄狂踏，短时间获得 {burstSpeed%} 爆发移动速度并在 {duration} 秒内持续衰减；击杀敌方英雄可立刻刷新本技能冷却。被动：学会后每施放任意技能，自身额外获得 {passiveSpeed%} 移动速度，持续 {passiveDur} 秒。",
+          maxLevel: 3,
+          cooldown: [36, 30, 24],
+          manaCost: [75, 80, 85],
+          cast: { type: "self", radius: 3.2 },
+          values: {
+            burstSpeed: [0.85, 1.05, 1.25],
+            endSpeed: [0.18, 0.24, 0.3],
+            duration: 4.0,
+            passiveSpeed: [0.18, 0.24, 0.3],
+            passiveDur: 2.5,
+          },
+          castTime: 0.08,
+        },
+      },
+      build: [
+        "slippers",
+        "running_shoes",
+        "brick",
+        "fire_blanket",
+        "sledgehammer",
+        "riot_armor",
+        "big_quilt",
+      ],
+      palette: { primary: "#c46c2d", secondary: "#593016", accent: "#ffae3d", glow: "#ffe08a" },
+      look: "上半身光着膀子、下半身长着四条壮实马腿的怪人，跑起来尘土飞扬，后蹄子踹人极重。",
+    },
+    cow: {
+      id: "cow",
+      name: "大脚牛",
+      title: "一脚裂地",
+      role: "tank",
+      roleName: "坦克",
+      lane: "top",
+      difficulty: 1,
+      lore: "一脚下去，地板都要裂。",
+      tips: "仗着一双大长腿，跑得越快能直接跨过的薄墙和土坑粪堆越宽，二技能飞踢突进距离也越远；对线有空就暴力练深蹲永久叠物攻、移速和冷却，练完力竭走不动时开大招牛气冲天立刻解掉力竭、变大回血加速，再连着跺脚把人全震晕。",
+      attackType: "melee",
+      radius: 0.64,
+      base: {
+        hp: 2944,
+        mana: 450,
+        ad: 158,
+        armor: 118,
+        mr: 62,
+        attackSpeed: 0.78,
+        moveSpeed: 5.55,
+        attackRange: 2.35,
+        hpRegen: 10.5,
+        manaRegen: 3.5,
+      },
+      growth: { hp: 355, mana: 90, ad: 11.5, armor: 22, mr: 9.2, attackSpeedPct: 0.016 },
+      basicAttack: { windup: 0.31, damageType: "physical" },
+      passive: {
+        name: "大长腿",
+        brief: "能直接迈步横跨薄墙体和人造地形，跨障厚度随当前移速提升",
+        tags: ["dash", "buff"],
+        desc: "凭着两根大长腿，朝着薄墙体或土坑、粪污等人造地形直走时可直接高抬腿横跨过去，能跨越的地形厚度随当前移动速度提升。",
+        values: {
+          baseCross: 1.85,
+          msFloor: 3.6,
+          msScale: 0.72,
+          maxCross: 7.4,
+          cd: 0.65,
+        },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "深蹲",
+          brief: "原地暴力深蹲 3 秒：不可移动但能普攻放技能，永久加物攻/移速/冷却，练后力竭减速 40% 且层数越高力竭越久",
+          tags: ["buff", "defense"],
+          desc: "花费 {maxDur} 秒原地暴力练习深蹲，期间无法移动但可以正常普攻与施放技能（再次点击可提前结束）。每练满 1 秒永久获得 1 层叠层，每层提供 +{adPerStack} 物攻、+{msPerStack} 移速与 +{cdrPerStack%} 冷却缩减。深蹲结束后进入 {exhaustDur} 秒力竭状态（当前每拥有 1 层额外延长 {exhaustPerStack} 秒），期间移动速度降低 {exhaustSlow%}。",
+          maxLevel: 6,
+          cooldown: [14.0, 13.5, 13.0, 12.5, 12.0, 11.5],
+          manaCost: [35, 35, 35, 35, 35, 35],
+          cast: { type: "self", radius: 2.0 },
+          recastBuff: "cow_squat",
+          recastCast: { type: "self", radius: 2.0 },
+          values: {
+            maxDur: 3,
+            adPerStack: [1.25, 1.5, 1.75, 2.0, 2.25, 2.5],
+            msPerStack: [0.02, 0.0225, 0.025, 0.0275, 0.03, 0.0325],
+            cdrPerStack: [0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005],
+            exhaustDur: 8,
+            exhaustPerStack: 0.25,
+            exhaustSlow: 0.4,
+          },
+          castTime: 0.06,
+        },
+        s2: {
+          slot: "s2",
+          name: "飞踢",
+          brief: "纵身飞踹一名敌人：必定物理暴击，移速越快突进距离越长",
+          tags: ["dash", "burst"],
+          desc: "纵身一脚踹向指定敌人，造成 {damage}(+{adRatio%}物攻) 点必定暴击的物理伤害并小幅击退目标。当前移动速度越快，飞踢的施放与突进距离越远（{minRange}～{maxRange} 米）。",
+          maxLevel: 6,
+          cooldown: [9.5, 9.0, 8.5, 8.0, 7.5, 7.0],
+          manaCost: [50, 52, 54, 56, 58, 60],
+          cast: { type: "target", range: 6.5, anyUnit: !0 },
+          values: {
+            damage: [145, 195, 245, 295, 345, 395],
+            adRatio: 0.85,
+            baseRange: 5.5,
+            msFloor: 4.5,
+            msScale: 0.95,
+            minRange: 4.0,
+            maxRange: 13.0,
+            knockDist: 1.4,
+          },
+          castTime: 0.1,
+        },
+        ult: {
+          slot: "ult",
+          name: "牛气冲天",
+          brief: "变大增血加速、立刻解力竭，8 秒内可连续跺脚 3/4/5 次造成范围伤害与眩晕",
+          tags: ["buff", "control", "burst"],
+          desc: "在 {giantDur} 秒内体型大幅变大，获得 {bonusHp} 点额外生命值（并立刻回复等量生命）与 {bonusMs%} 移动速度，同时立刻移除力竭状态。开启后 {stompWindow} 秒内可连续再次释放本技能进行跺脚（最多 {maxStomps} 次），每次跺脚对周围 {stompRadius} 米内敌人造成 {stompDamage}(+{adRatio%}物攻) 点物理伤害并眩晕 {stompStun} 秒。",
+          maxLevel: 3,
+          cooldown: [42, 36, 30],
+          manaCost: [80, 90, 100],
+          cast: { type: "self", radius: 4.8 },
+          recastBuff: "cow_stomp_ready",
+          recastCast: { type: "self", radius: 4.8 },
+          values: {
+            giantDur: [8, 9, 10],
+            bonusHp: [650, 1000, 1350],
+            bonusMs: [0.22, 0.28, 0.34],
+            stompWindow: 8,
+            maxStomps: [3, 4, 5],
+            stompRadius: 4.8,
+            stompDamage: [170, 240, 310],
+            adRatio: 0.85,
+            stompStun: [0.85, 0.95, 1.05],
+          },
+          castTime: 0.08,
+        },
+      },
+      build: [
+        "slippers",
+        "running_shoes",
+        "red_bull_case",
+        "riot_armor",
+        "fire_blanket",
+        "sledgehammer",
+        "big_quilt",
+      ],
+      palette: { primary: "#b85c28", secondary: "#4d2712", accent: "#ff9b38", glow: "#ffdf78" },
+      look: "一头长着粗壮大长腿和硕大牛脚丫的壮实大牛，跑起来步子大得离谱，一脚跺下去地皮都要开裂。",
+    },
+    monkey: {
+      id: "monkey",
+      name: "轮椅大圣",
+      title: "铁棍轮椅王",
+      role: "fighter",
+      roleName: "战士",
+      lane: "top",
+      difficulty: 2,
+      lore: "轮椅不是限制，是武器。",
+      tips: "每 9 秒吃香蕉回血或满血爆发加速并往轮椅底下掉香蕉皮，香蕉皮落地 1 秒后才生效，1 秒内被敌人踩到会被直接踩没；一技能可存 3 层随时甩皮；二技能甩棍击飞并插地变粗挡路；开大后 6/7/8 秒内普攻全变长且直线穿透击退，前三棍必定暴击，期间杀小兵叠 1 层、杀英雄叠 6 层永久加棍长。",
+      attackType: "melee",
+      radius: 0.62,
+      base: {
+        hp: 3350,
+        mana: 440,
+        ad: 174,
+        armor: 108,
+        mr: 56,
+        attackSpeed: 0.84,
+        moveSpeed: 5.65,
+        attackRange: 2.6,
+        hpRegen: 10,
+        manaRegen: 3.6,
+      },
+      growth: { hp: 345, mana: 90, ad: 12.2, armor: 21, mr: 8.8, attackSpeedPct: 0.02 },
+      basicAttack: { windup: 0.28, damageType: "physical" },
+      passive: {
+        name: "香蕉皮",
+        brief: "每 9 秒吃香蕉回 8% 生命（满血改爆发加速），轮椅下留香蕉皮（最多 8 片）；落地 1 秒后生效，1 秒内被踩会被消除",
+        tags: ["heal", "control"],
+        desc: "每 {interval} 秒吃一根香蕉，回复 {healPct%} 最大生命；满血时改为获得一次 {hastePct%} 爆发加速，持续 {hasteDur} 秒。同时在轮椅下方留下一片香蕉皮（最多同时存在 {maxPeels} 片）。香蕉皮落地 {armDur} 秒后才生效，生效前被敌人踩到会被直接消除；生效后敌人踩到会滑倒眩晕 {stunDur} 秒并被打断施法。",
+        values: {
+          interval: 9,
+          healPct: 0.08,
+          hastePct: 0.45,
+          hasteDur: 2.2,
+          maxPeels: 8,
+          armDur: 1,
+          peelDur: 35,
+          peelRadius: 1.05,
+          stunDur: 0.8,
+        },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "甩蕉皮",
+          brief: "可存 3 层：把一片香蕉皮扔到指定位置（1 秒后生效，1 秒内被踩会消除）；被动：香蕉皮造成高额魔法伤害",
+          tags: ["control", "zone"],
+          desc: "最多可储存 {maxCharges} 层（每 {recharge} 秒充能 1 层）：把一片香蕉皮扔到指定位置（与被动共用最多 {maxPeels} 片上限），落地 1 秒后生效，1 秒内被敌人踩到会被直接消除；生效后踩中眩晕 0.8 秒并打断施法。被动：生效的香蕉皮被踩中时额外造成 {peelDmg}(+{adRatio%}物攻) 点魔法伤害。",
+          maxLevel: 6,
+          cooldown: [0.45, 0.45, 0.45, 0.45, 0.45, 0.45],
+          manaCost: [39, 42, 44, 47, 49, 52],
+          cast: { type: "position", range: 8.5, radius: 1.1 },
+          values: {
+            maxCharges: 3,
+            maxPeels: 8,
+            recharge: [9.5, 9.0, 8.5, 8.0, 7.5, 7.0],
+            peelDmg: [374, 493, 612, 731, 850, 969],
+            adRatio: 1.87,
+            travelSpeed: 18,
+          },
+          castTime: 0.14,
+        },
+        s2: {
+          slot: "s2",
+          name: "横刀立棍",
+          brief: "扔出铁棍击飞路径敌人并造成伤害，落地后插地变粗变大阻隔地形",
+          tags: ["control", "zone", "burst"],
+          desc: "朝指定地点扔出铁棍，击飞路径上的敌人 {knockup} 秒并造成 {damage}(+{adRatio%}物攻) 点物理伤害；铁棍落到目的地后直直插进地里变粗变大，形成半径 {pillarRadius} 米的阻隔地形，持续 {pillarDur} 秒。",
+          maxLevel: 6,
+          cooldown: [13, 12.2, 11.4, 10.6, 9.8, 9.0],
+          manaCost: [60, 65, 70, 75, 80, 85],
+          cast: { type: "position", range: 9.2, radius: 1.55 },
+          values: {
+            damage: [155, 200, 245, 290, 335, 380],
+            adRatio: 0.85,
+            knockup: 0.75,
+            width: 1.55,
+            speed: 21,
+            pillarRadius: 1.45,
+            pillarDur: [4.2, 4.6, 5.0, 5.4, 5.8, 6.2],
+          },
+          castTime: 0.16,
+        },
+        ult: {
+          slot: "ult",
+          name: "铁棍修行",
+          brief: "6/7/8 秒内普攻全变直线穿透击退横扫，射程 +25%~40%、移速 −15%，前三棍必暴击；击杀小兵叠 1 层、英雄叠 6 层永久加棍长",
+          tags: ["buff", "burst", "control"],
+          desc: "进入 {duration} 秒铁棍修行状态：自身移速降低 {selfSlow%}，期间所有普攻距离提高 {rangePct%}（脚下显示普攻范围圈），且变为直线穿透横扫，额外造成 {bonusDmg}(+{adRatio%}物攻) 点物理伤害并击退沿线敌人 {knockDist} 米，其中前 {critAttacks} 棍必定暴击。期间击杀小兵叠加 {minionStacks} 层、击杀敌方英雄叠加 {heroStacks} 层，每层永久增加 {lenPerStack} 码棍长（同时增加攻击距离与铁棍长度）。",
+          maxLevel: 3,
+          cooldown: [46, 40, 34],
+          manaCost: [80, 90, 100],
+          cast: { type: "self", radius: 4.8 },
+          values: {
+            duration: [6, 7, 8],
+            critAttacks: 3,
+            rangePct: [0.25, 0.325, 0.4],
+            selfSlow: 0.15,
+            bonusDmg: [95, 145, 195],
+            adRatio: 0.45,
+            sweepWidth: 1.85,
+            knockDist: 2.2,
+            minionStacks: 1,
+            heroStacks: 6,
+            lenPerStack: 0.1,
+          },
+          castTime: 0.1,
+        },
+      },
+      build: [
+        "slippers",
+        "red_bull_case",
+        "liberation_shoes",
+        "sledgehammer",
+        "riot_armor",
+        "pry_bar",
+        "big_quilt",
+      ],
+      palette: { primary: "#d99228", secondary: "#4d2b12", accent: "#ffe042", glow: "#ffae24" },
+      look: "坐着双涡轮铁轮椅的猴哥，双臂握着金箍铁棍，一边啃香蕉顺手丢蕉皮，一边抡棍横扫战场。",
+    },
+    slime: {
+      id: "slime",
+      name: "黄色史莱姆",
+      title: "打不死的果冻",
+      role: "tank",
+      roleName: "控制",
+      lane: "top",
+      difficulty: 1,
+      lore: "用身体当控制工具。",
+      tips: "吃物理伤害会被弹性顶飞，但那部分血会慢慢弹回来；要是被撞到墙上，半秒内按二技能能直接甩出满蓄弹球。开大摊成一大滩果冻后再按一技能，可以把脚底踩着的人全都反吸住拖回自家塔下。",
+      attackType: "melee",
+      radius: 0.78,
+      base: {
+        hp: 3680,
+        hpGrowth: 315,
+        mp: 480,
+        mpGrowth: 34,
+        ad: 162,
+        adGrowth: 9.5,
+        ap: 0,
+        apGrowth: 0,
+        armor: 92,
+        armorGrowth: 19,
+        mr: 66,
+        mrGrowth: 12,
+        moveSpeed: 3.72,
+        attackRange: 2.35,
+        attackSpeed: 0.76,
+        asGrowth: 0.018,
+        hpRegen: 16,
+        mpRegen: 10,
+      },
+      passive: {
+        name: "究极弹性生物",
+        brief: "35%~60% 物理伤害在 10~6 秒内持续回复，并沿受击方向被弹性击退（撞墙即停）",
+        desc: "受到的物理伤害有 {minPct%}~{maxPct%}（随等级提升）会在 {maxDur}~{minDur} 秒内持续回复；这部分伤害在受伤瞬间会转化为强制位移，沿伤害来源与自身的连线方向被击退，距离按减少的最大生命百分比计算，撞墙即停。",
+        values: {
+          minPct: 0.35,
+          maxPct: 0.6,
+          maxDur: 10,
+          minDur: 6,
+          knockScale: 24,
+          minKnock: 0.85,
+          maxKnock: 7.5,
+          knockSpeed: 21,
+          wallWindow: 0.5,
+        },
+      },
+      skills: {
+        s1: {
+          slot: "s1",
+          name: "吸附",
+          brief: "贴住一名敌人 3 秒（免疫击退并持续法伤）；大招期间释放会把大滩上所有敌人反吸住拖着走",
+          tags: ["control", "damage"],
+          desc: "贴住一名敌人 {duration} 秒（模型重叠、随对方位移同步移动），期间自身不再被击退，每 {tick} 秒造成 {tickDmg}(+{apRatio%}法强+{hpRatio%}最大生命) 点魔法伤害。大招「化整为零」期间释放时改为反向吸附：把自身体积覆盖到的所有敌人吸进果冻里，强制跟随自己移动且无法自主移动或位移。",
+          maxLevel: 6,
+          cooldown: [9.5, 8.9, 8.3, 7.7, 7.1, 6.5],
+          manaCost: [45, 48, 51, 54, 57, 60],
+          cast: { type: "target", range: 5.8, targetTeam: "enemy", anyUnit: !0 },
+          values: {
+            duration: 3.0,
+            tick: 0.25,
+            tickDmg: [26, 35, 44, 53, 62, 71],
+            apRatio: 0.14,
+            hpRatio: 0.0085,
+            absorbRadius: 2.95,
+          },
+          castTime: 0.08,
+        },
+        s2: {
+          slot: "s2",
+          name: "弹球",
+          brief: "蓄力最多 3 秒冲撞击飞敌人；被动撞墙后 0.5 秒内可瞬发无需蓄力的满额弹球",
+          tags: ["dash", "control", "burst"],
+          desc: "原地蓄力最多 {maxCharge} 秒，松手或再次按下后朝目标方向冲撞 {minRange}～{maxRange} 米，击飞路径上的敌人 {minAir}～{maxAir} 秒并造成 {minDamage}～{damage}(+{apRatio%}法强+{hpRatio%}最大生命) 点魔法伤害；蓄力越久冲得越快、越远、伤害越高。若被被动击退撞到墙上，{wallWindow} 秒内可立即无视冷却释放一次无需蓄力的满额弹球。",
+          maxLevel: 6,
+          cooldown: [11.5, 10.7, 9.9, 9.1, 8.3, 7.5],
+          manaCost: [55, 58, 61, 64, 67, 70],
+          holdCharge: !0,
+          cast: { type: "direction", range: 4.5, width: 2.2 },
+          recastBuff: "slime_ball_charge",
+          recastCast: { type: "direction", range: 11.5, width: 2.2 },
+          values: {
+            fullCharge: 3.0,
+            maxCharge: 3.0,
+            minRange: 4.5,
+            maxRange: 11.5,
+            minSpeed: 15,
+            maxSpeed: 31,
+            hitRadius: 1.35,
+            minDamage: [110, 145, 180, 215, 250, 285],
+            damage: [255, 335, 415, 495, 575, 655],
+            apRatio: 0.65,
+            hpRatio: 0.055,
+            minAir: 0.65,
+            maxAir: 1.2,
+            wallWindow: 0.5,
+          },
+          castTime: 0.08,
+        },
+        ult: {
+          slot: "ult",
+          name: "化整为零",
+          brief: "4 秒不可选取，摊开成 4 倍大滩果冻大量回血并持续法伤，期间一技能可反吸拖走所有人",
+          tags: ["defense", "control", "zone"],
+          desc: "{duration} 秒内进入不可选取状态，摊开在地、体积变为 4 倍（覆盖半径 {radius} 米），期间共回复 {healBase}(+{healHp%}最大生命) 点生命，并对覆盖到的敌人每 {tick} 秒造成 {tickDmg}(+{apRatio%}法强+{hpRatio%}最大生命) 点魔法伤害。期间使用「吸附」会把覆盖到的所有敌人反吸过来，强制跟随自己移动、无法自主移动或位移。",
+          maxLevel: 3,
+          cooldown: [48, 42, 36],
+          manaCost: [80, 90, 100],
+          cast: { type: "self", radius: 2.95 },
+          values: {
+            duration: 4.0,
+            radius: 2.95,
+            tick: 0.25,
+            healBase: [520, 820, 1120],
+            healHp: [0.18, 0.22, 0.26],
+            tickDmg: [36, 54, 72],
+            apRatio: 0.16,
+            hpRatio: 0.012,
+          },
+          castTime: 0.08,
+        },
+      },
+      build: [
+        "slippers",
+        "big_quilt",
+        "liberation_shoes",
+        "riot_armor",
+        "air_cooler",
+        "fire_blanket",
+        "barbed_fence",
+      ],
+      palette: { primary: "#f2c618", secondary: "#9c6d0a", accent: "#fff36b", glow: "#ffe038" },
+      look: "亮黄色半透明高弹果冻团，底部带一圈柔软裙边，挨打会被弹飞、撞墙能立刻弹回去，开大能摊成一大滩果冻把人反吸带走。",
+    },
   };
 
 function z0(n) {
@@ -1572,6 +3430,8 @@ const Br = {
     shield: "护盾",
     heal: "回复",
     buff: "增益",
+    defense: "防身",
+    channel: "引导",
   },
   eh = 15;
 
@@ -1594,7 +3454,15 @@ function Nh(n, t, e) {
 }
 
 function Cy(n, t) {
-  return t ? `${Math.round(n * 100)}%` : Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100);
+  if (t) {
+    const p = n * 100;
+    return `${Math.abs(p) < 1 && p !== 0 ? Math.round(p * 100) / 100 : Math.round(p)}%`;
+  }
+  return Number.isInteger(n)
+    ? String(n)
+    : Math.abs(n) < 0.1
+      ? String(Math.round(n * 10000) / 10000)
+      : String(Math.round(n * 100) / 100);
 }
 
 function US(n, t) {

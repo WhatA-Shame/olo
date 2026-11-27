@@ -208,11 +208,20 @@ function WG(n, t) {
 const jG = {
     panyue: { fleeHp: 0.22, recallHp: 0.33, engage: 0.9, initiator: !0, diveBackline: 0.2, support: !0 },
     chijin: { fleeHp: 0.23, recallHp: 0.34, engage: 0.82, initiator: !0, diveBackline: 0.5, support: !1 },
-    niumo: { fleeHp: 0.2, recallHp: 0.3, engage: 0.86, initiator: !0, diveBackline: 0.7, support: !1 },
+    niumo: { fleeHp: 0.14, recallHp: 0.25, engage: 0.68, initiator: !0, diveBackline: 0.3, support: !1 },
     xingli: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: !1, diveBackline: 0, support: !1 },
     fengling: { fleeHp: 0.3, recallHp: 0.38, engage: 1.05, initiator: !1, diveBackline: 0, support: !1 },
     yeque: { fleeHp: 0.28, recallHp: 0.38, engage: 0.94, initiator: !1, diveBackline: 1.2, support: !1 },
     mushroom: { fleeHp: 0.2, recallHp: 0.3, engage: 0.85, initiator: !0, diveBackline: 0.1, support: !0 },
+    xuesong: { fleeHp: 0.24, recallHp: 0.34, engage: 0.84, initiator: !0, diveBackline: 0.85, support: !0 },
+    stone: { fleeHp: 0.2, recallHp: 0.32, engage: 0.78, initiator: !0, diveBackline: 0.55, support: !1 },
+    scallion: { fleeHp: 0.28, recallHp: 0.36, engage: 1.0, initiator: !1, diveBackline: 0.15, support: !1 },
+    paperboy: { fleeHp: 0.1, recallHp: 0.24, engage: 0.72, initiator: !1, diveBackline: 0.15, support: !0 },
+    maggot: { fleeHp: 0.28, recallHp: 0.36, engage: 1.0, initiator: !1, diveBackline: 0.1, support: !1 },
+    horseman: { fleeHp: 0.2, recallHp: 0.3, engage: 0.84, initiator: !0, diveBackline: 0.55, support: !1 },
+    cow: { fleeHp: 0.18, recallHp: 0.3, engage: 0.74, initiator: !0, diveBackline: 0.55, support: !1 },
+    monkey: { fleeHp: 0.27, recallHp: 0.36, engage: 0.98, initiator: !1, diveBackline: 0.05, support: !1 },
+    slime: { fleeHp: 0.18, recallHp: 0.3, engage: 0.78, initiator: !0, diveBackline: 0.45, support: !1 },
   },
   se = {
     senseRadius: 15,
@@ -275,9 +284,22 @@ function Kp(n) {
   return (n.hp + n.shield) * (1 + ((n.stats.armor + n.stats.mr) * 0.5) / 600);
 }
 
+function nmStacks(n) {
+  for (let t = 0; t < n.buffs.length; t++) if (n.buffs[t].id === "niumo_flame") return n.buffs[t].stacks || 0;
+  return 0;
+}
+
 function T1(n) {
   const t = n.stats;
-  return t.ad * t.attackSpeed * (1 + t.critChance * (t.critDamage - 1));
+  let e = t.ad * t.attackSpeed * (1 + t.critChance * (t.critDamage - 1));
+  if (n.heroId === "niumo") {
+    const p = Se.niumo.passive.values;
+    e *= p.dmgMin + Math.min(1, Math.max(0, (t.maxHp - p.hpBase) / p.hpSpan)) * (p.dmgMax - p.dmgMin);
+    const s2Lv = n.skills.s2.level;
+    if (s2Lv > 0) e += Nh(Se.niumo.skills.s2, "flameDps", s2Lv) * 2.2;
+    if (e5(n, "niumo_ult")) e *= 1.25;
+  }
+  return e;
 }
 
 function e6(n, t) {
@@ -760,6 +782,226 @@ function nV(n, t) {
       }
       return !1;
     }
+    case "xuesong": {
+      const hasSand = e5(e, "xuesong_sand"),
+        onPole = e5(e, "xuesong_pole"),
+        hasScoop = e5(e, "xuesong_scoop");
+      if (hasScoop) return xuesongHandleScoop(n);
+      if (onPole && wn(n, "s2")) {
+        const ally = n.friends.find((f) => ye(f.pos, e.pos) <= 7.5 && f.hp / f.stats.maxHp < 0.75);
+        return (Bc(n, "s2", ally ? ally.pos : e.pos), !0);
+      }
+      if (!hasScoop && wn(n, "ult")) {
+        const uTgt = xuesongPickUltTarget(n, !0);
+        if (uTgt) {
+          n.brain.callFocus(uTgt.id, n.time);
+          return (n.act.castTarget("ult", uTgt.id), !0);
+        }
+      }
+      if (hasSand && wn(n, "s1") && s <= 8.5) return (Bc(n, "s1", t.pos), !0);
+      // 保留 2 技能给大招「抓人+撑篙跳回」连招，只有在低血保命或给残血队友套盾时才单独开
+      if (!onPole && wn(n, "s2") && (!wn(n, "ult") || n.hpR < 0.42)) {
+        const lowAlly = n.friends.find((f) => ye(f.pos, e.pos) <= 7.2 && f.hp / f.stats.maxHp < 0.5);
+        if (n.hpR < 0.42 || lowAlly) return (n.act.castSelf("s2"), !0);
+      }
+      // 进攻/打架时不要乱挖洞堵自己队友的路
+      return !1;
+    }
+    case "stone": {
+      const training = e5(e, "stone_train"),
+        hasCorpse = e5(e, "stone_corpse");
+      if (hasCorpse && wn(n, "s2") && s <= 7.5) return (Bc(n, "s2", t.pos), !0);
+      if (wn(n, "ult") && s <= 11.5) {
+        const a = Oa.stone.ult,
+          o = Zp(n, t, a.aoeRadius, 11.5, a.delay, Bt);
+        if (
+          (o >= 2 || (o >= 1 && s > 3.2 && (i < 0.68 || n.fightAdv >= 1.15 || n.friendsNear >= 1))) &&
+          (n.diving || n.v.enemyStructureCovering(Bt, 0) === null)
+        )
+          return (Bc(n, "ult", Bt), !0);
+      }
+      if (!hasCorpse && wn(n, "s2") && s <= 5.5 && t.alive) return (n.act.castTarget("s2", t.id), !0);
+      if (training && wn(n, "s1") && (n.hpR < 0.34 || s > 5.8)) return (n.act.castSelf("s1"), !0);
+      if (!training && wn(n, "s1") && s <= 2.6 && n.hpR > 0.62 && n.foesNear <= 1) return (n.act.castSelf("s1"), !0);
+      return !1;
+    }
+    case "scallion": {
+      if (e5(e, "scallion_beam")) {
+        // 大招喷射期间若已经打不到人或快被贴脸秒了，立刻按二段中断大招脱身
+        if (wn(n, "ult", !0) && (s > 13.8 || (n.hpR < 0.28 && n.nearFoeD < 4.5) || (n.adv < 0.62 && n.nearFoeD < 4.0)))
+          return (n.act.castSelf("ult"), !0);
+        n.act.moveTo(t.pos.x, t.pos.y, !0);
+        return !0;
+      }
+      if (wn(n, "s2") && s <= e.stats.attackRange + 2.2) return (n.act.castSelf("s2"), !0);
+      if (wn(n, "s1") && s <= 8.5) return (_s(n, t, 0.12, 0, Bt), $s(n, "s1", Bt), !0);
+      if (wn(n, "ult") && s <= 14 && (i < 0.72 || n.foesNear >= 2 || n.fightAdv >= 1.15)) {
+        const ang = Math.atan2(e.pos.y - t.pos.y, e.pos.x - t.pos.x),
+          idealD = Math.min(7.5, Math.max(3.2, s > 8 ? 5 : 4.2));
+        ((Bt.x = t.pos.x + Math.cos(ang) * Math.min(8.5, Math.max(5.5, idealD))),
+          (Bt.y = t.pos.y + Math.sin(ang) * Math.min(8.5, Math.max(5.5, idealD))));
+        const land = n.v.nearestWalkable(Bt);
+        if (ye(e.pos, land) <= 7.5 && (n.diving || n.v.enemyStructureCovering(land, 0) === null))
+          return (n.act.castAt("ult", land), !0);
+      }
+      return !1;
+    }
+    case "paperboy": {
+      let bestUltAlly = null,
+        bestUltScore = 0,
+        bestCraneAlly = null,
+        bestCraneScore = 0;
+      for (const a of n.friends) {
+        const d = ye(e.pos, a.pos);
+        if (d <= 11.2 && a.hp / a.stats.maxHp < 0.92) {
+          const sc = (1.2 - a.hp / a.stats.maxHp) * (a.inCombat ? 1.5 : 1);
+          if (sc > bestUltScore) {
+            bestUltScore = sc;
+            bestUltAlly = a;
+          }
+        }
+        if (d <= 10.8) {
+          const cc = D3(a) || uh(a) > 0.2,
+            low = a.hp / a.stats.maxHp < 0.65;
+          if (cc || low) {
+            const sc = (cc ? 3 : 0) + (1 - a.hp / a.stats.maxHp);
+            if (sc > bestCraneScore) {
+              bestCraneScore = sc;
+              bestCraneAlly = a;
+            }
+          }
+        }
+      }
+      if (wn(n, "s1") && (s <= 8.3 || (n.nearFoe !== null && n.nearFoeD <= 8.3)))
+        return (n.act.castSelf("s1"), !0);
+      if (wn(n, "ult")) {
+        if (bestUltAlly && (n.foesNear >= 1 || bestUltAlly.inCombat))
+          return (n.act.castTarget("ult", bestUltAlly.id), !0);
+        if (s <= 8.6 && (n.heroesOnMe > 0 || n.hpR < 0.78 || t.stats.attackRange < 4))
+          return (n.act.castTarget("ult", e.id), !0);
+      }
+      if (wn(n, "s2") && bestCraneAlly) return (n.act.castTarget("s2", bestCraneAlly.id), !0);
+      if (
+        wn(n, "s2") &&
+        (D3(e) ||
+          uh(e) > 0.15 ||
+          (t.stats.attackRange < 4 && s < 5.0) ||
+          (s > 6.6 && s <= 11 && n.fightAdv >= 0.95))
+      )
+        return (n.act.castTarget("s2", e.id), !0);
+      return !1;
+    }
+    case "maggot": {
+      if (wn(n, "ult") && s <= 13.2) return (_s(n, t, Oa.maggot.ult.delay, 0, Bt), Bc(n, "ult", Bt), !0);
+      if (wn(n, "s1") && s <= 8.2 && !e.buffs.some((b) => b.id === "maggot_spray"))
+        return (_s(n, t, 0.15, 0, Bt), $s(n, "s1", Bt), !0);
+      if (wn(n, "s2") && s <= 9.5) return (n.act.castSelf("s2"), !0);
+      return !1;
+    }
+    case "horseman": {
+      const charging = e5(e, "horseman_kick_charge"),
+        hasPassive = e5(e, "horseman_charge");
+      if (charging) {
+        const ch = e.buffs.find((b) => b.id === "horseman_kick_charge"),
+          held = ch ? ch.duration - ch.timeLeft : 0.6,
+          curRange = 3.0 + Math.min(1, held / 0.9) * 3.8;
+        if (wn(n, "s1") && (held >= 0.92 || (s <= curRange - 0.3 && (held >= 0.55 || i < 0.3)))) return ($s(n, "s1", t.pos), !0);
+        return !0;
+      }
+      if (wn(n, "ult") && (hasPassive || s > 3.8 || n.foesNear >= 2) && s <= 11.5) return (n.act.castSelf("ult"), !0);
+      if (wn(n, "s2") && (s <= 5.2 || D3(e) || uh(e) > 0.15) && s <= 6.2) return (n.act.castSelf("s2"), !0);
+      if (wn(n, "s1") && !hasPassive && s <= 6.2) return ($s(n, "s1", t.pos), !0);
+      return !1;
+    }
+    case "cow": {
+      const kickR = Math.max(4.0, Math.min(13.0, 5.5 + ((e.stats.moveSpeed || 5.5) - 4.5) * 0.95)),
+        stompReady = e5(e, "cow_stomp_ready"),
+        exhausted = e5(e, "cow_exhaust");
+      if (e5(e, "cow_squat") && wn(n, "s1")) return (n.act.castSelf("s1"), !0);
+      if (stompReady && wn(n, "ult") && s <= 4.8) return (n.act.castSelf("ult"), !0);
+      // 力竭了也不怂：团战/接战直接开大解力竭+拉满移速，立刻接飞踢冲进人群连环跺脚
+      if (!stompReady && wn(n, "ult") && exhausted && s <= 12.0) return (n.act.castSelf("ult"), !0);
+      // 满血也能主动飞踢进来直接开大开团
+      if (wn(n, "s2") && s <= kickR + t.radius) return (n.act.castTarget("s2", t.id), !0);
+      if (!stompReady && wn(n, "ult") && (s <= 6.2 || (n.foesNear >= 2 && s <= 9.5) || (n.friendsNear >= 1 && s <= 8.5)))
+        return (n.act.castSelf("ult"), !0);
+      if (!e5(e, "cow_squat") && !exhausted && wn(n, "s1") && s <= 2.8 && n.hpR > 0.72 && n.foesNear <= 1 && !wn(n, "ult"))
+        return (n.act.castSelf("s1"), !0);
+      return !1;
+    }
+    case "niumo": {
+      if (e5(e, "niumo_march")) return !0;
+      const st = nmStacks(t),
+        ulting = e5(e, "niumo_ult");
+      if (!ulting && wn(n, "ult") && s <= 5.8 && (st >= 3 || n.foesNear >= 2 || n.hpR < 0.68 || i < 0.55 || D3(e) || uh(e) > 0.2))
+        return (n.act.castSelf("ult"), !0);
+      if (wn(n, "s1") && s <= 6.7) return (_s(n, t, 0.3, 0, Bt), $s(n, "s1", Bt), !0);
+      if (wn(n, "s2") && s <= 5.6 && s >= 1.1) {
+        if (!(ulting && st >= 3 && s <= 3.6) && (st < 4 || n.foesNear >= 2 || D3(e) || uh(e) > 0.15 || s >= 2.6)) {
+          _s(n, t, 0.22, 0, Bt);
+          const dx = Bt.x - e.pos.x,
+            dy = Bt.y - e.pos.y,
+            d = Math.hypot(dx, dy) || 1;
+          if (Cl(n, dx / d, dy / d, Math.min(4.2, s + 1.0))) return ($s(n, "s2", Bt), !0);
+        }
+      }
+      return !1;
+    }
+    case "monkey": {
+      const ulting = e5(e, "monkey_ult");
+      if (!ulting && wn(n, "ult") && s <= e.stats.attackRange * 1.35 + 1.5 && (i < 0.72 || n.foesNear >= 2 || n.fightAdv >= 1.05 || uh(t) > 0.2))
+        return (n.act.castSelf("ult"), !0);
+      if (wn(n, "s2") && s <= 9.0) {
+        _s(n, t, 0.2, 21, Bt);
+        const dx = Bt.x - e.pos.x,
+          dy = Bt.y - e.pos.y,
+          d = Math.hypot(dx, dy) || 1,
+          far = Math.min(9.0, d + 1.5);
+        ((Bt.x = e.pos.x + (dx / d) * far), (Bt.y = e.pos.y + (dy / d) * far));
+        return (Bc(n, "s2", Bt), !0);
+      }
+      if (wn(n, "s1") && n.time - (n._mkPeelAt ?? -99) >= 0.85) {
+        const spot = monkeyPickPeelSpot(n, t);
+        if (spot) return ((n._mkPeelAt = n.time), Bc(n, "s1", spot), !0);
+      }
+      return !1;
+    }
+    case "slime": {
+      // 撞墙 0.5 秒窗口：立刻瞬发满额弹球砸脸
+      if (e5(e, "slime_wall_bounce") && wn(n, "s2")) {
+        _s(n, t, 0.14, 30, Bt);
+        return ($s(n, "s2", Bt), !0);
+      }
+      // 正在蓄力弹球：距离够了或蓄力满 0.85~1.35 秒就松手弹出
+      if (e5(e, "slime_ball_charge")) {
+        const elapsed = n.time - (e.h?._slBallStart ?? n.time),
+          curRange = 4.5 + 7.0 * Math.min(1, elapsed / 3.0);
+        if (wn(n, "s2") && (elapsed >= 1.25 || (elapsed >= 0.45 && curRange >= s + 0.8))) {
+          _s(n, t, 0.12, 24, Bt);
+          return ($s(n, "s2", Bt), !0);
+        }
+        return !0;
+      }
+      // 大招期间覆盖到敌人立刻按 1 反吸拖走
+      if (e5(e, "slime_puddle")) {
+        if (wn(n, "s1") && s <= 2.95 + t.radius) return (n.act.castSelf("s1"), !0);
+        return !1;
+      }
+      // 血量偏低或人堆里开大摊成 4 倍果冻回血 + 准备反吸
+      if (wn(n, "ult") && s <= 3.6 && (n.hpR < 0.48 || n.foesNear >= 2 || (n.friendsNear >= 1 && s <= 2.9))) {
+        return (n.act.castSelf("ult"), !0);
+      }
+      // 1 技能贴身吸附黏住目标（还能防击退）
+      if (!e5(e, "slime_cling") && wn(n, "s1") && s <= 5.8 + t.radius) {
+        return (n.act.castTarget("s1", t.id), !0);
+      }
+      // 2 技能蓄力弹球开团击飞
+      if (!e5(e, "slime_cling") && wn(n, "s2") && s <= 9.2) {
+        _s(n, t, 0.25, 22, Bt);
+        return ($s(n, "s2", Bt), !0);
+      }
+      return !1;
+    }
   }
 }
 
@@ -804,6 +1046,64 @@ function sV(n, t) {
             n.advantageAt(t.pos.x, t.pos.y) >= 0.8
           ? (n.act.castTarget("ult", t.id), !0)
           : !1;
+    case "xuesong":
+      return e.buffs.some((b) => b.id === "xuesong_sand") && s <= 8.5 && a("s1")
+        ? (Bc(n, "s1", t.pos), !0)
+        : !e.buffs.some((b) => b.id === "xuesong_scoop") && s <= 6.2 && a("ult")
+          ? (n.act.castTarget("ult", t.id), !0)
+          : !1;
+    case "stone":
+      return e.buffs.some((b) => b.id === "stone_corpse") && s <= 7.5 && a("s2")
+        ? (Bc(n, "s2", t.pos), !0)
+        : s <= 11.5 && a("ult") && (n.diving || n.v.enemyStructureCovering(t.pos, 0) === null)
+          ? (Bc(n, "ult", t.pos), !0)
+          : !1;
+    case "scallion":
+      return s <= 8.6 && a("s1") ? (_s(n, t, 0.12, 0, Bt), $s(n, "s1", Bt), !0) : !1;
+    case "paperboy":
+      return !1;
+    case "maggot":
+      return s <= 13.2 && a("ult") ? (_s(n, t, Oa.maggot.ult.delay, 0, Bt), Bc(n, "ult", Bt), !0) : !1;
+    case "horseman":
+      return s <= 4.3 && a("s1") ? ($s(n, "s1", t.pos), !0) : s <= 5.2 && a("s2") ? (n.act.castSelf("s2"), !0) : !1;
+    case "cow": {
+      const kickR = Math.max(4.0, Math.min(13.0, 5.5 + ((e.stats.moveSpeed || 5.5) - 4.5) * 0.95));
+      if (e5(e, "cow_stomp_ready") && wn(n, "ult") && s <= 4.7) return (n.act.castSelf("ult"), !0);
+      return s <= kickR + t.radius && a("s2") ? (n.act.castTarget("s2", t.id), !0) : !1;
+    }
+    case "niumo": {
+      if (e5(e, "niumo_march")) return !1;
+      if (s <= 6.8 && a("s1")) return (_s(n, t, 0.3, 0, Bt), $s(n, "s1", Bt), !0);
+      const st = nmStacks(t);
+      if (!e5(e, "niumo_ult") && wn(n, "ult") && s <= 3.8 && st >= 2 && Nm(e, "ult", t, st) + S1(e, t) >= i)
+        return (n.act.castSelf("ult"), !0);
+      if (s <= 5.6 && !e5(e, "niumo_ult") && a("s2", 4)) {
+        _s(n, t, 0.2, 0, Bt);
+        const dx = Bt.x - e.pos.x,
+          dy = Bt.y - e.pos.y,
+          d = Math.hypot(dx, dy) || 1;
+        if (Cl(n, dx / d, dy / d, Math.min(4.0, s + 0.8))) return ($s(n, "s2", Bt), !0);
+      }
+      return !1;
+    }
+    case "monkey": {
+      if (s <= 9.0 && a("s2")) return (_s(n, t, 0.18, 21, Bt), Bc(n, "s2", Bt), !0);
+      if (a("s1") && n.time - (n._mkPeelAt ?? -99) >= 0.85) {
+        const spot = monkeyPickPeelSpot(n, t);
+        if (spot) return ((n._mkPeelAt = n.time), Bc(n, "s1", spot), !0);
+      }
+      if (!e5(e, "monkey_ult") && wn(n, "ult") && s <= e.stats.attackRange * 1.35 + t.radius && i <= S1(e, t) * 2.4 + Nm(e, "ult", t, 2))
+        return (n.act.castSelf("ult"), !0);
+      return !1;
+    }
+    case "slime": {
+      if (e5(e, "slime_wall_bounce") && wn(n, "s2")) return (_s(n, t, 0.12, 30, Bt), $s(n, "s2", Bt), !0);
+      if (e5(e, "slime_ball_charge") && wn(n, "s2")) return (_s(n, t, 0.12, 24, Bt), $s(n, "s2", Bt), !0);
+      if (e5(e, "slime_puddle") && wn(n, "s1") && s <= 2.95 + t.radius) return (n.act.castSelf("s1"), !0);
+      if (!e5(e, "slime_cling") && a("s1") && s <= 5.8 + t.radius) return (n.act.castTarget("s1", t.id), !0);
+      if (!e5(e, "slime_cling") && a("s2") && s <= 7.5) return (_s(n, t, 0.2, 20, Bt), $s(n, "s2", Bt), !0);
+      return !1;
+    }
   }
 }
 
@@ -838,6 +1138,79 @@ function Uk(n, t) {
         (_s(n, t, 0.06, Ii(n, "s2", "speed"), Bt), !ay(n, Bt, 0.5))
         ? ($s(n, "s2", Bt), !0)
         : !1;
+    case "xuesong": {
+      if (!e5(e, "xuesong_scoop") && wn(n, "ult")) {
+        const uTgt = xuesongPickUltTarget(n, !1);
+        if (uTgt) {
+          n.brain.callFocus(uTgt.id, n.time);
+          return (n.act.castTarget("ult", uTgt.id), !0);
+        }
+      }
+      return e5(e, "xuesong_sand") && wn(n, "s1") && s <= 8.5 ? (Bc(n, "s1", t.pos), !0) : !1;
+    }
+    case "stone": {
+      const training = e5(e, "stone_train"),
+        hasCorpse = e5(e, "stone_corpse");
+      if (hasCorpse && wn(n, "s2") && s <= 7.5) return (Bc(n, "s2", t.pos), !0);
+      if (training && wn(n, "s1") && (n.hpR < 0.42 || (n.heroesOnMe > 0 && n.adv < 0.85))) return (n.act.castSelf("s1"), !0);
+      if (!training && wn(n, "s1") && s > 6.5 && n.hpR > 0.66 && x0(n, "s1") >= 0.35) return (n.act.castSelf("s1"), !0);
+      return !1;
+    }
+    case "scallion":
+      return wn(n, "s1") && s <= 8.5 && x0(n, "s1") >= se.pokeMana
+        ? (_s(n, t, 0.12, 0, Bt), $s(n, "s1", Bt), !0)
+        : !1;
+    case "paperboy":
+      return wn(n, "s1") && (s <= 8.3 || (n.nearFoe !== null && n.nearFoeD <= 8.3)) && x0(n, "s1") >= 0.16
+        ? (n.act.castSelf("s1"), !0)
+        : !1;
+    case "maggot":
+      return wn(n, "ult") && s <= 13.2 && x0(n, "ult") >= se.pokeMana
+        ? (_s(n, t, Oa.maggot.ult.delay, 0, Bt), Bc(n, "ult", Bt), !0)
+        : wn(n, "s1") && s <= 8.2 && x0(n, "s1") >= se.pokeMana && !e.buffs.some((b) => b.id === "maggot_spray")
+          ? (_s(n, t, 0.15, 0, Bt), $s(n, "s1", Bt), !0)
+          : !1;
+    case "horseman":
+      if (e5(e, "horseman_kick_charge") && wn(n, "s1")) return ($s(n, "s1", t.pos), !0);
+      return wn(n, "s1") && s <= 5.8 && x0(n, "s1") >= se.pokeMana && !e5(e, "horseman_charge")
+        ? ($s(n, "s1", t.pos), !0)
+        : wn(n, "s2") && s <= 5.0 && x0(n, "s2") >= se.pokeMana
+          ? (n.act.castSelf("s2"), !0)
+          : !1;
+    case "cow": {
+      const kickR = Math.max(4.0, Math.min(13.0, 5.5 + ((e.stats.moveSpeed || 5.5) - 4.5) * 0.95));
+      if (e5(e, "cow_squat") && wn(n, "s1") && (n.hpR < 0.45 || n.heroesOnMe > 1)) return (n.act.castSelf("s1"), !0);
+      if (!e5(e, "cow_squat") && !e5(e, "cow_exhaust") && wn(n, "s1") && s > 6.5 && n.hpR > 0.72 && x0(n, "s1") >= 0.5)
+        return (n.act.castSelf("s1"), !0);
+      return wn(n, "s2") && s <= kickR && x0(n, "s2") >= se.pokeMana ? (n.act.castTarget("s2", t.id), !0) : !1;
+    }
+    case "niumo": {
+      if (e5(e, "niumo_march")) return !1;
+      if (wn(n, "s1") && s <= 6.7 && x0(n, "s1") >= 0.2) return (_s(n, t, 0.3, 0, Bt), $s(n, "s1", Bt), !0);
+      if (wn(n, "s2") && s <= 5.0 && x0(n, "s2") >= 0.35 && !e5(e, "niumo_ult") && n.adv >= 0.85) {
+        _s(n, t, 0.2, 0, Bt);
+        const dx = Bt.x - e.pos.x,
+          dy = Bt.y - e.pos.y,
+          d = Math.hypot(dx, dy) || 1;
+        if (Cl(n, dx / d, dy / d, 4.0)) return ($s(n, "s2", Bt), !0);
+      }
+      return !1;
+    }
+    case "monkey": {
+      if (wn(n, "s1") && x0(n, "s1") >= 0.26 && n.time - (n._mkPeelAt ?? -99) >= 1.6) {
+        const spot = monkeyPickPeelSpot(n, t);
+        if (spot) return ((n._mkPeelAt = n.time), Bc(n, "s1", spot), !0);
+      }
+      if (wn(n, "s2") && s <= 8.8 && x0(n, "s2") >= 0.45 && (uh(t) > 0.2 || n.adv >= 0.95))
+        return (_s(n, t, 0.2, 21, Bt), Bc(n, "s2", Bt), !0);
+      return !1;
+    }
+    case "slime": {
+      if (e5(e, "slime_wall_bounce") && wn(n, "s2") && s <= 10.5) return (_s(n, t, 0.14, 30, Bt), $s(n, "s2", Bt), !0);
+      if (!e5(e, "slime_cling") && wn(n, "s1") && x0(n, "s1") >= 0.35 && s <= 5.6 + t.radius && n.adv >= 0.9)
+        return (n.act.castTarget("s1", t.id), !0);
+      return !1;
+    }
   }
 }
 
@@ -900,6 +1273,77 @@ function oy(n, t, e) {
       }
       return !1;
     }
+    case "xuesong":
+      return s.buffs.some((b) => b.id === "xuesong_sand") && wn(n, "s1") && Dd(t, 3, Bt) >= a && ye(s.pos, Bt) <= 8.5
+        ? (n.act.castAt("s1", Bt), !0)
+        : !1;
+    case "stone": {
+      const training = e5(s, "stone_train"),
+        hasCorpse = e5(s, "stone_corpse");
+      if (hasCorpse && wn(n, "s2") && Dd(t, 2.6, Bt) >= (training ? 1 : a) && ye(s.pos, Bt) <= 7.5)
+        return (n.act.castAt("s2", Bt), !0);
+      if (!hasCorpse && (training ? wn(n, "s2") && x0(n, "s2") >= 0.16 : o("s2")) && ye(s.pos, r.pos) <= 5.5 + r.radius && t.length >= (e || training ? 1 : 2))
+        return (n.act.castTarget("s2", r.id), !0);
+      if (!training && wn(n, "s1") && x0(n, "s1") >= 0.25 && n.hpR > 0.58 && (n.foesNear === 0 || (n.foesNear === 1 && n.adv >= 0.95 && n.nearFoeD >= 5.2)) && ye(s.pos, r.pos) <= 2.9)
+        return (n.act.castSelf("s1"), !0);
+      return !1;
+    }
+    case "scallion": {
+      if (!o("s1")) return !1;
+      Dd(t, 3.6, Bt);
+      const l = Bt.x - s.pos.x,
+        c = Bt.y - s.pos.y;
+      return Math.hypot(l, c) <= 8.5 && J2(n, t, l, c, 8.8, 1.15) >= a ? (n.act.castDir("s1", l, c), !0) : !1;
+    }
+    case "paperboy":
+      return !1;
+    case "maggot": {
+      if (o("ult") && Dd(t, 2.6, Bt) >= a && ye(s.pos, Bt) <= 13) return (n.act.castAt("ult", Bt), !0);
+      if (o("s1") && !s.buffs.some((b) => b.id === "maggot_spray")) {
+        Dd(t, 3.4, Bt);
+        const l = Bt.x - s.pos.x,
+          c = Bt.y - s.pos.y;
+        if (Math.hypot(l, c) <= 8.2 && J2(n, t, l, c, 8.5, 1.2) >= a) return (n.act.castDir("s1", l, c), !0);
+      }
+      return !1;
+    }
+    case "horseman": {
+      if (e5(s, "horseman_kick_charge") && wn(n, "s1")) return (n.act.castDir("s1", r.pos.x - s.pos.x, r.pos.y - s.pos.y), !0);
+      if (o("s2") && ye(s.pos, r.pos) <= 4.8 && t.length >= a) return (n.act.castSelf("s2"), !0);
+      if (o("s1") && Dd(t, 3.4, Bt) >= a && ye(s.pos, Bt) <= 4.0)
+        return (n.act.castDir("s1", Bt.x - s.pos.x, Bt.y - s.pos.y), !0);
+      return !1;
+    }
+    case "cow": {
+      const kickR = Math.max(4.0, Math.min(13.0, 5.5 + ((s.stats.moveSpeed || 5.5) - 4.5) * 0.95));
+      if (o("s2") && ye(s.pos, r.pos) <= kickR + r.radius && t.length >= (e ? 1 : 2))
+        return (n.act.castTarget("s2", r.id), !0);
+      if (!e5(s, "cow_squat") && !e5(s, "cow_exhaust") && o("s1") && n.hpR > 0.7 && n.foesNear === 0 && ye(s.pos, r.pos) <= 3.0)
+        return (n.act.castSelf("s1"), !0);
+      return !1;
+    }
+    case "niumo": {
+      if (e5(s, "niumo_march")) return !1;
+      if (o("s1") && Dd(t, 3.2, Bt) >= a && ye(s.pos, Bt) <= 6.6)
+        return (n.act.castDir("s1", Bt.x - s.pos.x, Bt.y - s.pos.y), !0);
+      if (o("s2") && (e || n.foesNear === 0) && Dd(t, 2.8, Bt) >= (e ? 1 : 3) && ye(s.pos, Bt) <= 4.8) {
+        const l = Bt.x - s.pos.x,
+          c = Bt.y - s.pos.y,
+          f = Math.hypot(l, c) || 1;
+        if (Cl(n, l / f, c / f, 4.0)) return (n.act.castDir("s2", l, c), !0);
+      }
+      return !1;
+    }
+    case "monkey": {
+      if (o("s2") && Dd(t, 2.8, Bt) >= a && ye(s.pos, Bt) <= 8.8) return (n.act.castAt("s2", Bt), !0);
+      return !1;
+    }
+    case "slime": {
+      if (e5(s, "slime_ball_charge") && wn(n, "s2")) return (n.act.castDir("s2", r.pos.x - s.pos.x, r.pos.y - s.pos.y), !0);
+      if (o("s2") && (e || n.foesNear === 0) && Dd(t, 2.6, Bt) >= a && ye(s.pos, Bt) <= 5.8)
+        return (n.act.castDir("s2", Bt.x - s.pos.x, Bt.y - s.pos.y), !0);
+      return !1;
+    }
   }
 }
 
@@ -955,6 +1399,102 @@ function a6(n, t, e) {
         : !1;
     case "yeque":
       return wn(n, "s1", !0) && Kd(n, "s1", t, e, 6.5);
+    case "xuesong": {
+      const onPole = n.me.buffs.some((b) => b.id === "xuesong_pole"),
+        hasSand = n.me.buffs.some((b) => b.id === "xuesong_sand");
+      if (onPole && wn(n, "s2", !0)) {
+        const a = Math.hypot(t, e) || 1;
+        ((Bt.x = n.me.pos.x + (t / a) * 7.2), (Bt.y = n.me.pos.y + (e / a) * 7.2));
+        const o = n.v.nearestWalkable(Bt);
+        return (n.act.castAt("s2", o), !0);
+      }
+      if (!onPole && i && wn(n, "s2", !0)) return (n.act.castSelf("s2"), !0);
+      if (hasSand && i && s && n.nearFoeD <= 8.5 && wn(n, "s1", !0)) return (Bc(n, "s1", s.pos), !0);
+      return !1;
+    }
+    case "stone": {
+      if (n.me.buffs.some((b) => b.id === "stone_train") && wn(n, "s1", !0)) return (n.act.castSelf("s1"), !0);
+      if (n.hpR < 0.3 && wn(n, "ult", !0)) {
+        const a = Math.hypot(t, e) || 1;
+        ((Bt.x = n.me.pos.x + (t / a) * 10.5), (Bt.y = n.me.pos.y + (e / a) * 10.5));
+        const o = n.v.nearestWalkable(Bt);
+        if (n.v.enemyStructureCovering(o, 0) === null) return (n.act.castAt("ult", o), !0);
+      }
+      return !1;
+    }
+    case "scallion": {
+      if (e5(n.me, "scallion_beam") && wn(n, "ult", !0)) return (n.act.castSelf("ult"), !0);
+      if (i && s && n.nearFoeD <= 8.5 && wn(n, "s1", !0) && n.hpR > 0.22)
+        return (_s(n, s, 0.1, 0, Bt), $s(n, "s1", Bt), !0);
+      if (!e5(n.me, "scallion_beam") && n.hpR < 0.25 && wn(n, "ult", !0)) {
+        const a = Math.hypot(t, e) || 1;
+        ((Bt.x = n.me.pos.x + (t / a) * 7.2), (Bt.y = n.me.pos.y + (e / a) * 7.2));
+        const o = n.v.nearestWalkable(Bt);
+        if (n.v.enemyStructureCovering(o, 0) === null) return (n.act.castAt("ult", o), !0);
+      }
+      return !1;
+    }
+    case "paperboy": {
+      if (i && wn(n, "s1", !0) && n.nearFoeD <= 8.3) return (n.act.castSelf("s1"), !0);
+      if (i && wn(n, "ult", !0) && n.heroesOnMe > 0 && n.nearFoeD <= 8.5)
+        return (n.act.castTarget("ult", n.me.id), !0);
+      if (wn(n, "s2", !0)) return (n.act.castTarget("s2", n.me.id), !0);
+      return !1;
+    }
+    case "maggot": {
+      if (i && s && wn(n, "ult", !0) && n.nearFoeD <= 12) {
+        ((Bt.x = s.pos.x + (n.me.pos.x - s.pos.x) * 0.35), (Bt.y = s.pos.y + (n.me.pos.y - s.pos.y) * 0.35));
+        return (n.act.castAt("ult", Bt), !0);
+      }
+      return !1;
+    }
+    case "horseman": {
+      if (e5(n.me, "horseman_kick_charge") && i && s && wn(n, "s1", !0)) return ($s(n, "s1", s.pos), !0);
+      if (wn(n, "s2", !0) && (D3(n.me) || uh(n.me) > 0.15 || (i && n.nearFoeD <= 5.2))) return (n.act.castSelf("s2"), !0);
+      if (wn(n, "ult", !0) && n.hpR < 0.45) return (n.act.castSelf("ult"), !0);
+      return !1;
+    }
+    case "cow": {
+      if (e5(n.me, "cow_squat") && wn(n, "s1", !0)) return (n.act.castSelf("s1"), !0);
+      if (e5(n.me, "cow_stomp_ready") && i && n.nearFoeD <= 4.7 && wn(n, "ult", !0)) return (n.act.castSelf("ult"), !0);
+      // 大招优先留着满血主动开团，只在快死且被人贴脸时才用来保命
+      if (!e5(n.me, "cow_stomp_ready") && wn(n, "ult", !0) && n.hpR < 0.22 && i && n.nearFoeD < 4.5)
+        return (n.act.castSelf("ult"), !0);
+      return !1;
+    }
+    case "niumo": {
+      if (e5(n.me, "niumo_march")) return !1;
+      if (wn(n, "ult", !0) && i && (n.hpR < 0.35 || D3(n.me) || uh(n.me) > 0.25) && (nmStacks(s) >= 2 || n.foesNear >= 2))
+        return (n.act.castSelf("ult"), !0);
+      if (wn(n, "s2", !0) && (D3(n.me) || uh(n.me) > 0.2) && Kd(n, "s2", t, e, 4.2)) return !0;
+      if (i && n.nearFoeD <= 6.6 && wn(n, "s1", !0)) return (_s(n, s, 0.25, 0, Bt), $s(n, "s1", Bt), !0);
+      return !1;
+    }
+    case "monkey": {
+      if (i && s && n.nearFoeD <= 7.8) {
+        if (wn(n, "s1", !0) && n.time - (n._mkPeelAt ?? -99) >= 0.85 && monkeyPeelCount(n) < (Se.monkey.passive.values.maxPeels || 8)) {
+          const spot = monkeyPickPeelSpot(n, s);
+          if (spot) return ((n._mkPeelAt = n.time), Bc(n, "s1", spot), !0);
+          if (n.nearFoeD >= 3.4) {
+            ((Bt.x = s.pos.x + (n.me.pos.x - s.pos.x) * 0.45), (Bt.y = s.pos.y + (n.me.pos.y - s.pos.y) * 0.45));
+            if (n.v.walkable(Bt, 0.55) && !monkeyOwnTowerBlocked(n, Bt))
+              return ((n._mkPeelAt = n.time), n.act.castAt("s1", Bt), !0);
+          }
+        }
+        if (wn(n, "s2", !0)) {
+          ((Bt.x = s.pos.x + (n.me.pos.x - s.pos.x) * 0.45), (Bt.y = s.pos.y + (n.me.pos.y - s.pos.y) * 0.45));
+          return (n.act.castAt("s2", Bt), !0);
+        }
+      }
+      return !1;
+    }
+    case "slime": {
+      if (e5(n.me, "slime_wall_bounce") && wn(n, "s2", !0) && Kd(n, "s2", t, e, 10.5)) return !0;
+      if (e5(n.me, "slime_ball_charge") && wn(n, "s2", !0)) return (n.act.castDir("s2", t, e), !0);
+      if (wn(n, "ult", !0) && (n.hpR < 0.34 || (i && n.nearFoeD < 4.5 && n.hpR < 0.5))) return (n.act.castSelf("ult"), !0);
+      if (wn(n, "s2", !0) && Kd(n, "s2", t, e, 5.2)) return !0;
+      return !1;
+    }
   }
 }
 
@@ -1020,11 +1560,16 @@ function aV(n, t, e) {
 }
 
 function oV(n, t, e) {
+  const pbAggressive =
+      n.heroId === "paperboy" && n.nearFoe !== null && n.nearFoeD <= 8.4 && (n.adv >= 0.52 || e5(n.me, "paperboy_effigy_ready")),
+    nmBully =
+      n.heroId === "niumo" && n.nearFoe !== null && n.nearFoeD <= 6.8 && n.adv >= 0.72 && !e5(n.me, "niumo_march"),
+    bully = pbAggressive || nmBully;
   if (
     n.foes.length === 0 ||
-    n.adv < se.advPoke ||
+    (!bully && n.adv < se.advPoke) ||
     n.inFoeRange ||
-    !n.inMood(_V, e ? Math.min(1, n.prof.harass + se.groupHarass) : n.prof.harass)
+    (!bully && !n.inMood(_V, e ? Math.min(1, n.prof.harass + se.groupHarass) : n.prof.harass))
   )
     return !1;
   const s = n.me,
@@ -1043,7 +1588,7 @@ function oV(n, t, e) {
     c = 3 + Math.floor(s.level / 3);
   return n.aggroMinions > c || !n.safeToHit(a)
     ? !1
-    : (n.ranged ? r <= l + 0.8 && i.attackCooldown() <= 0.25 : r <= l + 0.3 && n.adv >= 1)
+    : (n.ranged ? r <= l + 0.8 && i.attackCooldown() <= 0.25 : nmBully ? r <= l + 1.4 && n.adv >= 0.78 : r <= l + 0.3 && n.adv >= 1)
       ? (n.act.attack(a.id), (n.label = "harass"), !0)
       : !1;
 }
@@ -1129,14 +1674,38 @@ function E1(n, t, e) {
     return;
   }
   const M = h !== null,
-    S = e !== "lane" || o.foeHeroes === 0 || n.adv >= 1.3 || o.threatMinions > 0,
-    b = aV(n, h, v);
+    S = e !== "lane" || o.foeHeroes === 0 || n.adv >= 1.3 || o.threatMinions > 0;
+  if (n.heroId === "monkey") {
+    if (monkeyStackUlt(n)) return;
+    if (e5(s, "monkey_ult") && n.foeMinions.length > 0 && !M) {
+      const mTgt = monkeyUltFarmTarget(n);
+      if (mTgt) {
+        (n.act.attack(mTgt.id), (n.label = `${e}:stack`));
+        return;
+      }
+    }
+  }
+  if (n.heroId === "stone" && stoneLaneWorkout(n, e)) return;
+  if (n.heroId === "xuesong") {
+    if (!e5(s, "xuesong_scoop") && !n.v.busy() && wn(n, "ult")) {
+      const uTgt = xuesongPickUltTarget(n, !1);
+      if (uTgt) {
+        n.brain.callFocus(uTgt.id, n.time);
+        n.act.castTarget("ult", uTgt.id);
+        n.label = "xuesong:ult-pick";
+        return;
+      }
+    }
+    if (xuesongPlanPit(n, t, e)) return;
+  }
+  const b = aV(n, h, v);
   if (b.kill) {
     (n.act.attack(b.kill.id), (n.label = `${e}:lasthit`));
     return;
   }
   const w = b.wait !== null && !S;
   if (!oV(n, w, e !== "lane") && !rV(n, o)) {
+    if (n.heroId === "monkey" && monkeyAnnoyPeel(n)) return;
     if (
       (S && !M && !n.v.busy() && n.foeMinions.length >= 3 && oy(n, n.foeMinions, !1),
       b.push && !M && !y && !w)
@@ -1352,7 +1921,16 @@ const pV = {
     fengling: { cast_s1: "s1", dash: "s2", cast_ult: "ult" },
     yeque: { dash: "s1", cast_s2: "s2", cast_ult: "ult" },
     mushroom: { cast_s1: "s1", spin: "s1", dash: "s1", cast_s2: "s2", leap: "ult" },
-    niumo: { cast_s1: "s1", dash: "s2", cast_ult: "ult" },
+    niumo: { cast_s1: "s1", cast_s2: "s2", dash: "s2", cast_ult: "ult" },
+    xuesong: { channel: "s1", cast_s1: "s1", leap: "s2", cast_s2: "s2", cast_ult: "ult" },
+    stone: { cast_s1: "s1", cast_s2: "s2", leap: "ult" },
+    scallion: { cast_s1: "s1", cast_s2: "s2", channel: "ult", cast_ult: "ult" },
+    paperboy: { cast_s1: "s1", cast_s2: "s2", cast_ult: "ult" },
+    maggot: { cast_s1: "s1", cast_s2: "s2", cast_ult: "ult" },
+    horseman: { cast_s1: "s1", cast_s2: "s2", cast_ult: "ult" },
+    cow: { cast_s1: "s1", cast_s2: "s2", leap: "s2", cast_ult: "ult" },
+    monkey: { cast_s1: "s1", cast_s2: "s2", cast_ult: "ult" },
+    slime: { cast_s1: "s1", cast_s2: "s2", dash: "s2", cast_ult: "ult" },
   },
   mV = 20,
   gV = 10,
@@ -1378,6 +1956,9 @@ class yV {
   squadUntil = 0;
   nextSquadAt = 0;
   focusUntil = 0;
+  xsTargetId = -1;
+  xsTargetUntil = 0;
+  xsDrop = { x: 0, y: 0 };
   epicSince = 0;
   epicRetryAt = 0;
   epicLastHp = new Map();
@@ -1448,13 +2029,22 @@ class yV {
         this.refreshEpic(t),
         this.refreshSquad(t),
         this.assign(t),
-        t.time >= this.focusUntil && (this.focusId = -1)));
+        t.time >= this.focusUntil && (this.focusId = -1),
+        t.time >= this.xsTargetUntil && (this.xsTargetId = -1)));
   }
   taskOf(t) {
     return this.tasks.get(t) ?? { kind: "lane", lane: "mid", campId: -1 };
   }
   callFocus(t, e) {
     ((this.focusId = t), (this.focusUntil = e + 2.5));
+  }
+  callXuesongCatch(t, x, y, e) {
+    ((this.focusId = t),
+      (this.focusUntil = Math.max(this.focusUntil, e + 3.6)),
+      (this.xsTargetId = t),
+      (this.xsTargetUntil = e + 3.6),
+      (this.xsDrop.x = x),
+      (this.xsDrop.y = y));
   }
   refreshLanes(t) {
     const e = this.geo,
@@ -1801,10 +2391,610 @@ function e5(n, t) {
 const f6 = {
     panyue: { slot: "s1", reach: 9 },
     chijin: { slot: "s2", reach: 5.5 },
-    niumo: { slot: "s2", reach: 6 },
+    niumo: { slot: "s1", reach: 4.5 },
     xingli: null,
     fengling: null,
     yeque: { slot: "s1", reach: 6.5 },
+    xuesong: { slot: "ult", reach: 6.5 },
+    stone: { slot: "ult", reach: 10.5 },
+    horseman: { slot: "s1", reach: 6.8 },
+    cow: { slot: "s2", reach: 7.5 },
+    monkey: { slot: "s2", reach: 9.0 },
+    slime: { slot: "s2", reach: 8.5 },
   },
-  d6 = { panyue: 1.2, chijin: 0.7, niumo: 0.7, xingli: 0.8, fengling: 0.6, yeque: 0.9 };
-export { VG, zk, WG, jG, se, Kp, T1, e6, qG, XG, YG, n6, KG, iy, Fk, rf, ye, JG, nV, sV, Uk, a6, E1, dV, hV, uV, vV, Ms, t5, bV, wV, MV, kV, SV, e5, f6, d6 };
+  d6 = { panyue: 1.2, chijin: 0.7, niumo: 0.7, xingli: 0.8, fengling: 0.6, yeque: 0.9, xuesong: 0.85, stone: 0.85, horseman: 0.75, cow: 0.85, monkey: 0.85, slime: 0.9 };
+function monkeyOwnPeels(n) {
+  const e = n.me,
+    areas = n.v.sim ? n.v.sim.areas : [],
+    out = [];
+  for (let i = 0; i < areas.length; i++) {
+    const a = areas[i];
+    if (!a.dead && a.ownerId === e.id && a.visual === "monkey_peel") out.push(a);
+  }
+  return out;
+}
+
+function monkeyPeelCount(n) {
+  const e = n.me,
+    active = monkeyOwnPeels(n).length,
+    recList = e.h?._mkPeels;
+  let recActive = 0;
+  if (recList) {
+    for (let i = 0; i < recList.length; i++) if (recList[i].active) recActive++;
+  }
+  return Math.max(active, recActive) + (e.h?._mkPeelsInFlight || 0);
+}
+
+// 己方泉水/己方防御塔周围默认禁扔香蕉皮；只有该塔正被敌人或小兵推塔时才允许塔下防守埋雷
+function monkeyOwnTowerBlocked(n, pt) {
+  const v = n.v;
+  if (ye(pt, n.home) <= 24) {
+    let baseInvaded = !1;
+    for (let i = 0; i < n.foesAll.length; i++) {
+      if (ye(n.foesAll[i].pos, n.home) <= 28) {
+        baseInvaded = !0;
+        break;
+      }
+    }
+    if (!baseInvaded) return !0;
+  }
+  const ownStructs = v.alliedStructures();
+  for (let i = 0; i < ownStructs.length; i++) {
+    const st = ownStructs[i],
+      guardR = (st.stats.attackRange || 8.5) + 2.5;
+    if (ye(pt, st.pos) > guardR) continue;
+    let underSiege = st.lastHitTime > 0 && n.time - st.lastHitTime < 4.5;
+    if (!underSiege) {
+      for (let k = 0; k < n.foesAll.length; k++) {
+        if (ye(n.foesAll[k].pos, st.pos) <= guardR + 4.5) {
+          underSiege = !0;
+          break;
+        }
+      }
+    }
+    if (!underSiege) {
+      let foeM = 0;
+      for (let k = 0; k < n.foeMinions.length; k++) {
+        if (ye(n.foeMinions[k].pos, st.pos) <= guardR + 2.5 && ++foeM >= 2) {
+          underSiege = !0;
+          break;
+        }
+      }
+    }
+    if (!underSiege) return !0;
+  }
+  return !1;
+}
+
+function monkeyPickPeelSpot(n, focusFoe, reservePassive = !1) {
+  const e = n.me,
+    v = n.v,
+    maxPeels = Se.monkey.passive.values.maxPeels || 8,
+    ownPeels = monkeyOwnPeels(n),
+    totalPeels = monkeyPeelCount(n) + (reservePassive && e5(e, "monkey_eating") ? 1 : 0);
+  // 满上限（含飞行中）绝不继续浪费一技能
+  if (totalPeels >= maxPeels) return null;
+  let best = null,
+    bestScore = -1e9;
+  const cand = { x: 0, y: 0 },
+    trySpot = (px, py, base) => {
+      let dx = px - e.pos.x,
+        dy = py - e.pos.y,
+        dist = Math.hypot(dx, dy);
+      if (dist < 1.2) return;
+      if (dist > 8.3) {
+        px = e.pos.x + (dx / dist) * 8.3;
+        py = e.pos.y + (dy / dist) * 8.3;
+        dist = 8.3;
+      }
+      cand.x = px;
+      cand.y = py;
+      if (!v.walkable(cand, 0.55) || n.nearFoeFountain(cand, 1.5)) return;
+      if (monkeyOwnTowerBlocked(n, cand)) return;
+      for (let i = 0; i < ownPeels.length; i++) {
+        const p = ownPeels[i];
+        if (Math.hypot(px - p.pos.x, py - p.pos.y) < 2.6) return;
+      }
+      for (let i = 0; i < n.foeMinions.length; i++) {
+        const m = n.foeMinions[i];
+        if (Math.hypot(px - m.pos.x, py - m.pos.y) < 2.1) return;
+      }
+      let score = base;
+      // 核心：避开敌方英雄 1 秒内能轻松踩烂的范围，丢在对方目前踩不到、之后走位/撤退/追击大概率踩中的点
+      for (let i = 0; i < n.foesAll.length; i++) {
+        const f = n.foesAll[i],
+          fd = Math.hypot(px - f.pos.x, py - f.pos.y);
+        if (uh(f) >= 0.85 && fd <= 1.2) {
+          score += 5;
+          continue;
+        }
+        if (fd < 4.2) return;
+        if (fd >= 4.6 && fd <= 8.6) score += 3.2 - Math.abs(fd - 5.8) * 0.35;
+      }
+      if (v.bushAt(cand) >= 0) score += 2.6;
+      if (v.enemyStructureCovering(cand, 0.4)) score -= 2.5;
+      if (score > bestScore) {
+        bestScore = score;
+        best = { x: px, y: py };
+      }
+    };
+  const foe = focusFoe || n.nearFoe,
+    foeDist = foe ? ye(e.pos, foe.pos) : 1 / 0;
+  if (foe && foeDist <= 16) {
+    // 1. 敌人身后撤退必经路
+    const rx = n.foeHome.x - foe.pos.x,
+      ry = n.foeHome.y - foe.pos.y,
+      rl = Math.hypot(rx, ry) || 1;
+    trySpot(foe.pos.x + (rx / rl) * 5.2, foe.pos.y + (ry / rl) * 5.2, 4.8);
+    trySpot(foe.pos.x + (rx / rl) * 6.5, foe.pos.y + (ry / rl) * 6.5, 4.2);
+    // 2. 敌人追击/压进路线与左右走位侧翼（隔开 4.8~5.6 米让对方没法直接踩烂）
+    const ax = e.pos.x - foe.pos.x,
+      ay = e.pos.y - foe.pos.y,
+      al = Math.hypot(ax, ay) || 1;
+    trySpot(foe.pos.x + (ax / al) * 5.0, foe.pos.y + (ay / al) * 5.0, 4.4);
+    trySpot(foe.pos.x + (ax / al) * 5.2 - (ay / al) * 2.3, foe.pos.y + (ay / al) * 5.2 + (ax / al) * 2.3, 4.0);
+    trySpot(foe.pos.x + (ax / al) * 5.2 + (ay / al) * 2.3, foe.pos.y + (ay / al) * 5.2 - (ax / al) * 2.3, 4.0);
+    trySpot(foe.pos.x - (ay / al) * 5.0, foe.pos.y + (ax / al) * 5.0, 3.8);
+    trySpot(foe.pos.x + (ay / al) * 5.0, foe.pos.y - (ax / al) * 5.0, 3.8);
+    // 3. 只有真被压血/追击时才往自己撤退路径预埋，平时不往自家塔方向瞎扔
+    if (foeDist <= 10.5 && (n.hpR < 0.72 || n.adv < 1.05 || n.heroesOnMe > 0)) {
+      const hx = n.home.x - e.pos.x,
+        hy = n.home.y - e.pos.y,
+        hl = Math.hypot(hx, hy) || 1;
+      trySpot(e.pos.x + (hx / hl) * 2.8, e.pos.y + (hy / hl) * 2.8, 3.3);
+    }
+  }
+  // 4. 附近草丛与河道/野区路口埋雷烦人
+  const bushes = v.map.bushes;
+  for (let i = 0; i < bushes.length; i++) {
+    const poly = bushes[i];
+    let sx = 0,
+      sy = 0;
+    for (let k = 0; k < poly.length; k++) ((sx += poly[k].x), (sy += poly[k].y));
+    const cx = sx / poly.length,
+      cy = sy / poly.length;
+    if (Math.hypot(cx - e.pos.x, cy - e.pos.y) <= 8.3) trySpot(cx, cy, 4.8);
+  }
+  const river = v.map.river;
+  if (river) {
+    for (let i = 0; i < river.length; i++) {
+      const rp = river[i];
+      if (Math.hypot(rp.x - e.pos.x, rp.y - e.pos.y) <= 8.3) trySpot(rp.x, rp.y, 4.0);
+    }
+  }
+  // 5. 只有走出自家外塔到线上交战区（或附近有敌人）时，才往前方兵线边缘埋雷，绝不往身后自家塔下扔
+  const lane = n.anchorLane || (e.lane === "mid" || e.lane === "bot" ? e.lane : "mid"),
+    laneInfo = n.brain.lanes[lane],
+    ownP = laneInfo ? laneInfo.ownP : 0,
+    curP = n.geo.prog(n.team, lane, e.pos.x, e.pos.y);
+  if (curP >= ownP + 5 || foeDist <= 15) {
+    const pt = { x: 0, y: 0 };
+    for (const dp of [4.2, 6.4]) {
+      for (const lat of [-2.4, 2.4]) {
+        n.geo.point(n.team, lane, Math.max(4, Math.min(n.geo.total(lane) - 4, curP + dp)), pt, lat);
+        if (Math.hypot(pt.x - e.pos.x, pt.y - e.pos.y) <= 8.3) trySpot(pt.x, pt.y, 3.4);
+      }
+    }
+  }
+  return bestScore >= 2.8 ? best : null;
+}
+
+function monkeyAnnoyPeel(n) {
+  if (n.heroId !== "monkey" || n.v.busy() || !wn(n, "s1")) return !1;
+  const e = n.me,
+    maxPeels = Se.monkey.passive.values.maxPeels || 8;
+  if (monkeyPeelCount(n) + (e5(e, "monkey_eating") ? 1 : 0) >= maxPeels) return !1;
+  if (ye(e.pos, n.home) < 24 && (!n.nearFoe || n.nearFoeD > 16)) return !1;
+  const ammoB = e.buffs.find((b) => b.id === "monkey_peel_ammo"),
+    ammo = ammoB ? ammoB.stacks : 0,
+    gap = ammo >= 3 ? 1.5 : 3.0;
+  if (n.time - (n._mkPeelAt ?? -99) < gap) return !1;
+  if (x0(n, "s1") < (ammo >= 3 ? 0.22 : 0.34)) return !1;
+  const spot = monkeyPickPeelSpot(n, n.nearFoe, !0);
+  if (!spot) return !1;
+  n._mkPeelAt = n.time;
+  Bc(n, "s1", spot);
+  return !0;
+}
+
+function monkeyStackUlt(n) {
+  const e = n.me;
+  if (n.heroId !== "monkey" || n.v.busy() || e5(e, "monkey_ult") || !wn(n, "ult")) return !1;
+  if (n.hpR < 0.35 || n.time < n.fleeUntil || x0(n, "ult") < 0.14) return !1;
+  if (n.foeStruct && n.inFoeRange && n.tankers === 0) return !1;
+  const stacks = e.h?.monkeyStickStacks || 0;
+  // 前中期努力叠层，不强求杀人：我方小兵和敌方小兵汇集时果断开大补兵刷层
+  if (n.time > 720 && stacks >= 30 && n.foesNear > 0) return !1;
+  if (n.myMinions.length < 1 && !(n.myStruct && ye(e.pos, n.myStruct.pos) < 11)) return !1;
+  const ultR = e.stats.attackRange * 1.4 + 2.8;
+  let nearCount = 0,
+    lowCount = 0;
+  for (let i = 0; i < n.foeMinions.length; i++) {
+    const m = n.foeMinions[i];
+    if (ye(e.pos, m.pos) - m.radius <= ultR) {
+      nearCount++;
+      if (m.hp <= e.stats.ad * 3.4) lowCount++;
+    }
+  }
+  if (nearCount >= 3 || (nearCount >= 2 && lowCount >= 1)) {
+    n.act.castSelf("ult");
+    n.label = "monkey:ult-stack";
+    return !0;
+  }
+  return !1;
+}
+
+function monkeyUltFarmTarget(n) {
+  const e = n.me,
+    r = e.stats.attackRange,
+    ultLv = Math.max(1, e.skills.ult.level),
+    ub = e.buffs.find((b) => b.id === "monkey_ult"),
+    crit = ub && ub.stacks > 0 ? e.stats.critDamage : 1,
+    estDmg = e.stats.ad * crit + Nh(Se.monkey.skills.ult, "bonusDmg", ultLv) + e.stats.ad * 0.45;
+  let best = null,
+    bestScore = -1e9;
+  for (let i = 0; i < n.foeMinions.length; i++) {
+    const m = n.foeMinions[i],
+      d = ye(e.pos, m.pos) - m.radius;
+    if (d > r + 4.5) continue;
+    if (n.v.enemyStructureCovering(m.pos, 0.3) && n.tankers === 0) continue;
+    // 优先打一棍能直接收掉拿层的小兵，其次顺着直线多穿几个小兵
+    let sc = m.hp <= estDmg * 0.95 ? 50 - m.hp * 0.02 : 20 - (m.hp / Math.max(1, m.stats.maxHp)) * 18;
+    sc -= Math.max(0, d - r) * 3;
+    if (sc > bestScore) {
+      bestScore = sc;
+      best = m;
+    }
+  }
+  return best;
+}
+
+const XS_NO_DASH = new Set(["xingli", "paperboy", "maggot", "monkey"]);
+
+// 小肥石：前中期安全时走到小兵堆里开练功边健身边清兵刷额外层数
+function stoneLaneWorkout(n, mode) {
+  const s = n.me;
+  if (n.heroId !== "stone" || n.v.busy() || n.foeMinions.length === 0) return !1;
+  const training = e5(s, "stone_train"),
+    hasCorpse = e5(s, "stone_corpse");
+  if (training) {
+    if (wn(n, "s1") && (n.hpR < 0.38 || (n.heroesOnMe >= 2 && n.adv < 0.85) || n.towerOnMe)) {
+      n.act.castSelf("s1");
+      return !0;
+    }
+    if (hasCorpse && wn(n, "s2") && Dd(n.foeMinions, 2.6, Bt) >= 1 && ye(s.pos, Bt) <= 7.5) {
+      n.act.castAt("s2", Bt);
+      n.label = "stone:workout-throw";
+      return !0;
+    }
+    let bestM = null,
+      bestHp = 1 / 0,
+      grabM = null;
+    for (let i = 0; i < n.foeMinions.length; i++) {
+      const m = n.foeMinions[i],
+        d = ye(s.pos, m.pos) - m.radius;
+      if (d <= s.stats.attackRange + 0.35 && m.hp < bestHp) {
+        bestHp = m.hp;
+        bestM = m;
+      }
+      if (!grabM && d <= 5.4 && m.hp > s.stats.ad * 0.9) grabM = m;
+    }
+    if (!hasCorpse && grabM && wn(n, "s2") && x0(n, "s2") >= 0.16 && n.foeMinions.length >= 2) {
+      n.act.castTarget("s2", grabM.id);
+      n.label = "stone:workout-grab";
+      return !0;
+    }
+    if (bestM) {
+      n.act.attack(bestM.id);
+      n.label = "stone:workout";
+      return !0;
+    }
+    return !1;
+  }
+  if (!wn(n, "s1") || n.hpR < 0.56 || x0(n, "s1") < 0.22 || n.towerOnMe || (n.foeStruct && n.inFoeRange)) return !1;
+  const safe = n.foesNear === 0 || (n.foesNear === 1 && n.adv >= 0.92 && n.nearFoeD >= 5.2);
+  if (!safe) return !1;
+  let inMelee = 0;
+  for (let i = 0; i < n.foeMinions.length; i++) {
+    const m = n.foeMinions[i];
+    if (ye(s.pos, m.pos) - m.radius <= s.stats.attackRange + 0.45) inMelee++;
+  }
+  if (inMelee >= 2 || (inMelee >= 1 && n.foeMinions.length >= 2 && wn(n, "s2"))) {
+    n.act.castSelf("s1");
+    n.label = `${mode}:workout`;
+    return !0;
+  }
+  // 兵堆就在附近且不在敌方塔下：主动走进去开练功清兵
+  const clump = Dd(n.foeMinions, 2.5, Bt);
+  if (
+    clump >= 2 &&
+    ye(s.pos, Bt) <= 6.8 &&
+    ye(s.pos, Bt) > 1.3 &&
+    n.v.enemyStructureCovering(Bt, 0.8) === null &&
+    (!n.nearFoe || ye(Bt, n.nearFoe.pos) >= 5.2)
+  ) {
+    n.act.moveTo(Bt.x, Bt.y);
+    n.label = `${mode}:walk-workout`;
+    return !0;
+  }
+  return !1;
+}
+
+// 雪松大招选人（支持隔墙抓取）：前期抓无位移/残血拉回塔下，中后期团战优先抓一切非坦克 C 位
+function xuesongPickUltTarget(n, inFight) {
+  const e = n.me,
+    early = n.brain.phase === "lane" || n.time < 420,
+    nearTower = n.myStruct && ye(e.pos, n.myStruct.pos) <= 15.5,
+    hasTeam = n.friendsNear >= 1;
+  if (!nearTower && !hasTeam && !inFight) return null;
+  let best = null,
+    bestScore = -1e9;
+  for (let i = 0; i < n.foesAll.length; i++) {
+    const f = n.foesAll[i],
+      d = ye(e.pos, f.pos);
+    if (d > 6.5 || !f.alive || f.rt?.untargetable) continue;
+    const role = Se[f.heroId].role,
+      hpR = f.hp / f.stats.maxHp,
+      noDash = XS_NO_DASH.has(f.heroId);
+    let sc = 0;
+    if (early && nearTower && !hasTeam) {
+      // 前期在自家塔附近，专挑无位移或残血目标拉回塔下堵起来打
+      if (!noDash && hpR > 0.68) continue;
+      sc = (noDash ? 4.5 : 0) + (1 - hpR) * 5 + (role !== "tank" ? 2.2 : -2.5);
+    } else {
+      // 中后期团战 / 有队友配合：只要不是坦克就往死里抓，最优先远程 C 位
+      if (role === "tank") {
+        if (hpR > 0.35 || n.foesAll.some((o) => o.alive && Se[o.heroId].role !== "tank" && ye(e.pos, o.pos) <= 7.5)) continue;
+        sc = 1.2 + (1 - hpR) * 3;
+      } else {
+        sc =
+          (role === "marksman" || role === "mage" ? 7.5 : role === "assassin" ? 6.2 : 4.5) +
+          (noDash ? 1.8 : 0) +
+          (1 - hpR) * 2.5;
+      }
+    }
+    // 隔墙抓人往往是必杀偷袭，额外加分
+    if (!n.v.lineClear(e.pos, f.pos)) sc += 1.6;
+    if (sc > bestScore) {
+      bestScore = sc;
+      best = f;
+    }
+  }
+  return bestScore >= 3.2 ? best : null;
+}
+
+// 雪松大招举起敌人后的完整连招：喊队友集火 -> 2 技能好了直接撑篙跳回塔下/人堆 -> 憋到控制最大再丢回去
+function xuesongHandleScoop(n) {
+  const e = n.me,
+    v = n.v,
+    scoopBuf = e.buffs.find((b) => b.id === "xuesong_scoop");
+  if (!scoopBuf) return !1;
+  const scoopLeft = scoopBuf.timeLeft,
+    onPole = e5(e, "xuesong_pole"),
+    tid = e.h?._xsScoopId ?? -1;
+  // 计算最阴间的丢人目的地：有队友优先丢回自家输出人堆，前期塔下优先丢回自家防御塔内+沙坑后
+  let dropX = n.home.x,
+    dropY = n.home.y,
+    hasDrop = !1;
+  let ax = 0,
+    ay = 0,
+    aw = 0;
+  for (let i = 0; i < n.friends.length; i++) {
+    const f = n.friends[i],
+      fd = ye(e.pos, f.pos);
+    if (fd > 17) continue;
+    const role = Se[f.heroId].role,
+      w = role === "marksman" || role === "mage" ? 2.2 : 1.4;
+    ((ax += f.pos.x * w), (ay += f.pos.y * w), (aw += w));
+  }
+  const nearOwnTower = n.myStruct && ye(e.pos, n.myStruct.pos) <= 17.5 ? n.myStruct : null;
+  if (aw > 0 && (!nearOwnTower || n.friendsNear >= 2 || n.time >= 360)) {
+    dropX = ax / aw;
+    dropY = ay / aw;
+    hasDrop = !0;
+  } else if (nearOwnTower) {
+    const hx = n.home.x - nearOwnTower.pos.x,
+      hy = n.home.y - nearOwnTower.pos.y,
+      hl = Math.hypot(hx, hy) || 1;
+    // 丢到自家塔下偏内侧，刚好让塔一直打且被提前挖好的洞堵住逃路
+    dropX = nearOwnTower.pos.x + (hx / hl) * 2.2;
+    dropY = nearOwnTower.pos.y + (hy / hl) * 2.2;
+    hasDrop = !0;
+  }
+  if (!hasDrop) {
+    const hx = n.home.x - e.pos.x,
+      hy = n.home.y - e.pos.y,
+      hl = Math.hypot(hx, hy) || 1;
+    dropX = e.pos.x + (hx / hl) * 9;
+    dropY = e.pos.y + (hy / hl) * 9;
+  }
+  tid >= 0 && n.brain.callXuesongCatch(tid, dropX, dropY, n.time);
+  const dx = dropX - e.pos.x,
+    dy = dropY - e.pos.y,
+    distDrop = Math.hypot(dx, dy) || 1;
+  // 正在撑篙：立刻朝塔下/人堆二段跳满 7.3 米（人会跟着铁锹一起飞回去！）
+  if (onPole) {
+    if (wn(n, "s2", !0)) {
+      const jumpD = Math.min(7.3, distDrop),
+        raw = { x: e.pos.x + (dx / distDrop) * jumpD, y: e.pos.y + (dy / distDrop) * jumpD },
+        land = v.nearestWalkable(raw);
+      n.act.castAt("s2", land);
+      n.label = "xuesong:scoop-jump";
+      return !0;
+    }
+    return !0;
+  }
+  // 2 技能好了且离目标点还远、压制时间还充足：先撑篙准备把敌人带跳回去
+  if (wn(n, "s2", !0) && scoopLeft >= 0.78 && distDrop >= 4.2) {
+    n.act.castSelf("s2");
+    n.label = "xuesong:scoop-pole";
+    return !0;
+  }
+  // 等到压制快结束（最大控制时间）或自己快死前，再把敌人朝目标点狠狠丢出去
+  if (wn(n, "ult", !0) && (scoopLeft <= 0.42 || n.hpR <= 0.22)) {
+    const throwD = Math.min(6.8, distDrop),
+      raw = { x: e.pos.x + (dx / distDrop) * throwD, y: e.pos.y + (dy / distDrop) * throwD },
+      land = v.nearestWalkable(raw);
+    n.act.castAt("ult", land);
+    n.label = "xuesong:scoop-throw";
+    return !0;
+  }
+  // 压制期间一直往自家塔下/人堆猛拖
+  n.act.moveTo(dropX, dropY, !0);
+  n.label = "xuesong:scoop-drag";
+  return !0;
+}
+
+// 雪松挖洞规划：前期塔前提前挖两个洞封路方便拉人关门打狗；大劣势没大招时挖洞堵敌方兵线防推塔；进攻绝不乱挖堵队友
+function xuesongPlanPit(n, lane, mode) {
+  const e = n.me,
+    v = n.v;
+  if (n.heroId !== "xuesong" || v.busy() || !wn(n, "s1") || e5(e, "xuesong_sand") || e5(e, "xuesong_scoop") || e5(e, "xuesong_pole"))
+    return !1;
+  if (x0(n, "s1") < 0.32 || n.dmgRate > 0) return !1;
+  const laneInfo = n.brain.lanes[lane];
+  if (!laneInfo || !laneInfo.ownStruct || laneInfo.ownStruct.kind !== "tower") return !1;
+  const earlyPrep = n.time < 460 && mode === "lane" && n.hpR > 0.65 && (!n.nearFoe || n.nearFoeD >= 7.5),
+    underDogBlock =
+      !wn(n, "ult") &&
+      (mode === "defend" || laneInfo.threatMinions >= 2 || n.adv < 0.76) &&
+      n.hpR > 0.45 &&
+      (!n.nearFoe || n.nearFoeD >= 6.4);
+  if (!earlyPrep && !underDogBlock) return !1;
+  // 正在压进/推塔时绝不挖洞堵自己人
+  if (mode === "push" || (n.adv >= 1.25 && n.friendsNear >= 1)) return !1;
+  const ownP = laneInfo.ownP,
+    curP = n.geo.prog(n.team, lane, e.pos.x, e.pos.y);
+  if (Math.abs(curP - ownP) > 16) return !1;
+  const pitP = Math.min(n.geo.total(lane) - 6, ownP + (underDogBlock ? 6.4 : 4.8)),
+    areas = v.sim ? v.sim.areas : [],
+    ownPits = [];
+  for (let i = 0; i < areas.length; i++) {
+    const a = areas[i];
+    if (!a.dead && a.ownerId === e.id && a.visual === "xuesong_pit") ownPits.push(a);
+  }
+  // 规划两个并排洞口堵住路，冷却长不乱挖第三个
+  const slots = [-2.1, 2.1];
+  let targetSpot = null;
+  for (let i = 0; i < slots.length; i++) {
+    const pt = { x: 0, y: 0 };
+    n.geo.point(n.team, lane, pitP, pt, slots[i]);
+    if (!v.walkable(pt, 0.6)) continue;
+    let covered = !1;
+    for (let k = 0; k < ownPits.length; k++) {
+      if (ye(pt, ownPits[k].pos) < 3.4) {
+        covered = !0;
+        break;
+      }
+    }
+    if (covered) continue;
+    // 别把冲锋中的队友堵在洞口
+    let blocksAlly = !1;
+    for (let k = 0; k < n.friends.length; k++) {
+      if (ye(pt, n.friends[k].pos) < 3.2) {
+        blocksAlly = !0;
+        break;
+      }
+    }
+    if (blocksAlly) continue;
+    targetSpot = pt;
+    break;
+  }
+  if (!targetSpot) return !1;
+  // 站在洞口偏自家一侧 3.05 米处面朝洞口开挖（沙坑正好生成在面朝方向 3.07 米处）
+  const toHomeX = laneInfo.ownStruct.pos.x - targetSpot.x,
+    toHomeY = laneInfo.ownStruct.pos.y - targetSpot.y,
+    toHomeL = Math.hypot(toHomeX, toHomeY) || 1,
+    standPt = v.nearestWalkable({
+      x: targetSpot.x + (toHomeX / toHomeL) * 3.05,
+      y: targetSpot.y + (toHomeY / toHomeL) * 3.05,
+    });
+  const dSpot = ye(e.pos, targetSpot),
+    ang = Math.atan2(targetSpot.y - e.pos.y, targetSpot.x - e.pos.x),
+    adiff = Math.abs(Math.atan2(Math.sin(ang - e.facing), Math.cos(ang - e.facing)));
+  if (dSpot >= 2.35 && dSpot <= 3.75 && adiff <= 0.35) {
+    n.act.castSelf("s1");
+    n.label = underDogBlock ? "xuesong:block-pit" : "xuesong:prep-pit";
+    return !0;
+  }
+  if (dSpot >= 2.35 && dSpot <= 3.75) {
+    // 站位到了但朝向不对：朝洞口轻挪一步把脸转正
+    n.act.moveDir(Math.cos(ang), Math.sin(ang));
+    n.label = "xuesong:aim-pit";
+    return !0;
+  }
+  if (ye(e.pos, standPt) <= 12) {
+    n.act.moveTo(standPt.x, standPt.y);
+    n.label = "xuesong:go-pit";
+    return !0;
+  }
+  return !1;
+}
+
+function slimeHandlePuddle(n) {
+  const e = n.me,
+    v = n.v;
+  if (!e5(e, "slime_puddle")) return !1;
+  const abs = e.h?._slAbsorbed;
+  let hasHeroAbsorbed = !1;
+  if (abs && abs.length > 0) {
+    for (let i = 0; i < abs.length; i++) {
+      const u = v.sim?.byId?.get(abs[i].id);
+      if (u && u.alive && u.kind === "hero") {
+        hasHeroAbsorbed = !0;
+        break;
+      }
+    }
+  }
+  // 已经反吸到敌方英雄：立刻往自家塔下或队友堆里拖
+  if (hasHeroAbsorbed) {
+    let dest = null;
+    const lane = n.brain?.lanes?.[n.lane];
+    if (lane && lane.ownStruct && ye(e.pos, lane.ownStruct.pos) <= 18) {
+      dest = lane.ownStruct.pos;
+    } else if (n.friends.length > 0) {
+      let best = n.friends[0],
+        bd = ye(e.pos, best.pos);
+      for (let i = 1; i < n.friends.length; i++) {
+        const d = ye(e.pos, n.friends[i].pos);
+        if (d < bd) ((bd = d), (best = n.friends[i]));
+      }
+      dest = best.pos;
+    } else {
+      dest = n.home;
+    }
+    if (dest) {
+      n.act.moveTo(dest.x, dest.y, !0);
+      n.label = "slime:drag-home";
+      return !0;
+    }
+  }
+  // 还没反吸：大滩覆盖到敌方英雄立刻按 1 反吸，否则主动往最近敌方英雄脚下挪
+  if (wn(n, "s1")) {
+    let covered = 0;
+    for (const f of n.foes) {
+      if (ye(e.pos, f.pos) <= 2.95 + f.radius) covered++;
+    }
+    if (covered > 0) {
+      n.act.castSelf("s1");
+      n.label = "slime:absorb";
+      return !0;
+    }
+  }
+  if (n.foes.length > 0 && n.hpR >= 0.28) {
+    let near = n.foes[0],
+      nd = ye(e.pos, near.pos);
+    for (let i = 1; i < n.foes.length; i++) {
+      const d = ye(e.pos, n.foes[i].pos);
+      if (d < nd) ((nd = d), (near = n.foes[i]));
+    }
+    if (nd <= 7.5) {
+      n.act.moveTo(near.pos.x, near.pos.y, !0);
+      n.label = "slime:puddle-chase";
+      return !0;
+    }
+  }
+  return !1;
+}
+
+export { VG, zk, WG, jG, se, Kp, T1, e6, qG, XG, YG, n6, KG, iy, Fk, rf, ye, JG, nV, sV, Uk, a6, E1, dV, hV, uV, vV, Ms, t5, bV, wV, MV, kV, SV, e5, f6, d6, monkeyAnnoyPeel, xuesongHandleScoop, xuesongPickUltTarget, slimeHandlePuddle };

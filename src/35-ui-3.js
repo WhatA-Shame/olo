@@ -356,7 +356,7 @@ function RH(n) {
   // 所以卡片上写"XX 的技能包"，让人知道点下去是套谁的手感。
   const ROSTER = [
     ...Ml.map((h) => ({ hero: h, skin: null })),
-    ...KART_SPECS.map((k) => ({ hero: k.kit, skin: k.id })),
+    ...KART_SPECS.filter((k) => !k.native).map((k) => ({ hero: k.kit, skin: k.id })),
   ];
   ROSTER.forEach((pick, et) => {
     const ct = Se[pick.hero],
@@ -528,7 +528,7 @@ function RH(n) {
         "sf-select__tags",
         za(et.roleName, "gold", Ar(et.role)),
         za(S3[et.lane], "cyan", k3(et.lane)),
-        za(et.attackType === "melee" ? "近战" : "远程", "mute"),
+        za(et.attackType === "both" ? "远程 / 近战" : et.attackType === "melee" ? "近战" : "远程", "mute"),
         z("span", "sf-dim", "难度"),
         T4(et.difficulty),
       ),
@@ -1218,7 +1218,7 @@ function HH() {
     e = n.difficulty,
     s = e === "easy" || e === "normal" || e === "hard" ? e : P2.difficulty,
     // 占位皮要校验：只认当前版本里还真存在、且确实挂在同一个英雄上的皮
-    k = typeof n.skin == "string" && kartSpec(n.skin)?.kit === t ? n.skin : null;
+    k = typeof n.skin == "string" && !kartSpec(n.skin)?.native && kartSpec(n.skin)?.kit === t ? n.skin : null;
   return { heroId: t, skin: k, difficulty: s };
 }
 

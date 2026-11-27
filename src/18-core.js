@@ -2033,6 +2033,15 @@ const yc = ws.panyue,
   Zr = ws.xingli,
   Ku = ws.fengling,
   nM = ws.niumo,
+  xS = ws.xuesong,
+  sT = ws.stone,
+  sC = ws.scallion,
+  pB = ws.paperboy,
+  mG = ws.maggot,
+  hM = ws.horseman,
+  cW0 = ws.cow,
+  mK0 = ws.monkey,
+  sL0 = ws.slime,
   TP = Lt(16760928),
   EP = Lt(15249520),
   Pb = {
@@ -2050,6 +2059,359 @@ const yc = ws.panyue,
       },
       update(n, t) {
         n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius).params(t.t);
+      },
+    },
+    xuesong_pit: {
+      create(n, t) {
+        const rim = Gd(n, t, Xt.ring, 0.07);
+        n.decals.at(rim).params(1, 0.14).color(xS.accent, 1.15, 0.72).under(W.sand, 0.48);
+        const mesh = new Sn(xsPitGeo(), xsPitMat());
+        mesh.position.set(t.x, 0.025, t.z);
+        mesh.rotation.y = t.phase;
+        mesh.scale.set(t.radius, t.radius, t.radius);
+        mesh.renderOrder = 2;
+        n.ctx.layers.fx.add(mesh);
+        t._xsPitMesh = mesh;
+        Ha(n, t.x, t.z, 18, t.radius * 0.75, 3.6, W.sand, W.dustDark, 0.95, 0.7);
+      },
+      update(n, t, e) {
+        const appear = Math.min(1, t.age * 4.5),
+          leave = Math.max(0, Math.min(1, (t.duration - t.age) * 1.1)),
+          fade = appear * Math.max(0.25, leave),
+          rimScale = 0.72 + 0.28 * appear;
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * 1.08).color(xS.accent, 1.1 * fade, 0.65 * fade);
+        if (t._xsPitMesh) {
+          t._xsPitMesh.position.set(t.x, 0.025, t.z);
+          t._xsPitMesh.scale.set(t.radius * rimScale, t.radius * Math.max(0.15, appear * leave), t.radius * rimScale);
+        }
+        for (let i = xc(n, t, e, 2.2); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = t.radius * a.range(0.75, 1.12);
+          n.particles
+            .use(Mt.dust)
+            .tint(W.sand, W.dustDark)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              0.16,
+              t.z + Math.sin(o) * r,
+              a.signed() * 0.35,
+              a.range(0.35, 0.85),
+              a.signed() * 0.35,
+              0.68,
+              0.36,
+              0.82,
+            );
+        }
+      },
+      end(n, t) {
+        Ha(n, t.x, t.z, 12, t.radius * 0.65, 2.4, W.sand, W.dustDark, 0.85, 0.6);
+      },
+      dispose(n, t) {
+        if (t._xsPitMesh) {
+          n.ctx.layers.fx.remove(t._xsPitMesh);
+          t._xsPitMesh = null;
+        }
+      },
+    },
+    xuesong_dig_mound: {
+      create(n, t) {
+        const hole = Gd(n, t, Xt.scorch, 0.06);
+        n.decals.at(hole).params(0, 0).color(W.black, 0.88, 0.82).under(xS.dark, 0.72);
+        const mesh = new Sn(xsSandGeo(), xsSandMat());
+        mesh.position.set(t.x, 0.25, t.z);
+        mesh.rotation.y = t.phase;
+        mesh.scale.set(0.25, 0.2, 0.25);
+        mesh.castShadow = !0;
+        n.ctx.layers.fx.add(mesh);
+        t._xsSandMesh = mesh;
+        t._xsDigBeat = -1;
+      },
+      update(n, t, e) {
+        const p = Math.min(1, t.age / Math.max(0.2, t.duration)),
+          cyc = t.age * 3.0,
+          beat = Math.floor(cyc),
+          f = cyc - beat,
+          lift = f > 0.35 && f < 0.82 ? Math.sin(((f - 0.35) / 0.47) * Math.PI) : 0,
+          s = 0.28 + 0.92 * Math.pow(p, 0.78),
+          yPos = 0.18 + p * 0.28 + lift * 0.52;
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * (0.35 + 0.65 * p)).color(W.black, 0.65 + 0.28 * p, 0.6 + 0.28 * p);
+        if (t._xsSandMesh) {
+          t._xsSandMesh.position.set(t.x, yPos, t.z);
+          t._xsSandMesh.scale.set(s * (1 + lift * 0.08), s * (0.78 + lift * 0.18), s * (1 + lift * 0.08));
+          t._xsSandMesh.rotation.set(lift * 0.28, t.phase + p * 0.9, 0);
+        }
+        if (beat !== t._xsDigBeat) {
+          t._xsDigBeat = beat;
+          Ha(n, t.x, t.z, 10, 0.55 + p * 0.5, 2.8 + p * 1.4, W.sand, W.dustDark, 0.65, 0.52);
+        }
+        for (let i = xc(n, t, e, 10 + p * 10); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            d = a.range(0.15, 0.65 + p * 0.4);
+          n.particles
+            .use(Mt.dust)
+            .tint(W.sand, xS.accent)
+            .spawn(
+              t.x + Math.cos(o) * d,
+              yPos + a.range(0, 0.35),
+              t.z + Math.sin(o) * d,
+              Math.cos(o) * a.range(0.8, 2.4),
+              a.range(1.6, 3.6),
+              Math.sin(o) * a.range(0.8, 2.4),
+              0.52,
+              0.26,
+              0.72,
+            );
+        }
+      },
+      dispose(n, t) {
+        if (t._xsSandMesh) {
+          n.ctx.layers.fx.remove(t._xsSandMesh);
+          t._xsSandMesh = null;
+        }
+      },
+    },
+    xuesong_pole_ring: {
+      create(n, t) {
+        const e = Gd(n, t, Xt.ring, 0.08);
+        n.decals.at(e).params(1, 0.1).color(xS.glow, 1.8, 0.9).under(xS.deep, 0.4);
+        const g = Gd(n, t, Xt.swirl, 0.08);
+        n.decals.at(g).params(2, -2).color(xS.accent, 1.35, 0.65).under(xS.dark, 0.25);
+        const h = n.glow.hold(qe.hoop, sn.hoop);
+        (h.color(xS.glow, 1.4, 0.85), (h.add = 0.25), t.meshes.push(h));
+        const pole = new Sn(xsPoleGeo(), xsPoleMat());
+        pole.position.set(t.x, 0, t.z);
+        pole.rotation.y = t.phase;
+        pole.castShadow = !0;
+        n.ctx.layers.fx.add(pole);
+        t._xsPoleMesh = pole;
+        Ha(n, t.x, t.z, 12, 0.6, 2.6, W.sand, W.dustDark, 0.6, 0.45);
+      },
+      update(n, t, e) {
+        const u = Math.min(1, t.age / 0.38),
+          ease = 1 - Math.pow(1 - u, 3),
+          pulse = 1 + 0.12 * Math.sin(t.age * 5);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 1.45);
+        const h = t.meshes[0];
+        (h.at(t.x, 0.25 + (1.05 + Math.sin(t.age * 4) * 0.14) * ease, t.z).scale(t.radius * (0.45 + 0.5 * ease)),
+          h.rot(0, t.age * 2.6, 0));
+        if (t._xsPoleMesh) {
+          const sway = ease >= 0.99 ? Math.sin(t.age * 3.2) * 0.028 : 0;
+          t._xsPoleMesh.position.set(t.x, 0, t.z);
+          t._xsPoleMesh.scale.set(0.85 + 0.15 * ease, 0.42 + 0.58 * ease, 0.85 + 0.15 * ease);
+          t._xsPoleMesh.rotation.set(-0.55 * (1 - ease) + sway, t.phase, sway * 0.7);
+        }
+        for (let i = xc(n, t, e, 8); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe;
+          n.particles
+            .use(Mt.mote)
+            .tint(xS.glow, xS.accent)
+            .spawn(
+              t.x + Math.cos(o) * t.radius * 0.7,
+              a.range(0.3, 2.6 * ease + 0.2),
+              t.z + Math.sin(o) * t.radius * 0.7,
+              Math.cos(o) * 0.6,
+              a.range(0.6, 1.4),
+              Math.sin(o) * 0.6,
+              0.55,
+              0.25,
+              0.1,
+            );
+        }
+      },
+      dispose(n, t) {
+        if (t._xsPoleMesh) {
+          n.ctx.layers.fx.remove(t._xsPoleMesh);
+          t._xsPoleMesh = null;
+        }
+      },
+    },
+    stone_train_ring: {
+      create(n, t) {
+        const e = Gd(n, t, Xt.ring, 0.08);
+        n.decals.at(e).params(1, 0.14).color(sT.accent, 1.9, 0.92).under(sT.dark, 0.45);
+        const g = Gd(n, t, Xt.swirl, 0.07);
+        n.decals.at(g).params(3, 2.4).color(sT.glow, 1.4, 0.72).under(sT.deep, 0.35);
+      },
+      update(n, t, e) {
+        const ratio = Math.min(1, t.age / Math.max(1, t.duration)),
+          pulse = 0.95 + 0.12 * Math.sin(t.age * (5 + ratio * 6));
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse).color(sT.accent, 1.6 + ratio * 0.9, 0.9);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * (0.85 + ratio * 0.35));
+        for (let i = xc(n, t, e, 7 + ratio * 8); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = t.radius * a.range(0.5, 1.05);
+          n.particles
+            .use(Mt.dust)
+            .tint(sT.accent, W.rock)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              0.2,
+              t.z + Math.sin(o) * r,
+              -Math.cos(o) * 0.8,
+              a.range(1.2, 2.6 + ratio * 1.4),
+              -Math.sin(o) * 0.8,
+              0.55,
+              0.42,
+              0.7,
+            );
+        }
+      },
+    },
+    scallion_ult_beam: {
+      create(n, t) {
+        const e = Gd(n, t, Xt.ring, 0.09);
+        n.decals.at(e).params(1, 0.16).color(sC.glow, 2.2, 0.92).under(sC.dark, 0.45);
+        const g = Gd(n, t, Xt.swirl, 0.08);
+        n.decals.at(g).params(4, 3.6).color(sC.hot, 1.85, 0.8).under(sC.deep, 0.35);
+      },
+      update(n, t, e) {
+        const pulse = 0.96 + 0.14 * Math.sin(t.age * 16);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse).color(sC.glow, 2.3, 0.92);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 1.15);
+        for (let i = xc(n, t, e, 16); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = t.radius * a.range(0.5, 1.1);
+          n.particles
+            .use(Mt.mote)
+            .tint(sC.hot, sC.glow)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              a.range(0.2, 1.3),
+              t.z + Math.sin(o) * r,
+              -Math.cos(o) * 1.8,
+              a.range(0.8, 2.2),
+              -Math.sin(o) * 1.8,
+              0.38,
+              0.28,
+              0.12,
+            );
+        }
+      },
+    },
+    paperboy_effigy: {
+      create(n, t) {
+        const e = Gd(n, t, Xt.ring, 0.08);
+        n.decals.at(e).params(1, 0.14).color(pB.glow, 1.85, 0.88).under(pB.dark, 0.45);
+        const g = Gd(n, t, Xt.swirl, 0.07);
+        n.decals.at(g).params(2, -1.8).color(pB.hot, 1.35, 0.62).under(pB.deep, 0.35);
+        const body = n.glow.hold(qe.cone, sn.rim);
+        (body.color(pB.hot, 1.65, 0.82), (body.add = 0.25), t.meshes.push(body));
+        const head = n.glow.hold(qe.sphere, sn.core);
+        (head.color(pB.glow, 2.0, 0.9), (head.add = 0.35), t.meshes.push(head));
+        const halo = n.glow.hold(qe.hoop, sn.hoop);
+        (halo.color(pB.accent, 1.75, 0.85), (halo.add = 0.3), t.meshes.push(halo));
+      },
+      update(n, t, e) {
+        const bob = Math.sin(t.age * 3.4) * 0.24,
+          pulse = 0.94 + 0.1 * Math.sin(t.age * 4.2);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 1.25);
+        const body = t.meshes[0],
+          head = t.meshes[1],
+          halo = t.meshes[2];
+        (body.at(t.x, 0.45 + bob, t.z).scale(0.55, 1.2, 0.55), body.rot(0, t.age * 1.4, 0));
+        (head.at(t.x, 1.82 + bob, t.z).scale(0.36, 0.36, 0.36), head.rot(0, -t.age * 1.8, 0));
+        (halo.at(t.x, 1.15 + bob * 0.6, t.z).scale(0.88), halo.rot(0.35, t.age * 2.2, 0.2));
+        for (let i = xc(n, t, e, 7); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = a.range(0.25, 0.95);
+          n.particles
+            .use(Mt.mote)
+            .tint(pB.hot, pB.glow)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              a.range(0.3, 1.9),
+              t.z + Math.sin(o) * r,
+              a.signed() * 0.45,
+              a.range(0.7, 1.6),
+              a.signed() * 0.45,
+              0.6,
+              0.24,
+              0.1,
+            );
+        }
+      },
+      end(n, t) {
+        for (let i = 0; i < 16; i++) {
+          const a = n.rnd,
+            o = a.next() * oe;
+          n.particles
+            .use(Mt.mote)
+            .tint(pB.hot, pB.accent)
+            .spawn(t.x, 1.1, t.z, Math.cos(o) * a.range(2, 5.5), a.range(1, 3.6), Math.sin(o) * a.range(2, 5.5), 0.52, 0.3, 0.14);
+        }
+      },
+    },
+    paperboy_suona_ring: {
+      create(n, t) {
+        const e = Gd(n, t, Xt.ring, 0.08);
+        n.decals.at(e).params(1, 0.08).color(pB.accent, 1.85, 0.82).under(pB.dark, 0.35);
+        const g = Gd(n, t, Xt.zone, 0.07);
+        n.decals.at(g).params(10, 0.05).color(pB.glow, 1.1, 0.48).under(pB.deep, 0.25);
+      },
+      update(n, t, e) {
+        const wave = 0.96 + 0.05 * Math.sin(t.age * 12);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * wave);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius);
+        for (let i = xc(n, t, e, 10); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = a.range(0.8, t.radius * 0.92);
+          n.particles
+            .use(Mt.mote)
+            .tint(pB.hot, pB.accent)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              a.range(0.25, 1.2),
+              t.z + Math.sin(o) * r,
+              Math.cos(o) * 1.1,
+              a.range(0.8, 1.9),
+              Math.sin(o) * 1.1,
+              0.48,
+              0.24,
+              0.08,
+            );
+        }
+      },
+    },
+    maggot_poop_s: {
+      create(n, t) {
+        mgInitPoopZone(n, t, 1);
+      },
+      update(n, t, e) {
+        mgUpdatePoopZone(n, t, e, 1);
+      },
+      dispose(n, t) {
+        mgDisposePoopZone(n, t);
+      },
+    },
+    maggot_poop_m: {
+      create(n, t) {
+        mgInitPoopZone(n, t, 2);
+      },
+      update(n, t, e) {
+        mgUpdatePoopZone(n, t, e, 2);
+      },
+      dispose(n, t) {
+        mgDisposePoopZone(n, t);
+      },
+    },
+    maggot_poop_l: {
+      create(n, t) {
+        mgInitPoopZone(n, t, 3);
+      },
+      update(n, t, e) {
+        mgUpdatePoopZone(n, t, e, 3);
+      },
+      dispose(n, t) {
+        mgDisposePoopZone(n, t);
       },
     },
     niumo_trail: {
@@ -2107,6 +2469,196 @@ const yc = ws.panyue,
               0.04,
             );
         }
+      },
+    },
+    horseman_kick_zone: {
+      create(n, t) {
+        const ring = Gd(n, t, Xt.ring, 0.08);
+        n.decals.at(ring).params(1, 0.14).color(hM.accent, 1.8, 0.9).under(hM.dark, 0.45);
+        const fill = Gd(n, t, Xt.zone, 0.07);
+        n.decals.at(fill).params(8, 0.06).color(hM.glow, 1.25, 0.55).under(hM.deep, 0.35);
+      },
+      update(n, t, e) {
+        const p = Math.min(1, t.age / 0.85),
+          pulse = 0.88 + 0.12 * p + 0.04 * Math.sin(t.age * 18);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * 0.48 * pulse).color(hM.hot, 1.5 + p * 1.1, 0.88);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * (0.35 + 0.65 * p)).color(hM.accent, 0.9 + p * 0.8, 0.35 + p * 0.3);
+        for (let i = xc(n, t, e, 12 + p * 14); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = a.range(0.4, 1.2 + p * 0.8);
+          n.particles
+            .use(Mt.dust)
+            .tint(W.sand, hM.accent)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              0.15,
+              t.z + Math.sin(o) * r,
+              Math.cos(o) * a.range(1.2, 3.2),
+              a.range(0.6, 1.8),
+              Math.sin(o) * a.range(1.2, 3.2),
+              0.42,
+              0.22,
+              0.68,
+            );
+        }
+      },
+    },
+    cow_squat_ring: {
+      create(n, t) {
+        const ring = Gd(n, t, Xt.ring, 0.07);
+        n.decals.at(ring).params(1, 0.16).color(cW0.accent, 1.7, 0.88).under(cW0.dark, 0.45);
+        const fill = Gd(n, t, Xt.zone, 0.06);
+        n.decals.at(fill).params(6, 0.05).color(cW0.glow, 1.2, 0.48).under(cW0.deep, 0.35);
+      },
+      update(n, t, e) {
+        const pulse = 0.84 + 0.16 * Math.abs(Math.sin(t.age * 11.8));
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse).color(cW0.hot, 1.6 + 0.55 * pulse, 0.9);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 0.92).color(cW0.accent, 1.0, 0.36);
+        for (let i = xc(n, t, e, 10); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = a.range(0.5, t.radius * 0.85);
+          n.particles
+            .use(Mt.dust)
+            .tint(W.sand, cW0.accent)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              0.14,
+              t.z + Math.sin(o) * r,
+              Math.cos(o) * a.range(0.8, 2.2),
+              a.range(0.6, 1.8),
+              Math.sin(o) * a.range(0.8, 2.2),
+              0.42,
+              0.24,
+              0.68,
+            );
+        }
+      },
+    },
+    cow_giant_aura: {
+      create(n, t) {
+        const ring = Gd(n, t, Xt.ring, 0.07);
+        n.decals.at(ring).params(1, 0.18).color(cW0.hot, 2.0, 0.9).under(cW0.deep, 0.45);
+        const sw = Gd(n, t, Xt.swirl, 0.06);
+        n.decals.at(sw).params(3, 1.8).color(cW0.glow, 1.4, 0.58).under(cW0.dark, 0.35);
+      },
+      update(n, t, e) {
+        const pulse = 0.94 + 0.08 * Math.sin(t.age * 7);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 0.88).rot(t.age * 1.4, 1);
+        for (let i = xc(n, t, e, 12); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = a.range(0.6, t.radius * 0.78);
+          n.particles
+            .use(Mt.ember)
+            .tint(cW0.hot, cW0.accent)
+            .spawn(
+              t.x + Math.cos(o) * r,
+              0.2,
+              t.z + Math.sin(o) * r,
+              a.signed() * 0.5,
+              a.range(1.4, 3.2),
+              a.signed() * 0.5,
+              0.52,
+              0.2,
+              0.06,
+            );
+        }
+      },
+    },
+    monkey_peel: {
+      create(n, t) {
+        const ring = Gd(n, t, Xt.ring, 0.06);
+        n.decals.at(ring).params(1, 0.14).color(mK0.accent, 1.45, 0.72).under(mK0.dark, 0.35);
+        const mesh = new Sn(mkPeelGeo(), xsPoleMat());
+        mesh.castShadow = !0;
+        mesh.receiveShadow = !0;
+        mesh.position.set(t.x, 0.02, t.z);
+        mesh.rotation.y = t.phase;
+        n.ctx.layers.fx.add(mesh);
+        t._mkPeelMesh = mesh;
+      },
+      update(n, t) {
+        const armed = t.age >= 1.0,
+          armU = Math.min(1, t.age / 1.0),
+          popU = Math.min(1, t.age / 0.18),
+          pop = popU < 1 ? 0.4 + 0.6 * popU + Math.sin(popU * Math.PI) * 0.25 : 1,
+          bob = armed ? 1 + Math.sin(t.age * 5.2 + t.phase) * 0.05 : 0.92 + 0.08 * armU;
+        n.decals
+          .at(t.slots[0])
+          .at(t.x, t.z)
+          .radius(t.radius * (armed ? 0.96 + 0.05 * Math.sin(t.age * 6) : 0.62 + 0.38 * armU))
+          .color(armed ? mK0.hot : mK0.dark, armed ? 1.8 : 0.75, armed ? 0.85 : 0.36);
+        if (t._mkPeelMesh) {
+          t._mkPeelMesh.position.set(t.x, 0.02, t.z);
+          t._mkPeelMesh.scale.set(1.25 * pop * bob, (armed ? 1.18 : 0.78 + 0.32 * armU) * pop, 1.25 * pop * bob);
+        }
+      },
+      dispose(n, t) {
+        if (t._mkPeelMesh) {
+          n.ctx.layers.fx.remove(t._mkPeelMesh);
+          t._mkPeelMesh = null;
+        }
+      },
+    },
+    monkey_pillar: {
+      create(n, t) {
+        const ring = Gd(n, t, Xt.ring, 0.07);
+        n.decals.at(ring).params(1, 0.16).color(mK0.hot, 2.2, 0.92).under(mK0.deep, 0.45);
+        const cracks = Gd(n, t, Xt.cracks, 0.06);
+        n.decals.at(cracks).params(0, 0).color(mK0.accent, 1.5, 0.82).under(mK0.dark, 0.6);
+        const mesh = new Sn(mkPillarGeo(), xsPoleMat());
+        mesh.castShadow = !0;
+        mesh.receiveShadow = !0;
+        mesh.position.set(t.x, 0, t.z);
+        mesh.rotation.y = t.phase;
+        n.ctx.layers.fx.add(mesh);
+        t._mkPillarMesh = mesh;
+      },
+      update(n, t, e) {
+        // 落地插地后 0.28 秒内迅速变粗变大，结束前 0.25 秒收小消失
+        const growU = Math.min(1, t.age / 0.28),
+          fadeU = Math.max(0, Math.min(1, (t.duration - t.age) / 0.25)),
+          overshoot = growU < 1 ? 1 + Math.sin(growU * Math.PI) * 0.18 : 1,
+          ease = (1 - Math.pow(1 - growU, 3)) * overshoot * fadeU,
+          xz = Math.max(0.08, t.radius * 0.78 * (0.28 + 0.72 * ease)),
+          yh = Math.max(0.1, (0.35 + 0.65 * ease));
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * (0.96 + 0.04 * Math.sin(t.age * 7)));
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 1.18);
+        if (t._mkPillarMesh) {
+          t._mkPillarMesh.position.set(t.x, 0, t.z);
+          t._mkPillarMesh.scale.set(xz, yh, xz);
+        }
+        for (let i = xc(n, t, e, 6); i > 0; i--) {
+          const a = n.rnd,
+            o = a.next() * oe,
+            r = t.radius * a.range(0.75, 1.08);
+          n.particles
+            .use(Mt.mote)
+            .tint(mK0.hot, mK0.accent)
+            .spawn(t.x + Math.cos(o) * r, a.range(0.2, 3.6 * yh), t.z + Math.sin(o) * r, a.signed() * 0.3, a.range(0.6, 1.5), a.signed() * 0.3, 0.55, 0.2, 0.08);
+        }
+      },
+      dispose(n, t) {
+        if (t._mkPillarMesh) {
+          n.ctx.layers.fx.remove(t._mkPillarMesh);
+          t._mkPillarMesh = null;
+        }
+      },
+    },
+    slime_puddle_zone: {
+      create(n, t) {
+        const ring = Gd(n, t, Xt.ring, 0.06);
+        n.decals.at(ring).params(1, 0.16).color(sL0.hot, 2.0, 0.85).under(sL0.deep, 0.45);
+        const fill = Gd(n, t, Xt.zone, 0.05);
+        n.decals.at(fill).params(0, 0).color(sL0.glow, 1.35, 0.42).under(sL0.deep, 0.25);
+      },
+      update(n, t) {
+        const pulse = 0.97 + 0.04 * Math.sin(t.age * 7);
+        n.decals.at(t.slots[0]).at(t.x, t.z).radius(t.radius * pulse);
+        n.decals.at(t.slots[1]).at(t.x, t.z).radius(t.radius * 0.96);
       },
     },
     panyue_s2_aura: {
@@ -2374,6 +2926,778 @@ const yc = ws.panyue,
     fountain_zone: { create() {}, update() {} },
   };
 
+let _mgGeo = null,
+  _mgMatBrown = null,
+  _mgMatGold = null;
+
+function mgPoopGeo() {
+  if (_mgGeo) return _mgGeo;
+  const segsU = 68,
+    segsV = 14,
+    turns = 2.85,
+    pos = [],
+    nor = [],
+    uvs = [],
+    idx = [],
+    pt = (u) => {
+      const a = u * turns * oe,
+        r = 0.56 * Math.pow(Math.max(0, 1 - u), 1.04),
+        curl = u > 0.82 ? Math.pow((u - 0.82) / 0.18, 1.6) * 0.16 : 0;
+      return [Math.cos(a) * r + curl, 0.21 + 0.96 * Math.pow(u, 0.92), Math.sin(a) * r];
+    };
+  for (let i = 0; i <= segsU; i++) {
+    const u = i / segsU,
+      p = pt(u),
+      p0 = pt(Math.max(0, u - 0.006)),
+      p1 = pt(Math.min(1, u + 0.006));
+    let tx = p1[0] - p0[0],
+      ty = p1[1] - p0[1],
+      tz = p1[2] - p0[2];
+    const tl = Math.hypot(tx, ty, tz) || 1;
+    ((tx /= tl), (ty /= tl), (tz /= tl));
+    // side = normalize(T x up)
+    let sx = -tz,
+      sy = 0,
+      sz = tx;
+    const sl = Math.hypot(sx, sz);
+    if (sl > 1e-4) {
+      sx /= sl;
+      sz /= sl;
+    } else {
+      sx = 1;
+      sz = 0;
+    }
+    // binorm = side x T
+    const bx = sy * tz - sz * ty,
+      by = sz * tx - sx * tz,
+      bz = sx * ty - sy * tx,
+      endCap = u < 0.06 ? Math.sin((u / 0.06) * (Math.PI * 0.5)) : 1,
+      tipCap = u > 0.92 ? Math.cos(((u - 0.92) / 0.08) * (Math.PI * 0.5)) : 1,
+      rad = Math.max(0.008, (0.29 * Math.pow(1 - u * 0.84, 0.72) + 0.024 * (1 - u)) * endCap * tipCap);
+    for (let j = 0; j <= segsV; j++) {
+      const v = j / segsV,
+        phi = v * oe,
+        cp = Math.cos(phi),
+        sp = Math.sin(phi),
+        nx = sx * cp + bx * sp,
+        ny = sy * cp + by * sp,
+        nz = sz * cp + bz * sp,
+        nl = Math.hypot(nx, ny, nz) || 1;
+      pos.push(p[0] + (nx / nl) * rad, Math.max(0, p[1] + (ny / nl) * rad), p[2] + (nz / nl) * rad);
+      nor.push(nx / nl, ny / nl, nz / nl);
+      uvs.push(u, v);
+    }
+  }
+  const ring = segsV + 1;
+  for (let i = 0; i < segsU; i++) {
+    for (let j = 0; j < segsV; j++) {
+      const a = i * ring + j,
+        b = (i + 1) * ring + j,
+        c = i * ring + j + 1,
+        d = (i + 1) * ring + j + 1;
+      idx.push(a, c, b, b, c, d);
+    }
+  }
+  // 底座圆饼贴地，避免第一圈下方悬空穿帮
+  const baseStart = pos.length / 3,
+    baseSegs = 20;
+  pos.push(0, 0.02, 0);
+  nor.push(0, 1, 0);
+  uvs.push(0, 0.5);
+  for (let j = 0; j <= baseSegs; j++) {
+    const a = (j / baseSegs) * oe;
+    pos.push(Math.cos(a) * 0.76, 0.02, Math.sin(a) * 0.76);
+    nor.push(Math.cos(a) * 0.35, 0.93, Math.sin(a) * 0.35);
+    uvs.push(0, 0.25);
+  }
+  for (let j = 0; j < baseSegs; j++) idx.push(baseStart, baseStart + 1 + j + 1, baseStart + 1 + j);
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setAttribute("uv", new On(new Float32Array(uvs), 2));
+  g.setIndex(idx);
+  return (_mgGeo = g);
+}
+
+function mgPoopMat(gold) {
+  if (gold && _mgMatGold) return _mgMatGold;
+  if (!gold && _mgMatBrown) return _mgMatBrown;
+  const mat = new An({
+    uniforms: {
+      uBase: { value: gold ? new Ut(0xe6ac18) : new Ut(0x6e411d) },
+      uDark: { value: gold ? new Ut(0x8a5004) : new Ut(0x331807) },
+      uHi: { value: gold ? new Ut(0xfff4a3) : new Ut(0xa86b36) },
+      uSpec: { value: gold ? new Ut(0xffffff) : new Ut(0xfff0d4) },
+      uGold: { value: gold ? 1 : 0 },
+    },
+    vertexShader: `
+      varying vec3 vN;
+      varying vec3 vW;
+      varying vec2 vUv;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vW = wp.xyz;
+        vN = normalize(mat3(modelMatrix) * normal);
+        vUv = uv;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uBase;
+      uniform vec3 uDark;
+      uniform vec3 uHi;
+      uniform vec3 uSpec;
+      uniform float uGold;
+      varying vec3 vN;
+      varying vec3 vW;
+      varying vec2 vUv;
+      void main() {
+        vec3 N = normalize(vN);
+        vec3 L = normalize(vec3(0.46, 0.84, 0.34));
+        vec3 V = normalize(cameraPosition - vW);
+        vec3 H = normalize(L + V);
+        float ndl = dot(N, L) * 0.5 + 0.5;
+        float crease = 0.72 + 0.28 * smoothstep(-0.35, 0.55, N.y);
+        float band = smoothstep(0.22, 0.82, ndl);
+        vec3 col = mix(uDark, uBase, band * crease);
+        col = mix(col, uHi, smoothstep(0.68, 0.96, ndl) * (0.48 + uGold * 0.38));
+        float spec = pow(max(dot(N, H), 0.0), mix(26.0, 56.0, uGold)) * mix(0.42, 0.95, uGold);
+        float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0) * mix(0.16, 0.55, uGold);
+        col += uSpec * spec + uHi * rim;
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    depthTest: !0,
+    depthWrite: !0,
+    transparent: !1,
+    side: 2,
+  });
+  return gold ? (_mgMatGold = mat) : (_mgMatBrown = mat);
+}
+
+// 雪松老师：真实凹陷沙坑、铁铲蓄沙堆、铲头朝地立杆模型（全部使用 Float32Array 避免 BufferAttribute 报错）
+let _xsPitGeo = null,
+  _xsPitMat = null,
+  _xsSandGeo = null,
+  _xsSandMat = null,
+  _xsPoleGeo = null,
+  _xsPoleMat = null;
+
+function xsPitGeo() {
+  if (_xsPitGeo) return _xsPitGeo;
+  const segs = 32,
+    pos = [],
+    nor = [],
+    kind = [],
+    idx = [];
+  // 1) 中央凹坑视差洞口圆盘（r = 0..0.88，kind = 0）
+  pos.push(0, 0.015, 0);
+  nor.push(0, 1, 0);
+  kind.push(0);
+  for (let i = 0; i <= segs; i++) {
+    const a = (i / segs) * oe,
+      r = 0.88;
+    pos.push(Math.cos(a) * r, 0.015, Math.sin(a) * r);
+    nor.push(0, 1, 0);
+    kind.push(0);
+  }
+  for (let i = 0; i < segs; i++) idx.push(0, 1 + i + 1, 1 + i);
+
+  // 2) 外圈翻起的三维沙土坑沿隆起（4 环，kind = 1）
+  const rimBase = pos.length / 3,
+    rings = [
+      { r: 0.85, y: 0.02, ny: 0.35, nr: -0.93 },
+      { r: 0.96, y: 0.24, ny: 0.72, nr: -0.68 },
+      { r: 1.12, y: 0.2, ny: 0.88, nr: 0.45 },
+      { r: 1.32, y: 0.0, ny: 0.95, nr: 0.3 },
+    ];
+  for (let ri = 0; ri < rings.length; ri++) {
+    const rg = rings[ri];
+    for (let i = 0; i <= segs; i++) {
+      const a = (i / segs) * oe,
+        ca = Math.cos(a),
+        sa = Math.sin(a),
+        bump = ri === 1 || ri === 2 ? 1 + 0.24 * Math.sin(a * 5 + 0.8) + 0.16 * Math.cos(a * 9 - 0.5) : 1,
+        rad = rg.r * (ri === 0 ? 1 : 0.96 + 0.07 * Math.sin(a * 6 + ri)),
+        yy = rg.y * bump;
+      pos.push(ca * rad, yy, sa * rad);
+      const nl = Math.hypot(ca * rg.nr, rg.ny, sa * rg.nr) || 1;
+      nor.push((ca * rg.nr) / nl, rg.ny / nl, (sa * rg.nr) / nl);
+      kind.push(1);
+    }
+  }
+  const stride = segs + 1;
+  for (let ri = 0; ri < rings.length - 1; ri++) {
+    for (let i = 0; i < segs; i++) {
+      const a = rimBase + ri * stride + i,
+        b = a + stride,
+        c = a + 1,
+        d = b + 1;
+      idx.push(a, c, b, b, c, d);
+    }
+  }
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setAttribute("aKind", new On(new Float32Array(kind), 1));
+  g.setIndex(idx);
+  return (_xsPitGeo = g);
+}
+
+function xsPitMat() {
+  if (_xsPitMat) return _xsPitMat;
+  return (_xsPitMat = new An({
+    vertexShader: `
+      attribute float aKind;
+      varying float vKind;
+      varying vec3 vWorld;
+      varying vec3 vOrigin;
+      varying vec3 vNorm;
+      varying float vScaleXZ;
+      void main() {
+        vKind = aKind;
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorld = wp.xyz;
+        vOrigin = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        vScaleXZ = max(0.01, length((modelMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz));
+        vNorm = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      varying float vKind;
+      varying vec3 vWorld;
+      varying vec3 vOrigin;
+      varying vec3 vNorm;
+      varying float vScaleXZ;
+      void main() {
+        vec3 L = normalize(vec3(0.48, 0.82, 0.32));
+        if (vKind > 0.5) {
+          // 外圈翻起的立体泥土隆起
+          vec3 N = normalize(vNorm);
+          float grain = sin(vWorld.x * 9.0) * cos(vWorld.z * 9.0) * 0.08;
+          float ndl = dot(N, L) * 0.5 + 0.5 + grain;
+          vec3 dirtDark = vec3(0.30, 0.20, 0.11);
+          vec3 dirtMid = vec3(0.62, 0.45, 0.25);
+          vec3 dirtHi = vec3(0.84, 0.67, 0.41);
+          vec3 col = mix(dirtDark, dirtMid, smoothstep(0.18, 0.72, ndl));
+          col = mix(col, dirtHi, smoothstep(0.68, 0.96, ndl) * 0.65);
+          gl_FragColor = vec4(col, 1.0);
+          return;
+        }
+        // 中央凹陷洞穴：视线解析求交抛物面坑壁，随镜头移动产生真实立体深坑视差
+        float R = 0.88;
+        float D = 0.96;
+        vec2 p0 = (vWorld.xz - vOrigin.xz) / vScaleXZ;
+        float r2 = dot(p0, p0);
+        if (r2 > R * R) discard;
+        vec3 rd = normalize(vWorld - cameraPosition);
+        rd.y = min(rd.y, -0.14);
+        float k = D / (R * R);
+        float A = k * dot(rd.xz, rd.xz);
+        float B = 2.0 * k * dot(p0, rd.xz) - rd.y;
+        float C = k * r2 - D;
+        float t = A > 1e-4 ? (-B + sqrt(max(0.0, B * B - 4.0 * A * C))) / (2.0 * A) : -C / max(1e-4, B);
+        vec3 hp = vec3(p0.x + t * rd.x, t * rd.y, p0.y + t * rd.z);
+        vec3 wallN = normalize(vec3(-2.0 * k * hp.x, 1.0, -2.0 * k * hp.z));
+        float ang = atan(hp.z, hp.x);
+        float strata = sin(hp.y * 22.0 + sin(ang * 4.0) * 0.8) * 0.5 + 0.5;
+        float gouge = sin(ang * 14.0 + hp.y * 6.0) * 0.08;
+        float ndl = max(0.0, dot(wallN, L)) + gouge;
+        // 深坑环境光遮蔽：越往下越暗黑，向阳内壁泛土黄色，背阴内壁深棕阴影
+        float depthFrac = clamp(-hp.y / D, 0.0, 1.0);
+        float ao = mix(0.95, 0.08, pow(depthFrac, 0.78));
+        vec3 rimLip = vec3(0.76, 0.57, 0.33);
+        vec3 wallSoil = mix(vec3(0.36, 0.24, 0.13), vec3(0.56, 0.39, 0.21), strata);
+        vec3 pitBottom = vec3(0.06, 0.04, 0.025);
+        vec3 litWall = wallSoil * (0.28 + 0.95 * ndl);
+        vec3 col = mix(litWall, pitBottom, smoothstep(0.52, 0.96, depthFrac));
+        col *= ao;
+        float edgeBevel = smoothstep(R * 0.76, R, sqrt(r2));
+        col = mix(col, rimLip * (0.55 + 0.45 * ndl), edgeBevel * 0.55);
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    depthTest: !0,
+    depthWrite: !0,
+    transparent: !1,
+    side: 2,
+  }));
+}
+
+function xsSandGeo() {
+  if (_xsSandGeo) return _xsSandGeo;
+  const segsU = 10,
+    segsV = 18,
+    pos = [],
+    nor = [],
+    idx = [];
+  for (let i = 0; i <= segsU; i++) {
+    const u = i / segsU,
+      y = Math.pow(u, 0.85) * 0.72,
+      rad = Math.sin((1 - u) * Math.PI * 0.52) * 0.62;
+    for (let j = 0; j <= segsV; j++) {
+      const a = (j / segsV) * oe,
+        bump = 1 + 0.12 * Math.sin(a * 4 + u * 5) + 0.08 * Math.cos(a * 7 - u * 4),
+        r = rad * bump,
+        x = Math.cos(a) * r,
+        z = Math.sin(a) * r;
+      pos.push(x, y, z);
+      const nx = Math.cos(a) * 0.75,
+        ny = 0.66 + u * 0.35,
+        nz = Math.sin(a) * 0.75,
+        nl = Math.hypot(nx, ny, nz) || 1;
+      nor.push(nx / nl, ny / nl, nz / nl);
+    }
+  }
+  const ring = segsV + 1;
+  for (let i = 0; i < segsU; i++) {
+    for (let j = 0; j < segsV; j++) {
+      const a = i * ring + j,
+        b = a + ring,
+        c = a + 1,
+        d = b + 1;
+      idx.push(a, c, b, b, c, d);
+    }
+  }
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setIndex(idx);
+  return (_xsSandGeo = g);
+}
+
+function xsSandMat() {
+  if (_xsSandMat) return _xsSandMat;
+  return (_xsSandMat = new An({
+    vertexShader: `
+      varying vec3 vN;
+      varying vec3 vW;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vW = wp.xyz;
+        vN = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vN;
+      varying vec3 vW;
+      void main() {
+        vec3 N = normalize(vN);
+        vec3 L = normalize(vec3(0.45, 0.85, 0.35));
+        float ndl = dot(N, L) * 0.5 + 0.5;
+        float sparkle = step(0.92, fract(sin(dot(floor(vW * 26.0), vec3(12.9898, 78.233, 37.719))) * 43758.5453));
+        vec3 col = mix(vec3(0.52, 0.36, 0.16), vec3(0.92, 0.76, 0.42), smoothstep(0.2, 0.88, ndl));
+        col += vec3(0.28, 0.24, 0.14) * sparkle;
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    depthTest: !0,
+    depthWrite: !0,
+    transparent: !1,
+    side: 2,
+  }));
+}
+
+function xsPoleGeo() {
+  if (_xsPoleGeo) return _xsPoleGeo;
+  const pos = [],
+    nor = [],
+    col = [],
+    idx = [];
+  const pushBox = (cx, cy, cz, sx, sy, sz, cr, cg, cb) => {
+    const hx = sx * 0.5,
+      hy = sy * 0.5,
+      hz = sz * 0.5,
+      faces = [
+        { n: [0, 0, 1], v: [[-hx, -hy, hz], [hx, -hy, hz], [hx, hy, hz], [-hx, hy, hz]] },
+        { n: [0, 0, -1], v: [[hx, -hy, -hz], [-hx, -hy, -hz], [-hx, hy, -hz], [hx, hy, -hz]] },
+        { n: [1, 0, 0], v: [[hx, -hy, hz], [hx, -hy, -hz], [hx, hy, -hz], [hx, hy, hz]] },
+        { n: [-1, 0, 0], v: [[-hx, -hy, -hz], [-hx, -hy, hz], [-hx, hy, hz], [-hx, hy, -hz]] },
+        { n: [0, 1, 0], v: [[-hx, hy, hz], [hx, hy, hz], [hx, hy, -hz], [-hx, hy, -hz]] },
+        { n: [0, -1, 0], v: [[-hx, -hy, -hz], [hx, -hy, -hz], [hx, -hy, hz], [-hx, -hy, hz]] },
+      ];
+    for (const f of faces) {
+      const b = pos.length / 3;
+      for (const v of f.v) {
+        pos.push(cx + v[0], cy + v[1], cz + v[2]);
+        nor.push(f.n[0], f.n[1], f.n[2]);
+        col.push(cr, cg, cb);
+      }
+      idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+    }
+  };
+  const pushCyl = (y0, y1, r0, r1, segs, cr, cg, cb) => {
+    const base = pos.length / 3;
+    for (let i = 0; i <= segs; i++) {
+      const a = (i / segs) * oe,
+        ca = Math.cos(a),
+        sa = Math.sin(a);
+      pos.push(ca * r0, y0, sa * r0, ca * r1, y1, sa * r1);
+      nor.push(ca, 0, sa, ca, 0, sa);
+      col.push(cr, cg, cb, cr, cg, cb);
+    }
+    for (let i = 0; i < segs; i++) {
+      const a = base + i * 2,
+        b = a + 1,
+        c = a + 2,
+        d = a + 3;
+      idx.push(a, c, b, b, c, d);
+    }
+  };
+  // 1) 铁铲头朝下深深插在地面里（y = 0.0 .. 0.72）：尖头入土 + 宽铲面 + 翻边
+  const bBase = pos.length / 3,
+    rows = [
+      { y: -0.04, w: 0.06, z: 0.05, c: [0.42, 0.45, 0.48] },
+      { y: 0.16, w: 0.34, z: 0.03, c: [0.58, 0.62, 0.67] },
+      { y: 0.44, w: 0.42, z: -0.02, c: [0.64, 0.68, 0.73] },
+      { y: 0.68, w: 0.38, z: -0.01, c: [0.52, 0.56, 0.6] },
+    ],
+    cols = [-1, -0.5, 0, 0.5, 1];
+  for (let side = 0; side < 2; side++) {
+    const zOff = side === 0 ? 0.032 : -0.032,
+      nz = side === 0 ? 1 : -1,
+      sb = pos.length / 3;
+    for (const r of rows) {
+      for (const u of cols) {
+        const scoop = (1 - u * u) * -0.065;
+        pos.push(u * r.w, r.y, r.z + scoop + zOff);
+        nor.push(u * 0.25, 0.05, nz * 0.96);
+        col.push(r.c[0], r.c[1], r.c[2]);
+      }
+    }
+    const cs = cols.length;
+    for (let ri = 0; ri < rows.length - 1; ri++) {
+      for (let ci = 0; ci < cs - 1; ci++) {
+        const a = sb + ri * cs + ci,
+          b = a + cs,
+          c = a + 1,
+          d = b + 1;
+        side === 0 ? idx.push(a, c, b, b, c, d) : idx.push(a, b, c, b, d, c);
+      }
+    }
+  }
+  void bBase;
+  // 2) 金属套筒（连接铲面与木杆，y = 0.64 .. 0.92）
+  pushCyl(0.64, 0.92, 0.115, 0.088, 12, 0.46, 0.5, 0.54);
+  // 3) 竖直粗木杆（y = 0.90 .. 2.58）
+  pushCyl(0.9, 2.58, 0.078, 0.072, 12, 0.68, 0.47, 0.24);
+  // 4) 顶部 T 字踩踏横柄（y = 2.58 .. 2.72，雪松老师双脚正好踩在上面）
+  pushBox(0, 2.63, 0, 0.72, 0.11, 0.13, 0.76, 0.54, 0.28);
+  pushBox(-0.28, 2.52, 0, 0.08, 0.16, 0.1, 0.56, 0.39, 0.2);
+  pushBox(0.28, 2.52, 0, 0.08, 0.16, 0.1, 0.56, 0.39, 0.2);
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setAttribute("color", new On(new Float32Array(col), 3));
+  g.setIndex(idx);
+  return (_xsPoleGeo = g);
+}
+
+function xsPoleMat() {
+  if (_xsPoleMat) return _xsPoleMat;
+  return (_xsPoleMat = new An({
+    vertexShader: `
+      attribute vec3 color;
+      varying vec3 vN;
+      varying vec3 vW;
+      varying vec3 vC;
+      void main() {
+        vC = color;
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vW = wp.xyz;
+        vN = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vN;
+      varying vec3 vW;
+      varying vec3 vC;
+      void main() {
+        vec3 N = normalize(vN);
+        vec3 L = normalize(vec3(0.45, 0.85, 0.35));
+        vec3 V = normalize(cameraPosition - vW);
+        vec3 H = normalize(L + V);
+        float ndl = dot(N, L) * 0.5 + 0.5;
+        float spec = pow(max(dot(N, H), 0.0), 28.0) * 0.38;
+        vec3 col = vC * (0.42 + 0.78 * ndl) + vec3(0.95, 0.92, 0.86) * spec;
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    depthTest: !0,
+    depthWrite: !0,
+    transparent: !1,
+    side: 2,
+  }));
+}
+
+let _mkPeelGeo = null,
+  _mkBananaGeo = null,
+  _mkPillarGeo = null;
+
+function mkBananaGeo() {
+  if (_mkBananaGeo) return _mkBananaGeo;
+  const pos = [],
+    nor = [],
+    col = [],
+    idx = [];
+  // 弯曲大黄香蕉：沿局部 Y 轴向上弯成月牙状，两端带棕色果蒂
+  const rings = [
+    { x: -0.14, y: -0.34, r: 0.032, c: [0.36, 0.22, 0.08] },
+    { x: -0.07, y: -0.22, r: 0.078, c: [0.98, 0.84, 0.14] },
+    { x: 0.01, y: -0.08, r: 0.105, c: [1.0, 0.9, 0.18] },
+    { x: 0.03, y: 0.08, r: 0.105, c: [1.0, 0.9, 0.18] },
+    { x: -0.04, y: 0.22, r: 0.082, c: [0.98, 0.85, 0.15] },
+    { x: -0.14, y: 0.33, r: 0.042, c: [0.85, 0.72, 0.14] },
+    { x: -0.2, y: 0.4, r: 0.028, c: [0.34, 0.2, 0.08] },
+  ];
+  const seg = 8;
+  for (let r = 0; r < rings.length - 1; r++) {
+    const a = rings[r],
+      b = rings[r + 1];
+    for (let i = 0; i < seg; i++) {
+      const t0 = (i / seg) * Math.PI * 2,
+        t1 = ((i + 1) / seg) * Math.PI * 2,
+        c0 = Math.cos(t0),
+        s0 = Math.sin(t0),
+        c1 = Math.cos(t1),
+        s1 = Math.sin(t1);
+      const base = pos.length / 3;
+      const pts = [
+        [a.x + c0 * a.r, a.y, s0 * a.r, c0, 0, s0, a.c],
+        [a.x + c1 * a.r, a.y, s1 * a.r, c1, 0, s1, a.c],
+        [b.x + c1 * b.r, b.y, s1 * b.r, c1, 0, s1, b.c],
+        [b.x + c0 * b.r, b.y, s0 * b.r, c0, 0, s0, b.c],
+      ];
+      for (const p of pts) {
+        pos.push(p[0], p[1], p[2]);
+        nor.push(p[3], p[4], p[5]);
+        col.push(p[6][0], p[6][1], p[6][2]);
+      }
+      idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+    }
+  }
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setAttribute("color", new On(new Float32Array(col), 3));
+  g.setIndex(idx);
+  return (_mkBananaGeo = g);
+}
+
+function mkPeelGeo() {
+  if (_mkPeelGeo) return _mkPeelGeo;
+  const pos = [],
+    nor = [],
+    col = [],
+    idx = [];
+  const pushTri = (a, b, c, r, g, bl) => {
+    const base = pos.length / 3;
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+    const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const nl = Math.hypot(nx, ny, nz) || 1;
+    nx /= nl; ny /= nl; nz /= nl;
+    for (const p of [a, b, c]) {
+      pos.push(p[0], p[1], p[2]);
+      nor.push(nx, ny, nz);
+      col.push(r, g, bl);
+    }
+    idx.push(base, base + 1, base + 2);
+  };
+  const pushQuad = (a, b, c, d, r, g, bl) => {
+    pushTri(a, b, c, r, g, bl);
+    pushTri(a, c, d, r, g, bl);
+  };
+  // 3 片朝外摊开的弯曲大黄香蕉皮瓣
+  for (let p = 0; p < 3; p++) {
+    const ang = (p * Math.PI * 2) / 3,
+      ca = Math.cos(ang),
+      sa = Math.sin(ang),
+      px = -sa,
+      pz = ca;
+    const segs = [
+      { d: 0.04, y: 0.32, w: 0.08, c: [0.98, 0.85, 0.16] },
+      { d: 0.18, y: 0.28, w: 0.14, c: [1.0, 0.88, 0.18] },
+      { d: 0.36, y: 0.14, w: 0.16, c: [0.98, 0.84, 0.14] },
+      { d: 0.54, y: 0.03, w: 0.13, c: [0.94, 0.76, 0.12] },
+      { d: 0.66, y: 0.06, w: 0.05, c: [0.65, 0.44, 0.12] },
+    ];
+    for (let s = 0; s < segs.length - 1; s++) {
+      const s0 = segs[s], s1 = segs[s + 1];
+      const a = [ca * s0.d - px * s0.w, s0.y, sa * s0.d - pz * s0.w];
+      const b = [ca * s0.d + px * s0.w, s0.y, sa * s0.d + pz * s0.w];
+      const c = [ca * s1.d + px * s1.w, s1.y, sa * s1.d + pz * s1.w];
+      const d = [ca * s1.d - px * s1.w, s1.y, sa * s1.d - pz * s1.w];
+      pushQuad(a, b, c, d, s1.c[0], s1.c[1], s1.c[2]);
+    }
+  }
+  // 顶部深棕色香蕉蒂小柱
+  const stemSeg = 6;
+  for (let i = 0; i < stemSeg; i++) {
+    const a0 = (i / stemSeg) * Math.PI * 2, a1 = ((i + 1) / stemSeg) * Math.PI * 2;
+    const p0 = [Math.cos(a0) * 0.06, 0.28, Math.sin(a0) * 0.06];
+    const p1 = [Math.cos(a1) * 0.06, 0.28, Math.sin(a1) * 0.06];
+    const p2 = [Math.cos(a1) * 0.045, 0.44, Math.sin(a1) * 0.045];
+    const p3 = [Math.cos(a0) * 0.045, 0.44, Math.sin(a0) * 0.045];
+    pushQuad(p0, p1, p2, p3, 0.36, 0.22, 0.09);
+  }
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setAttribute("color", new On(new Float32Array(col), 3));
+  g.setIndex(idx);
+  return (_mkPeelGeo = g);
+}
+
+function mkPillarGeo() {
+  if (_mkPillarGeo) return _mkPillarGeo;
+  const pos = [],
+    nor = [],
+    col = [],
+    idx = [];
+  const pushCyl = (y0, y1, r0, r1, seg, cr, cg, cb) => {
+    const base = pos.length / 3;
+    for (let i = 0; i <= seg; i++) {
+      const a = (i / seg) * Math.PI * 2,
+        ca = Math.cos(a),
+        sa = Math.sin(a);
+      pos.push(ca * r0, y0, sa * r0, ca * r1, y1, sa * r1);
+      nor.push(ca, 0, sa, ca, 0, sa);
+      col.push(cr, cg, cb, cr, cg, cb);
+    }
+    for (let i = 0; i < seg; i++) {
+      const p = base + i * 2;
+      idx.push(p, p + 1, p + 3, p, p + 3, p + 2);
+    }
+    const topC = pos.length / 3;
+    pos.push(0, y1, 0);
+    nor.push(0, 1, 0);
+    col.push(cr * 1.1, cg * 1.1, cb * 1.1);
+    for (let i = 0; i < seg; i++) {
+      const p0 = base + i * 2 + 1,
+        p1 = base + (i + 1) * 2 + 1;
+      idx.push(topC, p1, p0);
+    }
+  };
+  // 插地变粗变大的金箍铁柱：底金箍 + 粗大暗红铁身 + 中金环 + 顶金箍帽
+  pushCyl(0.0, 0.72, 1.08, 1.04, 16, 0.98, 0.76, 0.18);
+  pushCyl(0.72, 4.35, 0.94, 0.92, 16, 0.68, 0.14, 0.1);
+  pushCyl(2.2, 2.55, 1.02, 1.02, 16, 1.0, 0.82, 0.22);
+  pushCyl(4.35, 5.15, 1.06, 1.12, 16, 1.0, 0.8, 0.2);
+  const g = new Bn();
+  g.setAttribute("position", new On(new Float32Array(pos), 3));
+  g.setAttribute("normal", new On(new Float32Array(nor), 3));
+  g.setAttribute("color", new On(new Float32Array(col), 3));
+  g.setIndex(idx);
+  return (_mkPillarGeo = g);
+}
+
+const MG_AURA_R = 5.67,
+  MG_BROWN_DASH = Lt(0x8a5b2e),
+  MG_GOLD_DASH = Lt(0xf6c93b);
+
+function mgInitPoopZone(n, t, tier) {
+  const isGold = tier >= 3,
+    scorch = Gd(n, t, Xt.scorch, 0.06);
+  n.decals
+    .at(scorch)
+    .params(0, 0)
+    .color(isGold ? mG.accent : mG.deep, isGold ? 1.15 : 0.9, 0.75)
+    .under(mG.dark, 0.55);
+  // 虚线圈：标明该粪污为活蛆提供攻速与普攻碎粑粑加成的生效范围
+  const dash = Gd(n, t, Xt.range, 0.06);
+  n.decals
+    .at(dash)
+    .params(0.0075, 40)
+    .color(isGold ? MG_GOLD_DASH : MG_BROWN_DASH, isGold ? 1.65 : 1.05, isGold ? 0.62 : 0.45)
+    .under(mG.dark, isGold ? 0.22 : 0.14);
+  const mesh = new Sn(mgPoopGeo(), mgPoopMat(isGold));
+  mesh.castShadow = !0;
+  mesh.receiveShadow = !0;
+  mesh.position.set(t.x, 0, t.z);
+  mesh.rotation.y = t.phase;
+  n.ctx.layers.fx.add(mesh);
+  t._mgMesh = mesh;
+  t._mgVisX = t.x;
+  t._mgVisZ = t.z;
+  t._mgVel = 0;
+  t._mgTiltX = 0;
+  t._mgTiltZ = 0;
+}
+
+function mgUpdatePoopZone(n, t, e, tier) {
+  const isGold = tier >= 3,
+    dt = Math.max(1e-4, Math.min(0.1, e || 0.016)),
+    vx0 = t._mgVisX ?? t.x,
+    vz0 = t._mgVisZ ?? t.z,
+    k = 1 - Math.exp(-24 * dt),
+    vx = vx0 + (t.x - vx0) * k,
+    vz = vz0 + (t.z - vz0) * k,
+    dx = vx - vx0,
+    dz = vz - vz0,
+    spd = Math.hypot(dx, dz) / dt;
+  t._mgVisX = vx;
+  t._mgVisZ = vz;
+  t._mgVel = t._mgVel * 0.78 + Math.min(18, spd) * 0.22;
+  const moving = Math.min(1, t._mgVel / 5.5);
+  if (spd > 0.35) {
+    const dirX = dx / (spd * dt + 1e-5),
+      dirZ = dz / (spd * dt + 1e-5);
+    t._mgTiltX = t._mgTiltX * 0.75 + dirZ * 0.28 * moving;
+    t._mgTiltZ = t._mgTiltZ * 0.75 - dirX * 0.28 * moving;
+  } else {
+    t._mgTiltX *= 0.82;
+    t._mgTiltZ *= 0.82;
+  }
+  const popU = Math.min(1, t.age / 0.28),
+    pop = popU < 1 ? 1 + Math.sin(popU * Math.PI) * 0.28 * (1 - popU) : 1,
+    popIn = popU < 0.25 ? popU / 0.25 : 1,
+    wob = 1 + Math.sin(t.age * (isGold ? 2.8 : 3.6) + t.phase) * 0.035,
+    sScale = (tier === 1 ? 0.92 : tier === 2 ? 1.42 : 1.98) * popIn * pop,
+    yScale = (tier === 1 ? 0.86 : tier === 2 ? 1.32 : 1.84) * popIn * (pop / wob) * (1 - moving * 0.12),
+    xzScale = sScale * wob * (1 + moving * 0.1),
+    hopY = moving * (0.14 + Math.abs(Math.sin(t.age * 16)) * 0.2);
+  n.decals.at(t.slots[0]).at(vx, vz).radius(t.radius * 1.1);
+  n.decals.at(t.slots[1]).at(vx, vz).radius(MG_AURA_R + t.radius);
+  const mesh = t._mgMesh;
+  if (mesh) {
+    mesh.position.set(vx, hopY, vz);
+    mesh.scale.set(xzScale, yScale, xzScale);
+    mesh.rotation.set(t._mgTiltX, t.phase + (isGold ? t.age * 0.45 : 0), t._mgTiltZ);
+  }
+  if (isGold) {
+    for (let i = xc(n, t, e, 8); i > 0; i--) {
+      const a = n.rnd,
+        o = a.next() * oe,
+        d = a.range(0.35, t.radius * 0.9);
+      n.particles
+        .use(Mt.star)
+        .tint(mG.hot, mG.accent)
+        .spawn(vx + Math.cos(o) * d, a.range(0.5, 2.1), vz + Math.sin(o) * d, a.signed() * 0.45, a.range(0.8, 1.7), a.signed() * 0.45, 0.72, 0.26, 0.09);
+    }
+  } else {
+    for (let i = xc(n, t, e, tier === 2 ? 3.5 : 2.2); i > 0; i--) {
+      const a = n.rnd,
+        o = a.next() * oe,
+        d = a.range(0.2, t.radius * 0.65);
+      n.particles
+        .use(Mt.mote)
+        .tint(mG.glow, mG.deep)
+        .spawn(vx + Math.cos(o) * d, a.range(0.4, 1.15), vz + Math.sin(o) * d, a.signed() * 0.35, a.range(0.45, 1.05), a.signed() * 0.35, 0.62, 0.16, 0.06);
+    }
+  }
+}
+
+function mgDisposePoopZone(n, t) {
+  if (t._mgMesh) {
+    n.ctx.layers.fx.remove(t._mgMesh);
+    t._mgMesh = null;
+  }
+}
+
 class AP {
   views = new Map();
   list = [];
@@ -2386,6 +3710,7 @@ class AP {
   release(t, e) {
     const s = this.k;
     e && t.def.end && t.def.end(s, t);
+    t.def.dispose && t.def.dispose(s, t);
     for (const i of t.slots) s.decals.release(i, 0.2);
     for (const i of t.meshes) s.glow.release(i);
     ((t.slots.length = 0), (t.meshes.length = 0));
@@ -2738,4 +4063,4 @@ function tf(n, t, e, s, i) {
     );
   }
 }
-export { KM, rP, dP, Mt, $n, H0, jo, L0, Ha, Ni, F0, U0, gf, le, vs, bn, xx, Hh, gP, Lr, wm, U1, qo, yx, vx, QM, bx, Of, O1, Mm, B1, km, Sh, Th, JM, MP, xo, AP, RP, CP, Nn, LP, IP, PP, tf };
+export { KM, rP, dP, Mt, $n, H0, jo, L0, Ha, Ni, F0, U0, gf, le, vs, bn, xx, Hh, gP, Lr, wm, U1, qo, yx, vx, QM, bx, Of, O1, Mm, B1, km, Sh, Th, JM, MP, xo, AP, RP, CP, Nn, LP, IP, PP, tf, mkBananaGeo, xsPoleMat };

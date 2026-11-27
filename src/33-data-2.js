@@ -1099,11 +1099,75 @@ const NB = {
       n.stacks > 1
         ? `磨砂火焰 ${n.stacks} 层：每秒受到 ${Math.round(n.value * n.stacks)} 点魔法伤害。`
         : `磨砂火焰：每秒受到 ${Math.round(n.value)} 点魔法伤害。`,
-    niumo_ult: () => "烈焰牛魔：免疫控制，脚下不断留下火焰，踩到的敌人会被点燃。",
+    niumo_march: () => "烈焰行军：朝选定方向前进并持续喷火，免疫控制，期间无法转向与攻击。",
+    niumo_ult: () => "烈焰牛魔：免疫控制，脚下不断留下火焰，普攻引爆火焰层数；期间击杀敌方英雄可刷新持续时间。",
     xingli_mark: (n) => `余音 ${n.stacks}/3：叠满后弦音共振，造成伤害并眩晕。`,
     fengling_gale: (n) => `连射 ${n.stacks}/5：每层提高攻速，满层后移速提高、普攻附带额外伤害。`,
     fengling_crit: () => "下一次普攻必定暴击。",
     yeque_shadow: () => "刚刚得手：一、二技能的冷却已刷新。",
+    blind: () => "致盲：普通攻击全部落空。",
+    xuesong_dig: () => "铲沙子中：正在反复撬地铲沙，铲子上的沙子越堆越多。",
+    xuesong_sand: () => "一铁锹沙子在手：再次施放一技能可将沙子抛出，造成高额伤害与长时间致盲。",
+    xuesong_pole: () => "立定撑篙：铲头插地站在铁锹顶端，处于高空不可选中状态，无法移动，为队友提供大片视野；再次施放二技能选落点跳下并给友军套盾。",
+    xuesong_scoop: () => "颠勺铁锹：正用铁锹高举一名敌人；再次施放大招将其投掷到指定位置。",
+    xuesong_lifted: () => "被铁锹高高举起压制：无法移动、攻击和施放技能。",
+    stone_passive: () => "祖传安全帽就绪：下一次普攻附带额外物理伤害。",
+    stone_train: () => "练功中：原地锻炼 7 秒每秒叠 1 层，期间击杀小兵野怪 +1 层、杀英雄 +4 层，受伤 +30%。",
+    stone_gains: (n) => `练功底子 ×${n.stacks}：永久提升最大生命、护甲和攻击力，死亡后不清空。`,
+    stone_tether: () => "抓起来锤：已锁住敌方英雄并大幅提速，被其带着走并可持续普攻；目标阵亡后可二次施放扔尸体。",
+    stone_locked: () => "被小肥石死死抱住：减速 50%，你的移动和传送会把小肥石一起带走。",
+    stone_corpse: () => "抓起尸体：再次施放二技能可将尸体投掷出去，砸地造成伤害并击飞。",
+    scallion_glide: (n) => `飘逸刺头：脱战滑行加速中，当前移速 +${Math.round((n.value || 0) * 100)}%。`,
+    scallion_s1_cnt: (n) => `葱锋计数：已普攻 ${n.stacks} 次，满 4 次自动白送一次无前摇葱锋。`,
+    scallion_shred: (n) => `护甲破损：已被葱锋拍碎护甲 ${n.stacks} 层，护甲降低 ${Math.round((n.value || 0) * n.stacks * 100)}%。`,
+    scallion_boost: () => "葱能爆发：攻速和普攻抽打射程大幅提升。",
+    scallion_beam: () => "葱击波：正在喷射绿色葱能激光，无法移动，可通过移动方向缓慢扫射转向；再次按大招可主动提前中断。",
+    paperboy_effigy_ready: () => "纸替身在岗：己方防御塔下正游荡着一个纸替身。受致命伤时替身先碎，回血并换位到替身处，引爆大范围内敌人全部晦气。",
+    paperboy_effigy_cd: () => "纸替身重扎中：冷却结束后会在最近去过的己方存活防御塔下重新生成替身。",
+    paperboy_gloom: (n) => `晦气 ×${n.stacks}：永久附身，只有在爆发后清零或回泉水慢慢消解。引爆时将直接扣除 ${n.stacks}% 最大生命值（血条白色部分）。`,
+    paperboy_suona: () => "唢呐齐响：吹响唢呐中，大范围内敌人每秒叠加晦气；护盾被打破会立刻中断。",
+    paperboy_crane_guard: () => "纸鹤护体：免疫控制效果并大幅提速。",
+    paperboy_bind: (n) =>
+      n.value > 0
+        ? "扎筋点睛：正用红线绑着一名队友，替其承受 30% 伤害并给打人的敌人自动叠晦气。"
+        : "扎筋点睛（自绑）：无免伤，但所有攻击自己的敌人都会按伤害量自动叠加晦气。",
+    paperboy_bound: (n) =>
+      n.value > 0
+        ? "扎筋点睛庇护：受到的 30% 伤害会转给纸札人，攻击你的敌人会被自动叠上晦气。"
+        : "扎筋点睛（反噬）：不减伤，但所有打你的人都会按伤害量自动叠加晦气。",
+    maggot_digest: () => "消化酝酿：刚吃下消耗品，倒计时结束会伴随响屁在原地拉出一坨小粪污。",
+    maggot_aura: (n) => `粪堆加持 ×${n.stacks}：攻速 +${n.stacks * 12}%，普攻多吐碎粑粑；大招伤害按 ${(Math.pow(1.5, n.stacks) * 100).toFixed(0)}% 累乘、蓝耗按 ${(Math.pow(1.8, n.stacks) * 100).toFixed(0)}% 累乘。`,
+    maggot_spray: () => "喷吐中：正朝前方持续喷吐散碎粪便，敌人被喷中满 3 秒会在脚下长出一坨小粪污。",
+    maggot_coated: (n) => `沾满粪渣：被活蛆喷吐沾染中（${Math.min(100, Math.round((n.stacks / 12) * 100))}%），满 3 秒脚下会生成挡路小粪污。`,
+    maggot_vacuum: () => "吸粪机运转：正把大范围内所有粪污猛吸到自己身边合成新大粪污。",
+    horseman_momentum: (n) => `助跑蓄势 ${n.stacks}/5 秒：保持移动且别普攻，跑满 5 秒下一次普攻变为带位移与击退的高伤冲锋。`,
+    horseman_charge: () => "人马一体就绪：下一次普攻变为长距离冲锋，沿途撞开所有敌人，移速越快伤害越高且无上限。",
+    horseman_dashing: () => "强化冲锋中：高速前冲撞开沿途所有敌人。",
+    horseman_kick_charge: () => "后腿蹬蓄力中：原地站定不可移动，松手朝瞄准方向猛蹬出去，造成大量物理伤害并眩晕。",
+    horseman_neigh_guard: () => "嘶鸣霸体：免疫所有控制效果，横冲直撞不怕被拦。",
+    horseman_weak: (n) => `气势受挫：被半马人嘶鸣震慑，造成的所有伤害降低 ${Math.round((n.value || 0.25) * 100)}%。`,
+    horseman_trample: (n) => `践踏狂奔：移速爆发提升 +${Math.round((n.value || 0.5) * 100)}%（持续衰减），击杀敌方英雄可立刻刷新大招冷却。`,
+    cow_gains: (n) => `深蹲练腿 ×${n.stacks} 层：永久提升物理攻击力、移动速度与冷却缩减。`,
+    cow_squat: () => "深蹲中：原地暴力练腿 3 秒，无法移动但可以普攻与施放技能，每秒永久叠加 1 层。",
+    cow_exhaust: () => "力竭：练深蹲腿软了，移动速度降低 40%（深蹲层数越高力竭持续越久），开启大招牛气冲天可立刻解除。",
+    cow_giant: () => "牛气冲天：体型大幅变大，获得额外生命值与移动速度。",
+    cow_stomp_ready: (n) => `连环跺脚：剩余 ${n.stacks} 次，再次按大招可重重跺地，造成圆形范围物理伤害并眩晕敌人。`,
+    cow_flykick: () => "飞踢突进：纵身飞踹目标，落地必定造成物理暴击伤害。",
+    cow_stride: () => "大长腿跨步：迈开长腿直接跨越薄墙体或人造障碍。",
+    monkey_peel_ammo: (n) => `甩蕉皮存量 ×${n.stacks} 层：可连续朝指定地点扔出香蕉皮（场上最多 8 片）。`,
+    monkey_eating: () => "啃香蕉：正在大口吃香蕉，吃完回复生命或满血加速，并顺手往轮椅底下丢香蕉皮。",
+    monkey_banana_haste: () => "满血吃蕉爆发：获得大幅爆发加速，轮椅踩出火星子。",
+    monkey_stick_out: () => "立棍挡路：铁棍已插在地上变粗挡路，持续结束自动收回。",
+    monkey_ult: (n) =>
+      `铁棍修行：持续期间普攻全变直线穿透击退横扫、攻击距离大幅延长但移速降低 15%${n.stacks > 0 ? `（剩余 ${n.stacks} 棍必定暴击）` : ""}；杀小兵叠 1 层、杀英雄叠 6 层，每层永久加 0.1 码棍长。`,
+    monkey_stick_len: (n) => `棍长修行 ×${n.stacks} 层：铁棍已永久增长 ${(n.stacks * 0.1).toFixed(1)} 码，永久提升攻击距离与外观长度。`,
+    slime_regen: () => "弹性回血：刚吃下的物理伤害正在持续反弹回复生命。",
+    slime_wall_bounce: () => "撞墙弹射：0.5 秒内按二技能可无视冷却瞬发无需蓄力的满额弹球。",
+    slime_cling: () => "吸附贴身：紧贴敌人并跟随其移动，免疫一切击退效果，每 0.25 秒造成魔法伤害。",
+    slime_ball_charge: () => "弹球蓄力中：原地压紧蓄力，蓄越久冲得越远、越快、伤害越高，松手或再按立刻弹出。",
+    slime_ball_dash: () => "弹球冲撞：高速弹射冲撞，撞飞路径上的敌人。",
+    slime_puddle: () => "化整为零：不可选取，摊成 4 倍大滩果冻大量回血并持续灼伤踩到的敌人，期间按一技能可把人全都反吸拖走。",
+    slime_absorbed: () => "被果冻吸住：被黄色史莱姆反吸进果冻里，强制跟随其移动，无法自主移动或位移。",
     tower_focus: (n) =>
       `塔在打你：塔的伤害越打越疼，现在 +${Ps(Math.min(yr.rampMax, n.stacks * yr.rampPerHit))}。塔下没有小兵就先退出来。`,
   };
@@ -1196,6 +1260,8 @@ const w3 = {
     shield: { name: Br.shield, short: "护盾", color: "#dfe8ff" },
     heal: { name: Br.heal, short: "回复", color: "#6fe3a1" },
     buff: { name: Br.buff, short: "增益", color: "#f3cf85" },
+    defense: { name: Br.defense, short: "防身", color: "#9fd6ff" },
+    channel: { name: Br.channel, short: "引导", color: "#d5b8ff" },
   },
   u4 = { recommend: "推荐", attack: "攻击", magic: "法术", defense: "防御", support: "辅助", boots: "鞋", consumable: "消耗品" },
   p4 = {
@@ -1993,11 +2059,381 @@ const qB = {
         `<ellipse cx="32" cy="55" rx="19" ry="4.5" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M26 21v10M32 21v15M38 21v10" stroke="#c4a2ff" stroke-width="2.1" stroke-linecap="round" opacity=".8"/><path d="M18 20Q19 7 32 7Q45 7 46 20Q39 16 32 16Q25 16 18 20Z" fill="#7c3aed" stroke="#070b16" stroke-width="1.6" stroke-linejoin="round"/><circle cx="27" cy="14" r="2.2" fill="#f7efdd"/><circle cx="38" cy="13" r="1.6" fill="#f7efdd"/><path d="M32 40l-7 8h4v6h6v-6h4z" fill="#f3e7d0" stroke="#070b16" stroke-width="1.4" stroke-linejoin="round"/>`,
       ),
   },
-  XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB, mushroom: mB, niumo: niumoIcons };
+  xB = {
+    passive: () =>
+      dn(
+        Rs("xuesong"),
+        je("g", "#7ee8c0") +
+          fn("shv", 0, -20, 0, 20, [
+            [0, "#eef5f2"],
+            [0.55, "#aebbc2"],
+            [1, "#4f626a"],
+          ]),
+        We("g", 36, 30, 22) +
+          `<path d="M12 52L54 14A34 34 0 0 1 58 46Z" fill="#7ee8c0" fill-opacity=".22" stroke="#d9a24b" stroke-width="1.6" stroke-dasharray="4 3"/>` +
+          `<g transform="translate(31 32) rotate(-40)"><path d="M-24 0H6" stroke="${xe}" stroke-width="5.2" stroke-linecap="round"/><path d="M-24 0H6" stroke="#855a34" stroke-width="2.8" stroke-linecap="round"/><rect x="4" y="-3.2" width="5" height="6.4" rx="1.2" fill="#d9a24b" stroke="${xe}" stroke-width="1"/><path d="M8 -10.5L23 -8.5Q27 0 23 8.5L8 10.5Z" fill="url(#@shv)" stroke="${xe}" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 0H21" stroke="#d9a24b" stroke-width="1.4" stroke-linecap="round"/></g>` +
+          `<path d="${hn(49, 17, 4.5, 0.16)}" fill="#fff6d6"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("xuesong"),
+        je("g", "#d9a24b") +
+          fn("sd", 0, 36, 0, 58, [
+            [0, "#e8c47a"],
+            [1, "#6f5328"],
+          ]),
+        We("g", 32, 42, 22) +
+          `<ellipse cx="32" cy="49" rx="22" ry="7.5" fill="#1b140c" stroke="#d9a24b" stroke-width="2"/><ellipse cx="32" cy="49" rx="14" ry="4.2" fill="none" stroke="#8c6d3b" stroke-width="1.3" stroke-dasharray="4 3"/>` +
+          `<g fill="url(#@sd)" stroke="${xe}" stroke-width="1"><circle cx="24" cy="24" r="3.4"/><circle cx="34" cy="17" r="4.2"/><circle cx="44" cy="25" r="3.2"/><circle cx="32" cy="28" r="2.6"/><circle cx="19" cy="34" r="2.5"/></g>` +
+          `<g transform="translate(42 37) rotate(132)"><path d="M-16 0H6" stroke="${xe}" stroke-width="4.4" stroke-linecap="round"/><path d="M-16 0H6" stroke="#855a34" stroke-width="2.3" stroke-linecap="round"/><path d="M6 -8L19 -6Q22 0 19 6L6 8Z" fill="#c7d4da" stroke="${xe}" stroke-width="1.3" stroke-linejoin="round"/></g>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("xuesong"),
+        je("g", "#7ee8c0", 0.95),
+        We("g", 32, 22, 24) +
+          `<ellipse cx="32" cy="54" rx="21" ry="5.5" fill="none" stroke="#7ee8c0" stroke-width="1.8" stroke-dasharray="5 3" opacity=".85"/>` +
+          `<path d="M32 54V24" stroke="${xe}" stroke-width="5.2" stroke-linecap="round"/><path d="M32 54V24" stroke="#855a34" stroke-width="2.8" stroke-linecap="round"/><path d="M26 53L32 58L38 53L36 45H28Z" fill="#c7d4da" stroke="${xe}" stroke-width="1.3" stroke-linejoin="round"/>` +
+          `<path d="M12 20Q32 6 52 20Q32 34 12 20Z" fill="#17443b" fill-opacity=".85" stroke="#7ee8c0" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="20" r="6.2" fill="#7ee8c0" stroke="${xe}" stroke-width="1.2"/><circle cx="32" cy="20" r="2.5" fill="#0d2a25"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("xuesong", !0),
+        je("g", "#ffd27a", 1),
+        We("g", 32, 28, 26) +
+          `<path d="M12 46Q32 10 54 24" fill="none" stroke="#ffd27a" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="4 3"/><path d="M49 18L57 24.5L47.5 27.5Z" fill="#ffd27a"/>` +
+          `<g transform="translate(27 42) rotate(-22)"><path d="M-20 0H8" stroke="${xe}" stroke-width="5.2" stroke-linecap="round"/><path d="M-20 0H8" stroke="#855a34" stroke-width="2.8" stroke-linecap="round"/><path d="M7 -10L24 -7.5Q28 0 24 7.5L7 10Z" fill="#dce6ea" stroke="${xe}" stroke-width="1.5" stroke-linejoin="round"/></g>` +
+          `<circle cx="40" cy="22" r="5.5" fill="#ff9f68" stroke="${xe}" stroke-width="1.4"/><path d="M33 32Q40 27 47 32" fill="none" stroke="#ff9f68" stroke-width="3.2" stroke-linecap="round"/>` +
+          `<path d="${hn(40, 14, 4, 0.16)}" fill="#fff6d6"/>`,
+      ),
+  },
+  stB = {
+    passive: () =>
+      dn(
+        Rs("stone"),
+        je("g", "#ffcf66"),
+        We("g", 32, 32, 24) +
+          `<path d="M14 38Q14 14 32 14Q50 14 50 38Z" fill="#e8b93c" stroke="${xe}" stroke-width="2" stroke-linejoin="round"/>` +
+          `<path d="M29 14H35V35H29Z" fill="#ffd977" stroke="${xe}" stroke-width="1.2"/>` +
+          `<path d="M10 38H54Q55 43 49 44H15Q9 43 10 38Z" fill="#c79524" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="${hn(44, 22, 4.5, 0.16)}" fill="#fff8d6"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("stone"),
+        je("g", "#e8b93c"),
+        We("g", 32, 34, 24) +
+          `<ellipse cx="32" cy="50" rx="20" ry="6" fill="none" stroke="#ffcf66" stroke-width="1.8" stroke-dasharray="4 3"/>` +
+          `<path d="M16 32H48" stroke="${xe}" stroke-width="6.5" stroke-linecap="round"/><path d="M16 32H48" stroke="#c8c2b8" stroke-width="3.2" stroke-linecap="round"/>` +
+          `<rect x="11" y="21" width="8" height="22" rx="2.5" fill="#7c776e" stroke="${xe}" stroke-width="1.6"/>` +
+          `<rect x="45" y="21" width="8" height="22" rx="2.5" fill="#7c776e" stroke="${xe}" stroke-width="1.6"/>` +
+          `<path d="M32 11L37 19H34V25H30V19H27Z" fill="#ffcf66" stroke="${xe}" stroke-width="1.2" stroke-linejoin="round"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("stone"),
+        je("g", "#ffcf66"),
+        We("g", 32, 30, 24) +
+          `<path d="M12 46Q30 12 52 24" fill="none" stroke="#ffcf66" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="4 3"/><path d="M47 18L55 24.5L46 27.5Z" fill="#ffcf66"/>` +
+          `<circle cx="24" cy="36" r="11" fill="#8b857a" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M19 33L29 39M29 33L19 39" stroke="#e8b93c" stroke-width="2.2" stroke-linecap="round"/>` +
+          `<circle cx="44" cy="34" r="6.5" fill="#d97757" stroke="${xe}" stroke-width="1.5"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("stone", !0),
+        je("g", "#ffcf66", 1),
+        We("g", 32, 30, 26) +
+          `<ellipse cx="32" cy="51" rx="22" ry="6.5" fill="#2d2722" stroke="#ffcf66" stroke-width="2"/>` +
+          `<path d="M22 14Q32 6 42 14L46 32Q32 41 18 32Z" fill="#8e887d" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M24 14Q32 9 40 14L38 19H26Z" fill="#e8b93c" stroke="${xe}" stroke-width="1.2"/>` +
+          `<path d="M32 37V48M25 43L32 50L39 43" fill="none" stroke="#ffcf66" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+      ),
+  },
+  scB = {
+    passive: () =>
+      dn(
+        Rs("scallion"),
+        je("g", "#6bff78"),
+        We("g", 32, 32, 24) +
+          `<path d="M16 44Q24 22 46 14Q34 26 42 30Q30 34 38 42Q24 40 16 44Z" fill="#6bff78" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M12 49H44M16 54H38" stroke="#eef7e6" stroke-width="2.4" stroke-linecap="round"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("scallion"),
+        je("g", "#a6f052"),
+        We("g", 32, 32, 24) +
+          `<path d="M12 48L44 16L52 24L20 52Z" fill="#2ea843" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M18 42L44 16" stroke="#c8ff8c" stroke-width="3" stroke-linecap="round"/>` +
+          `<path d="M40 34L52 46M52 34L40 46" stroke="#ffcf66" stroke-width="2.4" stroke-linecap="round"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("scallion"),
+        je("g", "#6bff78"),
+        We("g", 32, 32, 25) +
+          `<circle cx="32" cy="32" r="18" fill="none" stroke="#a6f052" stroke-width="2.2" stroke-dasharray="5 3"/>` +
+          `<path d="M32 10V54M10 32H54" stroke="#6bff78" stroke-width="2.2" stroke-linecap="round"/>` +
+          `<path d="M32 18L39 32L32 46L25 32Z" fill="#eef7e6" stroke="${xe}" stroke-width="1.6" stroke-linejoin="round"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("scallion", !0),
+        je("g", "#6bff78", 1),
+        We("g", 32, 32, 26) +
+          `<path d="M10 38L54 18V38L10 46Z" fill="#2ea843" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M12 41L54 25V32L12 43Z" fill="#dcff9e"/>` +
+          `<circle cx="15" cy="41" r="7" fill="#eef7e6" stroke="#2ea843" stroke-width="2"/>`,
+      ),
+  },
+  pbB = {
+    passive: () =>
+      dn(
+        Rs("paperboy"),
+        je("g", "#c9f7ff"),
+        We("g", 32, 32, 24) +
+          `<circle cx="32" cy="18" r="8" fill="#eef6fc" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M18 52L24 28H40L46 52H36L32 41L28 52Z" fill="#dceaf5" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M29 20H35" stroke="#e84a5f" stroke-width="2.2" stroke-linecap="round"/>` +
+          `<path d="M22 36L42 28M24 44L40 38" stroke="#e84a5f" stroke-width="1.6" stroke-dasharray="3 2"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("paperboy"),
+        je("g", "#e84a5f"),
+        We("g", 32, 32, 24) +
+          `<path d="M12 46L36 26L48 14L52 28L38 34L16 50Z" fill="#f0c85c" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<ellipse cx="48" cy="21" rx="4.5" ry="9" transform="rotate(-32 48 21)" fill="#e84a5f" stroke="${xe}" stroke-width="1.6"/>` +
+          `<path d="M18 18Q28 12 36 16M14 26Q22 22 28 24" fill="none" stroke="#c9f7ff" stroke-width="2.2" stroke-linecap="round"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("paperboy"),
+        je("g", "#c9f7ff"),
+        We("g", 32, 32, 24) +
+          `<path d="M10 38L30 28L22 14L40 24L54 16L42 36L48 50L30 38Z" fill="#f5fbff" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M30 28L42 36M22 14L30 38" stroke="#8fb8d6" stroke-width="1.4"/>` +
+          `<circle cx="48" cy="20" r="2.2" fill="#e84a5f"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("paperboy", !0),
+        je("g", "#e84a5f", 1),
+        We("g", 32, 32, 25) +
+          `<circle cx="18" cy="38" r="8" fill="#dceaf5" stroke="${xe}" stroke-width="1.8"/>` +
+          `<circle cx="46" cy="26" r="8" fill="#c9f7ff" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M25 35Q32 24 39 29" fill="none" stroke="#e84a5f" stroke-width="3.2" stroke-linecap="round"/>` +
+          `<circle cx="46" cy="26" r="2.6" fill="#e84a5f"/>`,
+      ),
+  },
+  mgB = {
+    passive: () =>
+      dn(
+        Rs("maggot"),
+        je("g", "#b8e04b"),
+        We("g", 32, 32, 24) +
+          `<path d="M16 48C16 38 48 38 48 48Z" fill="#7a5226" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M21 39C21 31 43 31 43 39Z" fill="#946430" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M27 31C27 25 37 25 37 31Z" fill="#f5c842" stroke="${xe}" stroke-width="1.6" stroke-linejoin="round"/>` +
+          `<path d="M24 20Q28 14 24 10M34 18Q38 12 34 8M42 22Q46 16 42 12" fill="none" stroke="#b8e04b" stroke-width="2.2" stroke-linecap="round"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("maggot"),
+        je("g", "#b8e04b"),
+        We("g", 32, 32, 24) +
+          `<path d="M10 34L48 16L52 48Z" fill="#7a5226" fill-opacity="0.72" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<circle cx="30" cy="32" r="4" fill="#b8e04b" stroke="${xe}" stroke-width="1.4"/>` +
+          `<circle cx="42" cy="24" r="3.5" fill="#946430" stroke="${xe}" stroke-width="1.4"/>` +
+          `<circle cx="44" cy="39" r="4.2" fill="#f5c842" stroke="${xe}" stroke-width="1.4"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("maggot"),
+        je("g", "#f5c842"),
+        We("g", 32, 32, 24) +
+          `<circle cx="32" cy="32" r="18" fill="none" stroke="#f5c842" stroke-width="2.6" stroke-dasharray="6 4"/>` +
+          `<circle cx="32" cy="32" r="10" fill="#f5c842" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M12 18L24 26M52 18L40 26M12 46L24 38M52 46L40 38" stroke="#b8e04b" stroke-width="2.4" stroke-linecap="round"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("maggot", !0),
+        je("g", "#f5c842", 1),
+        We("g", 32, 32, 25) +
+          `<path d="M12 46Q26 10 46 26" fill="none" stroke="#b8e04b" stroke-width="3" stroke-linecap="round"/>` +
+          `<circle cx="46" cy="30" r="10" fill="#7a5226" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M40 30C40 24 52 24 52 30Z" fill="#f5c842"/>` +
+          `<path d="M36 46H54" stroke="#f5c842" stroke-width="2.8" stroke-linecap="round"/>`,
+      ),
+  },
+  hmB = {
+    passive: () =>
+      dn(
+        Rs("horseman"),
+        je("g", "#ffae3d"),
+        We("g", 32, 32, 24) +
+          `<path d="M10 40H26M14 31H30M10 22H24" stroke="#ffe08a" stroke-width="2.8" stroke-linecap="round"/>` +
+          `<path d="M26 24L48 20L52 36L36 46L24 38Z" fill="#c46c2d" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M42 20L54 28L46 38" fill="none" stroke="#ffe08a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("horseman"),
+        je("g", "#ffae3d"),
+        We("g", 32, 32, 24) +
+          `<path d="M14 44L34 26L46 30L30 48Z" fill="#c46c2d" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M36 24L48 16L52 26L42 32Z" fill="#4f2a14" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M44 12L54 10M50 20L58 18M48 30L56 34" stroke="#ffe08a" stroke-width="2.6" stroke-linecap="round"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("horseman"),
+        je("g", "#ffe08a"),
+        We("g", 32, 32, 24) +
+          `<circle cx="32" cy="32" r="9" fill="#c46c2d" stroke="${xe}" stroke-width="1.8"/>` +
+          `<circle cx="32" cy="32" r="16" fill="none" stroke="#ffae3d" stroke-width="2.6" stroke-dasharray="6 4"/>` +
+          `<circle cx="32" cy="32" r="23" fill="none" stroke="#ffe08a" stroke-width="2" stroke-dasharray="5 5" opacity=".85"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("horseman", !0),
+        je("g", "#ffae3d", 1),
+        We("g", 32, 32, 25) +
+          `<path d="M12 46L26 20L36 32L52 14" fill="none" stroke="#ffe08a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `<path d="M42 14H52V24" fill="none" stroke="#ffe08a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `<path d="M14 48H50" stroke="#ffae3d" stroke-width="2.8" stroke-linecap="round"/>`,
+      ),
+  },
+  cwB = {
+    passive: () =>
+      dn(
+        Rs("cow"),
+        je("g", "#ff9b38"),
+        We("g", 32, 32, 24) +
+          `<rect x="24" y="34" width="16" height="16" rx="2" fill="#4d2712" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M12 46L26 18L44 26L52 44" fill="none" stroke="#ffdf78" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `<ellipse cx="52" cy="46" rx="6" ry="3.5" fill="#b85c28" stroke="${xe}" stroke-width="1.6"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("cow"),
+        je("g", "#ff9b38"),
+        We("g", 32, 32, 24) +
+          `<path d="M18 22H46" stroke="#ffdf78" stroke-width="3.6" stroke-linecap="round"/>` +
+          `<rect x="12" y="16" width="6" height="12" rx="2" fill="#b85c28" stroke="${xe}" stroke-width="1.6"/>` +
+          `<rect x="46" y="16" width="6" height="12" rx="2" fill="#b85c28" stroke="${xe}" stroke-width="1.6"/>` +
+          `<path d="M24 28L18 42L24 50M40 28L46 42L40 50" fill="none" stroke="#ffdf78" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("cow"),
+        je("g", "#ffdf78"),
+        We("g", 32, 32, 24) +
+          `<path d="M10 38L36 26L46 32L20 46Z" fill="#b85c28" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M38 22L54 18L56 32L44 36Z" fill="#4d2712" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M10 24H24M14 18H28" stroke="#ffdf78" stroke-width="2.6" stroke-linecap="round"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("cow", !0),
+        je("g", "#ff9b38", 1),
+        We("g", 32, 32, 25) +
+          `<path d="M26 12H38V34L44 40H20L26 34Z" fill="#b85c28" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<path d="M10 46L22 42L32 50L42 42L54 46" fill="none" stroke="#ffdf78" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `<path d="M16 52H48" stroke="#ff9b38" stroke-width="2.6" stroke-linecap="round"/>`,
+      ),
+  },
+  mkB = {
+    passive: () =>
+      dn(
+        Rs("monkey"),
+        je("g", "#ffe042"),
+        We("g", 32, 32, 24) +
+          `<path d="M32 16C26 24 18 32 14 44C21 43 26 39 30 34C32 41 37 47 46 48C42 38 38 30 35 22C42 26 48 31 52 38C50 28 43 20 35 16Z" fill="#ffe042" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<rect x="29" y="12" width="6" height="6" rx="2" fill="#5c3614" stroke="${xe}" stroke-width="1.4"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("monkey"),
+        je("g", "#ffe042"),
+        We("g", 32, 32, 24) +
+          `<path d="M12 46Q22 24 38 22" fill="none" stroke="#ffae24" stroke-width="2.6" stroke-dasharray="4 3" stroke-linecap="round"/>` +
+          `<path d="M38 14C34 22 28 28 24 36C31 35 35 32 39 28C41 34 45 39 52 40C49 32 45 25 42 18Z" fill="#ffe042" stroke="${xe}" stroke-width="1.8" stroke-linejoin="round"/>` +
+          `<circle cx="48" cy="18" r="3" fill="#fff2a6"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("monkey"),
+        je("g", "#ffae24"),
+        We("g", 32, 32, 24) +
+          `<rect x="26" y="10" width="12" height="36" rx="4" fill="#b8281c" stroke="${xe}" stroke-width="1.8"/>` +
+          `<rect x="24" y="10" width="16" height="7" rx="2" fill="#ffd23f" stroke="${xe}" stroke-width="1.6"/>` +
+          `<rect x="24" y="39" width="16" height="7" rx="2" fill="#ffd23f" stroke="${xe}" stroke-width="1.6"/>` +
+          `<path d="M12 48L22 44L32 52L42 44L52 48" fill="none" stroke="#ffe042" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("monkey", !0),
+        je("g", "#ffe042", 1),
+        We("g", 32, 32, 25) +
+          `<path d="M10 46L52 14" stroke="#b8281c" stroke-width="8" stroke-linecap="round"/>` +
+          `<path d="M10 46L52 14" stroke="#ffe042" stroke-width="3" stroke-linecap="round"/>` +
+          `<path d="M14 26Q32 18 50 32" fill="none" stroke="#fff2a6" stroke-width="3.2" stroke-linecap="round"/>` +
+          `<path d="M16 50Q34 38 54 44" fill="none" stroke="#ffae24" stroke-width="2.6" stroke-linecap="round"/>`,
+      ),
+  },
+  slB = {
+    passive: () =>
+      dn(
+        Rs("slime"),
+        je("g", "#ffe842"),
+        We("g", 32, 32, 24) +
+          `<path d="M16 44C14 30 22 18 32 18C42 18 50 30 48 44C42 48 22 48 16 44Z" fill="#ffd92e" stroke="${xe}" stroke-width="1.8"/>` +
+          `<path d="M24 26Q28 22 33 24" fill="none" stroke="#fffce0" stroke-width="2.6" stroke-linecap="round"/>` +
+          `<path d="M10 30L18 30M13 24L20 27M54 30L46 30M51 24L44 27" stroke="#fff38a" stroke-width="2.4" stroke-linecap="round"/>`,
+      ),
+    s1: () =>
+      dn(
+        Rs("slime"),
+        je("g", "#ffe842"),
+        We("g", 32, 32, 24) +
+          `<circle cx="32" cy="34" r="14" fill="#ffd92e" stroke="${xe}" stroke-width="1.8"/>` +
+          `<circle cx="32" cy="34" r="6" fill="#ff9e1c" stroke="${xe}" stroke-width="1.4"/>` +
+          `<path d="M12 16L22 24M52 16L42 24M12 50L22 42M52 50L42 42" stroke="#fff38a" stroke-width="2.6" stroke-linecap="round"/>`,
+      ),
+    s2: () =>
+      dn(
+        Rs("slime"),
+        je("g", "#ffc624"),
+        We("g", 32, 32, 24) +
+          `<path d="M10 46Q22 34 30 30" fill="none" stroke="#fff38a" stroke-width="3.2" stroke-linecap="round"/>` +
+          `<path d="M12 36Q22 28 28 26" fill="none" stroke="#ffae24" stroke-width="2.4" stroke-linecap="round"/>` +
+          `<circle cx="39" cy="25" r="13" fill="#ffd92e" stroke="${xe}" stroke-width="1.8"/>` +
+          `<ellipse cx="35" cy="20" rx="4.5" ry="2.6" transform="rotate(-24 35 20)" fill="#ffffff" opacity=".88"/>`,
+      ),
+    ult: () =>
+      dn(
+        Rs("slime", !0),
+        je("g", "#ffe842", 1),
+        We("g", 32, 32, 25) +
+          `<ellipse cx="32" cy="40" rx="23" ry="11" fill="#ffd92e" stroke="${xe}" stroke-width="1.8"/>` +
+          `<ellipse cx="32" cy="38" rx="15" ry="6" fill="#fff066" opacity=".85"/>` +
+          `<circle cx="20" cy="30" r="3.5" fill="#fff8a8" stroke="${xe}" stroke-width="1.2"/>` +
+          `<circle cx="42" cy="27" r="4.2" fill="#fff8a8" stroke="${xe}" stroke-width="1.2"/>` +
+          `<circle cx="32" cy="22" r="2.8" fill="#ffffff"/>`,
+      ),
+  },
+  XB = { panyue: $B, chijin: GB, xingli: VB, fengling: jB, yeque: qB, mushroom: mB, niumo: niumoIcons, xuesong: xB, stone: stB, scallion: scB, paperboy: pbB, maggot: mgB, horseman: hmB, cow: cwB, monkey: mkB, slime: slB };
 
 function Ia(n, t) {
   return XB[n][t]();
 }
+
+// 离线烘焙技能图标用（tools/heroart.mjs）：把某个英雄某个槽位的图标取成 SVG 字符串。
+// 和 __sfPortrait 一样，只是给导出工具留的口子，运行时用不到。
+globalThis.__sfIcon = (n, t) => Ia(n, t);
 
 const YB = {
   recall: () =>
